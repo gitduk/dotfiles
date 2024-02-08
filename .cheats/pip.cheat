@@ -1,0 +1,5 @@
+% pip3
+
+# update pip
+pip3 install --upgrade pip
+

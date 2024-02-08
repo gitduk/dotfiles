@@ -1,0 +1,25 @@
+% brew, install
+
+# install brew
+sudo nala install -y libbz2-dev libcurl4-openssl-dev libexpat-dev libncurses-dev zlib1g-dev
+curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+
+# sampler: terminal dashboard
+brew install sampler
+
+# curlie
+brew install curlie
+
+# gping
+brew install gping
+
+# dua
+brew install dua-cli
+
+# uplot
+brew install youplot
+
+# usql
+brew tap xo/xo
+brew install --with-odbc usql
+

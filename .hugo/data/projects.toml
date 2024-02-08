@@ -1,0 +1,4 @@
+[[list]]
+name = "clash-rules"
+url = "https://github.com/gitduk/clash-rules"
+desc = "生成适用于 subconverter 外部配置 ruleset 字段的规则文件。"

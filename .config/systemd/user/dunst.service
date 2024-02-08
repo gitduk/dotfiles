@@ -1,0 +1,13 @@
+[Unit]
+Description = Dunst Service
+After = network.target
+
+[Service]
+Type = simple
+ExecStart = %h/.local/bin/dunst -config %h/.config/dunst/dunstrc
+Restart = always
+RestartSec = 5s
+
+[Install]
+WantedBy = default.target
+

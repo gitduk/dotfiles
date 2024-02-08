@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+if [[ $# -eq 0 ]]; then
+  node -e "console.log(encodeURIComponent(process.argv[1]))" "$(cat)"
+else
+  node -e "console.log(encodeURIComponent(process.argv[1]))" "$*"
+fi

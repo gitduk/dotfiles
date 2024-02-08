@@ -1,0 +1,6 @@
+% rm
+
+# rm syslog.* file and clear /var/log/syslog
+echo "" | sudo tee /var/log/syslog
+sudo rm -rf /var/log/syslog.*
+

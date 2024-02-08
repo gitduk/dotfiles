@@ -1,0 +1,8 @@
+% fc-list, fc-cache
+
+# refresh font cache
+fc-cache -fv | grep -v "skipping"
+
+# search fonts
+fc-list | choose -f '.ttf: ' -1 | fzf
+

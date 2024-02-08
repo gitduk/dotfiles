@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+if [ -z "$*" ]; then
+  sessions="$(tmux ls -F '#{session_name}#{?session_attached,: attached,}' 2>/dev/null | fzf)"
+else
+  sessions="$(echo "$*" | tr ' ' '\n')"
+fi
+[[ -n "$sessions" ]] && xargs -I _ tmux kill-session -t _ <<< ${sessions//: attached/}
+

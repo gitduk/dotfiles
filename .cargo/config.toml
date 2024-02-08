@@ -1,0 +1,40 @@
+[http]
+# Path to Certificate Authority (CA) bundle (optional)
+# cainfo = "cert.pem"
+
+# Lower threshold for bytes/sec (10 = default, 0 = disabled)
+# low-speed-limit = 10
+
+# in libcurl format, e.g., "socks5h://host:port"
+# proxy = "http://127.0.0.1:7890"
+
+# Indicates whether SSL certs are checked for revocation
+check-revoke = false
+
+# whether or not to use HTTP/2 multiplexing where possible
+multiplexing = false
+
+# Timeout for each HTTP request, in seconds
+timeout = 10
+
+[source.crates-io]
+registry = "https://github.com/rust-lang/crates.io-index"
+# 指定镜像
+# replace-with = 'sjtu'
+
+# 中国科学技术大学
+[source.ustc]
+registry = "https://mirrors.ustc.edu.cn/crates.io-index"
+
+# 上海交通大学
+[source.sjtu]
+registry = "https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index"
+
+# 清华大学
+[source.tuna]
+registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
+
+# rustcc社区
+[source.rustcc]
+registry = "https://code.aliyun.com/rustcc/crates.io-index.git"
+

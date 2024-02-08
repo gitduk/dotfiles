@@ -1,0 +1,26 @@
+cache-dir = "/home/wukaige/.cache/pypoetry"
+experimental.new-installer = true
+installer.parallel = true
+virtualenvs.create = true
+virtualenvs.in-project = false
+virtualenvs.path = "{cache-dir}/virtualenvs"
+
+[repositories]
+[repositories.aliyun]
+url = "http://mirrors.aliyun.com/pypi/simple/"
+
+[repositories.tsinghua]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+
+[repositories.douban]
+url = "http://pypi.douban.com/simple/"
+
+[repositories.ustc]
+url = "http://pypi.mirrors.ustc.edu.cn/simple/"
+
+[repositories.ustcs]
+url = "https://pypi.mirrors.ustc.edu.cn/simple/"
+
+[repositories.tencent]
+url = "http://mirrors.cloud.tencent.com/pypi/simple/"
+

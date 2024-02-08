@@ -1,0 +1,31 @@
+version = 1
+
+[custom]
+enable_rule_generator = true
+overwrite_original_rules = true
+
+# Options for custom base configuration file
+clash_rule_base = "base/clash.tpl"
+
+# Options for adding emojis
+add_emoji = false
+remove_old_emoji = false
+
+# Options for filtering nodes
+include_remarks = []
+exclude_remarks = []
+
+[[custom_groups]]
+import = "snippets/groups.toml"
+
+[[rulesets]]
+import = "snippets/rulesets.toml"
+
+[[template_args]]
+key = "clash.dns.port"
+value = "7853"
+
+[[template_args]]
+key = "clash.dns.enhanced-mode"
+value = "fake-ip"
+

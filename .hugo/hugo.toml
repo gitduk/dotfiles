@@ -1,0 +1,74 @@
+# ###  BUILT-IN CONFIGURATION OPTOINS  ########################################
+
+baseURL = "https://blog.wukaige.com/"  # website root path
+disqusShortname = ""                   # disqus shortcode
+enableGitInfo = false                  # retrieve last modified date from git commits
+enableRobotsTXT = true                 # /robots.txt
+hasCJKLanguage = true                  # Chinese/Japanese/Korean
+paginate = 5                           # number of posts each page
+rssLimit = 10                          # maximum items in rss feeds
+title = "Hugo"                         # website title
+theme = "hugo-theme-cactus"            # theme directory name
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+googleAnalytics = "G-PWF07XQSY3"
+
+[frontmatter]
+date = ['date', 'publishdate', 'pubdate', 'published', 'lastmod', 'modified']
+expiryDate = ['expirydate', 'unpublishdate']
+lastmod = [
+  ':git',
+  'lastmod',
+  'modified',
+  'date',
+  'publishdate',
+  'pubdate',
+  'published',
+]
+publishDate = ['publishdate', 'pubdate', 'published', 'date']
+
+[permalinks]
+[permalinks.page]
+posts = '/:slug/'
+[permalinks.term]
+tags = '/tags/:slug/'
+
+# Main menu which appears below site header.
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "Posts"
+url = "/posts"
+weight = 2
+
+[[menu.main]]
+name = "About"
+url = "/about"
+weight = 4
+
+[params]
+colortheme = "white"
+tagsOverview = true
+showProjectsList = true
+showAllPostsArchive = true
+showAllPostsOnHomePage = false
+postsOnHomePage = 5
+tocInline = false
+googleAnalyticsAsync = true
+css = ["css/custom.css"]
+description = ""
+
+[[params.author]]
+name = "wukaige"
+email = "wukaigee@gmail.com"
+
+[[params.social]]
+name = "github"
+link = "https://github.com/gitduk"
+
+[[params.social]]
+name = "email"
+link = "wukaigee@gmail.com" # no need for "mailto:" at the start

@@ -1,0 +1,9 @@
+% npm, install
+
+# install latest node version
+sudo npm install -g n
+sudo n latest
+
+# install yarn
+sudo npm install -g yarn
+

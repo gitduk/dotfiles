@@ -1,0 +1,10 @@
+% podman
+
+# docker.io/whyour/qinglong:latest
+podman run -dit \
+  --network host \
+  -v $HOME/.ql/data:/ql/data \
+  --name qinglong \
+  --hostname qinglong \
+  --restart unless-stopped \
+  docker.io/whyour/qinglong:latest

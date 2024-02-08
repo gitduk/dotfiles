@@ -1,0 +1,19 @@
+#!/bin/bash
+
+hv=0
+windows=$(tmux list-windows -F '#{window_index}' | wc -l)
+tmux swap-window -d -t 1
+for ((w = 2; w <= $windows; w++)); do
+	if [ $(($hv % 2)) == 0 ]; then
+		pmt='h'
+	else
+		pmt='v'
+	fi
+	hv=$(($hv + 1))
+	panes=$(tmux list-panes -t 2 -F '#{pane_index}' | wc -l)
+	for ((p = 1; p <= $panes; p++)); do
+		tmux join-pane -$pmt -s 2.$(($panes - $p + 1)) &>/dev/null
+	done
+done
+tmux select-pane -t 1
+

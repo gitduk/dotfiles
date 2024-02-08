@@ -1,0 +1,220 @@
+# [Created by task 2.5.1 2/19/2022 10:36:51]
+# Taskwarrior program configuration file.
+# For more documentation, see http://taskwarrior.org or try 'man task', 'man task-color',
+# 'man task-sync' or 'man taskrc'
+
+# Here is an example of entries that use the default, override and blank values
+#   variable=foo   -- By specifying a value, this overrides the default
+#   variable=      -- By specifying no value, this means no default
+#   #variable=foo  -- By commenting out the line, or deleting it, this uses the default
+
+# Use the command 'task show' to see all defaults and overrides
+
+# Files
+data.location=~/.task
+
+# Custom priority values
+uda.priority.values=H,M,,L
+
+news.version=2.6.0
+dateformat=Y-M-D
+dateformat.report=
+dateformat.holiday=YMD
+dateformat.edit=Y-M-D H:N:S
+dateformat.info=Y-M-D H:N:S
+dateformat.annotation=
+report.X.dateformat=Y-M-D
+
+# label sort
+report.list.columns=id,start.age,entry.age,depends.indicator,priority,project,tags,recur.indicator,scheduled.countdown,due,until.remaining,description.count,urgency
+report.list.context=1
+report.list.description=Most details of tasks
+report.list.filter=status:pending -WAITING
+report.list.labels=ID,Active,Age,D,P,Project,Tags,R,Sch,Due,Until,Description,Urg
+report.list.sort=start-,due+,project+,urgency-
+
+# Custom reports
+report.todo.description=Todo
+report.todo.columns=id,project,description.count
+report.todo.labels=ID,Project,Text
+report.todo.sort=priority-,urgency-,project+,id+
+report.todo.filter=status:pending -ACTIVE -WAITING -BLOCKED -OVERDUE description.hasnt:"(GH)"
+
+report.doing.description=In progress
+report.doing.columns=id,description.count
+report.doing.labels=ID,Text
+report.doing.sort=priority-,id+
+report.doing.filter=status:pending +ACTIVE
+
+report.github.description=GitHub issues
+report.github.columns=id,githuburl,description.count
+report.github.labels=ID,URL,Text
+report.github.sort=entry-,githuburl+
+report.github.filter=status:pending -ACTIVE -WAITING -BLOCKED -OVERDUE description.has:"(GH)"
+
+# Bugwarrior UDAs
+uda.githubrepo.label=Github Repo Slug
+uda.githubrepo.type=string
+uda.githubnumber.label=Github Issue/PR #
+uda.githubnumber.type=numeric
+uda.githubnamespace.label=Github Namespace
+uda.githubnamespace.type=string
+uda.githubupdatedat.label=Github Updated
+uda.githubupdatedat.type=date
+uda.githubtype.label=Github Type
+uda.githubtype.type=string
+uda.githubuser.label=Github User
+uda.githubuser.type=string
+uda.githubcreatedon.label=Github Created
+uda.githubcreatedon.type=date
+uda.githubclosedon.label=Github Closed
+uda.githubclosedon.type=date
+uda.githubtitle.label=Github Title
+uda.githubtitle.type=string
+uda.githubbody.label=Github Body
+uda.githubbody.type=string
+uda.githuburl.label=Github URL
+uda.githuburl.type=string
+uda.githubmilestone.label=Github Milestone
+uda.githubmilestone.type=string
+uda.githubstate.label=Github State
+uda.githubstate.type=string
+# END Bugwarrior UDAs
+
+
+# Colors
+# ------------------------------------------------------------------------------
+color.label=
+color.label.sort=
+color.alternate=
+color.header=yellow
+color.footnote=yellow
+color.warning=bold red
+color.error=white on red
+color.debug=blue
+
+# Task state
+color.completed=
+color.deleted=
+color.active=bold black on bright blue
+color.recurring=magenta
+color.scheduled=white on green
+color.until=
+color.blocked=black on white
+color.blocking=black on bright white
+
+# Project
+color.project.none=
+
+# Priority
+color.uda.priority.H=bold white
+color.uda.priority.M=white
+color.uda.priority.L=
+
+# Tags
+color.tag.next=bold yellow
+color.tag.none=
+color.tagged=bold red
+
+# Due
+color.due=red
+color.due.today=red
+color.overdue=bold red
+
+# UDA
+#color.uda.X=
+
+# Report: burndown
+color.burndown.done=on green
+color.burndown.pending=on red
+color.burndown.started=on yellow
+
+# Report: history
+color.history.add=black on red
+color.history.delete=black on yellow
+color.history.done=black on green
+
+# Report: summary
+color.summary.background=white on black
+color.summary.bar=black on green
+
+# Command: calendar
+color.calendar.due=white on red
+color.calendar.due.today=bold white on red
+color.calendar.holiday=black on bright yellow
+color.calendar.overdue=black on bright red
+color.calendar.today=bold white on bright blue
+color.calendar.weekend=white on bright black
+color.calendar.weeknumber=bold blue
+
+# Command: sync
+color.sync.added=green
+color.sync.changed=yellow
+color.sync.rejected=red
+
+# Command: undo
+color.undo.after=green
+color.undo.before=red
+
+
+# taskwarrior-tui
+# ------------------------------------------------------------------------------
+# keys
+uda.taskwarrior-tui.keyconfig.quit=q
+uda.taskwarrior-tui.keyconfig.refresh=r
+uda.taskwarrior-tui.keyconfig.go-to-bottom=G
+uda.taskwarrior-tui.keyconfig.go-to-top=g
+uda.taskwarrior-tui.keyconfig.down=j
+uda.taskwarrior-tui.keyconfig.up=k
+uda.taskwarrior-tui.keyconfig.page-down=J
+uda.taskwarrior-tui.keyconfig.page-up=K
+uda.taskwarrior-tui.keyconfig.delete=x
+uda.taskwarrior-tui.keyconfig.done=d
+uda.taskwarrior-tui.keyconfig.start-stop=s
+uda.taskwarrior-tui.keyconfig.quick-tag=t
+uda.taskwarrior-tui.keyconfig.undo=u
+uda.taskwarrior-tui.keyconfig.edit=e
+uda.taskwarrior-tui.keyconfig.modify=m
+uda.taskwarrior-tui.keyconfig.shell=!
+uda.taskwarrior-tui.keyconfig.add=a
+uda.taskwarrior-tui.keyconfig.annotate=A
+uda.taskwarrior-tui.keyconfig.filter=/
+uda.taskwarrior-tui.keyconfig.zoom=z
+uda.taskwarrior-tui.keyconfig.context-menu=c
+uda.taskwarrior-tui.keyconfig.next-tab=L
+uda.taskwarrior-tui.keyconfig.previous-tab=H
+# uda.taskwarrior-tui.keyconfig.log=l
+
+# ___ options ___
+uda.taskwarrior-tui.selection.indicator=•
+uda.taskwarrior-tui.selection.bold=yes
+uda.taskwarrior-tui.selection.italic=no
+uda.taskwarrior-tui.selection.dim=no
+uda.taskwarrior-tui.selection.blink=no
+uda.taskwarrior-tui.selection.reverse=no
+uda.taskwarrior-tui.mark.indicator=✔
+uda.taskwarrior-tui.unmark.indicator=
+uda.taskwarrior-tui.mark-selection.indicator=✔
+uda.taskwarrior-tui.unmark-selection.indicator=
+uda.taskwarrior-tui.calendar.months-per-row=4
+uda.taskwarrior-tui.task-report.show-info=true
+uda.taskwarrior-tui.task-report.looping=true
+uda.taskwarrior-tui.task-report.jump-on-task-add=true
+uda.taskwarrior-tui.task-report.prompt-on-delete=false
+uda.taskwarrior-tui.task-report.prompt-on-done=false
+uda.taskwarrior-tui.style.report.selection=
+uda.taskwarrior-tui.style.context.active=black on blue
+uda.taskwarrior-tui.style.calendar.title=black on blue
+uda.taskwarrior-tui.style.report.scrollbar=black
+uda.taskwarrior-tui.style.report.scrollbar.area=white
+uda.taskwarrior-tui.scrollbar.indicator=█
+uda.taskwarrior-tui.scrollbar.area=║
+uda.taskwarrior-tui.task-report.auto-insert-double-quotes-on-add=true
+uda.taskwarrior-tui.task-report.auto-insert-double-quotes-on-annotate=true
+uda.taskwarrior-tui.task-report.auto-insert-double-quotes-on-log=true
+uda.taskwarrior-tui.task-report.reset-filter-on-esc=false
+uda.taskwarrior-tui.context-menu.select-on-move=false
+uda.taskwarrior-tui.tabs.change-focus-rotate=false
+uda.taskwarrior-tui.quick-tag.name=urgently
+# uda.taskwarrior-tui.task-report.next.filter=$(task show report.next.filter)
+

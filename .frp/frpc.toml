@@ -1,0 +1,138 @@
+# This configuration file is for reference only. Please do not use this configuration directly to run the program as it may have various issues.
+
+# your proxy name will be changed to {user}.{proxy}
+user = "wukaige"
+
+# A literal address or host name for IPv6 must be enclosed
+# in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
+# For single serverAddr field, no need square brackets, like serverAddr = "::".
+serverAddr = "120.78.164.217"
+serverPort = 7000
+
+# STUN server to help penetrate NAT hole.
+# natHoleStunServer = "stun.easyvoip.com:3478"
+
+# Decide if exit program when first login failed, otherwise continuous relogin to frps
+# default is true
+loginFailExit = true
+
+# console or real logFile path like ./frpc.log
+log.to = "/tmp/frpc.log"
+# trace, debug, info, warn, error
+log.level = "info"
+log.maxDays = 3
+# disable log colors when log.to is console, default is false
+log.disablePrintColor = false
+
+auth.method = "token"
+# auth.additionalScopes specifies additional scopes to include authentication information.
+# Optional values are HeartBeats, NewWorkConns.
+# auth.additionalScopes = ["HeartBeats", "NewWorkConns"]
+
+# auth token
+auth.token = "changeme"
+
+# oidc.clientID specifies the client ID to use to get a token in OIDC authentication.
+# auth.oidc.clientID = ""
+# oidc.clientSecret specifies the client secret to use to get a token in OIDC authentication.
+# auth.oidc.clientSecret = ""
+# oidc.audience specifies the audience of the token in OIDC authentication.
+# auth.oidc.audience = ""
+# oidc.scope specifies the permissions of the token in OIDC authentication if AuthenticationMethod == "oidc". By default, this value is "".
+# auth.oidc.scope = ""
+# oidc.tokenEndpointURL specifies the URL which implements OIDC Token Endpoint.
+# It will be used to get an OIDC token.
+# auth.oidc.tokenEndpointURL = ""
+
+# oidc.additionalEndpointParams specifies additional parameters to be sent to the OIDC Token Endpoint.
+# For example, if you want to specify the "audience" parameter, you can set as follow.
+# frp will add "audience=<value>" "var1=<value>" to the additional parameters.
+# auth.oidc.additionalEndpointParams.audience = "https://dev.auth.com/api/v2/"
+# auth.oidc.additionalEndpointParams.var1 = "foobar"
+
+# Set admin address for control frpc's action by http api such as reload
+webServer.addr = "127.0.0.1"
+webServer.port = 7090
+webServer.user = "wukaige"
+webServer.password = "changeme"
+# Admin assets directory. By default, these assets are bundled with frpc.
+# webServer.assetsDir = "./static"
+
+# Enable golang pprof handlers in admin listener.
+webServer.pprofEnable = false
+
+# The maximum amount of time a dial to server will wait for a connect to complete. Default value is 10 seconds.
+# transport.dialServerTimeout = 10
+
+# dialServerKeepalive specifies the interval between keep-alive probes for an active network connection between frpc and frps.
+# If negative, keep-alive probes are disabled.
+# transport.dialServerKeepalive = 7200
+
+# connections will be established in advance, default value is zero
+transport.poolCount = 5
+
+# If tcp stream multiplexing is used, default is true, it must be same with frps
+# transport.tcpMux = true
+
+# Specify keep alive interval for tcp mux.
+# only valid if tcpMux is enabled.
+# transport.tcpMuxKeepaliveInterval = 60
+
+# Communication protocol used to connect to server
+# supports tcp, kcp, quic, websocket and wss now, default is tcp
+transport.protocol = "tcp"
+
+# set client binding ip when connect server, default is empty.
+# only when protocol = tcp or websocket, the value will be used.
+transport.connectServerLocalIP = "0.0.0.0"
+
+# if you want to connect frps by http proxy or socks5 proxy or ntlm proxy, you can set proxyURL here or in global environment variables
+# it only works when protocol is tcp
+# transport.proxyURL = "http://user:passwd@192.168.1.128:8080"
+# transport.proxyURL = "socks5://user:passwd@192.168.1.128:1080"
+# transport.proxyURL = "ntlm://user:passwd@192.168.1.128:2080"
+
+# quic protocol options
+# transport.quic.keepalivePeriod = 10
+# transport.quic.maxIdleTimeout = 30
+# transport.quic.maxIncomingStreams = 100000
+
+# If tls.enable is true, frpc will connect frps by tls.
+# Since v0.50.0, the default value has been changed to true, and tls is enabled by default.
+transport.tls.enable = true
+
+# transport.tls.certFile = "client.crt"
+# transport.tls.keyFile = "client.key"
+# transport.tls.trustedCaFile = "ca.crt"
+# transport.tls.serverName = "example.com"
+
+# If the disableCustomTLSFirstByte is set to false, frpc will establish a connection with frps using the
+# first custom byte when tls is enabled.
+# Since v0.50.0, the default value has been changed to true, and the first custom byte is disabled by default.
+# transport.tls.disableCustomTLSFirstByte = true
+
+# Heartbeat configure, it's not recommended to modify the default value.
+# The default value of heartbeatInterval is 10 and heartbeatTimeout is 90. Set negative value
+# to disable it.
+# transport.heartbeatInterval = 30
+# transport.heartbeatTimeout = 90
+
+# Specify a dns server, so frpc will use this instead of default one
+# dnsServer = "8.8.8.8"
+
+# Proxy names you want to start.
+# Default is empty, means all proxies.
+# start = ["ssh", "dns"]
+
+# Specify udp packet size, unit is byte. If not set, the default value is 1500.
+# This parameter should be same between client and server.
+# It affects the udp and sudp proxy.
+udpPacketSize = 1500
+
+# Additional metadatas for client.
+# metadatas.var1 = "abc"
+# metadatas.var2 = "123"
+
+# Include other config files for proxies.
+includes = [".frp/conf.d/*.toml"]
+

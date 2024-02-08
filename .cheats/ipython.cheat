@@ -1,0 +1,5 @@
+% ipython, jupyter
+
+# add kernel to jupyter
+ipython kernel install --name <kernel_name> --user
+

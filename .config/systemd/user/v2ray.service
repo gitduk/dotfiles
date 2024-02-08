@@ -1,0 +1,12 @@
+[Unit]
+Description = V2ray proxy server.
+After = network.target nss-lookup.target
+
+[Service]
+Type = simple
+ExecStart = %h/.v2ray/v2ray run
+Restart = on-failure
+RestartSec = 5s
+
+[Install]
+WantedBy = default.target

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=localsend
+Comment=send files by lan.
+Exec=localsend
+Icon=localsend
+Type=Application
+Categories=Utility;
+

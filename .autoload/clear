@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+# fix clear command terminal database is inaccessible
+
+if [ -n "$(env|grep CONDA_PREFIX)" ] && [ -f "$CONDA_PREFIX/bin/clear" ]; then
+  mv $CONDA_PREFIX/bin/clear $CONDA_PREFIX/bin/clear.old
+fi
+/usr/bin/clear
+

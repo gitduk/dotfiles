@@ -1,0 +1,36 @@
+display:
+  tiup cluster display tidb
+
+edit:
+  tiup cluster edit-config tidb
+
+start:
+  tiup cluster start tidb
+
+stop:
+  tiup cluster stop tidb
+
+reload:
+  tiup cluster reload tidb
+
+restart:
+  tiup cluster restart tidb
+
+list:
+  tiup cluster list
+
+check:
+  tiup cluster check ./topology.yaml --user root -p
+
+apply:
+  tiup cluster check --apply ./topology.yaml --user root -p
+  
+deploy:
+  tiup cluster deploy tidb v7.1.1 ./topology.yaml --user root -p
+
+init:
+  tiup cluster start tidb --init
+
+root:
+  mysql -h 127.0.0.1 -P 4000 -u root -p
+  

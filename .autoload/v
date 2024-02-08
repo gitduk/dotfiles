@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+
+# Set a default editor if $EDITOR is not set
+if ! hash $EDITOR &>/dev/null; then
+  if hash nvim &>/dev/null; then
+    EDITOR="nvim"
+  elif hash hx &>/dev/null; then
+    EDITOR="hx"
+  fi
+fi
+
+# Function to edit a file or open the editor
+function edit_file {
+  # If no file specified, open editor in current directory if writable
+  if [[ -z "$1" ]]; then
+    [[ -w "." ]] && $EDITOR || { echo "Error: Current directory is not writable."; exit 1; }
+    return
+  fi
+
+  # If file exists and is writable, or does not exist but directory is writable, use EDITOR
+  if [[ -w "$1" ]] || { [[ ! -f "$1" ]] && [[ -w $(dirname "$1") ]]; }; then
+    $EDITOR "$1"
+  # If file exists but is not writable, use sudo EDITOR
+  elif [[ -f "$1" ]]; then
+    sudo $EDITOR "$1"
+  # Otherwise, create file
+  else
+    $EDITOR "$1"
+  fi
+}
+
+# Main logic
+if [[ -n "$1" ]]; then
+  edit_file "$1"
+else
+  edit_file
+fi
+

@@ -1,0 +1,104 @@
+#!/usr/bin/env zsh
+
+# ###  Args  ##################################################################
+short="r"
+long="remove"
+ARGS=`getopt -a -o $short -l $long -n "${0##*/}" -- "$@"`
+
+if [[ $? -ne 0 ]]; then
+  cat <<- EOF
+Usage: $0 [OPTIONS] [FILE]...
+
+Options:
+    -r, --remove    Remove archive after unpacking.
+EOF
+  return 1
+fi
+
+eval set -- "${ARGS}"
+
+while true
+do
+  case "$1" in
+  -r|--remove) remove_archive=0 ;;
+  --) shift ; break ;;
+  esac
+shift
+done
+
+# ###  Main  ##################################################################
+
+remove_archive=${remove_archive:-1}
+
+[[ ! -f "$1" ]] && echo "x: '$1' is not a valid file" >&2 && return
+
+local file="$1" filename="${1:r}" full_path="${1:A}"
+if [[ $filename =~ '\.tar$' ]]; then
+  filename="${filename:r}"
+fi
+
+local target="${2:-$filename}"
+# if [[ -e "$target" ]]; then
+#   local rnd="${(L)"${$(( [##36]$RANDOM*$RANDOM ))}":1:5}"
+#   target="${target}-${rnd}"
+# fi
+[[ ! -e "$target" ]] && command mkdir -p "$target"
+builtin cd -q "$target"
+
+local success=0
+echo "x: extracting to $target" >&1
+
+case "${file:l}" in
+  *.tar.gz|*.tgz)
+    (( $+commands[pigz] )) && { tar -I pigz -xvf "$full_path" } || tar zxvf "$full_path" ;;
+  *.tar.bz2|*.tbz|*.tbz2)
+    (( $+commands[pbzip2] )) && { tar -I pbzip2 -xvf "$full_path" } || tar xvjf "$full_path" ;;
+  *.tar.xz|*.txz)
+    (( $+commands[pixz] )) && { tar -I pixz -xvf "$full_path" } || {
+    tar --xz --help &> /dev/null \
+    && tar --xz -xvf "$full_path" \
+    || xzcat "$full_path" | tar xvf - } ;;
+  *.tar.zma|*.tlz)
+    tar --lzma --help &> /dev/null \
+    && tar --lzma -xvf "$full_path" \
+    || lzcat "$full_path" | tar xvf - ;;
+  *.tar.zst|*.tzst)
+    tar --zstd --help &> /dev/null \
+    && tar --zstd -xvf "$full_path" \
+    || zstdcat "$full_path" | tar xvf - ;;
+  *.tar) tar xvf "$full_path" ;;
+  *.tar.lz) (( $+commands[lzip] )) && tar xvf "$full_path" ;;
+  *.tar.lz4) lz4 -c -d "$full_path" | tar xvf - ;;
+  *.tar.lrz) (( $+commands[lrzuntar] )) && lrzuntar "$full_path" ;;
+  *.gz) (( $+commands[pigz] )) && pigz -cdk "$full_path" > "${file:t:r}" || gunzip -ck "$full_path" > "${file:t:r}" ;;
+  *.bz2) bunzip2 "$full_path" ;;
+  *.xz) unxz "$full_path" ;;
+  *.lrz) (( $+commands[lrunzip] )) && lrunzip "$full_path" ;;
+  *.lz4) lz4 -d "$full_path" ;;
+  *.lzma) unlzma "$full_path" ;;
+  *.z) uncompress "$full_path" ;;
+  *.zip|*.war|*.jar|*.ear|*.sublime-package|*.ipa|*.ipsw|*.xpi|*.apk|*.aar|*.whl) unzip "$full_path" ;;
+  *.rar) unrar x -ad "$full_path" ;;
+  *.rpm)
+    rpm2cpio "$full_path" | cpio --quiet -id ;;
+  *.7z) 7za x "$full_path" ;;
+  *.deb)
+    command mkdir -p "control" "data"
+    ar vx "$full_path" > /dev/null
+    builtin cd -q control; x ../control.tar.*
+    builtin cd -q ../data; x ../data.tar.*
+    builtin cd -q ..; command rm *.tar.* debian-binary ;;
+  *.zst) unzstd "$full_path" ;;
+  *.cab|*.exe) cabextract "$full_path" ;;
+  *.cpio|*.obscpio) cpio -idmvF "$full_path" ;;
+  *.zpaq) zpaq x "$full_path" ;;
+  *.zlib) zlib-flate -uncompress < "$full_path" > "${file:r}" ;;
+  *)
+    echo "x: '$file' cannot be extracted" >&2
+    success=1 ;;
+esac
+
+(( success = success > 0 ? success : $? ))
+(( success == 0 && remove_archive == 0 )) && command rm "$full_path"
+builtin cd -q "$pwd"
+

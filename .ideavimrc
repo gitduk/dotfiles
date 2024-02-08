@@ -1,0 +1,160 @@
+" basic
+" ################################################################
+let mapleader=' '
+
+" comment plugin
+set commentary
+" surround plugin
+set surround
+" easymotion
+set easymotion
+
+set ideajoin
+
+set hlsearch
+set showmode
+set incsearch
+set scrolloff=3
+set history=1000
+set ignorecase smartcase
+
+" easymotion config
+" -----------------
+map f <Plug>(easymotion-bd-f)
+
+" action
+" ################################################################
+
+" method jump
+nnoremap [[ :action MethodUp<CR>
+nnoremap ]] :action MethodDown<CR>
+
+" tab action
+nnoremap <c-l> :tabn<CR>
+nnoremap <c-h> :tabp<CR>
+
+" find usage
+nnoremap <Leader>u :action FindUsages<CR>
+" find operation
+nnoremap ?  :action Find<CR>
+
+" idea replace
+nnoremap <Leader>; :action Replace<CR>
+
+" go to class
+nnoremap <Leader>gc :action GotoClass<CR>
+
+" go to action
+nnoremap <Leader>ga :action GotoAction<CR>
+
+" goto file
+nnoremap <leader>gf :action GotoFile<CR>
+
+" hide active window
+nnoremap <Leader>h :action HideActiveWindow<CR>
+
+" close active window
+nnoremap <leader>c :action CloseActiveTab<CR>
+
+" close all but this
+nnoremap <leader>ca :action CloseAllEditorsButActive<CR>
+
+" hide all window
+nnoremap <leader>H :action HideAllWindows<CR>
+
+nnoremap <leader>s :action Stop<CR>
+
+nnoremap <leader>z :action ToggleDistractionFreeMode<CR>
+
+nnoremap <S-Space> :action GotoNextError<CR>
+
+nnoremap <leader>o :action FileStructurePopup<CR>
+
+nnoremap <leader>w :action SaveAll<CR>
+
+nnoremap <leader>p :action QuickJavaDoc<CR>
+
+nnoremap <leader>j :action EditSource<CR>
+
+nnoremap <leader>J :action Back<CR>
+
+" open project tree
+nnoremap <leader>tt :action SelectInProjectView<CR>
+
+nnoremap <leader>ff :action ReformatCode<CR>
+
+" find in content
+nnoremap <leader>fc :action FindInPath<CR>
+
+nnoremap <leader>rr :action Run<CR>
+
+nnoremap <leader><tab> :action JumpToLastWindow<CR>
+
+" for debug
+nnoremap <leader>b :action ToggleLineBreakpoint<CR>
+nnoremap <leader>dd :action Debug<CR>
+nnoremap <leader>dr :action Resume<CR>
+nnoremap <leader>dv :action ViewBreakpoints<CR>
+nnoremap <leader>dw :action ActivateDebugToolWindow<CR>
+
+" vimscript map
+" ################################################################
+
+nnoremap H b
+nnoremap L e
+nnoremap J <C-d>
+nnoremap K <C-u>
+vnoremap J <C-d>
+vnoremap K <C-u>
+nnoremap U <C-r>
+vnoremap Y "+y
+inoremap jk <Esc>
+nnoremap q <esc>
+
+" quick v
+noremap vw viw
+noremap v" vi"
+noremap v' vi'
+noremap v` vi`
+noremap v( vi(
+noremap v[ vi[
+noremap v{ vi{
+noremap v< vi<
+
+" quick arround
+vnoremap ( di(<esc>p
+vnoremap [ di[<esc>p
+vnoremap { di{<esc>p
+vnoremap " di"<esc>p
+vnoremap ' di'<esc>p
+vnoremap < di<><LEFT><esc>p
+vnoremap ` di``<LEFT><esc>p
+
+nmap <leader>a( vw(
+nmap <leader>a[ vw[
+nmap <leader>a{ vw{
+nmap <leader>a< vw<
+nmap <leader>a" vw"
+nmap <leader>a' vw'
+nmap <leader>a` vw`
+nmap <Leader>w :w<CR>
+
+nnoremap <leader>q :wq<CR>
+nnoremap <leader>l :noh<CR>
+nnoremap <leader>R :source ~/.ideavimrc<CR>
+nnoremap <silent> <C-l> :w<CR>:tabn<CR>
+nnoremap <silent> <C-h> :w<CR>:tabp<CR>
+
+# add header
+autocmd bufnewfile *.c so $HOME/files/file_headers/c_header.txt
+autocmd bufnewfile *.sh so $HOME/files/file_headers/sh_header.txt
+autocmd bufnewfile *.py so $HOME/files/file_headers/py_header.txt
+autocmd bufnewfile *.conf so $HOME/files/file_headers/conf_header.txt
+autocmd bufnewfile *.c,*.sh,*.py,*.conf exe "1," . 10 . "g/File Name :.*/s//File Name : " .expand("%")
+autocmd bufnewfile *.c,*.sh,*.py,*.conf exe "1," . 10 . "g/Creation Date :.*/s//Creation Date : " .strftime("%Y-%m-%d %H:%M:%S")
+autocmd bufnewfile *.c,*.sh,*.py,*.conf exe "1," . 10 . "g/Created By :.*/s//Created By : " .$USER
+autocmd bufnewfile *.c,*.sh,*.py,*.conf execute "normal mu"
+autocmd bufwritepre,filewritepre *.c,*.sh,*.py,*.conf exe "1," . 10 . "g/Last Modified :.*/s/Last Modified :.*/Last Modified : " .strftime("%c")
+autocmd bufwritepre,filewritepre *.c,*.sh,*.py,*.conf execute "normal `'"
+autocmd bufnewfile *.c,*.sh,*.py,*.conf execute "normal `u"
+

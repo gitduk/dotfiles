@@ -1,0 +1,53 @@
+########################## 自定义 ##########################
+
+[[rulesets]]
+group = "🐼 全球直连"
+ruleset = "rules/force-direct.txt"
+interval = 86400
+
+[[rulesets]]
+group = "🪁 Match"
+ruleset = "rules/force-proxy.txt"
+interval = 86400
+
+######################## 基于服务 ########################
+
+[[rulesets]]
+group = "🐻 Chat"
+ruleset = "rules/chat.txt"
+interval = 86400
+
+[[rulesets]]
+group = "🐻 Chat"
+ruleset = "rules/openai.txt"
+interval = 86400
+
+############## 黑名单模式: 匹配走代理 ##############
+# [[rulesets]]
+# group = "🌻 节点选择"
+# ruleset = "rules/proxy.txt"
+# interval = 86400
+#
+# [[rulesets]]
+# group = "🌻 节点选择"
+# ruleset = "rules/gfw.txt"
+# interval = 86400
+
+
+############## 白名单模式: 匹配走直连 ##############
+
+[[rulesets]]
+group = "🐼 全球直连"
+ruleset = "rules/direct.txt"
+interval = 86400
+
+[[rulesets]]
+group = "DIRECT"
+ruleset = "rules/lan_cidr.txt"
+interval = 86400
+
+########################## 未匹配 ##########################
+
+[[rulesets]]
+group = "🪁 Match"
+ruleset = "[]FINAL"

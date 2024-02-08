@@ -1,0 +1,26 @@
+% dpkg
+
+# list linux kernels
+sudo dpkg --get-selections | grep linux-
+
+# remove deinstall linux kernel
+sudo dpkg --get-selections | grep linux- | grep deinstall | awk '{printf "%s\n", $1}' | xargs sudo dpkg -P
+
+% dpkg, install
+# gh
+VERSION="2.23.0"
+aria2c -c "https://github.com/cli/cli/releases/download/v$VERSION/gh_${VERSION}_linux_amd64.deb" -d /tmp
+sudo dpkg -i /tmp/gh_${VERSION}_linux_amd64.deb
+
+# hurl
+aria2c -c "https://github.com/Orange-OpenSource/hurl/releases/download/1.8.0/hurl_1.8.0_amd64.deb" -d /tmp -o hurl.deb
+sudo dpkg -i /tmp/hurl.deb
+
+# nvim
+aria2c -c "https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.deb" -d /tmp -o nvim-latest.deb
+sudo dpkg -i /tmp/nvim-latest.deb
+
+# google chrome
+aria2c -c "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -d /tmp
+sudo dpkg -i /tmp/google-chrome-stable_current_amd64.deb
+

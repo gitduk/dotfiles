@@ -1,0 +1,28 @@
+% aria2c, install
+
+# anaconda
+aria2c -c "https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh" -d /tmp
+sudo chmod 744 /tmp/Anaconda3-2022.10-Linux-x86_64.sh
+bash /tmp/Anaconda3-2022.10-Linux-x86_64.sh
+
+# Vimix curosr theme
+aria2c -c "https://github.com/vinceliuice/Vimix-cursors/archive/refs/tags/2020-02-24.tar.gz" -d /tmp
+cd /tmp && sudo tar -xzf /tmp/Vimix-cursors-2020-02-24.tar.gz
+[[ ! -e "~/.local/share/icons" ]] && mkdir ~/.local/share/icons
+sudo cp -r /tmp/Vimix-cursors-2020-02-24/dist/ /usr/share/icons/Vimix/
+sudo cp -r /tmp/Vimix-cursors-2020-02-24/dist/ ~/.local/share/icons/Vimix/
+sudo cp -r /tmp/Vimix-cursors-2020-02-24/dist-white/ /usr/share/icons/Vimix-white/
+sudo cp -r /tmp/Vimix-cursors-2020-02-24/dist-white/ ~/.local/share/icons/Vimix-white/
+
+# font: Iosevka Nerd Font
+aria2c -c "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/Iosevka.zip" -d /tmp
+mkdir -p ~/.local/share/fonts/Iosevka && unzip /tmp/Iosevka.zip -d ~/.local/share/fonts/Iosevka && fc-cache -fv
+
+# font: Meslo
+aria2c -c "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/Meslo.zip" -d /tmp
+mkdir -p  ~/.local/share/fonts/Meslo && unzip /tmp/Meslo.zip -d ~/.local/share/fonts/Meslo && fc-cache -fv
+
+# font: LXGW
+aria2c -c "https://github.com/lxgw/LxgwWenKai/releases/download/v1.300/lxgw-wenkai-v1.300.tar.gz" -d /tmp -o LXGW.tar.gz
+tar -xzvf /tmp/LXGW.tar.gz -C ~/.local/share/fonts/ && fc-cache -fv
+

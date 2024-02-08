@@ -1,0 +1,11 @@
+[[proxies]]
+# 'ssh' is the unique proxy name
+# If global user is not empty, it will be changed to {user}.{proxy} such as 'your_name.ssh'
+name = "code"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 8080
+remotePort = 8080
+
+# Limit bandwidth for this proxy, unit is KB and MB
+transport.bandwidthLimit = "1MB"

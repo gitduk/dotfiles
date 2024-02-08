@@ -1,0 +1,23 @@
+% bash, color
+
+# Print 256 color
+for i in {0..255}; do print -Pn "%K{$i}  %k%F{$i}${(l:3::0:)i}%f " ${${(M)$((i%6)):#3}:+$'\n'}; done
+
+# Print 256 color v2
+local -a colors
+for i in {000..255}; do
+  colors+=("%F{$i}$i%f")
+done
+print -cP $colors
+
+# Xterm <-> hex
+python $HOME/.python/xterm-and-hex.py <color>
+
+# Print bash color
+for i in {0..255} ; do
+  printf "\x1b[37;${i}m%3d \x1b[0m" "$i"
+  if (( $i == 15 )) || (( $i > 15 )) && (( ($i-15) % 12 == 0 )); then
+    echo;
+  fi
+done
+

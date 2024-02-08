@@ -1,0 +1,13 @@
+channels:
+  - defaults
+
+show_channel_urls: true
+restore_free_channel: true
+
+proxy_servers:
+  http: "http://127.0.0.1:7890"
+  https: "http://127.0.0.1:7890"
+
+ssl_verify: false
+auto_activate_base: false
+

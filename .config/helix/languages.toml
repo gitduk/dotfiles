@@ -1,0 +1,76 @@
+# brew install llvm
+# rustup component add rust-analyzer
+[[language]]
+name = "rust"
+auto-format = true
+roots = ["Cargo.toml", "Cargo.lock"]
+indent = { tab-width = 4, unit = "    " }
+
+[language-server.rust-analyzer.config.check]
+command = "clippy"
+
+# npm install --location=global pyright
+[[language]]
+name = "python"
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+language-servers = ["pyright"]
+
+# npm install -g typescript typescript-language-server
+[[language]]
+name = "typescript"
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+
+# =============================================================================
+
+# cargo install taplo-cli --locked --features lsp
+[[language]]
+name = "toml"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+formatter = { command = "taplo", args = ["fmt", "-"] }
+
+# brew install marksman
+[[language]]
+name = "markdown"
+auto-format = true
+language-servers = ["marksman", "ltex-ls"]
+
+# npm i -g sql-language-server
+[[language]]
+name = "sql"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+language-servers = ["sql-language-server"]
+
+[language-server.sql-language-server]
+command = "sql-language-server"
+args = ["up", "--method", "stdio"]
+
+# npm i -g vscode-langservers-extracted
+[[language]]
+name = "json"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+
+[[language]]
+name = "html"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+
+# npm i -g yaml-language-server@next ansible-language-server
+[[language]]
+name = "yaml"
+auto-format = true
+file-types = ["yaml", "yml"]
+indent = { tab-width = 2, unit = "  " }
+language-servers = ["yaml-language-server", "ansible-language-server"]
+
+[language-server.yaml-language-server.config.yaml]
+format = { enable = true }
+validation = true
+
+[language-server.yaml-language-server.config.yaml.schemas]
+"https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.{yml,yaml}"
+"https://raw.githubusercontent.com/ansible-community/schemas/main/f/ansible-tasks.json" = "roles/{tasks,handlers}/*.{yml,yaml}"

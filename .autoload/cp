@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+if [[ $# -eq 0 ]]; then
+  cat | wl-copy
+else 
+  /usr/bin/cp "$@"
+fi

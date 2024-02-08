@@ -1,0 +1,11 @@
+% git, clone
+
+# font: Nerd fonts
+git clone --depth 1 "https://github.com/ryanoasis/nerd-fonts.git" ~/.local/share/fonts/nerd-fonts && fc-cache -fv
+
+# font: Sarasa Nerd
+git clone https://github.com/XuanXiaoming/Sarasa-Mono-SC-Nerd.git ~/.local/share/fonts/Sarasa-Mono-SC-Nerd && fc-cache -fv
+
+# font: Nerd fonts
+git clone --depth 1 https://github.com/ryanoasis/nerd-fonts.git ~/.local/share/fonts/nerd-fonts && fc-cache -fv
+

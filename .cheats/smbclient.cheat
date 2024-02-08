@@ -1,0 +1,8 @@
+% smbclient
+
+# verify local shares
+smbclient -L <domain> -U <user>
+
+# mount windows shared directory
+sudo mount -t cifs -o credentials=<abs_file_path> //<domain>/<shared_dir> <mount_path>
+

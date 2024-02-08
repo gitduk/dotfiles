@@ -1,0 +1,10 @@
+#!/bin/bash
+	
+sessions=$(tmux list-sessions -F '#S')
+current=$(tmux display-message -p '#S')
+for session in ${sessions[@]}; do
+  if [ ! "$session" == "$current" ]; then
+    $HOME/.tmux/bin/kill-session $session
+  fi
+done
+

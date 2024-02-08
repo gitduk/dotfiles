@@ -1,0 +1,24 @@
+gauges:
+  - title: Year progress
+    position: [[0, 0], [80, 0]]
+    rate-ms: 1000
+    scale: 2
+    color: 75
+    percent-only: false
+    cur:
+        sample: date +%j
+    max:
+        sample: echo 365
+    min:
+        sample: echo 0
+textboxes:
+  - title: Docker containers stats
+    position: [[0, 3], [40, 12]]
+    rate-ms: 1000
+    color: 75
+    sample: docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.PIDs}}"
+  - title: Usb devices
+    position: [[0, 14], [40, 12]]
+    rate-ms: 1000
+    color: 75
+    sample: lsusb 2>/dev/null

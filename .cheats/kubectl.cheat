@@ -1,0 +1,14 @@
+% kubectl
+
+# list all pods
+kubectl get pods --all-namespaces
+
+# list special pod
+kubectl get pods -n <pod_name>
+
+# show all services
+kubectl get services
+
+# show special service host and ports
+kubectl get services <service_name>
+

@@ -1,0 +1,65 @@
+{
+  "uploaded": [
+    {
+      "fileName": "1113834.png",
+      "width": 2560,
+      "height": 1440,
+      "extname": ".png",
+      "imgUrl": "https://typora.com/image/1113834.png",
+      "type": "github",
+      "id": "48ff9621-149d-4269-aa49-a18df92f01c3"
+    }
+  ],
+  "picBed": {
+    "current": "gitee",
+    "uploader": "gitee",
+    "smms": {
+      "token": "WD5B0Q3EOlkKChH7twk9KgfrDgrUKCFc"
+    },
+    "github": {
+      "repo": "gitduk/image",
+      "branch": "typora",
+      "token": "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",
+      "path": "image/",
+      "customUrl": "https://typora.com"
+    },
+    "gitee": {
+      "repo": "gitduk/typora-image",
+      "branch": "master",
+      "token": "507233353f7be7b98c92a542b87b3ad7",
+      "path": "image/",
+      "customPath": "default",
+      "customUrl": ""
+    },
+    "transformer": "path"
+  },
+  "settings": {
+    "shortKey": {
+      "picgo:upload": {
+        "enable": true,
+        "key": "CommandOrControl+Shift+P",
+        "name": "upload",
+        "label": "快捷上传"
+      }
+    },
+    "server": {
+      "port": 36677,
+      "host": "127.0.0.1",
+      "enable": true
+    },
+    "showUpdateTip": false,
+    "privacyEnsure": true,
+    "pasteStyle": "markdown"
+  },
+  "picgoPlugins": {
+    "picgo-plugin-gitee": true,
+    "picgo-plugin-gitee-uploader": true,
+    "picgo-plugin-super-prefix": true
+  },
+  "debug": true,
+  "PICGO_ENV": "GUI",
+  "needReload": false,
+  "picgo-plugin-gitee-uploader": {
+    "lastSync": "2023-07-17 11:38:57"
+  }
+}
