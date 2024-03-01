@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 if [[ $# -eq 0 ]]; then
-  selected_dir="$({_zlua -l | sort -g -r;echo;wd list|sed '1d'} | sed -e '1d' -e 's/~/$HOME/' | fzf)"
+  selected_dir="$({_zlua -l | sort -g -r} | sed -e '1d' -e 's/~/$HOME/' | fzf)"
   [[ -z "$selected_dir" ]] && return 1 || read _ dir <<< "$selected_dir"
   eval cd $dir
 else

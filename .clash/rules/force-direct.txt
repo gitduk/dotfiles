@@ -1,2 +1,0 @@
-# 强制直连域名列表
-DOMAIN,leetcode.cn

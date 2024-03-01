@@ -23,7 +23,7 @@ daemon:
   default_parallel_tasks: 1
   pause_group_on_failure: false
   pause_all_on_failure: false
-  callback: "\"Task {{ id }}\nCommand: {{ command }}\nPath: {{ path }}\nFinished with status '{{ result }}'\""
+  callback: "notify-send \"Task {{ id }} {{ result }}\" \"<b>{{ command }}</b>\""
   callback_log_lines: 10
   groups:
     default: 1

@@ -1,0 +1,12 @@
+version: "3.3"
+
+services:
+  redis:
+    stdin_open: true
+    tty: true
+    container_name: redis
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    image: redis:latest
+networks: {}

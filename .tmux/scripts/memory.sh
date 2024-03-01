@@ -17,5 +17,5 @@ case $mem in
   *) fgcolor="#[fg=$red $sytle]" ;;
 esac
 
-printf "%s" "$fgcolor$mem%"
+printf "%s" "$fgcolor$mem"
 

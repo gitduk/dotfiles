@@ -22,6 +22,11 @@ group = "🐻 Chat"
 ruleset = "rules/openai.txt"
 interval = 86400
 
+[[rulesets]]
+group = "🦍 广告拦截"
+ruleset = "rules/reject-uniq.txt"
+interval = 86400
+
 ############## 黑名单模式: 匹配走代理 ##############
 # [[rulesets]]
 # group = "🌻 节点选择"
@@ -32,7 +37,6 @@ interval = 86400
 # group = "🌻 节点选择"
 # ruleset = "rules/gfw.txt"
 # interval = 86400
-
 
 ############## 白名单模式: 匹配走直连 ##############
 
@@ -51,3 +55,4 @@ interval = 86400
 [[rulesets]]
 group = "🪁 Match"
 ruleset = "MATCH"
+

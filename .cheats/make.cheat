@@ -21,14 +21,23 @@ sudo nala install -y libxcb-xkb-dev libxcb-xrm-dev libxcb-cursor-dev libasound2-
 aria2c -c "https://github.com/polybar/polybar/releases/download/3.6.3/polybar-3.6.3.tar.gz" -d /tmp
 cd /tmp && tar -xvzf polybar-3.6.3.tar.gz && ./build.sh
 
-# Hyprland 0.34.0
+# Hyprland: 0.35.0
 sudo nala install -y build-essential cmake cmake-extras fontconfig g++-11 gcc-11 gettext gettext-base glslang-tools grim 
 sudo nala install -y libavcodec-dev libavformat-dev libavutil-dev libcunit1-dev libdrm-dev libegl1-mesa-dev libegl-dev libffi-dev libfontconfig-dev libgbm-dev libgles2 libgulkan-dev libinput-bin libinput-dev libpixman-1-dev libsdl-pango-dev libseat-dev libsystemd-dev libtoml11-dev libtomlplusplus3 libtomlplusplus-dev libudev-dev libvkfft-dev libvulkan-dev libvulkan-volk-dev libxcb-composite0-dev libxcb-dri3-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-icccm4-dev libxcb-present-dev libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev libxkbcommon-dev libxkbcommon-x11-dev libxkbregistry-dev libxml2-dev libwlroots-dev
 sudo nala install -y meson ninja-build qt6-wayland seatd swayidle valgrind vulkan-validationlayers-dev wget xcb xdg-desktop-portal-wlr xwayland
 meson wrap install tomlplusplus
 sudo nala remove libdrm-dev
-tar -xvf $HOME/.static/libdrm-2.4.118.tar.xz -C /tmp/
-cd /tmp/libdrm-2.4.118 && meson build/ && ninja -C build && sudo ninja -C build install
+cd /tmp
+tar -xvf $HOME/.static/libdrm-2.4.120.tar.xz -C /tmp
+cd libdrm-2.4.120 && meson build/ && ninja -C build && sudo ninja -C build install
+cd .. && git clone https://github.com/marzer/tomlplusplus.git
+[[ -e "/usr/include/toml++" ]] && sudo mv /usr/include/toml++ /usr/include/toml++.bak
+sudo mv /tmp/tomlplusplus/include/toml++ /usr/include/
+git clone --depth 1 https://github.com/hyprwm/hyprlang.git
+cd hyprlang/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+cmake --build ./build --config Release --target hyprlang -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF`
+cd ..
 git clone --recursive https://github.com/hyprwm/Hyprland
 cd Hyprland && make all && sudo make install
 

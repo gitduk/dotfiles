@@ -56,9 +56,14 @@ bindkey -v
 # zstyle
 source $HOME/.zstyle.zsh
 
+# set proxy
+export http_proxy="http://127.0.0.1:7890"
+export https_proxy="http://127.0.0.1:7890"
+export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+
 # ###  Autoload  ##############################################################
 
-ls "$HOME/.autoload" | while read -n file; do
+ls "$HOME/.autoload" | while read -r file; do
   autoload -Uz $file
 done
 
@@ -70,26 +75,8 @@ source $HOME/.widgets.zsh
 # alias
 source $HOME/.alias.zsh
 
-# ###  Plugin  ################################################################
-
-# load plugin
+# plugins
 source $HOME/.plugin.zsh
-
-# dotenv
-export ZSH_DOTENV_FILE='.env'
-export ZSH_CLEAR_FILE='.clear'
-export ZSH_DOTENV_PROMPT=false
-export PROJECT_TAG=("venv" ".git" ".idea" ".env" ".vscode" ".clear")
-export ZSH_DOTENV_ALLOWED_LIST='${ZSH_CACHE_DIR:-$ZSH/cache}/dotenv-allowed.list'
-export ZSH_DOTENV_DISALLOWED_LIST='${ZSH_CACHE_DIR:-$ZSH/cache}/dotenv-disallowed.list'
-
-# zsh-autosuggestions
-export ZSH_AUTOSUGGEST_MANUAL_REBIND='1'
-export ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
-export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-
-# zsh-history-substring-search
-export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
 
 # ###  Brew  ##################################################################
 
@@ -141,9 +128,9 @@ export RUSTC_WRAPPER="$HOMEBREW_PREFIX/bin/sccache"
 # rustup installer
 hash rustup &> /dev/null || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# ###  Application  ###########################################################
+# ###  Custom  ################################################################
 
-source $HOME/.app.zsh
+source $HOME/.custom.zsh
 
 # ###  Keybind  ###############################################################
 
@@ -160,3 +147,4 @@ eval "$(starship init zsh)"
 # echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 # zprof | head -n 20; zmodload -u zsh/zprof
 
+. "$HOME/.cargo/env"

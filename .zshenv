@@ -8,7 +8,10 @@ export PKG_CONFIG_PATH="/usr/lib/pkgconfig:\
 # ###  Lib Path  ##############################################################
 
 export LD_LIBRARY_PATH="/usr/local/lib:\
-/usr/lib/x86_64-linux-gnu"
+/usr/lib/x86_64-linux-gnu:\
+/usr/local/cuda/lib64:\
+/usr/local/cuda/targets/x86_64-linux/lib:\
+/usr/local/cuda/targets/x86_64-linux/lib/stubs"
 
 # ###  System Options  ########################################################
 
@@ -50,10 +53,6 @@ export XCURSOR_THEME=Vimix
 
 # Skip the not really helping Ubuntu global compinit
 export skip_global_compinit=1
-
-# proxy
-export http_proxy="http://127.0.0.1:7890"
-export https_proxy="http://127.0.0.1:7890"
 
 # ###  Hyprland  ##############################################################
 
@@ -132,6 +131,9 @@ addPath "$HOME/.config/emacs/bin"
 
 # conda
 addPath "$HOME/anaconda3/bin"
+
+# f.sh
+addPath "$HOME/.f.sh"
 
 # ###  Token  #################################################################
 

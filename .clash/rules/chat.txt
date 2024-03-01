@@ -1,4 +1,0 @@
-DOMAIN,claude.ai
-DOMAIN,bard.google.com
-DOMAIN-SUFFIX,bing.com
-DOMAIN-SUFFIX,openai.com

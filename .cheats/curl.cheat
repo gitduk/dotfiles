@@ -18,6 +18,6 @@ curl -s https://install.zerotier.com | sudo bash
 
 % curl, api
 
-# ipinfo
+# ipaddr
 curl --fail -m 10 -sSL "https://ipinfo.io/geo?token=$ipinfo"
 

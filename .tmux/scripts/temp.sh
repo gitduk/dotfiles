@@ -26,5 +26,5 @@ case $cpu_temp in
   *) fgcolor="#[fg=$blue $style]" ;;
 esac
 
-printf "%s" "$fgcolor$cpu_temp°C"
+printf "%s" "$fgcolor$cpu_temp"
 

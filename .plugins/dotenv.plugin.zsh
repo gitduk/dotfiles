@@ -1,54 +1,64 @@
-## Settings
+# 默认配置
+: ${DOTENV_FILE:=".env"}
+: ${DOTENV_CLEAR_FILE:=".clear"}
+: ${DOTENV_TAGS:="venv .git .idea .env .vscode"}
+: ${DOTENV_DEBUG:=1}
 
-# Filename of the dotenv file to look for
-: ${ZSH_DOTENV_FILE:=.env}
-: ${ZSH_CLEAR_FILE:=.clear}
-
-: ${PROJECT_TAG:=("venv" ".git" ".idea" ".env" ".vscode")}
-
-function in_project {
-  local DIRS=(${(s:/:)1})
-  local index=-1
-  while [[ $index -gt -${#DIRS} ]]; do
-    PROJECT=${(j:/:)DIRS[1,$index]}
-    for tag in $PROJECT_TAG; do
-      if [[ -e "/$PROJECT/$tag" ]]; then
-        echo "/$PROJECT"
-        return 0
-      fi
-    done
-    ((index--))
-  done
-  return 1
+# 调试信息打印
+function dotenv_debug {
+  [[ "$DOTENV_DEBUG" -eq 1 ]] && echo "$*"
 }
 
-function source_file {
+# 加载文件
+function zsh_source {
+  dotenv_debug "dotenv: load $1"
   zsh -fn "$1" || {
-    echo "dotenv: error when sourcing '$1' file" >&2
+    echo "dotenv: error when load \`$1\`" >&2
     return 1
   }
   source "$1" 2>/dev/null
 }
 
-function source_env {
-  PROJECT="`in_project "$PWD"`"
-  if [[ "$PWD" = $OLDPWD/* && "$PROJECT" && "$PWD" = "$PROJECT" ]]; then
-    [[ -f "$PROJECT/$ZSH_DOTENV_FILE" ]] && source_file "$PROJECT/$ZSH_DOTENV_FILE"
+# 递归查找项目根目录
+function get_project_root {
+  local dir=$1
+  local tags=(${(z)DOTENV_TAGS})
+
+  for tag in ${tags}; do
+    if [ -f "$dir/$tag" ]; then
+      echo $dir
+      return
+    fi
+  done
+
+  local parent=$(dirname $dir)
+  if [ "$parent" == "/" ]; then
+    return
   fi
 
-  OLDPROJECT="`in_project "$OLDPWD"`"
-  [[ "$OLDPROJECT" = "$PROJECT" ]] && return 0
+  get_project_root $parent
+}
 
-  if [[ "$PROJECT" && "$OLDPROJECT" ]]; then
-    [[ -f "$OLDPROJECT/$ZSH_CLEAR_FILE" ]] && source_file "$OLDPROJECT/$ZSH_CLEAR_FILE"
-    [[ -f "$PROJECT/$ZSH_DOTENV_FILE" ]] && source_file "$PROJECT/$ZSH_DOTENV_FILE"
+
+function chpwd_hook {
+  root="`get_project_root "$PWD"`"
+  if [[ "$PWD" = $OLDPWD/* && "$root" && "$PWD" = "$root" ]]; then
+    [[ -f "$root/$DOTENV_FILE" ]] && zsh_source "$root/$DOTENV_FILE"
   fi
 
-  if [[ "$OLDPWD" = $PWD/* && ! "$PROJECT" && "$OLDPROJECT" ]]; then
-    [[ -f "$OLDPROJECT/$ZSH_CLEAR_FILE" ]] && source_file "$OLDPROJECT/$ZSH_CLEAR_FILE"
+  oldroot="`get_project_root "$OLDPWD"`"
+  [[ "$oldroot" = "$root" ]] && return 0
+
+  if [[ "$root" && "$oldroot" ]]; then
+    [[ -f "$oldroot/$DOTENV_CLEAR_FILE" ]] && zsh_source "$oldroot/$DOTENV_CLEAR_FILE"
+    [[ -f "$root/$DOTENV_FILE" ]] && zsh_source "$root/$DOTENV_FILE"
+  fi
+
+  if [[ "$OLDPWD" = $PWD/* && ! "$root" && "$oldroot" ]]; then
+    [[ -f "$oldroot/$DOTENV_CLEAR_FILE" ]] && zsh_source "$oldroot/$DOTENV_CLEAR_FILE"
   fi
 }
 
 autoload -U add-zsh-hook
-add-zsh-hook chpwd source_env
+add-zsh-hook chpwd chpwd_hook
 

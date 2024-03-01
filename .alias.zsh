@@ -65,7 +65,6 @@ alias cps="c push"
 alias cst="c stash"
 alias csb="c submodule"
 alias cls="c ls-tree -r master --name-only"
-alias crsy="rsync -avr $HOME/.dotfiles.git/ sv:$HOME/.dotfiles.git/"
 
 # conda
 alias co="conda"
@@ -119,11 +118,11 @@ alias cpath="copypath"
 # ###  D  #####################################################################
 
 # docker
-alias dc="docker"
-alias dcc="docker container"
 alias dcv="docker volume"
 alias dcpl="docker pull"
 alias dcr="docker run"
+
+alias dcc="docker container"
 alias dcls="docker container ls"
 alias dcla="docker container ls -a"
 alias dcs="docker container stats"
@@ -133,28 +132,16 @@ alias dcstp="docker container stop"
 alias dcrm="docker container rm"
 alias dcat="docker container attach"
 alias dcpr="docker container prune"
-alias dnc="docker network create"
-alias dnls="docker network ls"
-alias dnrm="docker network rm"
-alias dcps="docker ps"
-alias dclg="docker logs --follow"
-alias dcec="docker exec -it"
-alias dccp="docker cp"
-alias dcsc="docker search"
-alias dcdf="docker diff"
-alias dccm="docker commit"
-alias dcis="docker inspect"
-alias dcils="docker image ls"
-alias dcirm="docker image rm"
 
-# docker-compose
-alias dp="docker-compose"
-alias dps="docker-compose ps"
-alias dpu="docker-compose up"
-alias dpb="docker-compose build"
-alias dplg="docker-compose logs"
-alias dpud="docker-compose up -d"
-alias dpec="docker-compose exec -it"
+alias dils="docker image ls"
+alias dirm="docker image rm"
+alias dipr="docker image prune"
+
+alias dcp="docker compose"
+alias dcpu="docker compose up"
+alias dcpud="docker compose up -d"
+alias dcplg="docker compose logs"
+alias dcpec="docker compose exec -it"
 
 # dpkg
 alias dis="sudo dpkg -i"
@@ -174,7 +161,6 @@ alias denv="deactivate"
 alias ezs="$EDITOR $HOME/.zshrc"
 alias epl="$EDITOR $HOME/.plugin.zsh"
 alias eas="$EDITOR $HOME/.alias.zsh"
-alias ekd="$EDITOR $HOME/.sxhkdrc"
 alias etm="$EDITOR $HOME/.tmux.conf"
 alias ei3="$EDITOR $HOME/.config/i3/config"
 alias eway="$EDITOR $HOME/.config/sway/config"
@@ -222,34 +208,7 @@ alias ff="fzf"
 
 # ###  G  #####################################################################
 
-# gh
-alias gbr="gh browse"
-alias grs="gh release"
-alias gcs="gh codespace"
-alias ggi="gh gist"
-alias ggcl="gh gist clone"
-alias ggcr="gh gist create"
-alias ggdl="gh gist delete"
-alias gged="gh gist edit"
-alias ggl="gh gist list"
-alias ggvi="gh gist view"
-alias grp="gh repo"
-alias grac="gh repo archive"
-alias grcl="gh repo clone"
-alias grcr="gh repo create"
-alias grdl="gh repo delete"
-alias gred="gh repo edit"
-alias grfk="gh repo fork"
-alias grl="gh repo list"
-alias grrn="gh repo rename"
-alias grsy="gh repo sync"
-alias grvi="gh repo view"
-alias gcf="gh config list"
-alias gcst="gh config set"
-alias gcgt="gh config get"
-
 # git
-alias g="git"
 alias gad="git add ."
 alias gst="git status"
 alias gsth="git stash"
@@ -400,7 +359,7 @@ alias mca="mpc clear && mpc ls | mpc add"
 alias mb="musicbox"
 
 # mount
-alias mt="sudo mount -o uid=$UID,gid=$GID /dev/sd"
+balias mt="sudo mount /dev/sd"
 
 # pandoc
 alias mto="for f in \`ls *.md\`; do pandoc -f markdown -t org -o \${f/.md/}.org \$f; done"
@@ -562,7 +521,7 @@ alias rls="lsb_release -a"
 alias rcl="redis-cli"
 
 # rsync
-alias rs="rsync"
+alias ryc="rsync -avP --partial --progress"
 
 # ###  S  #####################################################################
 
@@ -640,4 +599,10 @@ alias wic="which"
 # ###  Z  #####################################################################
 
 alias zif="zipinfo"
+
+# ###  ?  #####################################################################
+
+# copilot
+ialias c?="gh copilot suggest"
+ialias c??="gh copilot explain"
 

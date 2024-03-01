@@ -1,0 +1,3 @@
+export ZSH_AUTOSUGGEST_MANUAL_REBIND='1'
+export ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'

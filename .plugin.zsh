@@ -1,13 +1,14 @@
 # ###  Local  #################################################################
 
 locals=(
-  "fzf.plugin.zsh"
-  "sudo.plugin.zsh"
-  "dotenv.plugin.zsh"
+  "fzf"
+  "sudo"
+  "dotenv"
 )
 
 for file in "${locals[@]}"; do
-  [[ -f "$ZPLUG/$file" ]] && source "$ZPLUG/$file"
+  [[ -f "$ZPLUG/$file.plugin.zsh" ]] && source "$ZPLUG/$file.plugin.zsh"
+  [[ -f "$ZPLUG/$file.custom.zsh" ]] && source "$ZPLUG/$file.custom.zsh"
 done
 
 # ###  Raw  ###################################################################
@@ -34,14 +35,15 @@ plugins=(
 )
 
 for plugin in "${plugins[@]}"; do
+  user="${plugin%%/*}"
   plugin="${plugin##*/}"
   if [[ -d "$ZPLUG/$plugin" ]]; then
     source "$ZPLUG/$plugin/$plugin.plugin.zsh"
+    [[ -f "$ZPLUG/$plugin.custom.zsh" ]] && source "$ZPLUG/$plugin.custom.zsh"
   else
-    git clone --depth=1 "https://github.com/$plugin.git" "$ZPLUG/$plugin"
-    [[ $? -eq 0 ]] && source "$ZPLUG/$plugin/$plugin.plugin.zsh" || echo "Failed to clone $plugin"
+    git clone --depth=1 "https://github.com/$user/$plugin.git" "$ZPLUG/$plugin"
+    [[ $? -eq 0 ]] && source "$ZPLUG/$plugin/$plugin.plugin.zsh" || echo "Failed to clone $user/$plugin"
   fi
-  [[ -e "$ZPLUG/$plugin.custom.zsh" ]] && source "$ZPLUG/$plugin.custom.zsh"
 done
 
 # ###  Completion  ############################################################
