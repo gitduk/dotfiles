@@ -19,6 +19,7 @@ if ! hash nala &>/dev/null; then
     "jq:jq"
     "rg:ripgrep"
     "ag:silversearcher-ag"
+    "sqlite3:sqlite3"
   )
   for app in "${apps[@]}"; do
     read cmd pkg < <(echo $app | tr ":" " ")

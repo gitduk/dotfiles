@@ -143,7 +143,7 @@ configuration {
 
   /* === options === */
   font:                       "MesloLGS NF 9";
-  modi:                       [combi,drun,run];
+  modi:                       [drun,run,ssh];
 	sidebar-mode: 					    false;
   drun-show-actions:          true;
   drun-match-fields:          "name,generic,exec,categories,keywords";
@@ -172,10 +172,10 @@ configuration {
 	icon-theme:                 "Papirus";
 
   /* === display === */
-  display-ssh:                "";
-  display-drun:               "";
+  display-run:                "run";
+  display-drun:               "drun";
+  display-ssh:                "ssh";
   display-combi:              "";
-  display-run:                "";
   disable-history:            false;
 
   /* === keybindings === */
@@ -208,4 +208,4 @@ configuration {
   }
 }
 
-@theme "onedark"
+@theme "squared-nord"

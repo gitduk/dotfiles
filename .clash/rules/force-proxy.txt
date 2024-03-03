@@ -1,0 +1,5 @@
+# 强制使用代理域名列表
+DOMAIN,dl.google.com
+DOMAIN,leetcode.com
+DOMAIN,services.googleapis.cn
+DOMAIN-SUFFIX,gstatic.com

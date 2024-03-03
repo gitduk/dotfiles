@@ -31,13 +31,9 @@ export CLIPBOARD="$HOME/.clipboard"
 # export LD=/usr/bin/g++-11
 
 # input method set up
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=@im=fcitx
-export INPUT_METHOD=fcitx
-export SDL_IM_MODULE=fcitx
-export GLFW_IM_MODULE=fcitx
-export IMSETTINGS_MODULE=fcitx
+export GTK_IM_MODULE=fcitx5
+export QT_IM_MODULE=fcitx5
+export XMODIFIERS=@im=fcitx5
 
 # editor
 export EDITOR="nvim"
@@ -135,9 +131,8 @@ addPath "$HOME/anaconda3/bin"
 # f.sh
 addPath "$HOME/.f.sh"
 
-# ###  Token  #################################################################
+# ###  Function  ##############################################################
 
-export ipinfo="c577b3ef143bc3"
-export codeium="eyJhbGciOiJSUzI1NiIsImtpZCI6IjY5NjI5NzU5NmJiNWQ4N2NjOTc2Y2E2YmY0Mzc3NGE3YWE5OTMxMjkiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoia2FpZ2Ugd3UiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSWlpOUpjQXZGekYwRHVESXZBUVF0cXc1LWJQbzdNRkRURWtGb0k2dkphMWlvPXM5Ni1jIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2V4YTItZmIxNzAiLCJhdWQiOiJleGEyLWZiMTcwIiwiYXV0aF90aW1lIjoxNzA3MDk5Mjk2LCJ1c2VyX2lkIjoibWNIN2lBdHlzeGVIbDR5RXBvajIxQnpoSXdWMiIsInN1YiI6Im1jSDdpQXR5c3hlSGw0eUVwb2oyMUJ6aEl3VjIiLCJpYXQiOjE3MDcwOTk5ODYsImV4cCI6MTcwNzEwMzU4NiwiZW1haWwiOiJ3dWthaWdlZUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJnb29nbGUuY29tIjpbIjEwNjI0MzM4NjEzNDI1ODg2OTIyMiJdLCJlbWFpbCI6WyJ3dWthaWdlZUBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJnb29nbGUuY29tIn19.KaYvblUqLJ0H_rV_mFQPZ3hdHqnWf5SQbjjJEmDHNUp8EwvRZRLCqUZcc48xdpMppADinv-FdkckcuXGLHB1O7NnCZNrQnZq0Q6H8S2saSidpo80HBnN66Ua_zVZSJdEEdPqRRJ_VPlRjVEi7_j6ZWv1MinnEMFepifEhFdPFKA72Nud2awAxnkvY42LYSrtD-zp_o1a-0lOqTZ6viuzTCpVya3UkEMPCqIStoEcJf5W_dUtPEe7dHnlf2BwuliFf_MCTiemDrVEJmSo2H1sydancIytkNzP70zi0pvlM3YF46F4eUHlyGaqRq4MaK457q5DON0o6X0nRQ3nPj3YcQ"
-export xfltd="https://4e27671ecbe40902.cdn.jiashule.com/api/v1/client/subscribe?token=e3b4087faa1bc13b7963f74af7d14cd1"
+# pretty.sh
+source $HOME/.sh/pretty.sh
 

@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-source pretty.sh
-
 function extract {
   local full_path="$1"
   local name=${full_path##*/}
@@ -17,12 +15,16 @@ local pattern=$1
 local success=1
 
 # fetch latest version
-latest=$(curl -s "https://api.github.com/repos/${repo}/releases/latest" | sed 's/\\n//g')
+latest=$(curl -s "https://api.github.com/repos/${repo}/releases/latest" | sed 's/\\n//g' | sed 's/\\r//g')
 [[ -z "$latest" ]] && error "$(red $repo): cannot fetch latest release" && exit 1
 
 # get latest tag name
 tag="$(echo $latest | jq -r '.name')"
-[[ -z "$tag" ]] && error "$(red $repo): cannot fetch latest version" && exit 1
+if [[ -z "$tag" ]];then
+  error "$(red $repo): cannot fetch latest version"
+  debug "latest: $latest"
+  exit 1
+fi
 
 # query tag field from sqlite table f_sh
 current_tag=$(sqlite3 $db "select tag from f_sh where repo='$repo'" 2>/dev/null || error "$(red $repo): cannot query tag from $db")

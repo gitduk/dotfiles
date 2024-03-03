@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-source pretty.sh
-
 # ###  Args  ##################################################################
 
 short="m:,r:"
@@ -55,8 +53,9 @@ if [[ ! -e "$db" ]]; then
 fi
 
 # run mode
-mode_path="$root_dir/$mode.sh"
+mode_path="$root_dir/modes/$mode.sh"
 if [[ -e "$mode_path" && -x "$mode_path" ]]; then
+  bar "$mode, $repo${cmd:+ -> $cmd}"
   $mode_path ${@:2}
 else
   [[ -e "$mode_path" ]] && error "mode $mode is not executable" && exit 1

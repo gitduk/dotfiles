@@ -82,11 +82,19 @@ if ! hash flameshot &>/dev/null; then
 fi
 
 # plum: rime config manage
-PLUM_ROOT="$HOME/.local/share/fcitx5/plum"
-if {! hash rime_dict_manager &>/dev/null || [[ ! -e "$PLUM_ROOT" ]]}; then
-  git clone --depth=1 "https://github.com/rime/plum.git" $PLUM_ROOT
-  rime_frontend=fcitx5-rime bash $PLUM_ROOT/rime-install iDvel/rime-ice:others/recipes/full
-  rime_frontend=fcitx5-rime bash $PLUM_ROOT/rime-install iDvel/rime-ice:others/recipes/all_dicts
+if ! hash rime_dict_manager &>/dev/null; then
+  sudo nala install -y fcitx5 \
+    fcitx5-chinese-addons \
+    fcitx5-frontend-gtk4 fcitx5-frontend-gtk3 fcitx5-frontend-gtk2 \
+    fcitx5-frontend-qt5 fcitx5-rime
+  im-config -n fcitx5
+  plum_dir="$HOME/.local/share/fcitx5/plum"
+  git clone --depth 1 https://github.com/rime/plum.git $plum_dir
+  rime_dir="$HOME/.local/share/fcitx5/rime" rime_frontend="fcitx5-rime" bash $plum_dir/rime-install iDvel/rime-ice:others/recipes/full
+  rime_dir="$HOME/.local/share/fcitx5/rime" rime_frontend="fcitx5-rime" bash $plum_dir/rime-install iDvel/rime-ice:others/recipes/config:schema=flypy
+  # auto install rime and rime-ice
+  # git clone --depth=1 https://github.com/Mark24Code/rime-auto-deploy.git --branch latest
+  # cd rime-auto-deploy && ./installer.rb
 fi
 
 # switchhosts

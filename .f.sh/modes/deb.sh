@@ -1,11 +1,9 @@
 #!/usr/bin/env zsh
 
-source pretty.sh
-
 local pattern=$1
 
 # fetch latest version
-latest=$(curl -s "https://api.github.com/repos/${repo}/releases/latest" | sed 's/\\n//g')
+latest=$(curl -s "https://api.github.com/repos/${repo}/releases/latest" | sed 's/\\n//g' | sed 's/\\r//g')
 [[ -z "$latest" ]] && error "$(red $repo): cannot fetch latest release" && exit 1
 
 # get latest tag name
@@ -34,14 +32,19 @@ else
 	url="$(echo $urls | fzf --prompt 'select url: ')"
 fi
 
+file="${url##*/}"
+dir="${repo//\//_}"
+mkdir -p /tmp/$dir
 cmd="${cmd:-${repo##*/}}"
 
 # download release file
-aria2c -c --all-proxy="$http_proxy" "$url" -d "$prefix" -o "$cmd"
-sudo chmod 744 "${prefix%/}/$cmd"
+aria2c -c --all-proxy="$http_proxy" "$url" -d "/tmp/$dir" -o "$file"
+builtin cd -q /tmp/$dir
+
+sudo dpkg -i "$file"
 
 # update sqlite table f_sh
-if [[ $? -eq 0 ]];
+if [[ $? -eq 0 ]]; then
   sqlite3 $db "insert or replace into f_sh (cmd, repo, tag) values ('$cmd', '$repo', '$tag')"
   ok "$(green $repo): ${cmd} updated to $tag"
 fi
