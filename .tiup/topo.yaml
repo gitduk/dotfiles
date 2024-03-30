@@ -1,0 +1,142 @@
+# 拓扑文件配置: https://docs.pingcap.com/zh/tidb/stable/tiup-cluster-topology-reference
+# 配置文件详情: https://docs.pingcap.com/zh/tidb/stable/tidb-configuration-file
+
+global:
+  user: "tidb"
+  ssh_port: 22
+  deploy_dir: "/home/tidb/tidb-deploy"
+  data_dir: "/home/tidb/tidb-data"
+
+# # Monitored variables are applied to all the machines.
+monitored:
+  node_exporter_port: 9100
+  blackbox_exporter_port: 9115
+
+server_configs:
+  tidb:
+    instance.tidb_slow_log_threshold: 1000
+
+    # TiDB 单行数据的大小限制, 默认值：6291456
+    # 最大值不超过 125829120（表示 120MB）
+    performance.txn-entry-size-limit: 125829120
+
+    # TiDB 单个事务大小限制, 默认值：104857600
+    # 最大值不超过 1099511627776（表示 1TB）
+    performance.txn-total-size-limit: 1099511627776
+
+  pd:
+    replication.enable-placement-rules: true
+    replication.max-replicas: 1
+    replication.location-labels: ["host"]
+
+    # 同时进行 leader 调度的任务个数, 默认值：4
+    # 如果集群的 TiKV 节点有足够资源, 可设置为 CPU 核数的 1/4 左右
+    schedule.leader-schedule-limit: 4
+
+    # 同时进行 Region 调度的任务个数, 默认值：2048
+    schedule.region-schedule-limit: 2048
+
+    # 同时进行 replica 调度的任务个数, 默认值：64
+    schedule.replica-schedule-limit: 64
+
+  tikv:
+    # 建议为cpu核数的1/4
+    server.grpc-concurrency: 8
+
+    # 总内存的 30%-50%
+    storage.block-cache.capacity: "64G"
+    storage.block-cache.shared: true
+
+    # MEM_TOTAL * 0.5 / TiKV 实例数量
+    storage.block-cache.capacity: "3G"
+
+    # readpool
+    readpool.storage.use-unified-pool: true
+    readpool.coprocessor.use-unified-pool: true
+
+    # 处理高优先级读请求的线程池线程数量
+    # 当 8 ≤ cpu num ≤ 16 时，默认值为 cpu_num * 0.5；
+    # 当 cpu num 小于 8 时，默认值为 4；
+    # 当 cpu num 大于 16 时，默认值为 8
+    readpool.storage.high-concurrency: 8
+
+    # cores * 0.8 / TiKV 数量
+    readpool.unified.max-thread-count: 13
+
+    # 单个日志最大大小，硬限制, 默认值：8MB
+    raftstore.raft-entry-max-size: "128MB"
+
+    # 磁盘总容量 / TiKV 实例数量
+    raftstore.capacity: "80GB"
+
+    # duration	副本允许的最长未响应时间, 默认值: "10m"
+    raftstore.max-peer-down-duration: "1m"
+
+    # 单个 log 文件最大大小，超过设定的参数值后，系统自动切分成多个文件, 默认值：300M
+    log.file.max-size: "300M"
+
+    # 保留 log 文件的最长天数, 默认值：0
+    log.file.max-days: 7
+
+tidb_servers:
+  - host: 127.0.0.1
+    port: 4000
+    status_port: 10080
+    numa_node: "0"
+
+  - host: 127.0.0.1
+    port: 4001
+    status_port: 10081
+    numa_node: "0"
+
+  - host: 127.0.0.1
+    port: 4002
+    status_port: 10082
+    numa_node: "0"
+
+pd_servers:
+  - host: 127.0.0.1
+    client_port: 2379
+    peer_port: 2380
+
+  - host: 127.0.0.1
+    client_port: 2381
+    peer_port: 2382
+
+  - host: 127.0.0.1
+    client_port: 2383
+    peer_port: 2384
+
+tikv_servers:
+  - host: 127.0.0.1
+    port: 20160
+    status_port: 20180
+    numa_node: "1"
+    config:
+      server.labels: { host: "tikv-01" }
+
+  - host: 127.0.0.1
+    port: 20161
+    status_port: 20181
+    numa_node: "1"
+    config:
+      server.labels: { host: "tikv-02" }
+
+  - host: 127.0.0.1
+    port: 20162
+    status_port: 20182
+    numa_node: "1"
+    config:
+      server.labels: { host: "tikv-03" }
+
+tiflash_servers:
+  - host: 127.0.0.1
+
+monitoring_servers:
+  - host: 127.0.0.1
+    port: 9090
+
+grafana_servers:
+  - host: 127.0.0.1
+    port: 3000
+

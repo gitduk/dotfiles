@@ -1,0 +1,14 @@
+[Unit]
+Description = MyIP Service
+After = network.target syslog.target
+Wants = network.target
+
+[Service]
+Type = simple
+ExecStart = %h/.sh/myip.sh
+Restart = always
+RestartSec = 5s
+
+[Install]
+WantedBy = default.target
+

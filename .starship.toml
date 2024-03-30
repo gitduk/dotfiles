@@ -4,10 +4,29 @@
 # Inserts a blank line between shell prompts
 add_newline = false
 
+# Use custom format
+format = """$os$all$line_break$character"""
+
+right_format = """$time"""
+
+# ###  modules  ###############################################################
+
 [character]
 success_symbol = "[➜](green)"
 error_symbol = "[➜](red)"
 vimcmd_symbol = "[](green)"
+
+[directory]
+truncation_length = 3
+truncation_symbol = '…/'
+read_only = " ro"
+style = "bold blue"
+
+# [directory.substitutions]
+# "Documents" = "󰈙 "
+# "Downloads" = " "
+# "Music" = " "
+# "Pictures" = " "
 
 [git_commit]
 tag_symbol = " tag "
@@ -18,6 +37,42 @@ behind = "<"
 diverged = "<>"
 renamed = "r"
 deleted = "x"
+
+[hostname]
+ssh_only = true
+ssh_symbol = " "
+
+[time]
+disabled = false
+time_format = "%H:%M:%S"
+style = "fg:#5c6370"
+format = '[$time]($style)'
+ 
+[os]
+disabled = true
+style = "bold white"
+format = '[$symbol ]($style)'
+
+[os.symbols]
+Windows = "󰍲"
+Ubuntu = "󰕈"
+SUSE = ""
+Raspbian = "󰐿"
+Mint = "󰣭"
+Macos = "󰀵"
+Manjaro = ""
+Linux = "󰌽"
+Gentoo = "󰣨"
+Fedora = "󰣛"
+Alpine = ""
+Amazon = ""
+Android = ""
+Arch = "󰣇"
+Artix = "󰣇"
+CentOS = ""
+Debian = "󰣚"
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
 
 [aws]
 symbol = "aws "
@@ -54,14 +109,6 @@ symbol = "deno "
 
 [dotnet]
 symbol = ".NET "
-
-[directory]
-truncation_length = 3
-truncate_to_repo = true
-truncation_symbol = "…/"
-read_only = " ro"
-style = "blue"
-format = "[$path]($style)[$read_only]($read_only_style) "
 
 [docker_context]
 symbol = "docker "
@@ -110,9 +157,6 @@ symbol = "lua "
 
 [nodejs]
 symbol = "nodejs "
-detect_extensions = ['js', 'mjs', 'cjs', 'ts', 'mts', 'cts']
-detect_files = ['package.json', '.node-version']
-detect_folders = ['node_modules']
 
 [memory_usage]
 symbol = "memory "
@@ -131,49 +175,6 @@ symbol = "ml "
 
 [opa]
 symbol = "opa "
-
-[os.symbols]
-Alpaquita = "alq "
-Alpine = "alp "
-Amazon = "amz "
-Android = "andr "
-Arch = "rch "
-Artix = "atx "
-CentOS = "cent "
-Debian = "deb "
-DragonFly = "dfbsd "
-Emscripten = "emsc "
-EndeavourOS = "ndev "
-Fedora = "fed "
-FreeBSD = "fbsd "
-Garuda = "garu "
-Gentoo = "gent "
-HardenedBSD = "hbsd "
-Illumos = "lum "
-Linux = "lnx "
-Mabox = "mbox "
-Macos = "mac "
-Manjaro = "mjo "
-Mariner = "mrn "
-MidnightBSD = "mid "
-Mint = "mint "
-NetBSD = "nbsd "
-NixOS = "nix "
-OpenBSD = "obsd "
-OpenCloudOS = "ocos "
-openEuler = "oeul "
-openSUSE = "osuse "
-OracleLinux = "orac "
-Pop = "pop "
-Raspbian = "rasp "
-Redhat = "rhl "
-RedHatEnterprise = "rhel "
-Redox = "redox "
-Solus = "sol "
-SUSE = "suse "
-Ubuntu = "ubnt "
-Unknown = "unk "
-Windows = "win "
 
 [package]
 symbol = "pkg "
@@ -196,6 +197,9 @@ symbol = "purs "
 [python]
 symbol = "py "
 
+[quarto]
+symbol = "quarto "
+
 [raku]
 symbol = "raku "
 
@@ -215,7 +219,7 @@ symbol = "spack "
 symbol = "solidity "
 
 [status]
-symbol = "[x](red) "
+symbol = "[x](bold red) "
 
 [sudo]
 symbol = "sudo "
@@ -223,19 +227,12 @@ symbol = "sudo "
 [swift]
 symbol = "swift "
 
+[typst]
+symbol = "typst "
+
 [terraform]
 symbol = "terraform "
 
 [zig]
 symbol = "zig "
-
-[hostname]
-ssh_only = true
-ssh_symbol = " "
-
-[custom.proxy]
-disabled = true
-command = 'echo $http_proxy | cut -d ":" -f3 ' # shows output of command
-when = ''' test "$http_proxy" '''
-format = 'via [:$output](green) '
 

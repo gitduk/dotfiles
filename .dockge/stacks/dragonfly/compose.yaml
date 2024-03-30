@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+  dragonfly:
+    network_mode: host
+    ulimits:
+      memlock: -1
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    restart: unless-stopped
+    extra_hosts:
+      - host.docker.internal:host-gateway
+networks: {}

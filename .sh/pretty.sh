@@ -72,16 +72,26 @@ warn() { printf "$(fmt n yellow)%s${reset} %s\n" "⚠" "$(picker "$@")" }
 error() { printf "$(fmt n red)%s${reset} %s\n" "✘" "$(picker "$@")" }
 
 function cmdi {
-  command_string="$(picker "$@")"
+  local command_string="$(picker "$@")"
   printf "$(fmt n yellow)%s${reset} %s\n" "♯" "$command_string"
   sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" <<< "$command_string" | bash
 }
 
 function bar {
-  string="$(picker "${@}")"
-  [[ "$1" == "-" ]] && char="$2" && string="$(picker "${@:3}")"
-  line_size=$(( $(tput cols) / 2 - ${#string} ))
-  half_line="$(printf -- "${char:-#}%.0s" {1..$line_size})"
-  echo -n "$(fmt n blue)# ### $string $half_line${reset}\n"
+  local char="#"
+  local string="$(picker "${@}")"
+  local width=$(tput cols)
+  if [[ "$1" == "-c" ]];then
+    char="$2"
+    string="$(picker "${@:3}")"
+  fi
+  left_size=$(( ($width - ${#string} - 1) / 2 ))
+  right_size=$left_size
+  if [[ $(( ($width - ${#string}) % 2 )) -eq 1 ]]; then
+    right_size=$(( $left_size - 1 ))
+  fi
+  left_line="$(printf -- "${char}%.0s" {1..$left_size})"
+  right_line="$(printf -- "${char}%.0s" {1..$right_size})"
+  echo -n "$(fmt n blue)$left_line $string $right_line${reset}\n"
 }
 

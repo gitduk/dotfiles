@@ -27,12 +27,13 @@ setopt PROMPTSUBST
 
 # custom path
 export ZPFX="$HOME/.local"
-export ZLOAD="$HOME/.autoload"
-export ZCOMP="$HOME/.completions"
-export ZPLUG="$HOME/.plugins"
+export ZDIR="$HOME/.config/zsh"
+export ZLOAD="$ZDIR/autoload"
+export ZCOMP="$ZDIR/completions"
+export ZPLUG="$ZDIR/plugins"
 
 # set fpath
-fpath+=("$ZLOAD" "$ZCOMP" "$ZPLUG")
+fpath+=($ZLOAD $ZCOMP $ZPLUG)
 
 # enable hidden files completion
 _comp_options+=(globdots)
@@ -53,9 +54,6 @@ zmodload zsh/complist
 # set bindkey mode to vi
 bindkey -v
 
-# zstyle
-source $HOME/.zstyle.zsh
-
 # set proxy
 export http_proxy="http://127.0.0.1:7890"
 export https_proxy="http://127.0.0.1:7890"
@@ -63,20 +61,21 @@ export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
 # ###  Autoload  ##############################################################
 
-ls "$HOME/.autoload" | while read -r file; do
-  autoload -Uz $file
-done
+# autoload
+if [[ -d "$ZLOAD" ]]; then
+  files=("$ZLOAD"/*(N))
+  for file in "${files[@]}"; do
+    autoload -Uz $file
+  done
+fi
 
-# ###  Snippet  ###############################################################
-
-# widgets
-source $HOME/.widgets.zsh
-
-# alias
-source $HOME/.alias.zsh
-
-# plugins
-source $HOME/.plugin.zsh
+# source
+if [[ -d "$ZDIR" ]]; then
+  files=("$ZDIR"/*.zsh(N))
+  for file in "${files[@]}"; do
+    source "$file"
+  done
+fi
 
 # ###  Brew  ##################################################################
 
@@ -89,15 +88,12 @@ export HOMEBREW_NO_AUTO_UPDATE=true             # 关闭自动更新
 export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))  # 自动更新间隔时间
 
 # brew installer
-if ! hash brew &> /dev/null; then
-  sudo apt install -y libbz2-dev libcurl4-openssl-dev libexpat-dev libncurses-dev zlib1g-dev
-  git clone --depth=1 "https://github.com/Homebrew/brew" $HOME/.linuxbrew
-fi
+hash brew &> /dev/null || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
 
 # ###  Npm  ###################################################################
 
 # installer
-hash npm &> /dev/null || sudo apt install -y npm
+hash npm &> /dev/null || curl -qL https://www.npmjs.com/install.sh | sh
 
 # ###  Golang  ################################################################
 
@@ -128,23 +124,14 @@ export RUSTC_WRAPPER="$HOMEBREW_PREFIX/bin/sccache"
 # rustup installer
 hash rustup &> /dev/null || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# ###  Custom  ################################################################
-
-source $HOME/.custom.zsh
-
-# ###  Keybind  ###############################################################
-
-source $HOME/.keybind.zsh
-
 # ###  Starship  ##############################################################
 
 # starship: shell prompts
 export STARSHIP_CONFIG=~/.starship.toml
-eval "$(starship init zsh)"
+hash starship 2>/dev/null && eval "$(starship init zsh)"
 
 # ###  Zprof  #################################################################
 # you need add `zmodload zsh/zprof` to the top of .zshrc file
 # echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 # zprof | head -n 20; zmodload -u zsh/zprof
 
-. "$HOME/.cargo/env"

@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-
-if hash lsd 2>/dev/null; then
-  lsd "$@"
-else
-  builtin ls "$@"
-fi
-

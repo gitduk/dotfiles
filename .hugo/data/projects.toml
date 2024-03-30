@@ -2,3 +2,9 @@
 name = "clash-rules"
 url = "https://github.com/gitduk/clash-rules"
 desc = "生成适用于 subconverter 外部配置 ruleset 字段的规则文件。"
+
+[[list]]
+name = "hexo-theme-cactus"
+url = "https://github.com/gitduk/hexo-theme-cactus"
+desc = "本博客的主题，基于 probberechts/hexo-theme-cactus 修改。"
+

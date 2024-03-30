@@ -2,28 +2,44 @@
 
 # ###  Desktop Manager  #######################################################
 
+# hyprland v0.36.0
 if ! hash hyprland; then
-  # xdg-desktop-portal-hyprland
-  git clone --depth 1 "https://github.com/Kistler-Group/sdbus-cpp.git"
-  cd sdbus-cpp/
+  # wayland-1.22.0
+  sudo nala install -y doxygen xmlto
+  cd /tmp/
+  aria2c -c "https://gitlab.freedesktop.org/wayland/wayland/-/releases/1.22.0/downloads/wayland-1.22.0.tar.xz"
+  tar -xf wayland-1.22.0.tar.xz && cd wayland-1.22.0/
   mkdir build && cd build
-  cmake .. -DCMAKE_BUILD_TYPE=Release ${OTHER_CONFIG_FLAGS}
-  cmake --build . && sudo cmake --build . --target install
-  cd .../
-  
-  git clone --depth 1 "https://github.com/hyprwm/hyprland-protocols.git"
-  cd hyprland-protocols/
-  meson setup build --prefix=/usr && ninja -C build && sudo ninja -C build install
-  cd ..
-  
-  sudo nala install -y libpipewire-0.3-dev libinih-dev \
-    librust-wayland-protocols-dev librust-wayland-client-dev
-  git clone --recursive "https://github.com/hyprwm/xdg-desktop-portal-hyprland.git"
-  cd xdg-desktop-portal-hyprland/
-  cmake -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib -DCMAKE_INSTALL_PREFIX=/usr -B build
-  cmake --build build
-  sudo cmake --install build
-  
+  meson setup .. --prefix=/usr --buildtype=release -Ddocumentation=false && ninja && sudo ninja install
+
+  # wayland-protocols-1.33
+  cd /tmp/
+  aria2c -c "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.33/downloads/wayland-protocols-1.33.tar.xz"
+  tar -xf wayland-protocols-1.33.tar.xz && cd wayland-protocols-1.33/
+  mkdir build && cd build
+  meson setup --prefix=/usr --buildtype=release && ninja && sudo ninja install
+
+  # xdg-desktop-portal-hyprland
+  # cd /tmp/
+  # git clone --depth 1 "https://github.com/Kistler-Group/sdbus-cpp.git"
+  # cd sdbus-cpp/
+  # mkdir build && cd build
+  # cmake .. -DCMAKE_BUILD_TYPE=Release ${OTHER_CONFIG_FLAGS}
+  # cmake --build . && sudo cmake --build . --target install
+
+  # cd /tmp/
+  # git clone --depth 1 "https://github.com/hyprwm/hyprland-protocols.git"
+  # cd hyprland-protocols/
+  # meson setup build --prefix=/usr && ninja -C build && sudo ninja -C build install
+
+  # sudo nala install -y libpipewire-0.3-dev libinih-dev librust-wayland-protocols-dev librust-wayland-client-dev
+  # cd /tmp/
+  # git clone --recursive "https://github.com/hyprwm/xdg-desktop-portal-hyprland.git"
+  # cd xdg-desktop-portal-hyprland/
+  # cmake -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib -DCMAKE_INSTALL_PREFIX=/usr -B build
+  # cmake --build build
+  # sudo cmake --install build
+
   # Hyprland
   sudo nala install -y build-essential cmake cmake-extras fontconfig \
     g++-11 gcc-11 gettext gettext-base glslang-tools grim
@@ -40,17 +56,23 @@ if ! hash hyprland; then
     vulkan-validationlayers-dev wget xcb xdg-desktop-portal-wlr xwayland
   meson wrap install tomlplusplus
   sudo nala remove libdrm-dev
+
   cd /tmp
   tar -xvf $HOME/.static/libdrm-2.4.120.tar.xz -C /tmp
   cd libdrm-2.4.120 && meson build/ && ninja -C build && sudo ninja -C build install
-  cd .. && git clone https://github.com/marzer/tomlplusplus.git
+
+  cd /tmp/
+  git clone https://github.com/marzer/tomlplusplus.git
   [[ -e "/usr/include/toml++" ]] && sudo mv /usr/include/toml++ /usr/include/toml++.bak
   sudo mv /tmp/tomlplusplus/include/toml++ /usr/include/
+
+  cd /tmp/
   git clone --depth 1 https://github.com/hyprwm/hyprlang.git
   cd hyprlang/
   cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
   cmake --build ./build --config Release --target hyprlang -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF`
-  cd ..
+
+  cd /tmp/
   git clone --recursive https://github.com/hyprwm/Hyprland
   cd Hyprland && make all && sudo make install
 fi
@@ -98,7 +120,7 @@ if ! hash rime_dict_manager &>/dev/null; then
 fi
 
 # switchhosts
-f.sh -b "oldj/SwitchHosts" "SwitchHosts_linux_x86_64.*.AppImage" -n "switchhosts"
+f.sh -m "binary" "oldj/SwitchHosts" "SwitchHosts_linux_x86_64.*.AppImage" -n "switchhosts"
 
 # google-chrome
 if ! hash google-chrome &>/dev/null; then
@@ -107,16 +129,16 @@ if ! hash google-chrome &>/dev/null; then
 fi
 
 # weixin
-if ! hash weixin &>/dev/null; then
-  aria2c -c "http://archive.ubuntukylin.com/software/pool/partner/weixin_2.1.4_amd64.deb" -d "/tmp"
-  sudo dpkg -i /tmp/weixin_2.1.4_amd64.deb
-fi
+# if ! hash weixin &>/dev/null; then
+#   aria2c -c "http://archive.ubuntukylin.com/software/pool/partner/weixin_2.1.4_amd64.deb" -d "/tmp"
+#   sudo dpkg -i /tmp/weixin_2.1.4_amd64.deb
+# fi
 
 # redis manager
-f.sh -d "tiny-craft/tiny-rdm" "tiny-rdm_.*_linux_amd64.deb"
+f.sh -m "deb" "tiny-craft/tiny-rdm" "tiny-rdm_.*_linux_amd64.deb"
 
 # localsend
-f.sh -b "localsend/localsend" "LocalSend-.*-linux-x86-64.AppImage" -n "localsend"
+f.sh -m "binary" "localsend/localsend" "LocalSend-.*-linux-x86-64.AppImage" -n "localsend"
 
 # db manager
 if ! hash dataflare &>/dev/null; then
@@ -124,4 +146,13 @@ if ! hash dataflare &>/dev/null; then
   sudo chmod 744 "$ZPFX/bin/Dataflare.AppImage"
   mv "$ZPFX/bin/Dataflare.AppImage" "$ZPFX/bin/dataflare"
 fi
+
+# spacedrive
+f.sh -m "deb" "spacedriveapp/spacedrive" "Spacedrive-linux-x86_64.deb"
+
+# bruno:  exploring and testing APIs.
+f.sh -m "deb" "usebruno/bruno" "bruno_.*_amd64_linux.deb"
+
+# obsidian
+f.sh -m "deb" "obsidianmd/obsidian-releases" "obsidian_.*_amd64.deb"
 

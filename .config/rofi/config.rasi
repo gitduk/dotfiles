@@ -144,7 +144,7 @@ configuration {
   /* === options === */
   font:                       "MesloLGS NF 9";
   modi:                       [drun,run,ssh];
-	sidebar-mode: 					    false;
+	sidebar-mode:               false;
   drun-show-actions:          true;
   drun-match-fields:          "name,generic,exec,categories,keywords";
   normalize-match:            true;
@@ -153,15 +153,15 @@ configuration {
   matching:                   "normal";  /* normal, regex, glob, fuzzy, prefix */
   drun-match-fields:          "all";
   drun-show-actions:          false;
-  sort:                       true;
   auto-select:                false;
   hover-select:               false;
-  fixed-num-lines: 				    true;
+  fixed-num-lines:            true;
+  case-sensitive:             false;
+  sort:                       true;
   me-select-entry:            "";
   location:                   0;
   me-accept-entry:            "MousePrimary";
   pid:                        "/run/user/1000/rofi.pid";
-  case-sensitive:             false;
 
   /* === format  === */
   window-format:              "{icon} {c} {w}: {t}";
@@ -208,4 +208,3 @@ configuration {
   }
 }
 
-@theme "squared-nord"

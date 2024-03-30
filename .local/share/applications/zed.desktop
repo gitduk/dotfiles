@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Zed
+Comment=A lightweight and extensible text editor
+Exec=zed %F
+Terminal=false
+Type=Application
+Icon=zed
+StartupWMClass=zed
+Categories=Utility;TextEditor;
+StartupNotify=true
+MimeType=text/plain;
+

@@ -50,6 +50,9 @@ export XCURSOR_THEME=Vimix
 # Skip the not really helping Ubuntu global compinit
 export skip_global_compinit=1
 
+# tmux
+export TMUX_DIR=$HOME/.config/tmux
+
 # ###  Hyprland  ##############################################################
 
 export MOZ_ENABLE_WAYLAND=1
@@ -134,5 +137,43 @@ addPath "$HOME/.f.sh"
 # ###  Function  ##############################################################
 
 # pretty.sh
-source $HOME/.sh/pretty.sh
+[[ -e "$HOME/.sh/pretty.sh" ]] && source $HOME/.sh/pretty.sh
+
+# blank aliases
+typeset -a baliases
+baliases=()
+function balias {
+  alias $@
+  args="$@"
+  args=${args%%\=*}
+  baliases+=(${args##* })
+}
+
+# ignored aliases
+typeset -a ialiases
+ialiases=()
+
+function ialias {
+  alias $@
+  args="$@"
+  args=${args%%\=*}
+  ialiases+=(${args##* })
+}
+
+# functionality
+function expand-alias-space {
+  [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
+  if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
+    zle _expand_alias
+  fi
+  zle self-insert
+  if [[ "$insertBlank" = "0" ]]; then
+    zle backward-delete-char
+  fi
+}
+
+function backward-delete-word {
+  local WORDCHARS='*?_[]~=&;!#$%^(){}<>'
+  zle backward-kill-word
+}
 

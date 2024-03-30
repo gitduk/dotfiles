@@ -1,15 +1,16 @@
 version: "3.3"
-
-# default port: 3001
 services:
   uptime-kuma:
     container_name: uptime-kuma
     environment:
-      - HTTP_PROXY=http://127.0.0.1:7890
-      - HTTPS_PROXY=http://127.0.0.1:7890
+      - HTTP_PROXY=http://host.docker.internal:7890
+      - HTTPS_PROXY=http://host.docker.internal:7890
     volumes:
-      - $HOME/.uptime-kuma:/app/data
-    network_mode: host
+      - /home/wukaige/.uptime-kuma:/app/data
+    ports:
+      - 3001:3001
     restart: unless-stopped
     image: louislam/uptime-kuma:1
+    extra_hosts:
+      - host.docker.internal:host-gateway
 networks: {}

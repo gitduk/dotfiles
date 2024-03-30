@@ -1,0 +1,72 @@
+{
+  "theme": "One Dark",
+  "autosave": "on_focus_change",
+  "buffer_font_size": 14,
+  "buffer_font_family": "MesloLGM Nerd Font",
+  "format_on_save": "on",
+  "vim_mode": true,
+  "preferred_line_length": 80,
+
+  // disable cursor blink
+  "cursor_blink": true,
+
+  // use relative line numbers
+  "relative_line_numbers": true,
+
+  // hide the scroll bar
+  // "scrollbar": { "show": "never" },
+
+  // allow cursor to reach edges of screen
+  "vertical_scroll_margin": 0,
+  "gutter": {
+    // disable line numbers completely:
+    "line_numbers": true
+  },
+
+  "vim": {
+    // "always": use system clipboard
+    // "never": don't use system clipboard
+    // "on_yank": use system clipboard for yank operations
+    "use_system_clipboard": "always",
+    // Lets `f` and `t` motions extend across multiple lines
+    "use_multiline_find": true
+  },
+
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "inlayHints": {
+          "maxLength": null,
+          "lifetimeElisionHints": {
+            "useParameterNames": true,
+            "enable": "skip_trivial"
+          },
+          "closureReturnTypeHints": {
+            "enable": "always"
+          }
+        }
+      }
+    },
+
+    "typescript-language-server": {
+      "initialization_options": {
+        "preferences": {
+          "includeInlayParameterNameHints": "all",
+          "includeInlayParameterNameHintsWhenArgumentMatchesName": true,
+          "includeInlayFunctionParameterTypeHints": true,
+          "includeInlayVariableTypeHints": true,
+          "includeInlayVariableTypeHintsWhenTypeMatchesName": false,
+          "includeInlayPropertyDeclarationTypeHints": true,
+          "includeInlayFunctionLikeReturnTypeHints": true,
+          "includeInlayEnumMemberValueHints": true
+        }
+      }
+    }
+  },
+
+  "language_overrides": {
+    "JSON": {
+      "tab_size": 2
+    }
+  }
+}
