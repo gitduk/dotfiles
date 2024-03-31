@@ -37,7 +37,7 @@ for plugin in "${plugins[@]}"; do
   user="${plugin%%/*}"
   plugin="${plugin##*/}"
   if [[ -d "$ZPLUG/$plugin" ]]; then
-    source "$ZPLUG/$plugin/$plugin.plugin.zsh"
+    [[ -e "$ZPLUG/$plugin/$plugin.plugin.zsh" ]] && source "$ZPLUG/$plugin/$plugin.plugin.zsh"
     [[ -f "$ZPLUG/$plugin.custom.zsh" ]] && source "$ZPLUG/$plugin.custom.zsh"
   else
     git clone --depth=1 "https://github.com/$user/$plugin.git" "$ZPLUG/$plugin"

@@ -73,7 +73,7 @@ hash zoxide &>/dev/null && eval "$(zoxide init zsh --cmd j)"
 # unset __conda_setup
 
 # Load Angular CLI autocompletion.
-source <(ng completion script)
+hash ng &>/dev/null && source <(ng completion script)
 
 # ###  Token  #################################################################
 
