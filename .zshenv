@@ -51,7 +51,7 @@ export XCURSOR_THEME=Vimix
 export skip_global_compinit=1
 
 # tmux
-export TMUX_DIR=$HOME/.config/tmux
+export TMUX_DIR=$HOME/.tmux.d
 
 # ###  Hyprland  ##############################################################
 

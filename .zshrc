@@ -27,10 +27,10 @@ setopt PROMPTSUBST
 
 # custom path
 export ZPFX="$HOME/.local"
-export ZDIR="$HOME/.config/zsh"
+export ZDIR="$HOME/.zsh.d"
 export ZLOAD="$ZDIR/autoload"
 export ZCOMP="$ZDIR/completions"
-export ZPLUG="$ZDIR/plugins"
+export ZPLUG="$HOME/.plugins/zsh"
 
 # set fpath
 fpath+=($ZLOAD $ZCOMP $ZPLUG)
