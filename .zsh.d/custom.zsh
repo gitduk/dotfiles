@@ -7,7 +7,7 @@
 export ROFITHEMES=$HOME/.config/rofi/themes
 
 # navi
-export NAVI_PATH=$HOME/.cheats
+export NAVI_PATH=$HOME/.config/navi/cheats
 export NAVI_CONFIG=$HOME/.config/navi/config.yaml
 
 # tmuxp

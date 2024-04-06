@@ -19,8 +19,7 @@ finder:
 
 cheats:
   paths:
-    - $HOME/.cheats/
-    # - $HOME/.local/share/navi/cheats/
+    - $HOME/.local/share/navi/cheats/
     # - /path/to/another/dir
 
 # search:

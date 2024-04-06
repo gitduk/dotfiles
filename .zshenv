@@ -50,8 +50,14 @@ export XCURSOR_THEME=Vimix
 # Skip the not really helping Ubuntu global compinit
 export skip_global_compinit=1
 
+# zsh
+export ZSH_DIR=$HOME/.zsh.d
+
 # tmux
 export TMUX_DIR=$HOME/.tmux.d
+
+# plugin root dir
+export PLUGIN_DIR=$HOME/.plugin.d
 
 # ###  Hyprland  ##############################################################
 
@@ -80,7 +86,7 @@ function addPath {
 # sh
 addPath "/usr/sbin"
 addPath "$HOME/.local/bin"
-addPath "$HOME/.sh"
+addPath "$HOME/.sh.d"
 
 # brew
 export HOMEBREW_PREFIX="$HOME/.linuxbrew";

@@ -27,10 +27,9 @@ setopt PROMPTSUBST
 
 # custom path
 export ZPFX="$HOME/.local"
-export ZDIR="$HOME/.zsh.d"
-export ZLOAD="$ZDIR/autoload"
-export ZCOMP="$ZDIR/completions"
-export ZPLUG="$HOME/.plugins/zsh"
+export ZLOAD="$ZSH_DIR/autoload"
+export ZCOMP="$ZSH_DIR/completions"
+export ZPLUG="$PLUGIN_DIR/zsh"
 
 # set fpath
 fpath+=($ZLOAD $ZCOMP $ZPLUG)
@@ -70,8 +69,8 @@ if [[ -d "$ZLOAD" ]]; then
 fi
 
 # source
-if [[ -d "$ZDIR" ]]; then
-  files=("$ZDIR"/*.zsh(N))
+if [[ -d "$ZSH_DIR" ]]; then
+  files=("$ZSH_DIR"/*.zsh(N))
   for file in "${files[@]}"; do
     source "$file"
   done
