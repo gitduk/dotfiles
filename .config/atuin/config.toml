@@ -55,8 +55,8 @@ history_filter = [
 filter_mode = "directory"
 
 # put the search bar at the top
-invert = true
+invert = false
 
 # Set the maximum number of lines Atuin’s interface should take up
-inline_height = 30
+# inline_height = 30
 

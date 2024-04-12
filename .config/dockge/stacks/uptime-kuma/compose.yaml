@@ -6,7 +6,7 @@ services:
       - HTTP_PROXY=http://host.docker.internal:7890
       - HTTPS_PROXY=http://host.docker.internal:7890
     volumes:
-      - /home/wukaige/.uptime-kuma:/app/data
+      - /home/wukaige/.docker/uptime-kuma:/app/data
     ports:
       - 3001:3001
     restart: unless-stopped

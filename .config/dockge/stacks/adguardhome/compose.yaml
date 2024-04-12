@@ -1,0 +1,17 @@
+version: "3.3"
+services:
+  adguardhome:
+    container_name: adguardhome
+    restart: unless-stopped
+    volumes:
+      - /home/wukaige/.docker/adguardhome/workdir:/opt/adguardhome/work
+      - /home/wukaige/.docker/adguardhome/confdir:/opt/adguardhome/conf
+    ports:
+      - 1053:53/tcp
+      - 1053:53/udp
+      - 8000:80/tcp
+      - 443:443/tcp
+      - 443:443/udp
+      - 3010:3000/tcp
+    image: adguard/adguardhome
+networks: {}

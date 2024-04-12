@@ -65,11 +65,35 @@ yellow() { printf "$(fmt n yellow)%s${reset}" "$(picker "$@")" }
 blue() { printf "$(fmt n blue)%s${reset}" "$(picker "$@")" }
 underline() { printf "$(fmt u white)%s${reset}" "$(picker "$@")" }
 
-debug() { printf "$(fmt n yellow)%s${reset} %s\n" "󰨰" "$(picker "$@")" }
-ok() { printf "$(fmt n green)%s${reset} %s\n" "✔" "$(picker "$@")" }
-info() { printf "$(fmt n blue)%s${reset} %s\n" "➭" "$(picker "$@")" }
-warn() { printf "$(fmt n yellow)%s${reset} %s\n" "⚠" "$(picker "$@")" }
-error() { printf "$(fmt n red)%s${reset} %s\n" "✘" "$(picker "$@")" }
+debug() {
+  local input
+  [[ -p /dev/stdin ]] && input=$(cat -) || input="$*"
+  printf "$(fmt n yellow)%s${reset} %s\n" "󰨰" "$(picker "$input")"
+}
+
+ok() {
+  local input
+  [[ -p /dev/stdin ]] && input=$(cat -) || input="$*"
+  printf "$(fmt n green)%s${reset} %s\n" "✔" "$(picker "$input")"
+}
+
+info() {
+  local input
+  [[ -p /dev/stdin ]] && input=$(cat -) || input="$*"
+  printf "$(fmt n blue)%s${reset} %s\\n" "➭" "$(picker "$input")"
+}
+
+warn() {
+  local input
+  [[ -p /dev/stdin ]] && input=$(cat -) || input="$*"
+  printf "$(fmt n yellow)%s${reset} %s\n" "⚠" "$(picker "$@")"
+}
+
+error() {
+  local input
+  [[ -p /dev/stdin ]] && input=$(cat -) || input="$*"
+  printf "$(fmt n red)%s${reset} %s\n" "✘" "$(picker "$@")"
+}
 
 function cmdi {
   local command_string="$(picker "$@")"

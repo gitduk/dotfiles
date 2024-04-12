@@ -4,6 +4,29 @@
 # start=$(date +%s.%N)
 # zmodload zsh/zprof
 
+# completion
+# 加载 compinit 函数,但不执行
+autoload -Uz compinit
+
+# 设置补全转储文件路径
+zstyle ':completion::complete:*' use-cache 1
+
+ZCOMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump-$ZSH_VERSION"
+zstyle ':completion::complete:*' cache-path "$ZCOMPDUMP"
+
+# 检查补全转储文件是否存在, 如果不存在,则生成新的转储文件, 否则,从现有转储文件加载补全定义
+if [[ -f "$ZCOMPDUMP" ]]; then
+  compinit -i -d "$ZCOMPDUMP"
+else
+  compinit -C -d "$ZCOMPDUMP"
+fi
+
+# 加载所有新的未加载的补全定义
+compinit -u
+
+# 加载控制补全列表显示的模块
+zmodload zsh/complist
+
 # zsh opts
 setopt AUTOCD                 # 免输入cd进入目录
 setopt AUTO_PUSHD             # Push the current directory visited on the stack.
@@ -39,16 +62,6 @@ _comp_options+=(globdots)
 
 # xhost access control
 xhost +local: &>/dev/null
-
-# completion
-ZCOMPDUMP_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump-${ZSH_VERSION}"
-if [[ ! -e "$ZCOMPDUMP_FILE" ]]; then
-  autoload -Uz compinit -C -d "$ZCOMPDUMP_FILE"
-else
-  autoload -Uz compinit -d "$ZCOMPDUMP_FILE"
-fi
-compinit -u
-zmodload zsh/complist
 
 # set bindkey mode to vi
 bindkey -v
@@ -131,6 +144,6 @@ hash starship 2>/dev/null && eval "$(starship init zsh)"
 
 # ###  Zprof  #################################################################
 # you need add `zmodload zsh/zprof` to the top of .zshrc file
-# echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 # zprof | head -n 20; zmodload -u zsh/zprof
+# echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 

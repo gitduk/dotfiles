@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+  linux-command:
+    container_name: linux-command
+    stdin_open: true
+    tty: true
+    ports:
+      - 9665:3000
+    restart: unless-stopped
+    image: wcjiang/linux-command:latest
+networks: {}

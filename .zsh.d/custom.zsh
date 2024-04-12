@@ -1,5 +1,17 @@
 # ###  Config  ################################################################
 
+# cadd list
+AUTOADD_DIRS=(
+  "$HOME/.sh.d/"
+  "$HOME/.zsh.d/"
+  "$HOME/.etc.d/"
+  "$HOME/.tmux.d/"
+  "$HOME/.config/dockge/"
+  "$HOME/.config/nvim/"
+  "$HOME/.docker/homepage/"
+  "$HOME/static/"
+)
+
 # Xresources
 [[ -f "$HOME/.Xresources" ]] && xrdb -merge "$HOME/.Xresources" 2>/dev/null
 

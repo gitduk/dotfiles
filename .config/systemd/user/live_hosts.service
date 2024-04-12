@@ -1,0 +1,14 @@
+[Unit]
+Description = Live Hosts Service
+After = network.target syslog.target
+Wants = network.target
+
+[Service]
+Type = simple
+ExecStart = %h/.tmux.d/scripts/live_hosts.sh
+Restart = always
+RestartSec = 5s
+
+[Install]
+WantedBy = default.target
+

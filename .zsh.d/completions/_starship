@@ -110,7 +110,7 @@ _arguments "${_arguments_options[@]}" \
 '--list[List out all preset names]' \
 '-h[Print help]' \
 '--help[Print help]' \
-'::name -- The name of preset to be printed:(bracketed-segments plain-text-symbols pure-preset no-nerd-font tokyo-night nerd-font-symbols pastel-powerline no-runtime-versions no-empty-icons)' \
+'::name -- The name of preset to be printed:(bracketed-segments gruvbox-rainbow jetpack nerd-font-symbols no-empty-icons no-nerd-font no-runtime-versions pastel-powerline plain-text-symbols pure-preset tokyo-night)' \
 && ret=0
 ;;
 (print-config)

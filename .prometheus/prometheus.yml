@@ -36,3 +36,11 @@ scrape_configs:
     static_configs:
       - targets: ["host.docker.internal:6379"]
 
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ["192.168.70.48:9200"]
+    metrics_path: "/_prometheus/metrics"
+    basic_auth:
+      username: "elastic"
+      password: "40R_i3g*mkICG7EVnqbp"
+

@@ -165,7 +165,7 @@ alias denv="deactivate"
 
 # edit file
 alias ezs="$EDITOR $HOME/.zshrc"
-alias eas="$EDITOR $HOME/.zsh/alias.zsh"
+alias eas="$EDITOR $HOME/.zsh.d/alias.zsh"
 alias exr="$EDITOR $HOME/.Xresources"
 alias ehx="$EDITOR $HOME/.config/helix/config.toml"
 alias eis="$EDITOR $HOME/.init.zsh"

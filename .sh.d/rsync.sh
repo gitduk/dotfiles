@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-source $HOME/.pretty.zsh
-
 source_dir="$HOME/.etc"
 target_dir="/etc"
 

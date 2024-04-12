@@ -83,7 +83,8 @@ if [[ -e "$mode_path" && -x "$mode_path" ]]; then
   export urls=$(
     jq -r '.assets[].browser_download_url' <<<"$latest" 2>/dev/null \
       | grep -Ev ".sha256$" \
-      | grep -Ev ".minisig$"
+      | grep -Ev ".minisig$" \
+      | grep -Ev ".zsync$"
   )
   [[  -z "$urls" ]] && error "no download url found" && exit 1
 

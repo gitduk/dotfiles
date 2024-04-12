@@ -1,15 +1,34 @@
 #!/usr/bin/env zsh
 
+local file_path
+
 # 更改内部字段分隔符为新行，以正确处理带有空格的文件名
 IFS=$'\n'
 git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME status --short | cut -b 2- | grep -v '^ ' | while read -r line; do
+
   stats=${line:0:1}
   # 使用xargs删除行首和行尾的空格
   file_path=$(echo ${line:1} | xargs | awk '{print $NF}')
   if [[ "$stats" = "D" ]]; then
-    git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME rm -- "${file_path}"
-  else
+    git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME rm -- "${file_path}" | info
+  elif [[ "$stats" = "M" ]]; then
     git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME add -- "${file_path}"
+  else
+    warn "unknown status: $stats, file: $file_path"
   fi
+
 done
 unset IFS # 恢复 IFS 到默认值
+
+local dir_path
+
+# autoadd add dir
+for dir_path in "${AUTOADD_DIRS[@]}";do
+  if [[ -d "$dir_path" ]]; then
+    info "autoadd: $dir_path"
+    git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME add "${dir_path}"
+  else
+    warn "$dir_path is not a directory."
+  fi
+done
+

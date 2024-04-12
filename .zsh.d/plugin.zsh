@@ -6,9 +6,9 @@ locals=(
   "dotenv"
 )
 
-for file in "${locals[@]}"; do
-  [[ -f "$ZPLUG/$file.plugin.zsh" ]] && source "$ZPLUG/$file.plugin.zsh"
-  [[ -f "$ZPLUG/$file.custom.zsh" ]] && source "$ZPLUG/$file.custom.zsh"
+for plugin in "${locals[@]}"; do
+  [[ -f "$ZSH_DIR/plugins/$plugin.plugin.zsh" ]] && source "$ZSH_DIR/plugins/$plugin.plugin.zsh"
+  [[ -f "$ZSH_DIR/plugins/$plugin.custom.zsh" ]] && source "$ZSH_DIR/plugins/$plugin.custom.zsh"
 done
 
 # ###  Raw  ###################################################################
@@ -39,6 +39,7 @@ for plugin in "${plugins[@]}"; do
   if [[ -d "$ZPLUG/$plugin" ]]; then
     [[ -e "$ZPLUG/$plugin/$plugin.plugin.zsh" ]] && source "$ZPLUG/$plugin/$plugin.plugin.zsh"
     [[ -f "$ZPLUG/$plugin.custom.zsh" ]] && source "$ZPLUG/$plugin.custom.zsh"
+    [[ -f "$ZSH_DIR/plugins/$plugin.custom.zsh" ]] && source "$ZSH_DIR/plugins/$plugin.custom.zsh"
   else
     git clone --depth=1 "https://github.com/$user/$plugin.git" "$ZPLUG/$plugin"
     [[ $? -eq 0 ]] && source "$ZPLUG/$plugin/$plugin.plugin.zsh" || echo "Failed to clone $user/$plugin"

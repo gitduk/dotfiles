@@ -59,6 +59,9 @@ export TMUX_DIR=$HOME/.tmux.d
 # plugin root dir
 export PLUGIN_DIR=$HOME/.plugin.d
 
+# cache
+export XDG_CACHE_HOME=$HOME/.cache
+
 # ###  Hyprland  ##############################################################
 
 export MOZ_ENABLE_WAYLAND=1
@@ -143,7 +146,7 @@ addPath "$HOME/.f.sh"
 # ###  Function  ##############################################################
 
 # pretty.sh
-[[ -e "$HOME/.sh/pretty.sh" ]] && source $HOME/.sh/pretty.sh
+[[ -e "$HOME/.sh.d/pretty.sh" ]] && source $HOME/.sh.d/pretty.sh
 
 # blank aliases
 typeset -a baliases

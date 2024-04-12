@@ -26,8 +26,6 @@ done
 
 # ###  Main  ##################################################################
 
-source $HOME/.sh/pretty.sh
-
 name="linux.org"
 temp_file="/tmp/dns-speed.list"
 dns_list="$HOME/.dns.list"

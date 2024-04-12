@@ -41,18 +41,29 @@ fi
 
 # one file
 if [[ $(ls $dir |wc -l) -eq 1 ]];then
+
   file=$dir/$(ls $dir)
   if [[ ! -x "$file" ]];then
     cmdi sudo chmod -R 755 $file
   fi
+
   cp -v $file $prefix/$cmd
+  if [[ ! $? -eq 0 ]];then
+    warn "$(yellow cannot copy $file to $prefix, please copy it manually), command:"
+    echo "cp -v $file $prefix/$cmd"
+  fi
+
 else
 
   # multiple files
   count=0
   local filename=""
   find "$dir" -type f -executable | while read -r file; do
-    cp -v $file $prefix/ || warn "$(yellow cannot copy $file to $prefix, please copy it manually)"
+    cp -v $file $prefix/
+    if [[ ! $? -eq 0 ]];then
+      warn "$(yellow cannot copy $file to $prefix, please copy it manually), command:"
+      echo "cp -v $file $prefix/$cmd"
+    fi
     filename=$(basename $file)
     count=$((count+1))
   done
@@ -67,5 +78,6 @@ else
     warn "$(yellow cannot find any executable file in $dir)"
     exit 1
   fi
+
 fi
 

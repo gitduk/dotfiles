@@ -17,6 +17,8 @@ if ! hash nala &>/dev/null; then
     "silversearcher-ag"
     "sqlite3"
     "redshift"
+    "nmap"
+    "inotify-tools"
   )
   for app in "${apps[@]}"; do
     sudo nala install -y $app
@@ -103,6 +105,9 @@ f.sh -m "archive" "ogham/dog" "dog-.*-x86_64-unknown-linux-gnu.zip"
 # lazygit
 f.sh -m "archive" "jesseduffield/lazygit" "lazygit_.*_Linux_x86_64.tar.gz"
 
+# go-musicfox
+f.sh -m "archive" "go-musicfox/go-musicfox" "go-musicfox_.*_linux_amd64.zip" -n "musicfox"
+
 # ###  Binary  ################################################################
 
 # docker-compose
@@ -173,6 +178,9 @@ f.sh -m "deb" "ClementTsang/bottom" "bottom_.*_amd64.deb"
 
 # httpie
 f.sh -m "deb" "ducaale/xh" "xh_.*_amd64.deb"
+
+# dbeaver
+f.sh -m "deb" "dbeaver/dbeaver" "dbeaver-ce_.*_amd64.deb"
 
 # ###  Cargo build  ###########################################################
 

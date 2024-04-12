@@ -5,7 +5,7 @@ Wants = network.target
 
 [Service]
 Type = simple
-ExecStart = %h/.sh/myip.sh
+ExecStart = %h/.tmux.d/scripts/ip_address.sh
 Restart = always
 RestartSec = 5s
 

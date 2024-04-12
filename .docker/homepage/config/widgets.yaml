@@ -1,0 +1,16 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/service-widgets
+
+# - resources:
+#     cpu: true
+#     memory: true
+#     disk: /
+
+- search:
+    # google, duckduckgo, bing, baidu, brave or custom
+    provider: [google, bing, duckduckgo, brave, baidu]
+    focus: true # Optional, will set focus to the search bar on page load
+    showSearchSuggestions: true # Optional, will show search suggestions. Defaults to false
+    target: _blank # One of _self, _blank, _parent or _top
+
