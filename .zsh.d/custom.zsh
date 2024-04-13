@@ -7,7 +7,8 @@ AUTOADD_DIRS=(
   "$HOME/.etc.d/"
   "$HOME/.tmux.d/"
   "$HOME/.config/dockge/"
-  "$HOME/.config/nvim/"
+  "$HOME/.config/nvim/lua/"
+  "$HOME/.config/systemd/user/"
   "$HOME/.docker/homepage/"
   "$HOME/static/"
 )

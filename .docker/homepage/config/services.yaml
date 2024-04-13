@@ -43,6 +43,10 @@
 
 - Docker:
 
+    - Dockge:
+        href: http://localhost:5011
+        description: A fancy, easy-to-use and reactive self-hosted docker compose.yaml stack-oriented manager
+
     - IT-TOOLS:
         href: http://localhost:8081
         description: Collection of handy online tools for developers, with great UX.
@@ -54,12 +58,4 @@
     - linux-command:
         href: http://localhost:9665
         description: Linux命令大全搜索工具，内容包含Linux命令手册、详解、学习、搜集。
-
-    - Dockge:
-        href: http://localhost:5011
-        description: A fancy, easy-to-use and reactive self-hosted docker compose.yaml stack-oriented manager
-
-    - planka:
-        href: http://localhost:1337
-        description: The realtime kanban board for workgroups built with React and Redux.
 
