@@ -1,3 +1,58 @@
+# ###  funtions  ##############################################################
+
+# pretty.sh
+[[ -e "$HOME/.sh.d/pretty.sh" ]] && source $HOME/.sh.d/pretty.sh
+
+# blank aliases
+typeset -a baliases
+baliases=()
+balias() {
+  alias $@
+  args="$@"
+  args=${args%%\=*}
+  baliases+=(${args##* })
+}
+
+# ignored aliases
+typeset -a ialiases
+ialiases=()
+
+ialias() {
+  alias $@
+  args="$@"
+  args=${args%%\=*}
+  ialiases+=(${args##* })
+}
+
+# functionality
+expand-alias-space() {
+  [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
+  if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
+    zle _expand_alias
+  fi
+  zle self-insert
+  if [[ "$insertBlank" = "0" ]]; then
+    zle backward-delete-char
+  fi
+}
+
+backward-delete-worda() {
+  local WORDCHARS='*?_[]~=&;!#$%^(){}<>'
+  zle backward-kill-word
+}
+
+addPath() {
+  local paths="${(@s/:/)1}"
+  for p in ${(s/:/)paths}; do
+    [[ ":$PATH:" != *":$p:"* ]] && export PATH="$p:$PATH"
+  done
+}
+
+has() {
+  local cmd="$1"
+  hash $cmd &>/dev/null
+}
+
 # ###  Pkgconfig  #############################################################
 
 export PKG_CONFIG_PATH="/usr/lib/pkgconfig:\
@@ -36,7 +91,17 @@ export QT_IM_MODULE=fcitx5
 export XMODIFIERS=@im=fcitx5
 
 # editor
-export EDITOR="nvim"
+if has nvim; then
+  export EDITOR="nvim"
+elif has hx; then
+  export EDITOR="hx"
+elif has vim; then
+  export EDITOR="vim"
+else
+  sudo apt install vim
+  export EDITOR="vim"
+fi
+
 export SUDO_EDITOR="$EDITOR"
 export VISUAL="$EDITOR"
 
@@ -79,30 +144,10 @@ export XDG_CURRENT_DESKTOP=wayland
 
 # ###  Path  ##################################################################
 
-function addPath {
-  local paths="${(@s/:/)1}"
-  for p in ${(s/:/)paths}; do
-    [[ ":$PATH:" != *":$p:"* ]] && export PATH="$p:$PATH"
-  done
-}
-
 # sh
 addPath "/usr/sbin"
 addPath "$HOME/.local/bin"
 addPath "$HOME/.sh.d"
-
-# brew
-export HOMEBREW_PREFIX="$HOME/.linuxbrew";
-export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar";
-export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew";
-addPath "$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
-addPath "$HOMEBREW_PREFIX/opt/llvm/bin";
-
-export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH:+:$MANPATH}";
-export INFOPATH="$HOMEBREW_PREFIX/share/info:$INFOPATH";
-
-# npm
-addPath "$HOME/.npm/bin"
 
 # snap
 addPath "/snap/bin"
@@ -113,10 +158,6 @@ export GOPATH="$HOME/go"
 export GOENV="$HOME/go/env"
 addPath "$GOROOT/bin"
 addPath "$GOPATH/bin"
-
-# cargo
-export CARGO_HOME="$HOME/.cargo"
-addPath "$CARGO_HOME/bin"
 
 # sqlserver
 addPath "/opt/mssql-tools/bin"
@@ -142,47 +183,4 @@ addPath "$HOME/anaconda3/bin"
 
 # f.sh
 addPath "$HOME/.f.sh"
-
-# ###  Function  ##############################################################
-
-# pretty.sh
-[[ -e "$HOME/.sh.d/pretty.sh" ]] && source $HOME/.sh.d/pretty.sh
-
-# blank aliases
-typeset -a baliases
-baliases=()
-function balias {
-  alias $@
-  args="$@"
-  args=${args%%\=*}
-  baliases+=(${args##* })
-}
-
-# ignored aliases
-typeset -a ialiases
-ialiases=()
-
-function ialias {
-  alias $@
-  args="$@"
-  args=${args%%\=*}
-  ialiases+=(${args##* })
-}
-
-# functionality
-function expand-alias-space {
-  [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
-  if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
-    zle _expand_alias
-  fi
-  zle self-insert
-  if [[ "$insertBlank" = "0" ]]; then
-    zle backward-delete-char
-  fi
-}
-
-function backward-delete-word {
-  local WORDCHARS='*?_[]~=&;!#$%^(){}<>'
-  zle backward-kill-word
-}
 

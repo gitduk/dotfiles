@@ -5,30 +5,29 @@
 # zmodload zsh/zprof
 
 # completion
-# 加载 compinit 函数,但不执行
+# load compinit, but not execute
 autoload -Uz compinit
 
-# 设置补全转储文件路径
+# set completion cache
 zstyle ':completion::complete:*' use-cache 1
 
+# set cache dir
 ZCOMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump-$ZSH_VERSION"
 zstyle ':completion::complete:*' cache-path "$ZCOMPDUMP"
 
-# 检查补全转储文件是否存在, 如果不存在,则生成新的转储文件, 否则,从现有转储文件加载补全定义
+# load or generation zsh complete cache file
 if [[ -f "$ZCOMPDUMP" ]]; then
   compinit -i -d "$ZCOMPDUMP"
 else
   compinit -C -d "$ZCOMPDUMP"
 fi
-
-# 加载所有新的未加载的补全定义
 compinit -u
 
-# 加载控制补全列表显示的模块
+# load complist
 zmodload zsh/complist
 
 # zsh opts
-setopt AUTOCD                 # 免输入cd进入目录
+setopt AUTOCD                 # enter dir without cd command
 setopt AUTO_PUSHD             # Push the current directory visited on the stack.
 setopt PUSHD_IGNORE_DUPS      # Do not store duplicates in the stack.
 setopt PUSHD_SILENT           # Do not print the directory stack after pushd or popd.
@@ -44,8 +43,8 @@ setopt PATH_DIRS              # Perform path search even on command names with s
 setopt EXTENDED_GLOB          # Needed for file modification glob modifiers with compinit.
 setopt MENU_COMPLETE          # Autoselect the first completion entry.
 setopt FLOW_CONTROL           # Ensable start/stop characters in shell editor.
-setopt HIST_IGNORE_ALL_DUPS   # 移除重复的命令历史
-setopt NONOMATCH              # 设置可以使用通配符
+setopt HIST_IGNORE_ALL_DUPS   # remove dups command
+setopt NONOMATCH              # re mode
 setopt PROMPTSUBST
 
 # custom path
@@ -70,6 +69,33 @@ bindkey -v
 export http_proxy="http://127.0.0.1:7890"
 export https_proxy="http://127.0.0.1:7890"
 export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+
+# init nala package
+if ! has nala; then
+  sudo apt update && sudo apt install -y nala
+  apps=(
+    "jq"
+    "gh"
+    "curl"
+    "lua5.3"
+    "aria2"
+    "cmake"
+    "meson"
+    "scdoc"
+    "foot"
+    "tmux"
+    "silversearcher-ag"
+    "sqlite3"
+    "redshift"
+    "nmap"
+    "inotify-tools"
+    "sccache"
+  )
+  for app in "${apps[@]}"; do
+    sudo nala install -y $app
+  done
+fi
+
 
 # ###  Autoload  ##############################################################
 
@@ -96,16 +122,34 @@ fi
 # export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
 # export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
 
-export HOMEBREW_NO_AUTO_UPDATE=true             # 关闭自动更新
-export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))  # 自动更新间隔时间
+# brew options
+export HOMEBREW_PREFIX="$HOME/.linuxbrew";
+export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar";
+export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew";
+export HOMEBREW_NO_AUTO_UPDATE=true                               # 关闭自动更新
+export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))                    # 自动更新间隔时间
+export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH:+:$MANPATH}";
+export INFOPATH="$HOMEBREW_PREFIX/share/info:$INFOPATH";
 
-# brew installer
-hash brew &> /dev/null || curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh | bash
+# add brew to path
+addPath "$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
+addPath "$HOMEBREW_PREFIX/opt/llvm/bin";
+
+# install brew
+if ! has brew; then
+  git clone --depth 1 https://github.com/Homebrew/brew $HOMEBREW_PREFIX
+  brew update --force --quiet
+  chmod -R go-w "$(brew --prefix)/share/zsh"
+fi
 
 # ###  Npm  ###################################################################
 
-# installer
-hash npm &> /dev/null || curl -qL https://www.npmjs.com/install.sh | sh
+# add npm to path
+addPath "$HOME/.npm/bin"
+
+# install npm
+has node &> /dev/null || sudo apt install nodejs
+has npm &> /dev/null || curl -qL https://www.npmjs.com/install.sh | sh
 
 # ###  Golang  ################################################################
 
@@ -115,32 +159,36 @@ export GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://gop
 # Enable Go modules
 export GO111MODULE=on
 
-# Disable the Go checksum database
+# Go checksum database
 export GOSUMDB=off
 
 # 1.13 开始支持，配置私有 module，不去校验 checksum
 export GOPRIVATE=*.corp.example.com,rsc.io/private
 
-# go installer
-if ! hash go &> /dev/null; then
-  go_version="1.21.3"
-  wget -c "https://go.dev/dl/go1.21.3.linux-amd64.tar.gz" -P /tmp
+# install golang
+if ! has go; then
+  go_version="1.22.2"
+  wget -c "https://go.dev/dl/go${go_version}.linux-amd64.tar.gz" -P /tmp
   sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$go_version.linux-amd64.tar.gz
 fi
 
 # ###  Rust  ##################################################################
 
-# set build wrapper
-export RUSTC_WRAPPER="$HOMEBREW_PREFIX/bin/sccache"
+# set cargo home
+export CARGO_HOME="$HOME/.cargo"
+addPath "$CARGO_HOME/bin"
 
-# rustup installer
-hash rustup &> /dev/null || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# set build wrapper
+has sccache && export RUSTC_WRAPPER="$(which sccache)"
+
+# install rust
+has rustup || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # ###  Starship  ##############################################################
 
 # starship: shell prompts
 export STARSHIP_CONFIG=~/.starship.toml
-hash starship 2>/dev/null && eval "$(starship init zsh)"
+has starship && eval "$(starship init zsh)"
 
 # ###  Zprof  #################################################################
 # you need add `zmodload zsh/zprof` to the top of .zshrc file

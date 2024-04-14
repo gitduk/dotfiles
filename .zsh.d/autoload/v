@@ -6,6 +6,10 @@ if ! hash $EDITOR &>/dev/null; then
     EDITOR="nvim"
   elif hash hx &>/dev/null; then
     EDITOR="hx"
+  elif hash vim &>/dev/null; then
+    EDITOR="vim"
+  else
+    sudo apt install vim && EDITOR="vim"
   fi
 fi
 

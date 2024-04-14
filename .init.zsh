@@ -2,29 +2,6 @@
 
 # ###  Scripts  ###############################################################
 
-if ! hash nala &>/dev/null; then
-  sudo apt update && sudo apt install -y nala
-  apps=(
-    "curl"
-    "lua5.3"
-    "aria2"
-    "cargo"
-    "cmake"
-    "meson"
-    "scdoc"
-    "tmux"
-    "jq"
-    "silversearcher-ag"
-    "sqlite3"
-    "redshift"
-    "nmap"
-    "inotify-tools"
-  )
-  for app in "${apps[@]}"; do
-    sudo nala install -y $app
-  done
-fi
-
 # Astrovim
 if [[ ! -e "$HOME/.config/nvim" ]]; then
   info "Install astrovim"
@@ -67,7 +44,7 @@ f.sh -m "archive" "wtfutil/wtf" "wtf_.*_linux_amd64.tar.gz" -n "wtf"
 
 # starship
 f.sh -m "archive" "starship/starship" "starship-x86_64-unknown-linux-musl.tar.gz"
-starship completions zsh > $ZCOMP/_starship
+has starship && starship completions zsh > $ZCOMP/_starship
 
 # just
 f.sh -m "archive" "casey/just" "just-.*-x86_64-unknown-linux-musl.tar.gz"

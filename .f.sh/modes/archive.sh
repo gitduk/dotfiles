@@ -19,7 +19,12 @@ function extract {
   esac
 }
 
-url=$(echo $urls | grep -E "$pattern" | fzf -1)
+if hash fzf &>/dev/null; then
+  url=$(echo $urls | grep -E "$pattern" | fzf -1)
+else
+  url=$(echo $urls | grep -E "$pattern" | head -n 1)
+fi
+
 info "$(blue url): $url"
 
 file_name="${url##*/}"
