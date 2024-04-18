@@ -71,7 +71,7 @@ export https_proxy="http://127.0.0.1:7890"
 export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
 # init nala package
-if ! has nala; then
+if ! hash nala &>/dev/null; then
   sudo apt update && sudo apt install -y nala
   apps=(
     "jq"
@@ -90,12 +90,14 @@ if ! has nala; then
     "nmap"
     "inotify-tools"
     "sccache"
+    "chromium-browser"
   )
+
   for app in "${apps[@]}"; do
     sudo nala install -y $app
   done
-fi
 
+fi
 
 # ###  Autoload  ##############################################################
 
@@ -114,6 +116,21 @@ if [[ -d "$ZSH_DIR" ]]; then
     source "$file"
   done
 fi
+
+# cadd list
+export AUTOADD_DIRS=(
+  "$HOME/.sh.d/"
+  "$HOME/.zsh.d/"
+  "$HOME/.etc.d/"
+  "$HOME/.tmux.d/"
+  "$HOME/.config/dockge/"
+  "$HOME/.config/hypr/scripts/"
+  "$HOME/.config/nvim/lua/"
+  "$HOME/.config/systemd/user/"
+  "$HOME/.local/share/applications/"
+  "$HOME/.docker/homepage/"
+  "$HOME/static/"
+)
 
 # ###  Brew  ##################################################################
 
@@ -136,7 +153,7 @@ addPath "$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
 addPath "$HOMEBREW_PREFIX/opt/llvm/bin";
 
 # install brew
-if ! has brew; then
+if ! hash brew &>/dev/null; then
   git clone --depth 1 https://github.com/Homebrew/brew $HOMEBREW_PREFIX
   brew update --force --quiet
   chmod -R go-w "$(brew --prefix)/share/zsh"
@@ -148,8 +165,8 @@ fi
 addPath "$HOME/.npm/bin"
 
 # install npm
-has node &> /dev/null || sudo apt install nodejs
-has npm &> /dev/null || curl -qL https://www.npmjs.com/install.sh | sh
+hash node &>/dev/null || sudo apt install nodejs
+hash npm &>/dev/null || curl -qL https://www.npmjs.com/install.sh | sh
 
 # ###  Golang  ################################################################
 
@@ -166,7 +183,7 @@ export GOSUMDB=off
 export GOPRIVATE=*.corp.example.com,rsc.io/private
 
 # install golang
-if ! has go; then
+if ! hash go &>/dev/null; then
   go_version="1.22.2"
   wget -c "https://go.dev/dl/go${go_version}.linux-amd64.tar.gz" -P /tmp
   sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$go_version.linux-amd64.tar.gz
@@ -179,16 +196,16 @@ export CARGO_HOME="$HOME/.cargo"
 addPath "$CARGO_HOME/bin"
 
 # set build wrapper
-has sccache && export RUSTC_WRAPPER="$(which sccache)"
+hash sccache &>/dev/null && export RUSTC_WRAPPER="$(which sccache)"
 
 # install rust
-has rustup || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+hash rustup &>/dev/null || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # ###  Starship  ##############################################################
 
 # starship: shell prompts
 export STARSHIP_CONFIG=~/.starship.toml
-has starship && eval "$(starship init zsh)"
+hash starship &>/dev/null && eval "$(starship init zsh)"
 
 # ###  Zprof  #################################################################
 # you need add `zmodload zsh/zprof` to the top of .zshrc file

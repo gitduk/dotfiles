@@ -48,11 +48,6 @@ addPath() {
   done
 }
 
-has() {
-  local cmd="$1"
-  hash $cmd &>/dev/null
-}
-
 # ###  Pkgconfig  #############################################################
 
 export PKG_CONFIG_PATH="/usr/lib/pkgconfig:\
@@ -91,11 +86,11 @@ export QT_IM_MODULE=fcitx5
 export XMODIFIERS=@im=fcitx5
 
 # editor
-if has nvim; then
+if hash nvim &>/dev/null; then
   export EDITOR="nvim"
-elif has hx; then
+elif hash hx &>/dev/null; then
   export EDITOR="hx"
-elif has vim; then
+elif hash vim &>/dev/null; then
   export EDITOR="vim"
 else
   sudo apt install vim

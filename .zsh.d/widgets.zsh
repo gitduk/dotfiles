@@ -55,7 +55,7 @@ function fzf-apt-widget {
 }
 
 function fzf-commands-widget {
-  cmd_path="$(zsh -c "$HOME/.sh/fzf-commands.sh $LBUFFER")"
+  cmd_path="$(zsh -c "$HOME/.sh.d/fzf-commands.sh $LBUFFER")"
   if [ -n "$cmd_path" ]; then
     BUFFER="$(awk -F '/' '{printf "%s ", $NF}' <<< $cmd_path)"
   fi

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Chromium
+GenericName=Web Browser
+Comment=Access the Internet
+Exec=chromium-browser %U
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=chromium-browser
+Categories=Network;WebBrowser;
+StartupNotify=true
+Actions=NewWindow;Incognito;TempProfile;
+X-AppInstall-Package=chromium-browser
+

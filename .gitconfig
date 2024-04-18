@@ -1,92 +1,90 @@
 [alias]
-	st = status
-	cm = commit -m
-	cl = clone
-	cl1 = clone --depth 1
-	ca = commit --amend -v
-	co = checkout
-	di = diff
-	lg = log -p
-	ps = push
-	pl = pull
+  st = status
+  cm = commit -m
+  cl = clone
+  cl1 = clone --depth 1
+  ca = commit --amend -v
+  co = checkout
+  di = diff
+  lg = log -p
+  ps = push
+  pl = pull
 
 [init]
-	defaultBranch = master
+  defaultBranch = master
 
 [diff]
-	mnemonicPrefix = true
-	wordRegex = "[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+"
-	compactionHeuristic = true
-	colorMoved = zebra
+  mnemonicPrefix = true
+  wordRegex = "[^[:space:]]|([[:alnum:]]|UTF_8_GUARD)+"
+  compactionHeuristic = true
+  colorMoved = zebra
 
 [color]
-	ui = auto
+  ui = auto
 
 [color "grep"]
-	match = cyan bold
-	selected = blue
-	context = normal
-	filename = magenta
-	linenumber = green
-	separator = yellow
-	function = blue
+  match = cyan bold
+  selected = blue
+  context = normal
+  filename = magenta
+  linenumber = green
+  separator = yellow
+  function = blue
 
 [pretty]
-	line = "%C(auto)%h %<|(60,trunc)%s %C(green)%ad%C(auto)%d"
-	detail = "%C(auto)%h %s%n  %C(yellow)by %C(blue)%an %C(magenta)<%ae> [%G?] %C(green)%ad%n %C(auto)%d%n"
+  line = "%C(auto)%h %<|(60,trunc)%s %C(green)%ad%C(auto)%d"
+  detail = "%C(auto)%h %s%n  %C(yellow)by %C(blue)%an %C(magenta)<%ae> [%G?] %C(green)%ad%n %C(auto)%d%n"
 
 [merge]
-	defaultToUpstream = true
-	tool = vimdiff
+  defaultToUpstream = true
+  tool = vimdiff
 
 [pull]
-	rebase = true
-	ff = only
+  rebase = true
+  ff = only
 
 [mergetool]
-	keepBackup = false
+  keepBackup = false
 
 [push]
-	default = upstream
-	autoSetupRemote = true
+  default = upstream
+  autoSetupRemote = true
 
 [credential]
   helper = cache --timeout=3600
 
 [credential "https://github.com"]
-	helper =
+  helper =
   helper = !/usr/bin/gh auth git-credential
 
 [grep]
-	lineNumber = true
+  lineNumber = true
 
 [advice]
-	detachedHead = false
-	waitingForEditor = false
+  detachedHead = false
+  waitingForEditor = false
 
 [user]
-	useConfigOnly = true
-	email = wukaigee@gmail.com
-	name = gitduk
+  useConfigOnly = true
+  email = wukaigee@gmail.com
+  name = gitduk
 
 [http]
-	cookieFile = ~/.gitcookies
-	postBuffer = 655360000
-
-[http "https://github.com"]
-  proxy = socks5://127.0.0.1:7890
+  cookieFile = ~/.gitcookies
+  postBuffer = 655360000
+  proxy = http://127.0.0.1:7890
 
 [https]
-	proxy = socks5://localhost:7890
+  proxy = http://127.0.0.1:7890
 
 [core]
-	excludesfile = ~/.gitignore_global
-	quotepath = false
-	longpaths = true
-	autocrlf = input
-	trustctime = false
+  excludesfile = ~/.gitignore_global
+  quotepath = false
+  longpaths = true
+  autocrlf = input
+  trustctime = false
   attributesfile = ~/.attributes_global
-	editor = nvim
+  editor = nvim
   sparsecheckout = true
   pager = delta
 
@@ -95,102 +93,102 @@
   path = ~/.gitconfig_local
 
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
 
 [diff "text"]
-	textconv = cat
+  textconv = cat
 
 [lfs]
-	concurrenttransfers = 32
-	fetchrecentrefsdays = 0
-	pruneoffsetdays = 0
+  concurrenttransfers = 32
+  fetchrecentrefsdays = 0
+  pruneoffsetdays = 0
 
 [rebase]
-	backend = apply
+  backend = apply
 
 [protocol]
   version = 1
 
 [interactive]
-    diffFilter = delta --color-only --features=interactive
+  diffFilter = delta --color-only --features=interactive
 
 [color "status"]
-	branch = 6 normal bold
-	added = 10 normal
-	updated = 10 normal
-	localbranch = 6 normal bold
-	changed = 11 normal
-	header = normal
-	remotebranch = 5 normal bold
-	nobranch = 1 0 bold
-	unmerged = 9 normal
-	untracked = normal dim
+  branch = 6 normal bold
+  added = 10 normal
+  updated = 10 normal
+  localbranch = 6 normal bold
+  changed = 11 normal
+  header = normal
+  remotebranch = 5 normal bold
+  nobranch = 1 0 bold
+  unmerged = 9 normal
+  untracked = normal dim
 
 [color "branch"]
-	plain = 6 normal bold dim
-	remote = 5 normal bold dim
-	current = 6 normal bold
-	local = 6 normal bold dim
-	upstream = 5 normal bold
+  plain = 6 normal bold dim
+  remote = 5 normal bold dim
+  current = 6 normal bold
+  local = 6 normal bold dim
+  upstream = 5 normal bold
 
 [color "remote"]
-	hint = normal dim
-	success = 2 normal
-	error = 1 normal
-	warning = 3 normal
+  hint = normal dim
+  success = 2 normal
+  error = 1 normal
+  warning = 3 normal
 
 [color "interactive"]
-	header = normal bold
-	prompt = 15 4
-	help = normal
-	error = 1 0 bold
+  header = normal bold
+  prompt = 15 4
+  help = normal
+  error = 1 0 bold
 
 [color "diff"]
-	commit = 3 0
-	newMoved = 14 normal
-	oldMovedAlternativeDimmed = 4 normal dim
-	frag = normal ul
-	oldMovedAlternative = 12 normal dim
-	contextBold = normal bold
-	newBold = 10 normal bold
-	context = normal
-	oldMoved = 14 normal dim
-	oldBold = 9 normal dim bold
-	newMovedDimmed = 6 normal
-	func = normal ul
-	meta = normal
-	newDimmed = 2 normal
-	newMovedAlternative = 12 normal
-	new = 10 normal
-	newMovedAlternativeDimmed = 4 normal
-	whitespace = normal 9
-	oldMovedDimmed = 6 normal dim
-	oldDimmed = 1 normal dim
-	old = 9 normal dim
+  commit = 3 0
+  newMoved = 14 normal
+  oldMovedAlternativeDimmed = 4 normal dim
+  frag = normal ul
+  oldMovedAlternative = 12 normal dim
+  contextBold = normal bold
+  newBold = 10 normal bold
+  context = normal
+  oldMoved = 14 normal dim
+  oldBold = 9 normal dim bold
+  newMovedDimmed = 6 normal
+  func = normal ul
+  meta = normal
+  newDimmed = 2 normal
+  newMovedAlternative = 12 normal
+  new = 10 normal
+  newMovedAlternativeDimmed = 4 normal
+  whitespace = normal 9
+  oldMovedDimmed = 6 normal dim
+  oldDimmed = 1 normal dim
+  old = 9 normal dim
 
 [color "decorate"]
-	branch = 6 normal bold
-	tag = 3 0
-	remotebranch = 5 normal bold
-	stash = normal
-	grafted = 1 0 bold
+  branch = 6 normal bold
+  tag = 3 0
+  remotebranch = 5 normal bold
+  stash = normal
+  grafted = 1 0 bold
   HEAD = 6 normal bold dim
 
 [delta]
-    features = decorations
+  features = decorations
 
 [delta "interactive"]
-    keep-plus-minus-markers = false
+  keep-plus-minus-markers = false
 
 [delta "decorations"]
-    commit-decoration-style = blue ol
-    commit-style = raw
-    file-style = omit
-    hunk-header-decoration-style = blue box
-    hunk-header-file-style = red
-    hunk-header-line-number-style = "#067a00"
-    hunk-header-style = file line-number syntax
+  commit-decoration-style = blue ol
+  commit-style = raw
+  file-style = omit
+  hunk-header-decoration-style = blue box
+  hunk-header-file-style = red
+  hunk-header-line-number-style = "#067a00"
+  hunk-header-style = file line-number syntax
 
