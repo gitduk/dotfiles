@@ -109,6 +109,12 @@ f.sh -m "binary" "mikefarah/yq" "yq_linux_amd64$"
 # jq
 f.sh -m "binary" "jqlang/jq" "jq-linux-amd64$"
 
+# fx
+f.sh -m "binary" "antonmedv/fx" "fx_linux_amd64"
+
+# direnv
+f.sh -m "binary" "direnv/direnv" "direnv.linux-amd64"
+
 # ###  Deb  ###################################################################
 
 # delta

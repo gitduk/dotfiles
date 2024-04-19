@@ -30,7 +30,7 @@ function cursor_mode() {
 # copy to system clipboard
 function vi-yank-copy {
    zle vi-yank
-   echo "$CUTBUFFER" | tr -d '\n' | wl-copy
+   echo -n "$CUTBUFFER" | cp
 }
 
 function fzf-alias-widget {
@@ -49,16 +49,19 @@ function fzf-apt-widget {
     --bind="I:reload(apt list --installed|sed '1d')" \
     --bind="R:reload(apt-cache search .)"
   )
-  echo $package | awk '{printf $1}' | xargs echo -n | wl-copy
+  echo $package | awk '{printf $1}' | xargs echo -n | cp
   zle reset-prompt
   zle vi-add-eol
 }
 
 function fzf-commands-widget {
-  cmd_path="$(zsh -c "$HOME/.sh.d/fzf-commands.sh $LBUFFER")"
-  if [ -n "$cmd_path" ]; then
-    BUFFER="$(awk -F '/' '{printf "%s ", $NF}' <<< $cmd_path)"
-  fi
+  BUFFER=$(while read -r dir
+  do
+    [[ ! -d "$dir" ]] && continue
+    for cmd in $(/usr/bin/find "$dir" -maxdepth 1 -type f -follow); do
+      echo $cmd
+    done
+  done <<< "`echo ${PATH//:/ } | xargs -n 1 | sort | uniq`" | fzf)
   zle reset-prompt
   zle end-of-line
 }

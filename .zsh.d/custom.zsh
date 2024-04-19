@@ -39,6 +39,9 @@ hash atuin &>/dev/null && eval "$(atuin init zsh)"
 # vfox
 hash vfox &>/dev/null && eval "$(vfox activate zsh)"
 
+# direnv
+hash direnv &>/dev/null && eval "$(direnv hook zsh)"
+
 # nvm
 export NVM_DIR="$HOME/.nvm"
 if [[ -e "$NVM_DIR" ]]; then

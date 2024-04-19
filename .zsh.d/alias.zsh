@@ -106,9 +106,6 @@ alias cre="crontab -e"
 alias cclash="curlie -s http://127.0.0.1:3000/sub | tee config.yaml"
 alias cspeed="clash-speedtest -c /home/wukaige/.config/clash/config.yaml -f 美国"
 
-# bat
-alias cat="bat"
-
 # curlie
 alias cl="curlie -s"
 

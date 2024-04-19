@@ -124,7 +124,7 @@ export AUTOADD_DIRS=(
   "$HOME/.etc.d/"
   "$HOME/.tmux.d/"
   "$HOME/.config/dockge/"
-  "$HOME/.config/hypr/scripts/"
+  "$HOME/.config/hypr/"
   "$HOME/.config/nvim/lua/"
   "$HOME/.config/systemd/user/"
   "$HOME/.local/share/applications/"

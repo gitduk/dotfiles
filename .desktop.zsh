@@ -18,7 +18,7 @@ if ! has hyprland; then
   sudo nala install -y libcairo2-dev libpango1.0-dev libgbm-dev libliftoff-dev libdisplay-info-dev
   git clone https://gitlab.freedesktop.org/wayland/wayland-protocols.git && cd wayland-protocols
   mkdir build && cd build \
-    && meson setup --prefix=/usr --buildtype=release \
+    && meson setup .. --prefix=/usr --buildtype=release \
     && sudo ninja -C . install
   cd ../..
 
@@ -83,6 +83,12 @@ if ! has hyprland; then
   git clone --recursive https://github.com/hyprwm/xdg-desktop-portal-hyprland && cd xdg-desktop-portal-hyprland
   cmake -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib -DCMAKE_INSTALL_PREFIX=/usr -B build
   cmake --build ./build && sudo cmake --install build
+
+  # wl-copy
+  git clone https://github.com/bugaevc/wl-clipboard.git && cd wl-clipboard
+  mkdir build && cd build \
+    && meson setup .. --prefix=/usr --buildtype=release \
+    && sudo ninja -C . install
 
 fi
 

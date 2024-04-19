@@ -28,6 +28,12 @@ style = "bold blue"
 # "Music" = " "
 # "Pictures" = " "
 
+[direnv]
+disabled = false
+symbol = ".envrc"
+style = "bold white"
+format = "[$symbol $allowed]($style) "
+
 [git_commit]
 tag_symbol = " tag "
 

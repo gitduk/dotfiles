@@ -1,10 +1,5 @@
 #!/usr/bin/env zsh
 
-function change {
-  local transition=("simple" "fade" "left" "right" "top" "bottom" "wipe" "grow" "center" "outer" "random" "wave")
-  swww img "$1" --transition-type=$(shuf -n1 -e "${transition[@]}")
-}
-
 function bing {
   # 1366 1920 3840
   resolution=3840
@@ -19,23 +14,16 @@ function bing {
   if [[ ! -e "$img_path" ]]; then
     aria2c ${url//\"/} -d "$HOME/Pictures/wallpaper" -o "$name.jpg"
   fi
-  change "$img_path" && notify-send "Bing Wallpaper" "$name"
-}
-
-function random {
-  local commands=(
-    "bing"
-  )
-  $(shuf -n1 -e "${commands[@]}")
+  echo $img_path
 }
 
 ############################ Args ############################
 
-SHORT="b,p,r"
-LONG="bing,random"
+SHORT="b"
+LONG="bing"
 ARGS=`getopt -a -o $SHORT -l $LONG -n "${0##*/}" -- "$@"`
 
-if [[ $? -ne 0 || $# -eq 0 ]; then
+if [[ $? -ne 0 || $# -eq 0 ]]; then
   cat <<- EOF
 $0: -[`echo $SHORT|sed 's/,/|/g'`] --[`echo $LONG|sed 's/,/|/g'`]
 EOF
@@ -47,7 +35,6 @@ while true
 do
   case "$1" in
   -b|--bing) bing ;;
-  -r|--random) random ;;
   --) shift ; break ;;
   esac
 shift

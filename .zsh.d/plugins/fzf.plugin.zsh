@@ -31,7 +31,7 @@ export FZF_DEFAULT_OPTS="
   --bind 'I:toggle-down'
   --bind 'P:toggle-preview'
   --bind 'S:toggle-sort'
-  --bind 'Y:execute(echo -n {} | wl-copy)'
+  --bind 'Y:execute(echo -n {} | cp)'
   --bind 'ctrl-space:accept'
   --bind 'ctrl-a:toggle-all'
   --bind 'ctrl-c:abort'
