@@ -351,6 +351,9 @@ alias kl="pkill"
 # lsof
 balias li="sudo lsof -i:"
 
+# ls
+ialias ls="ls --color"
+
 # ###  M  #####################################################################
 
 # audio
@@ -494,9 +497,6 @@ alias path="echo $PATH | tr ':' '\n'"
 # set proxy
 alias pre="export http_proxy=http://${proxy:-127.0.0.1:7890} https_proxy=http://${proxy:-127.0.0.1:7890}"
 alias prd="unset http_proxy https_proxy"
-
-# gping
-alias ping="gping"
 
 # pid
 alias pof="pidof"

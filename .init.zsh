@@ -13,9 +13,6 @@ fi
 
 # ###  Brew  ##################################################################
 
-# gping
-hash gping &>/dev/null || {info "Install gping"; brew install gping}
-
 # tldr
 hash tldr &>/dev/null || {info "Install tldr"; brew install tlrc}
 

@@ -3,6 +3,7 @@
 WALLPAPER_DIR="$HOME/Pictures/wallpaper"
 HYPRPAPER_CONF="$HOME/.config/hypr/hyprpaper.conf"
 MONITOR="$(hyprctl monitors|grep 'ID 0'|awk '{print $2}')"
+pgrep hyprpaper &>/dev/null || {hyprctl dispatch exec hyprpaper && sleep 1}
 
 load_wallpaper() {
   local wallpaper="${1##*/}"
@@ -26,7 +27,7 @@ switch_wallpaper() {
   local prev_wallpaper
   local next_wallpaper
 
-  current_wallpaper="$(hyprctl hyprpaper listactive | sed 's|.*/||')"
+  current_wallpaper="$(hyprctl hyprpaper listactive | sed 's|.*/||' | head -n 1)"
 
   ls -1v $WALLPAPER_DIR | while read -r file; do
     [[ -n "$next_wallpaper" ]] && next_wallpaper="$file" && break
