@@ -112,6 +112,9 @@ f.sh -m "binary" "antonmedv/fx" "fx_linux_amd64"
 # direnv
 f.sh -m "binary" "direnv/direnv" "direnv.linux-amd64"
 
+# cliphist
+f.sh -m "binary" "sentriz/cliphist" "v.*-linux-amd64"
+
 # ###  Deb  ###################################################################
 
 # delta

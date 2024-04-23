@@ -78,6 +78,35 @@ function space-widget {
   zle end-of-line
 }
 
+function fzf-services-widget {
+  selected_service=$({
+    systemctl --user list-units --no-pager --type=service --no-legend --all
+    systemctl --system list-units --no-pager --type=service --no-legend --all
+  } | while read -r raw
+  do
+    if [[ "$raw" = ●* ]]; then
+      stat="✘"
+      read _ name load active run comment <<<  "$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+    else
+      stat="✔"
+      read name load active run comment <<<  "$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+    fi
+    [[ ${#name} -gt 30 ]] && name="${name:0:28}.."
+    printf "%s %-30s %-10s %-10s %-10s %s\n" $stat $name $load $active $run $comment
+  done | fzf --exact --preview 'systemctl status $(cut -d " " -f2 <<< "{}") 2>/dev/null || systemctl --user status $(cut -d " " -f2 <<< "{}")')
+}
+
+function fzf-crontab-widget {
+  crontab -l | grep -Ev "^#|^$|^[a-zA-Z]" | sort | fzf | while read -r raw
+  do
+    raw=${raw//\*/\\*}
+    task="$(echo $raw | sed -n 's/\\\*/*/g;p')"
+    read _ _ _ _ _ command <<< $task
+    [[ -z "$command" ]] && continue
+    zsh <<< $command
+  done
+}
+
 function _navi_call {
   local result="$(navi "$@" </dev/tty)"
   printf "%s" "$result"
@@ -164,4 +193,6 @@ zbindkey -M viins '^T' fzf-apt-widget
 zbindkey -M viins '^N' _navi_widget
 zbindkey -M viins '^_' fzf-commands-widget
 zbindkey -M viins '^B' fzf-bindkeys-widget
+zbindkey -M viins '^V' fzf-services-widget
+zbindkey -M viins '^Z' fzf-crontab-widget
 

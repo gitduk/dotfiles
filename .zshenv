@@ -1,4 +1,4 @@
-# ###  funtions  ##############################################################
+# ###  Funtions  ##############################################################
 
 # pretty.sh
 [[ -e "$HOME/.sh.d/pretty.sh" ]] && source $HOME/.sh.d/pretty.sh
@@ -48,95 +48,6 @@ addPath() {
   done
 }
 
-# ###  Pkgconfig  #############################################################
-
-export PKG_CONFIG_PATH="/usr/lib/pkgconfig:\
-/usr/lib/x86_64-linux-gnu/pkgconfig:\
-/usr/share/pkgconfig:\
-/usr/local/lib/x86_64-linux-gnu/pkgconfig"
-
-# ###  Lib Path  ##############################################################
-
-export LD_LIBRARY_PATH="/usr/local/lib:\
-/usr/lib/x86_64-linux-gnu:\
-/usr/local/cuda/lib64:\
-/usr/local/cuda/targets/x86_64-linux/lib:\
-/usr/local/cuda/targets/x86_64-linux/lib/stubs"
-
-# ###  System Options  ########################################################
-
-# Term options
-# terminfo directory: ${HOME}/.terminfo
-# then /etc/terminfo
-# then /lib/terminfo
-# then /usr/share/terminfo
-export TERMINFO="/lib/terminfo"
-export TERM="xterm-256color"
-export KEYTIMEOUT=20
-export CLIPBOARD="$HOME/.clipboard"
-
-# for cmake
-# export CXX=/usr/bin/g++-11
-# export CC=/usr/bin/gcc-11
-# export LD=/usr/bin/g++-11
-
-# input method set up
-export GTK_IM_MODULE=fcitx5
-export QT_IM_MODULE=fcitx5
-export XMODIFIERS=@im=fcitx5
-
-# editor
-if hash nvim &>/dev/null; then
-  export EDITOR="nvim"
-elif hash hx &>/dev/null; then
-  export EDITOR="hx"
-elif hash vim &>/dev/null; then
-  export EDITOR="vim"
-else
-  sudo apt install vim
-  export EDITOR="vim"
-fi
-
-export SUDO_EDITOR="$EDITOR"
-export VISUAL="$EDITOR"
-
-# browser
-export BROWSER=google-chrome
-
-# cursor
-export XCURSOR_PATH="$HOME/.local/share/icons"
-export XCURSOR_THEME=Vimix
-
-# Skip the not really helping Ubuntu global compinit
-export skip_global_compinit=1
-
-# zsh
-export ZSH_DIR=$HOME/.zsh.d
-
-# tmux
-export TMUX_DIR=$HOME/.tmux.d
-
-# plugin root dir
-export PLUGIN_DIR=$HOME/.plugin.d
-
-# cache
-export XDG_CACHE_HOME=$HOME/.cache
-
-# ###  Hyprland  ##############################################################
-
-export MOZ_ENABLE_WAYLAND=1
-export MOZ_WAYLAND_USE_VAAPI=1
-export MOZ_DBUS_REMOTE=1
-export MOZ_WEBRENDER=1
-export GTK_USE_PORTAL=1
-export GDK_BACKEND=wayland
-export XDG_SESSION_TYPE=wayland
-export SDL_VIDEODRIVER=wayland
-export QT_QPA_PLATFORM=wayland
-export CLUTTER_BACKEND=wayland
-export XDG_SESSION_DESKTOP=wayland
-export XDG_CURRENT_DESKTOP=wayland
-
 # ###  Path  ##################################################################
 
 # sh
@@ -178,4 +89,43 @@ addPath "$HOME/anaconda3/bin"
 
 # f.sh
 addPath "$HOME/.f.sh"
+
+# ###  Envs  ##################################################################
+
+# editor
+if hash nvim &>/dev/null; then
+  export EDITOR="nvim"
+elif hash hx &>/dev/null; then
+  export EDITOR="hx"
+elif hash vim &>/dev/null; then
+  export EDITOR="vim"
+else
+  sudo apt install vim
+  export EDITOR="vim"
+fi
+
+export SUDO_EDITOR="$EDITOR"
+export VISUAL="$EDITOR"
+
+# browser
+export BROWSER=chromium
+
+# cursor
+export XCURSOR_PATH="$HOME/.local/share/icons"
+export XCURSOR_THEME=Vimix
+
+# Skip the not really helping Ubuntu global compinit
+export skip_global_compinit=1
+
+# zsh
+export ZSH_DIR=$HOME/.zsh.d
+
+# tmux
+export TMUX_DIR=$HOME/.tmux.d
+
+# plugin root dir
+export PLUGIN_DIR=$HOME/.plugin.d
+
+# cache
+export XDG_CACHE_HOME=$HOME/.cache
 

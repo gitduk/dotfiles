@@ -78,6 +78,9 @@ hash zoxide &>/dev/null && eval "$(zoxide init zsh --cmd j)"
 # Load Angular CLI autocompletion.
 hash ng &>/dev/null && source <(ng completion script)
 
+# hyprland socket
+export HYPRLAND_INSTANCE_SIGNATURE="$(ls /tmp/hypr/*.lock &>/dev/null|tail -n 1|awk -F '/' '{print $4}'|sed 's|.lock||')"
+
 # ###  Token  #################################################################
 
 export ipinfo="c577b3ef143bc3"

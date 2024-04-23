@@ -2,7 +2,7 @@
 Name=Chromium
 GenericName=Web Browser
 Comment=Access the Internet
-Exec=chromium %U
+Exec=chromium --ozone-platform-hint=auto --enable-wayland-ime --disable-features=WaylandFractionalScaleV1
 Terminal=false
 Type=Application
 Icon=chromium-browser

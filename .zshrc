@@ -129,7 +129,6 @@ export AUTOADD_DIRS=(
   "$HOME/.config/systemd/user/"
   "$HOME/.local/share/applications/"
   "$HOME/.docker/homepage/"
-  "$HOME/static/"
 )
 
 # ###  Brew  ##################################################################

@@ -63,6 +63,7 @@ alias cmn="c commit --amend --no-edit"
 alias cpl="c pull --rebase"
 alias cps="c push"
 alias cst="c stash"
+alias csap="c stash apply"
 alias csb="c submodule"
 alias cls="c ls-tree -r master --name-only"
 
@@ -352,7 +353,7 @@ alias kl="pkill"
 balias li="sudo lsof -i:"
 
 # ls
-ialias ls="ls --color"
+ialias ls="ls --color=auto"
 
 # ###  M  #####################################################################
 
