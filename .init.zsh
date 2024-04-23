@@ -11,6 +11,62 @@ if [[ ! -e "$HOME/.config/nvim" ]]; then
   ln -s ~/.nvim ~/.config/nvim/lua/user
 fi
 
+# alacritty
+if ! hash alacritty &>/dev/null; then
+  sudo nala install -y libegl-dev libegl-amber0
+  git clone https://github.com/alacritty/alacritty.git && cd alacritty
+  cargo build --release --no-default-features --features=wayland
+  cp target/release/alacritty $ZPFX/bin/alacritty
+fi
+
+# tofi: application launcher
+if ! hash tofi &>/dev/null; then
+  git clone --depth=1 "https://github.com/philj56/tofi.git" && cd tofi
+  meson setup build && sudo ninja -C build install
+fi
+
+# screenshot: flameshot
+if ! hash flameshot &>/dev/null; then
+  sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools \
+    libqt5svg5-dev qttools5-dev libkf5guiaddons-dev
+  git clone https://github.com/flameshot-org/flameshot.git
+  cd flameshot/
+  cmake -S . -B build \
+    -DUSE_WAYLAND_CLIPBOARD=true \
+    -DUSE_WAYLAND_GRIM=ON \
+    && cmake --build build \
+    && sudo cmake --install build
+fi
+
+# plum: rime config manage
+if ! hash rime_dict_manager &>/dev/null; then
+  sudo nala install -y fcitx5 \
+    fcitx5-chinese-addons \
+    fcitx5-frontend-gtk4 fcitx5-frontend-gtk3 fcitx5-frontend-gtk2 \
+    fcitx5-frontend-qt5 fcitx5-rime
+  im-config -n fcitx5
+  plum_dir="$HOME/.local/share/fcitx5/plum"
+  git clone --depth 1 https://github.com/rime/plum.git $plum_dir
+  rime_dir="$HOME/.local/share/fcitx5/rime" rime_frontend="fcitx5-rime" bash $plum_dir/rime-install iDvel/rime-ice:others/recipes/full
+  rime_dir="$HOME/.local/share/fcitx5/rime" rime_frontend="fcitx5-rime" bash $plum_dir/rime-install iDvel/rime-ice:others/recipes/config:schema=flypy
+  # auto install rime and rime-ice
+  # git clone --depth=1 https://github.com/Mark24Code/rime-auto-deploy.git --branch latest
+  # cd rime-auto-deploy && ./installer.rb
+fi
+
+# db manager
+if ! hash dataflare &>/dev/null; then
+  aria2c -c "https://assets.dataflare.app/release/linux/x86_64/Dataflare.AppImage" -d "$ZPFX/bin"
+  sudo chmod 744 "$ZPFX/bin/Dataflare.AppImage"
+  mv "$ZPFX/bin/Dataflare.AppImage" "$ZPFX/bin/dataflare"
+fi
+
+# weixin
+# if ! hash weixin &>/dev/null; then
+#   aria2c -c "http://archive.ubuntukylin.com/software/pool/partner/weixin_2.1.4_amd64.deb" -d "/tmp"
+#   sudo dpkg -i /tmp/weixin_2.1.4_amd64.deb
+# fi
+
 # ###  Brew  ##################################################################
 
 # tldr
@@ -93,9 +149,6 @@ f.sh -m "binary" "neovim/neovim" "nvim.appimage" -n "nvim"
 # helix
 f.sh -m "binary" "helix-editor/helix" "helix.*.AppImage"
 
-# sampler
-f.sh -m "binary" "sqshq/sampler" "sampler-.*-linux-amd64$"
-
 # pueue
 f.sh -m "binary" "Nukesor/pueue" "pueue-linux-x86_64" -n "pueue"
 f.sh -m "binary" "Nukesor/pueue" "pueued-linux-x86_64" -n "pueued"
@@ -114,6 +167,18 @@ f.sh -m "binary" "direnv/direnv" "direnv.linux-amd64"
 
 # cliphist
 f.sh -m "binary" "sentriz/cliphist" "v.*-linux-amd64"
+
+# heynote
+f.sh -m "binary" "heyman/heynote" "Heynote_.*_x86_64.AppImage"
+
+# reor
+f.sh -m "binary" "reorproject/reor" "Reor_.*.AppImage"
+
+# switchhosts
+f.sh -m "binary" "oldj/SwitchHosts" "SwitchHosts_linux_x86_64.*.AppImage" -n "switchhosts"
+
+# localsend
+f.sh -m "binary" "localsend/localsend" "LocalSend-.*-linux-x86-64.AppImage" -n "localsend"
 
 # ###  Deb  ###################################################################
 
@@ -165,14 +230,26 @@ f.sh -m "deb" "ducaale/xh" "xh_.*_amd64.deb"
 # dbeaver
 f.sh -m "deb" "dbeaver/dbeaver" "dbeaver-ce_.*_amd64.deb"
 
-# ###  Cargo build  ###########################################################
+# redis manager
+f.sh -m "deb" "tiny-craft/tiny-rdm" "tiny-rdm_.*_linux_amd64.deb"
 
-# alacritty
-# TODO: 
+# spacedrive
+f.sh -m "deb" "spacedriveapp/spacedrive" "Spacedrive-linux-x86_64.deb"
 
-# ###  Meson build  ###########################################################
+# bruno:  exploring and testing APIs.
+f.sh -m "deb" "usebruno/bruno" "bruno_.*_amd64_linux.deb"
 
-# wl-copy
-###  # f.sh -m "bugaevc/wl-clipboard" "meson setup build && cd build/ && ninja && sudo meson install \  
-#   && go install go.senan.xyz/cliphist@latest"
+# ###  Fonts  #################################################################
+
+fonts=(
+  "Meslo"
+)
+
+for font in "${fonts[@]}"; do
+  if [[ $(fc-list | grep -w "$font" | wc -l) -eq 0 ]]; then
+    curl -OL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$font.tar.xz -o /tmp/$font.tar.xz
+    [[ -d "$HOME/.local/share/fonts/$font" ]] || mkdir -p $HOME/.local/share/fonts/$font
+    tar -xvf /tmp/$font.tar.xz -C $HOME/.local/share/fonts/$font && fc-cache -fv
+  fi
+done
 

@@ -6,9 +6,6 @@ HYPRPAPER_CONF="$HOME/.config/hypr/hyprpaper.conf"
 MONITOR="$(hyprctl monitors|grep 'ID 0'|awk '{print $2}')"
 HYPRLAND_INSTANCE_SIGNATURE="$(ls /tmp/hypr/*.lock|tail -n 1|awk -F '/' '{print $4}'|sed 's|.lock||')"
 
-# options
-subdirectories=true
-
 pgrep hyprpaper &>/dev/null || {hyprctl dispatch exec hyprpaper && sleep 1}
 
 load_wallpaper() {
@@ -67,11 +64,8 @@ switch_wallpaper() {
 }
 
 cycle_wallpaper() {
-  local depth
-  $subdirectories || depth="-maxdepth 1"
   while true; do
-	  find "$WALLPAPER_DIR" $depth | while read -r img; do
-      [[ $img == '.' ]] && continue
+	  find "$WALLPAPER_DIR" -type f | while read -r img; do
 	    echo "$((RANDOM % 1000)):$img"
 	  done | sort -n | cut -d':' -f2- | while read -r img; do
       sleep ${INTERVAL:-1800} && load_wallpaper "$WALLPAPER_DIR/$img"

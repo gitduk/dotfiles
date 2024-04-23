@@ -529,9 +529,6 @@ alias rsy="rsync -avP"
 
 # ###  S  #####################################################################
 
-# change wallpaper
-alias s="swww img --transition-type center"
-
 # systemctl
 alias scs="sudo systemctl status"
 alias scst="sudo systemctl start"
@@ -558,8 +555,8 @@ alias sis="source $HOME/.init.zsh"
 alias sds="source $HOME/.desktop.zsh"
 
 # swap on/off 
+alias sps="sudo swapon --show"
 alias spon="sudo swapon -a && free -h"
-alias spso="sudo swapon --show"
 alias spof="sudo swapoff -a && free -h"
 
 # python env

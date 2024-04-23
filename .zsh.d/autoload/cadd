@@ -11,7 +11,7 @@ git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME status --short | cut -b 2- |
   file_path=$(echo ${line:1} | xargs | awk '{print $NF}')
   if [[ "$stats" = "D" ]]; then
     git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME rm -- "${file_path}" | info
-  elif [[ "$stats" = "M" ]]; then
+  elif [[ "$stats" = "M" || "$stats" = "U" ]]; then
     git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME add -- "${file_path}"
   else
     warn "unknown status: $stats, file: $file_path"
