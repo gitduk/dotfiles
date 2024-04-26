@@ -91,6 +91,7 @@ if ! hash nala &>/dev/null; then
     "inotify-tools"
     "sccache"
     "chromium-browser"
+    "s-nail"
   )
 
   for app in "${apps[@]}"; do
@@ -119,7 +120,6 @@ fi
 
 # cadd list
 export AUTOADD_DIRS=(
-  "$HOME/.sh.d/"
   "$HOME/.zsh.d/"
   "$HOME/.etc.d/"
   "$HOME/.tmux.d/"

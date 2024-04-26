@@ -1,8 +1,5 @@
 # ###  Funtions  ##############################################################
 
-# pretty.sh
-[[ -e "$HOME/.sh.d/pretty.sh" ]] && source $HOME/.sh.d/pretty.sh
-
 # blank aliases
 typeset -a baliases
 baliases=()
@@ -53,7 +50,6 @@ addPath() {
 # sh
 addPath "/usr/sbin"
 addPath "$HOME/.local/bin"
-addPath "$HOME/.sh.d"
 
 # snap
 addPath "/snap/bin"
@@ -86,9 +82,6 @@ addPath "$HOME/.config/emacs/bin"
 
 # conda
 addPath "$HOME/anaconda3/bin"
-
-# f.sh
-addPath "$HOME/.f.sh"
 
 # ###  Envs  ##################################################################
 

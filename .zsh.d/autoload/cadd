@@ -10,11 +10,11 @@ git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME status --short | cut -b 2- |
   # 使用xargs删除行首和行尾的空格
   file_path=$(echo ${line:1} | xargs | awk '{print $NF}')
   if [[ "$stats" = "D" ]]; then
-    git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME rm -- "${file_path}" | info
+    git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME rm -- "${file_path}" | tee
   elif [[ "$stats" = "M" || "$stats" = "U" ]]; then
     git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME add -- "${file_path}"
   else
-    warn "unknown status: $stats, file: $file_path"
+    echo "unknown status: $stats, file: $file_path"
   fi
 
 done
@@ -25,10 +25,10 @@ local dir_path
 # autoadd add dir
 for dir_path in "${AUTOADD_DIRS[@]}";do
   if [[ -d "$dir_path" ]]; then
-    info "autoadd: $dir_path"
+    echo "autoadd: $dir_path"
     git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME add "${dir_path}"
   else
-    warn "$dir_path is not a directory."
+    echo "$dir_path is not a directory."
   fi
 done
 

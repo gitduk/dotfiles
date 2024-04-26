@@ -1,6 +1,6 @@
 # launch hyprland
 
 if [[ -z "$DISPLAY" ]]; then
-  pgrep hyprland || exec hyprland
+  pgrep hyprland &>/dev/null || exec hyprland
 fi
 

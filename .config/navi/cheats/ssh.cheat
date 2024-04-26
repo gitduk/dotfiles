@@ -1,5 +1,0 @@
-% ssh, tar
-
-# tar file and send to remote
-tar -cf - <dir-path> | ssh <user>@<domain> "tar -xf -"
-

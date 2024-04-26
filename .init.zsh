@@ -97,7 +97,7 @@ f.sh -m "archive" "wtfutil/wtf" "wtf_.*_linux_amd64.tar.gz" -n "wtf"
 
 # starship
 f.sh -m "archive" "starship/starship" "starship-x86_64-unknown-linux-musl.tar.gz"
-has starship && starship completions zsh > $ZCOMP/_starship
+hash &>/dev/null starship && starship completions zsh > $ZCOMP/_starship
 
 # just
 f.sh -m "archive" "casey/just" "just-.*-x86_64-unknown-linux-musl.tar.gz"
@@ -137,6 +137,9 @@ f.sh -m "archive" "jesseduffield/lazygit" "lazygit_.*_Linux_x86_64.tar.gz"
 
 # go-musicfox
 f.sh -m "archive" "go-musicfox/go-musicfox" "go-musicfox_.*_linux_amd64.zip" -n "musicfox"
+
+# tailspin
+f.sh -m "archive" "bensadeh/tailspin" "tailspin-x86_64-unknown-linux-musl.tar.gz"
 
 # ###  Binary  ################################################################
 

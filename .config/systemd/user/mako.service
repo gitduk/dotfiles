@@ -1,9 +1,0 @@
-[Unit]
-Description=mako notifications watcher
-
-[Service]
-Type=oneshot
-ExecStart=%h/.config/mako/reload.sh
-
-[Install]
-WantedBy=graphical-session.target
