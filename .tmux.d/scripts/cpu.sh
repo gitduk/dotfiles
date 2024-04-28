@@ -28,5 +28,5 @@ case $usage in
   *) fgcolor="#[fg=$red $sytle]" ;;
 esac
 
-printf "%s%05.2f" $fgcolor $usage
+printf "%s%02.0f" $fgcolor $usage
 

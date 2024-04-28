@@ -123,12 +123,11 @@ export AUTOADD_DIRS=(
   "$HOME/.zsh.d/"
   "$HOME/.etc.d/"
   "$HOME/.tmux.d/"
-  "$HOME/.config/dockge/"
+  "$HOME/.compose.d/"
   "$HOME/.config/hypr/"
   "$HOME/.config/nvim/lua/"
   "$HOME/.config/systemd/user/"
   "$HOME/.local/share/applications/"
-  "$HOME/.docker/homepage/"
 )
 
 # ###  Brew  ##################################################################

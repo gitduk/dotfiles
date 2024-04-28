@@ -1,0 +1,27 @@
+services:
+  adguardhome:
+    container_name: adguardhome
+    restart: unless-stopped
+    volumes:
+      - ~/.docker/adguardhome/workdir:/opt/adguardhome/work
+      - ~/.docker/adguardhome/confdir:/opt/adguardhome/conf
+    ports:
+      - 1153:1153/tcp
+      - 1153:1153/udp
+      - 8000:80/tcp
+      - 443:443/tcp
+      - 443:443/udp
+      - 3010:3000/tcp
+    image: adguard/adguardhome
+    depends_on:
+      - smartdns
+  smartdns:
+    container_name: smartdns
+    restart: unless-stopped
+    ports:
+      - 1053:53/tcp
+      - 1053:53/udp
+    volumes:
+      - /home/wukaige/.docker/smartdns:/etc/smartdns
+    image: pymumu/smartdns:latest
+networks: {}

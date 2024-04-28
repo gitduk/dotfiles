@@ -183,6 +183,9 @@ f.sh -m "binary" "oldj/SwitchHosts" "SwitchHosts_linux_x86_64.*.AppImage" -n "sw
 # localsend
 f.sh -m "binary" "localsend/localsend" "LocalSend-.*-linux-x86-64.AppImage" -n "localsend"
 
+# ctop
+f.sh -m "binary" "bcicen/ctop" "ctop-0.7.7-linux-amd64"
+
 # ###  Deb  ###################################################################
 
 # delta

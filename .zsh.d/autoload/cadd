@@ -5,30 +5,29 @@ local file_path
 # 更改内部字段分隔符为新行，以正确处理带有空格的文件名
 IFS=$'\n'
 git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME status --short | cut -b 2- | grep -v '^ ' | while read -r line; do
+  echo "$line"
 
   stats=${line:0:1}
-  # 使用xargs删除行首和行尾的空格
   file_path=$(echo ${line:1} | xargs | awk '{print $NF}')
-  if [[ "$stats" = "D" ]]; then
-    git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME rm -- "${file_path}" | tee
-  elif [[ "$stats" = "M" || "$stats" = "U" ]]; then
-    git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME add -- "${file_path}"
-  else
-    echo "unknown status: $stats, file: $file_path"
-  fi
+
+  case "$stats" in
+    A|M|U) option="add" ;;
+    D) option="rm" ;;
+    *) echo "unknown status: $stats, file: $file_path" && continue ;;
+  esac
+
+  git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME $option -- "${file_path}" | tee
 
 done
 unset IFS # 恢复 IFS 到默认值
 
-local dir_path
-
 # autoadd add dir
+local dir_path
 for dir_path in "${AUTOADD_DIRS[@]}";do
   if [[ -d "$dir_path" ]]; then
-    echo "autoadd: $dir_path"
     git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME add "${dir_path}"
   else
-    echo "$dir_path is not a directory."
+    echo "autoadd: $dir_path is not a directory."
   fi
 done
 
