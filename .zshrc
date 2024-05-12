@@ -70,36 +70,6 @@ export http_proxy="http://127.0.0.1:7890"
 export https_proxy="http://127.0.0.1:7890"
 export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
-# init nala package
-if ! hash nala &>/dev/null; then
-  sudo apt update && sudo apt install -y nala
-  apps=(
-    "jq"
-    "gh"
-    "curl"
-    "lua5.3"
-    "aria2"
-    "cmake"
-    "meson"
-    "scdoc"
-    "foot"
-    "tmux"
-    "silversearcher-ag"
-    "sqlite3"
-    "redshift"
-    "nmap"
-    "inotify-tools"
-    "sccache"
-    "chromium-browser"
-    "s-nail"
-  )
-
-  for app in "${apps[@]}"; do
-    sudo nala install -y $app
-  done
-
-fi
-
 # ###  Autoload  ##############################################################
 
 # autoload

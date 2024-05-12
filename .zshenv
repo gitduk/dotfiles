@@ -86,17 +86,7 @@ addPath "$HOME/anaconda3/bin"
 # ###  Envs  ##################################################################
 
 # editor
-if hash nvim &>/dev/null; then
-  export EDITOR="nvim"
-elif hash hx &>/dev/null; then
-  export EDITOR="hx"
-elif hash vim &>/dev/null; then
-  export EDITOR="vim"
-else
-  sudo apt install vim
-  export EDITOR="vim"
-fi
-
+export EDITOR="hx"
 export SUDO_EDITOR="$EDITOR"
 export VISUAL="$EDITOR"
 

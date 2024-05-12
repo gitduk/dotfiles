@@ -2,42 +2,81 @@
   "features": {
     "copilot": false
   },
-  "theme": "One Dark",
+  "hour_format": "hour24",
   "autosave": "on_focus_change",
+  "auto_update": false,
   "buffer_font_size": 14,
   "buffer_font_family": "MesloLGM Nerd Font",
-  "format_on_save": "on",
   "vim_mode": true,
   "preferred_line_length": 80,
-
-  // disable cursor blink
+  "buffer_font_features": {
+    "zero": true
+  },
+  "theme": {
+    "mode": "light",
+    "light": "Catppuccin Latte",
+    "dark": "One Dark"
+  },
+  "format_on_save": "on",
+  "formatter": "language_server",
   "cursor_blink": true,
-
-  // use relative line numbers
   "relative_line_numbers": true,
-
-  // hide the scroll bar
-  // "scrollbar": { "show": "never" },
-
-  // allow cursor to reach edges of screen
   "vertical_scroll_margin": 0,
   "gutter": {
-    // disable line numbers completely:
     "line_numbers": true
   },
-
+  "centered_layout": {
+    "left_padding": 0.2,
+    "right_padding": 0.2
+  },
   "vim": {
-    // "always": use system clipboard
-    // "never": don't use system clipboard
-    // "on_yank": use system clipboard for yank operations
-    "use_system_clipboard": "always",
-    // Lets `f` and `t` motions extend across multiple lines
+    "use_system_clipboard": "on_yank",
     "use_multiline_find": true
   },
-
+  "scrollbar": {
+    "show": "auto",
+    "cursors": true,
+    "git_diff": true,
+    "search_results": true,
+    "selected_symbol": true,
+    "diagnostics": true
+  },
+  "tab_bar": {
+    "show": true,
+    "show_nav_history_buttons": true
+  },
+  "tabs": {
+    "close_position": "right",
+    "git_status": false
+  },
+  "toolbar": {
+    "breadcrumbs": true,
+    "quick_actions": true
+  },
+  "git": {
+    "git_gutter": "tracked_files",
+    "inline_blame": {
+      "enabled": true
+    }
+  },
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true,
+    "edit_debounce_ms": 700,
+    "scroll_debounce_ms": 50
+  },
+  "journal": {
+    "path": "~",
+    "hour_format": "hour24"
+  },
   "lsp": {
     "rust-analyzer": {
       "initialization_options": {
+        "check": {
+          "command": "clippy-driver"
+        },
         "inlayHints": {
           "maxLength": null,
           "lifetimeElisionHints": {
@@ -50,7 +89,6 @@
         }
       }
     },
-
     "typescript-language-server": {
       "initialization_options": {
         "preferences": {
@@ -66,10 +104,36 @@
       }
     }
   },
-
   "language_overrides": {
     "JSON": {
       "tab_size": 2
     }
+  },
+  "preview_tabs": {
+    "enabled": true,
+    "enable_preview_from_file_finder": false,
+    "enable_preview_from_code_navigation": false
+  },
+  "terminal": {
+    "alternate_scroll": "off",
+    "blinking": "terminal_controlled",
+    "copy_on_select": true,
+    "env": {},
+    "font_family": null,
+    "font_features": null,
+    "font_size": null,
+    "option_as_meta": false,
+    "button": false,
+    "shell": {},
+    "toolbar": {
+      "title": true
+    },
+    "working_directory": "current_project_directory"
+  },
+  "project_panel": {
+    "button": true,
+    "dock": "left",
+    "git_status": true,
+    "default_width": 10
   }
 }

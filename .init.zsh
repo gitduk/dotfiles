@@ -2,6 +2,36 @@
 
 # ###  Scripts  ###############################################################
 
+# init nala package
+if ! hash nala &>/dev/null; then
+  sudo apt update && sudo apt install -y nala
+  apps=(
+    "jq"
+    "gh"
+    "curl"
+    "lua5.3"
+    "aria2"
+    "cmake"
+    "meson"
+    "scdoc"
+    "foot"
+    "tmux"
+    "silversearcher-ag"
+    "sqlite3"
+    "redshift"
+    "nmap"
+    "inotify-tools"
+    "sccache"
+    "chromium-browser"
+    "s-nail"
+  )
+
+  for app in "${apps[@]}"; do
+    sudo nala install -y $app
+  done
+
+fi
+
 # Astrovim
 if [[ ! -e "$HOME/.config/nvim" ]]; then
   info "Install astrovim"
@@ -185,6 +215,9 @@ f.sh -m "binary" "localsend/localsend" "LocalSend-.*-linux-x86-64.AppImage" -n "
 
 # ctop
 f.sh -m "binary" "bcicen/ctop" "ctop-0.7.7-linux-amd64"
+
+# nvtop
+f.sh -m "binary" "Syllo/nvtop" "nvtop-x86_64.AppImage"
 
 # ###  Deb  ###################################################################
 

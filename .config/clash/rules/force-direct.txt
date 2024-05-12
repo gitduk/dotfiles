@@ -1,3 +1,2 @@
 # 强制直连域名列表
 DOMAIN,leetcode.cn
-DOMAIN,weixin.qq.com

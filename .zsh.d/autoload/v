@@ -1,17 +1,18 @@
 #!/usr/bin/env zsh
 
 # Set a default editor if $EDITOR is not set
-if ! hash $EDITOR &>/dev/null; then
-  if hash nvim &>/dev/null; then
-    EDITOR="nvim"
-  elif hash hx &>/dev/null; then
-    EDITOR="hx"
-  elif hash vim &>/dev/null; then
-    EDITOR="vim"
-  else
-    sudo apt install vim && EDITOR="vim"
+editors=(
+  "hx"
+  "nvim"
+  "vim"
+)
+
+for e in $editors; do
+  if hash $e &>/dev/null; then
+    export EDITOR=$e
+    break
   fi
-fi
+done
 
 # Function to edit a file or open the editor
 function edit_file {

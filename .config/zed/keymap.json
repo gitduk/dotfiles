@@ -61,36 +61,85 @@
       "cmd-v": "terminal::Paste",
       "cmd-k": "terminal::Clear",
       // Some nice conveniences
-      "cmd-backspace": ["terminal::SendText", "\u0015"],
-      "cmd-right": ["terminal::SendText", "\u0005"],
-      "cmd-left": ["terminal::SendText", "\u0001"],
+      "cmd-backspace": [
+        "terminal::SendText",
+        "\u0015"
+      ],
+      "cmd-right": [
+        "terminal::SendText",
+        "\u0005"
+      ],
+      "cmd-left": [
+        "terminal::SendText",
+        "\u0001"
+      ],
       // Terminal.app compatibility
-      "alt-left": ["terminal::SendText", "\u001bb"],
-      "alt-right": ["terminal::SendText", "\u001bf"],
+      "alt-left": [
+        "terminal::SendText",
+        "\u001bb"
+      ],
+      "alt-right": [
+        "terminal::SendText",
+        "\u001bf"
+      ],
       // There are conflicting bindings for these keys in the global context.
       // these bindings override them, remove at your own risk:
-      "up": ["terminal::SendKeystroke", "up"],
-      "pageup": ["terminal::SendKeystroke", "pageup"],
-      "down": ["terminal::SendKeystroke", "down"],
-      "pagedown": ["terminal::SendKeystroke", "pagedown"],
-      "escape": ["terminal::SendKeystroke", "escape"],
-      "enter": ["terminal::SendKeystroke", "enter"],
-      "ctrl-c": ["terminal::SendKeystroke", "ctrl-c"]
+      "up": [
+        "terminal::SendKeystroke",
+        "up"
+      ],
+      "pageup": [
+        "terminal::SendKeystroke",
+        "pageup"
+      ],
+      "down": [
+        "terminal::SendKeystroke",
+        "down"
+      ],
+      "pagedown": [
+        "terminal::SendKeystroke",
+        "pagedown"
+      ],
+      "escape": [
+        "terminal::SendKeystroke",
+        "escape"
+      ],
+      "enter": [
+        "terminal::SendKeystroke",
+        "enter"
+      ],
+      "ctrl-c": [
+        "terminal::SendKeystroke",
+        "ctrl-c"
+      ]
     }
-  },
-  {
-     "context": "Editor && vim_mode == insert && !menu",
-     "bindings": {
-        "j k": "vim::NormalBefore"
-     }
   },
   {
     "context": "Dock",
     "bindings": {
-        "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
-        "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"],
-        "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
-        "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"]
+      "ctrl-w h": [
+        "workspace::ActivatePaneInDirection",
+        "Left"
+      ],
+      "ctrl-w l": [
+        "workspace::ActivatePaneInDirection",
+        "Right"
+      ],
+      "ctrl-w k": [
+        "workspace::ActivatePaneInDirection",
+        "Up"
+      ],
+      "ctrl-w j": [
+        "workspace::ActivatePaneInDirection",
+        "Down"
+      ]
+    }
+  },
+  {
+    "context": "Editor && vim_mode == insert && !menu",
+    "bindings": {
+      "j k": "vim::NormalBefore",
+      "ctrl-h": "vim::Backspace"
     }
   }
 ]
