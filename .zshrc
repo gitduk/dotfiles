@@ -72,21 +72,11 @@ export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
 # ###  Autoload  ##############################################################
 
-# autoload
-if [[ -d "$ZLOAD" ]]; then
-  files=("$ZLOAD"/*(N))
-  for file in "${files[@]}"; do
-    autoload -Uz $file
-  done
-fi
+# Autoload functions
+autoload -Uz ${ZLOAD}/**/*(:t)
 
-# source
-if [[ -d "$ZSH_DIR" ]]; then
-  files=("$ZSH_DIR"/*.zsh(N))
-  for file in "${files[@]}"; do
-    source "$file"
-  done
-fi
+# Source scripts
+for script ($ZSH_DIR/*.zsh(N)) source "$script"
 
 # cadd list
 export AUTOADD_DIRS=(

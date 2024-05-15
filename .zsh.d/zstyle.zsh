@@ -48,6 +48,7 @@ zstyle ':completion:*:corrections' format '%F{yellow}![ %d (errors: %e) ]!%f'
 zstyle ':completion:*:warnings' format '%F{red}[ no matches found ]%f'
 
 ########################### History ###########################
+
 zstyle ':completion:*:history-words' stop yes
 zstyle ':completion:*:history-words' remove-all-dups yes
 zstyle ':completion:*:history-words' list false 
@@ -66,24 +67,4 @@ zstyle -e ':completion::*:*:*:hosts' hosts 'reply=(${=${${(f)"$(cat {/etc/ssh_,~
 # scp/rsync  
 zstyle ':completion:*:(scp|rsync):*' group-order files all-files users hosts-host hosts-ipaddr hosts-domain
 zstyle ':completion:*:(scp|rsync):*' tag-order 'users:-user:user hosts:-host:host hosts:-ipaddr:ip\ address hosts:-domain:domain *'
-
-# Kill
-zstyle ':completion:*:*:*:*:processes' command 'ps -u $LOGNAME -o pid,user,command -w'
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;36=0=01'
-zstyle ':completion:*:*:kill:*' menu yes select
-zstyle ':completion:*:*:kill:*' force-list always
-zstyle ':completion:*:*:kill:*' insert-ids single
-
-# Man  
-zstyle ':completion:*:manuals' separate-sections true
-zstyle ':completion:*:manuals.(^1*)' insert-sections true
-zstyle ':completion:*:man:*' menu yes select
-
-# cd
-zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories  
-zstyle ':completion:*:*:cd:*:directory-stack' menu yes select
-zstyle ':completion:*:-tilde-:*' group-order 'named-directories' 'path-directories' 'users' 'expand'
-
-# Git
-zstyle ':completion:*:git-checkout:*' sort false
 

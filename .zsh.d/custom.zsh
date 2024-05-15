@@ -75,9 +75,6 @@ hash zoxide &>/dev/null && eval "$(zoxide init zsh --cmd j)"
 # fi
 # unset __conda_setup
 
-# Load Angular CLI autocompletion.
-hash ng &>/dev/null && source <(ng completion script)
-
 # hyprland socket
 export HYPRLAND_INSTANCE_SIGNATURE="$(ls /tmp/hypr/*.lock &>/dev/null|tail -n 1|awk -F '/' '{print $4}'|sed 's|.lock||')"
 

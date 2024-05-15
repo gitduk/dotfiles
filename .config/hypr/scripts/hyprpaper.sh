@@ -65,11 +65,11 @@ switch_wallpaper() {
 
 cycle_wallpaper() {
   while true; do
-	  find "$WALLPAPER_DIR" -type f | while read -r img; do
-	    echo "$((RANDOM % 1000)):$img"
-	  done | sort -n | cut -d':' -f2- | while read -r img; do
+    find "$WALLPAPER_DIR" -type f | while read -r img; do
+        echo "$((RANDOM % 1000)):$img"
+    done | sort -n | cut -d':' -f2- | while read -r img; do
       sleep ${INTERVAL:-1800} && load_wallpaper "$WALLPAPER_DIR/$img"
-		done
+    done
   done
 }
 
