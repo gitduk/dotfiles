@@ -133,6 +133,53 @@ udpPacketSize = 1500
 # metadatas.var1 = "abc"
 # metadatas.var2 = "123"
 
-# Include other config files for proxies.
-includes = [".frp/conf.d/*.toml"]
+[[proxies]]
+# 'ssh' is the unique proxy name
+# If global user is not empty, it will be changed to {user}.{proxy} such as 'your_name.ssh'
+name = "code"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 8080
+remotePort = 8080
 
+# Limit bandwidth for this proxy, unit is KB and MB
+transport.bandwidthLimit = "1MB"
+
+[[proxies]]
+# 'ssh' is the unique proxy name
+# If global user is not empty, it will be changed to {user}.{proxy} such as 'your_name.ssh'
+name = "ssh"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 2222
+
+# Limit bandwidth for this proxy, unit is KB and MB
+transport.bandwidthLimit = "1MB"
+# Resolve your domain names to [serverAddr] so you can use http://web01.yourdomain.com to browse web01 and http://web02.yourdomain.com to browse 
+
+[[proxies]]
+name = "store"
+type = "http"
+localIP = "127.0.0.1"
+localPort = 8000
+# http username and password are safety certification for http protocol
+# if not set, you can access this customDomains without certification
+httpUser = "admin"
+httpPassword = "admin"
+# if domain for frps is frps.com, then you can access [web01] proxy by URL http://web01.frps.com
+subdomain = "web01"
+customDomains = ["web01.yourdomain.com"]
+# locations is only available for http type
+locations = ["/", "/pic"]
+# route requests to this service if http basic auto user is abc
+# routeByHTTPUser = abc
+hostHeaderRewrite = "example.com"
+requestHeaders.set.x-from-where = "frp"
+healthCheck.type = "http"
+# frpc will send a GET http request '/status' to local http service
+# http service is alive when it return 2xx http response code
+healthCheck.path = "/status"
+healthCheck.intervalSeconds = 10
+healthCheck.maxFailed = 3
+healthCheck.timeoutSeconds = 3
