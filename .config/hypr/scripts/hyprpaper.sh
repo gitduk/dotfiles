@@ -15,7 +15,6 @@ load_wallpaper() {
     load_status="$(hyprctl hyprpaper preload "$WALLPAPER_DIR/$wallpaper")"
     if [[ $load_status == "ok" ]]; then
       notify-send "${wallpaper%.*}"
-      echo "$MONITOR,$WALLPAPER_DIR/$wallpaper" >> ~/wallpaper
       hyprctl hyprpaper wallpaper "$MONITOR,$WALLPAPER_DIR/$wallpaper"
     else
       notify-send "Load $wallpaper faield: $load_status"
