@@ -1,0 +1,295 @@
+mixed-port: 7890
+allow-lan: true
+bind-address: "*"
+mode: rule
+external-controller: 0.0.0.0:9090
+
+proxy-groups:
+  - name: "🌻 节点选择"
+    type: "select"  
+    proxies:
+      - "[]🌲 负载均衡-轮询"
+      - "[]🍁 负载均衡-散列"
+      - "[]🐏 手动切换"
+      - "[]🇭🇰 香港"
+      - "[]🇹🇼 台湾" 
+      - "[]🇸🇬 狮城"
+      - "[]🇯🇵 日本"
+      - "[]🇺🇲 美国"
+      - "[]🇰🇷 韩国"
+      - "[]🇮🇳 印度"
+      - "[]🇹🇷 土耳其"
+  
+  - name: "🌲 负载均衡-轮询"
+    type: "load-balance"
+    strategy: "round-robin"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    proxies:
+      - "香港[^-]|台湾|日本"
+  
+  - name: "🍁 负载均衡-散列" 
+    type: "load-balance"
+    strategy: "consistent-hashing"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    proxies:
+      - "香港[^-]|台湾|日本"
+  
+  - name: "🐏 手动切换"
+    type: "select"
+    proxies:
+      - ".*?"
+  
+  - name: "🐻 Chat"
+    type: "select"
+    proxies:
+      - "[]🇮🇳 印度"
+      - "[]🇹🇷 土耳其"
+      - "[]🇰🇷 韩国"
+      - "[]🇺🇲 美国"
+      - "[]🐏 手动切换"
+  
+  - name: "🐼 全球直连"
+    type: "select" 
+    proxies:
+      - "[]DIRECT"
+      - "[]🌻 节点选择"
+  
+  - name: "🦍 广告拦截"
+    type: "select"
+    proxies:
+      - "[]REJECT"
+      - "[]🐼 全球直连"
+  
+  - name: "🪁 Match"
+    type: "select"
+    proxies:
+      - "[]🌻 节点选择"
+      - "[]DIRECT"
+      
+  - name: "🐝 FallBack"
+    type: "fallback"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "应急|专线|IEPL"
+  
+  - name: "🌈 订阅信息"
+    type: "select"
+    proxies:
+      - "套餐|到期|剩余|流量|重置|时间|官网|产品|上网|更新|订阅|平台|expire"
+  
+  - name: "🇭🇰 香港"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "香港[^-]|HK|Hong Kong"
+  
+  - name: "🇹🇼 台湾"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180 
+    tolerance: 100
+    proxies:
+      - "台|新北|彰化|TW|Taiwan"
+  
+  - name: "🇸🇬 狮城"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "新加坡|坡|狮城|SG|Singapore"
+  
+  - name: "🇯🇵 日本"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "日本|川日|东京|大阪|泉日|埼玉|沪日|深日|[^-]日|JP|Japan"
+  
+  - name: "🇺🇲 美国"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "美|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|US|United States"
+  
+  - name: "🇰🇷 韩国"
+    type: "url-test" 
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "韩国|韩|首尔|韓|KR|Korea|KOR"
+      
+  - name: "🇮🇳 印度"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "印度|孟买|India"
+  
+  - name: "🇹🇷 土耳其"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "土耳其|伊斯坦布尔|TR|Turkey"
+  
+  - name: "🇻🇳 越南"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204" 
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "越南"
+  
+  - name: "🇵🇭 菲律宾"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "菲律宾"
+  
+  - name: "🇲🇾 马来西亚"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "马来西亚"
+  
+  - name: "🇦🇺 澳大利亚"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "澳大利亚"
+  
+  - name: "🇷🇺 俄罗斯"
+    type: "url-test" 
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "俄罗斯"
+  
+  - name: "🇬🇧 英国"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "英国"
+  
+  - name: "🇩🇪 德国"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "德国"
+  
+  - name: "🇫🇷 法国"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100 
+    proxies:
+      - "法国"
+  
+  - name: "🇳🇱 荷兰"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "荷兰"
+  
+  - name: "🇷🇴 罗马尼亚"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "罗马尼亚"
+  
+  - name: "🇺🇦 乌克兰"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204" 
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "乌克兰"
+  
+  - name: "🇵🇱 波兰"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "波兰"
+  
+  - name: "🇨🇦 加拿大"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "加拿大"
+  
+  - name: "🇮🇱 以色列"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "以色列"
+  
+  - name: "🇦🇷 阿根廷" 
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "阿根廷"
+  
+  - name: "🇱🇺 卢森堡"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "卢森堡"
+  
+  - name: "🇦🇹 奥地利"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "奥地利"
+  
+  - name: "🇦🇶 南极"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    proxies:
+      - "南极"
+  
+rules:
+  - direct.txt,🐼 全球直连
+  - lan_cidr.txt,DIRECT,no-resolve
+  - MATCH,🪁 Match
