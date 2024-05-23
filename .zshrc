@@ -84,10 +84,7 @@ export AUTOADD_DIRS=(
   "$HOME/.etc.d/"
   "$HOME/.tmux.d/"
   "$HOME/.compose.d/"
-  "$HOME/.config/hypr/"
   "$HOME/.config/nvim/lua/"
-  "$HOME/.config/systemd/user/"
-  "$HOME/.local/share/applications/"
 )
 
 # ###  Brew  ##################################################################

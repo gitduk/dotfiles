@@ -1,9 +1,0 @@
-[Unit]
-Description=Pueue Daemon - CLI process scheduler and manager
-
-[Service]
-Restart=no
-ExecStart=%h/.local/bin/pueued -vv
-
-[Install]
-WantedBy=default.target
