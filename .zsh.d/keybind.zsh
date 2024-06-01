@@ -19,7 +19,6 @@ bindkey -M viins "jk" vi-cmd-mode
 
 # execute command
 # bindkey -s '^semicolon' 'xclip -selection clipboard <<< "$(greenclip print|fzf --prompt="clipboard> ")"^M'
-bindkey -s '^p' 'hyprland^M'
 
 # ###  Plugin keybind  ########################################################
 

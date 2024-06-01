@@ -4,7 +4,7 @@ After = network.target
 
 [Service]
 Type = simple
-ExecStart = %h/.local/bin/clash -f %h/.config/clash/config.yaml
+ExecStart = %h/.local/bin/clash -f %h/.config/mihomo/config.yaml
 Restart = always
 RestartSec = 5s
 

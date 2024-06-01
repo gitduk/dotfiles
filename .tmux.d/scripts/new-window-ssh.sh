@@ -36,6 +36,6 @@ case "$command" in
 	tmux new-window "$@" $(echo "$command" | sed -e 's/;/\\;/g')
 	;;
 *)
-	tmux new-window "$@"
+	tmux new-window -c "#{pane_current_path}" "$@"
 	;;
 esac
