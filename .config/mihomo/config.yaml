@@ -1,0 +1,209 @@
+# HTTP(S) 和 SOCKS 代理混合端口
+mixed-port: 7890
+
+# socks 代理端口
+socks-port: 7891
+
+# 允许局域网连接
+allow-lan: true
+
+# 绑定 IP 地址，仅作用于 allow-lan 为 true，'*'表示所有地址
+bind-address: "*"
+
+# 规则引擎
+mode: rule
+
+# Clash 内核输出日志的等级
+# silent 静默，不输出
+# error 仅输出发生错误至无法使用的日志
+# warning 输出发生错误但不影响运行的日志，以及 error 级别内容
+# info 输出一般运行的内容，以及 error 和 warning 级别的日志
+# debug 尽可能的输出运行中所有的信息
+log-level: info
+
+# 开启 IPv6 总开关，关闭阻断所有 IPv6 链接和屏蔽 DNS 请求 AAAA 记录
+ipv6: true
+
+# 控制 Clash 发出 TCP Keep Alive 包的间隔，减少移动设备耗电问题的临时措施。
+keep-alive-interval: 30
+
+# 控制是否让 Clash 去匹配进程
+# always 开启，强制匹配所有进程
+# strict 默认，由 Clash 判断是否开启
+# off 不匹配进程，推荐在路由器上使用此模式
+find-process-mode: strict
+
+# 外部控制器，可以使用 RESTful API 来控制你的 Clash 内核
+external-controller: 0.0.0.0:9090
+
+# API 的访问密钥
+secret: ""
+
+# 可以将静态网页资源 (比如 Clash-dashboard) 运行在 Clash API, 路径为 API 地址/ui
+external-ui: ./dashboard/
+
+# 外部用户界面名字，合并为 external-ui/xd
+# external-ui-name: xd
+
+# 外部用户界面下载地址
+external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
+
+# 缓存
+profile:
+  # 储存 API 对策略组的选择，以供下次启动时使用
+  store-selected: true
+  # 储存 fakeip 映射表，域名再次发生连接时，使用原有映射地址
+  store-fake-ip: true
+
+
+# 更换延迟计算方式，去除握手等额外延迟
+unified-delay: true
+
+# TCP 并发
+tcp-concurrent: true
+
+# 全局 TLS 指纹，优先低于 proxy 内的 client-fingerprint
+# 目前支持开启 TLS 传输的 TCP/grpc/WS/HTTP , 支持协议有 VLESS,Vmess 和 trojan
+global-client-fingerprint: chrome
+
+# 更改 geoip 使用文件，mmdb 或者 dat，可选 true/false,true为 dat，默认值 false
+geodata-mode: true 
+
+# standard：标准加载器
+# memconservative：专为内存受限 (小内存) 设备优化的加载器 (默认值)
+geodata-loader: memconservative
+
+# 自动更新 GEO
+geo-auto-update: false
+
+# 更新间隔，单位为小时
+geo-update-interval: 24
+
+# 自定 GEO 下载地址
+geox-url:
+  geoip: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+  asn: "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+
+# 自定义外部资源下载时使用的的 UA，默认为 clash.meta
+global-ua: clash.meta
+
+# hosts 域名支持通配，例如 *.clash.dev或 +.example.com，别名不支持通配
+hosts:
+  '*.clash.dev': 127.0.0.1
+  'alpha.clash.dev': '::1'
+  test.com: [1.1.1.1, 2.2.2.2]
+  baidu.com: google.com
+
+# DNS 配置
+dns:
+  enable: false
+  prefer-h3: true
+  use-hosts: true
+  use-system-hosts: true
+  listen: 0.0.0.0:1053
+  ipv6: true
+  default-nameserver:
+    - 223.5.5.5
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - '*.lan'
+    - localhost.ptlogin2.qq.com
+  nameserver-policy:
+    'www.baidu.com': '114.114.114.114'
+    '+.internal.crop.com': '10.0.0.1'
+    'geosite:cn': https://doh.pub/dns-query
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+    - system
+  fallback:
+    - tls://8.8.4.4
+    - tls://1.1.1.1
+  proxy-server-nameserver:
+    - https://doh.pub/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    geosite:
+      - gfw
+    ipcidr:
+      - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'
+
+tun:
+  enable: true
+  stack: system
+  auto-route: true
+  auto-detect-interface: true
+
+p: &p
+  type: http
+  interval: 3600
+  health-check:
+    enable: true
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+
+proxy-providers:
+  hk:
+    <<: *p
+    url: http://127.0.0.1:3078/provider?re=%E9%A6%99%E6%B8%AF
+    path: ./proxies/hk.yaml
+
+proxy-groups:
+  # - name: 🪁 Match
+  #   type: url-test
+  #   interval: 3600 
+  #   url: http://www.gstatic.com/generate_204
+  #   use:
+  #     - caiyun
+  #   proxies:
+  #     - DIRECT
+  - name: 🪁 Match
+    type: select
+    interval: 3600 
+    url: http://www.gstatic.com/generate_204
+    use:
+      - hk
+    proxies:
+      - DIRECT
+
+rule-providers:
+  direct:
+    type: file
+    path: ./rules/direct.txt
+    behavior: classical
+    format: text
+
+rules:
+- DOMAIN,dl.google.com,🪁 Match
+- DOMAIN,leetcode.com,🪁 Match
+- DOMAIN,claude.ai,🪁 Match
+- DOMAIN-SUFFIX,googleapis.cn,🪁 Match
+- DOMAIN-SUFFIX,googleapis.com,🪁 Match
+- IP-CIDR,0.0.0.0/8,DIRECT,no-resolve
+- IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+- IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
+- IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+- IP-CIDR,169.254.0.0/16,DIRECT,no-resolve
+- IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+- IP-CIDR,192.0.0.0/24,DIRECT,no-resolve
+- IP-CIDR,192.0.2.0/24,DIRECT,no-resolve
+- IP-CIDR,192.88.99.0/24,DIRECT,no-resolve
+- IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+- IP-CIDR,198.18.0.0/15,DIRECT,no-resolve
+- IP-CIDR,198.51.100.0/24,DIRECT,no-resolve
+- IP-CIDR,203.0.113.0/24,DIRECT,no-resolve
+- IP-CIDR,224.0.0.0/3,DIRECT,no-resolve
+- IP-CIDR,::/127,DIRECT,no-resolve
+- IP-CIDR,fc00::/7,DIRECT,no-resolve
+- IP-CIDR,fe80::/10,DIRECT,no-resolve
+- IP-CIDR,ff00::/8,DIRECT,no-resolve
+- RULE-SET,direct,DIRECT,no-resolve
+- MATCH,🪁 Match

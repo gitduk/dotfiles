@@ -5,7 +5,7 @@ Wants = network.target
 
 [Service]
 Type = simple
-ExecStart = %h/.local/bin/frpc -c %h/.frp/frpc.toml
+ExecStart = %h/.local/bin/frpc -c %h/.frpc.toml
 Restart = always
 RestartSec = 5s
 
