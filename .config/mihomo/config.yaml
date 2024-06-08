@@ -1,8 +1,11 @@
 # HTTP(S) 和 SOCKS 代理混合端口
 mixed-port: 7890
 
-# socks 代理端口
-socks-port: 7891
+# redirect 透明代理端口，仅能代理 TCP 流量
+redir-port: 7891
+
+# tproxy 透明代理端口，可代理 TCP 与 UDP 流量
+tproxy-port: 7892
 
 # 允许局域网连接
 allow-lan: true
@@ -31,13 +34,13 @@ keep-alive-interval: 30
 # always 开启，强制匹配所有进程
 # strict 默认，由 Clash 判断是否开启
 # off 不匹配进程，推荐在路由器上使用此模式
-find-process-mode: strict
+find-process-mode: off
 
 # 外部控制器，可以使用 RESTful API 来控制你的 Clash 内核
 external-controller: 0.0.0.0:9090
 
 # API 的访问密钥
-secret: ""
+# secret: ""
 
 # 可以将静态网页资源 (比如 Clash-dashboard) 运行在 Clash API, 路径为 API 地址/ui
 external-ui: ./dashboard/
@@ -55,9 +58,8 @@ profile:
   # 储存 fakeip 映射表，域名再次发生连接时，使用原有映射地址
   store-fake-ip: true
 
-
 # 更换延迟计算方式，去除握手等额外延迟
-unified-delay: true
+unified-delay: false
 
 # TCP 并发
 tcp-concurrent: true
@@ -98,49 +100,130 @@ hosts:
 
 # DNS 配置
 dns:
-  enable: false
+  enable: true
   prefer-h3: true
   use-hosts: true
   use-system-hosts: true
   listen: 0.0.0.0:1053
   ipv6: true
-  default-nameserver:
-    - 223.5.5.5
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
   fake-ip-filter:
-    - '*.lan'
-    - localhost.ptlogin2.qq.com
-  nameserver-policy:
-    'www.baidu.com': '114.114.114.114'
-    '+.internal.crop.com': '10.0.0.1'
-    'geosite:cn': https://doh.pub/dns-query
+    - '*'
+    - '+.lan'
+  # 默认 DNS, 用于解析 DNS 服务器 的域名, 必须为 IP, 可为加密 DNS
+  default-nameserver:
+    - 223.5.5.5
+  # 代理节点域名解析服务器，仅用于解析代理节点的域名
+  proxy-server-nameserver:
+    - https://doh.pub/dns-query
+  # 默认的域名解析服务器，如不配置 fallback/proxy-server-nameserver , 则所有域名都由 nameserver 解析
   nameserver:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
     - system
+  # 指定域名查询的解析服务器，可使用 geosite, 优先于 nameserver/fallback 查询
+  nameserver-policy:
+    'www.baidu.com': '114.114.114.114'
+    '+.internal.crop.com': '10.0.0.1'
+    'geosite:cn': https://doh.pub/dns-query
+  # 后备域名解析服务器，一般情况下使用境外 DNS, 保证结果可信
+  # 配置 fallback后默认启用 fallback-filter, geoip-code 为 cn
   fallback:
-    - tls://8.8.4.4
+    - tls://8.8.8.8
     - tls://1.1.1.1
-  proxy-server-nameserver:
-    - https://doh.pub/dns-query
+  # 后备域名解析服务器筛选，满足条件的将使用 fallback结果或只使用 fallback解析
   fallback-filter:
     geoip: true
+    # 除了 geoip-code 配置的国家 IP, 其他的 IP 结果会被视为污染
     geoip-code: CN
+    # geosite 列表的内容被视为已污染，匹配到 geosite 的域名，将只使用 fallback 解析，不去使用 nameserver
     geosite:
       - gfw
+    # 这些网段的结果会被视为污染，nameserver解析出这些结果时将会采用 fallback的解析结果
     ipcidr:
       - 240.0.0.0/4
+    # 这些域名被视为已污染，匹配到这些域名，会直接使用 fallback解析，不去使用 nameserver
     domain:
       - '+.google.com'
       - '+.facebook.com'
       - '+.youtube.com'
 
+# 域名嗅探
+sniffer:
+  enable: false
+  # 对 redir-host 类型识别的流量进行强制嗅探
+  force-dns-mapping: true
+  # 对所有未获取到域名的流量进行强制嗅探
+  parse-pure-ip: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  # 需要强制嗅探的域名（默认情况下只对IP进行嗅探）
+  force-domain:
+    - +.v2ex.com
+  # 需要跳过嗅探的域名。主要解决部分站点sni字段非域名，导致嗅探结果异常的问题，如米家设备Mijia Cloud
+  skip-domain:
+    - Mijia Cloud
+
 tun:
   enable: true
+  # tun 模式堆栈，如无使用问题，建议使用 mixed 栈，默认 gvisor
+  # system 使用系统协议栈，可以提供更稳定/全面的 tun 体验，且占用相对其他堆栈更低
+  # gvisor 通过在用户空间中实现网络协议栈，可以提供更高的安全性和隔离性，同时可以避免操作系统内核和用户空间之间的切换，从而在特定情况下具有更好的网络处理性能
+  # mixed 混合堆栈，tcp 使用 system栈，udp 使用 gvisor栈，使用体验可能相对更好
   stack: system
+  # 自动设置全局路由，可以自动将全局流量路由进入 tun 网卡。
   auto-route: true
+  # 自动选择流量出口接口，多出口网卡同时连接的设备建议手动指定出口网卡
   auto-detect-interface: true
+  # dns 劫持，将匹配到的连接导入内部 dns 模块，不书写协议则为 udp://
+  dns-hijack:
+    - any:53
+    - tcp://any:53
+  device: utun0
+  mtu: 9000
+  strict-route: true
+  gso: true
+  gso-max-size: 65536
+  udp-timeout: 300
+  endpoint-independent-nat: false
+  include-interface:
+    - eth0
+  exclude-interface:
+    - eth1
+  inet4-route-address:
+    - 0.0.0.0/1
+    - 128.0.0.0/1
+  inet6-route-address:
+    - "::/1"
+    - "8000::/1"
+  inet4-route-exclude-address:
+    - 192.168.0.0/16
+  inet6-route-exclude-address:
+    - fc00::/7
+  include-uid:
+    - 0
+  include-uid-range:
+    - 1000:9999
+  exclude-uid:
+    - 1000
+  exclude-uid-range:
+    - 1000:9999
+  include-android-user:
+    - 0
+    - 10
+  include-package:
+    - com.android.chrome
+  exclude-package:
+    - com.android.captiveportallogin
+  table-index: 2022
 
 p: &p
   type: http
@@ -151,30 +234,202 @@ p: &p
     interval: 300
 
 proxy-providers:
-  hk:
+  ALL:
     <<: *p
-    url: http://127.0.0.1:3078/provider?re=%E9%A6%99%E6%B8%AF
+    url: "http://127.0.0.1:3078/provider?re="
+    path: ./proxies/all.yaml
+  香港:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E9%A6%99%E6%B8%AF"
     path: ./proxies/hk.yaml
+  台湾:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E5%8F%B0%E6%B9%BE"
+    path: ./proxies/tw.yaml
+  新加坡:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E7%8B%AE%E5%9F%8E"
+    path: ./proxies/sg.yaml
+  日本:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E6%97%A5%E6%9C%AC"
+    path: ./proxies/jp.yaml
+  美国:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E7%BE%8E%E5%9B%BD"
+    path: ./proxies/us.yaml
+  韩国:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E9%9F%A9%E5%9B%BD"
+    path: ./proxies/kr.yaml
+  印度:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E5%8D%B0%E5%BA%A6"
+    path: ./proxies/in.yaml
+  土耳其:
+    <<: *p
+    url: "http://127.0.0.1:3078/provider?re=%E5%9C%9F%E8%80%B3%E5%85%B6"
+    path: ./proxies/tr.yaml
 
 proxy-groups:
-  # - name: 🪁 Match
-  #   type: url-test
-  #   interval: 3600 
-  #   url: http://www.gstatic.com/generate_204
-  #   use:
-  #     - caiyun
-  #   proxies:
-  #     - DIRECT
-  - name: 🪁 Match
-    type: select
-    interval: 3600 
-    url: http://www.gstatic.com/generate_204
-    use:
-      - hk
+  - name: "🌻 节点选择"
+    type: "select"  
     proxies:
-      - DIRECT
+      - "🌲 负载轮询"
+      - "🍁 负载散列"
+      - "🐏 手动切换"
+      - "🇭🇰 香港"
+      - "🇹🇼 台湾" 
+      - "🇸🇬 狮城"
+      - "🇯🇵 日本"
+      - "🇺🇲 美国"
+      - "🇰🇷 韩国"
+      - "🇮🇳 印度"
+      - "🇹🇷 土耳其"
+  
+  - name: "🐏 手动切换"
+    type: "select"
+    use:
+      - "ALL"
+  
+  - name: "🐼 全球直连"
+    type: "select" 
+    proxies:
+      - "DIRECT"
+      - "🌻 节点选择"
+  
+  - name: "🐻 Chat"
+    type: "select"
+    proxies:
+      - "🇯🇵 日本"
+      - "🇮🇳 印度"
+      - "🇹🇷 土耳其"
+      - "🇰🇷 韩国"
+      - "🇺🇲 美国"
+      - "🐏 手动切换"
+  
+  - name: "🐟 漏网之鱼"
+    type: "select"
+    proxies:
+      - "🌻 节点选择"
+      - "DIRECT"
+  
+  - name: "🦍 广告拦截"
+    type: "select"
+    proxies:
+      - "REJECT"
+      - "🐼 全球直连"
+  
+  - name: "🌲 负载轮询"
+    type: "load-balance"
+    strategy: "round-robin"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    use:
+      - "香港"
+      - "台湾"
+      - "日本"
+  
+  - name: "🍁 负载散列" 
+    type: "load-balance"
+    strategy: "consistent-hashing"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    use:
+      - "香港"
+      - "台湾"
+      - "日本"
+  
+  - name: "🇭🇰 香港"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    use:
+      - "香港"
+  
+  - name: "🇹🇼 台湾"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180 
+    tolerance: 100
+    use:
+      - "台湾"
+  
+  - name: "🇸🇬 狮城"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    use:
+      - "新加坡"
+  
+  - name: "🇯🇵 日本"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    use:
+      - "日本"
+  
+  - name: "🇺🇲 美国"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    use:
+      - "美国"
+  
+  - name: "🇰🇷 韩国"
+    type: "url-test" 
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    use:
+      - "韩国"
+      
+  - name: "🇮🇳 印度"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    use:
+      - "印度"
+  
+  - name: "🇹🇷 土耳其"
+    type: "url-test"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 180
+    tolerance: 100
+    use:
+      - "土耳其"
 
 rule-providers:
+  lan_cidr:
+    type: file
+    path: ./rules/lan_cidr.txt
+    behavior: classical
+    format: text
+  cn_cidr:
+    type: file
+    path: ./rules/cn_cidr.txt
+    behavior: classical
+    format: text
+  chat:
+    type: file
+    path: ./rules/chat.txt
+    behavior: classical
+    format: text
+  force-direct:
+    type: file
+    path: ./rules/force-direct.txt
+    behavior: classical
+    format: text
+  force-proxy:
+    type: file
+    path: ./rules/force-proxy.txt
+    behavior: classical
+    format: text
   direct:
     type: file
     path: ./rules/direct.txt
@@ -182,28 +437,11 @@ rule-providers:
     format: text
 
 rules:
-- DOMAIN,dl.google.com,🪁 Match
-- DOMAIN,leetcode.com,🪁 Match
-- DOMAIN,claude.ai,🪁 Match
-- DOMAIN-SUFFIX,googleapis.cn,🪁 Match
-- DOMAIN-SUFFIX,googleapis.com,🪁 Match
-- IP-CIDR,0.0.0.0/8,DIRECT,no-resolve
-- IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
-- IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
-- IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
-- IP-CIDR,169.254.0.0/16,DIRECT,no-resolve
-- IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
-- IP-CIDR,192.0.0.0/24,DIRECT,no-resolve
-- IP-CIDR,192.0.2.0/24,DIRECT,no-resolve
-- IP-CIDR,192.88.99.0/24,DIRECT,no-resolve
-- IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
-- IP-CIDR,198.18.0.0/15,DIRECT,no-resolve
-- IP-CIDR,198.51.100.0/24,DIRECT,no-resolve
-- IP-CIDR,203.0.113.0/24,DIRECT,no-resolve
-- IP-CIDR,224.0.0.0/3,DIRECT,no-resolve
-- IP-CIDR,::/127,DIRECT,no-resolve
-- IP-CIDR,fc00::/7,DIRECT,no-resolve
-- IP-CIDR,fe80::/10,DIRECT,no-resolve
-- IP-CIDR,ff00::/8,DIRECT,no-resolve
-- RULE-SET,direct,DIRECT,no-resolve
-- MATCH,🪁 Match
+  - RULE-SET,lan_cidr,DIRECT,no-resolve
+  - RULE-SET,cn_cidr,DIRECT,no-resolve
+  - RULE-SET,chat,🐻 Chat
+  - RULE-SET,force-proxy,🐟 漏网之鱼
+  - RULE-SET,force-direct,DIRECT,no-resolve
+  - RULE-SET,direct,DIRECT,no-resolve
+  - MATCH,🐟 漏网之鱼
+

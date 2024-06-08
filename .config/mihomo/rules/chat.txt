@@ -3,6 +3,7 @@ DOMAIN,bard.google.com
 DOMAIN,gemini.google.com
 DOMAIN-SUFFIX,bing.com
 DOMAIN-SUFFIX,auth0.com
+DOMAIN-SUFFIX,anthropic.com
 DOMAIN-SUFFIX,challenges.cloudflare.com
 DOMAIN-SUFFIX,chatgpt.com
 DOMAIN-SUFFIX,client-api.arkoselabs.com

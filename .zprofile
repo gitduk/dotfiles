@@ -37,6 +37,12 @@ export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=hyprland
 export XDG_CURRENT_DESKTOP=hyprland
 
+# lang
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+
 # for cmake
 # export CXX=/usr/bin/g++-11
 # export CC=/usr/bin/gcc-11
@@ -51,10 +57,6 @@ export TERMINFO="/lib/terminfo"
 export TERM="xterm-256color"
 export KEYTIMEOUT=20
 export CLIPBOARD="$HOME/.clipboard"
-
-# proxy
-http_proxy=http://127.0.0.1:7890
-https_proxy=http://127.0.0.1:7890
 
 # pkg config
 export PKG_CONFIG_PATH="/usr/lib/pkgconfig:\
