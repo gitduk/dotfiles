@@ -9,48 +9,10 @@
     }
   },
   {
-    "context": "ProjectSearchBar",
+    "context": "Editor && vim_mode == insert && !menu",
     "bindings": {
-      "cmd-enter": "project_search::SearchInNew"
-    }
-  },
-  {
-    "context": "ProjectPanel",
-    "bindings": {
-      "left": "project_panel::CollapseSelectedEntry",
-      "right": "project_panel::ExpandSelectedEntry",
-      "cmd-n": "project_panel::NewFile",
-      "alt-cmd-n": "project_panel::NewDirectory",
-      "cmd-x": "project_panel::Cut",
-      "cmd-c": "project_panel::Copy",
-      "cmd-v": "project_panel::Paste",
-      "cmd-alt-c": "project_panel::CopyPath",
-      "alt-cmd-shift-c": "project_panel::CopyRelativePath",
-      "f2": "project_panel::Rename",
-      "enter": "project_panel::Rename",
-      "space": "project_panel::Open",
-      "backspace": "project_panel::Delete",
-      "alt-cmd-r": "project_panel::RevealInFinder",
-      "alt-shift-f": "project_panel::NewSearchInDirectory"
-    }
-  },
-  {
-    "context": "CollabPanel",
-    "bindings": {
-      "ctrl-backspace": "collab_panel::Remove",
-      "space": "menu::Confirm"
-    }
-  },
-  {
-    "context": "ChannelModal",
-    "bindings": {
-      "tab": "channel_modal::ToggleMode"
-    }
-  },
-  {
-    "context": "ChannelModal > Picker > Editor",
-    "bindings": {
-      "tab": "channel_modal::ToggleMode"
+      "j k": "vim::NormalBefore",
+      "ctrl-h": "editor::Backspace"
     }
   },
   {
@@ -111,7 +73,56 @@
       "ctrl-c": [
         "terminal::SendKeystroke",
         "ctrl-c"
+      ],
+      "ctrl-w": [
+        "terminal::SendKeystroke",
+        "ctrl-w"
       ]
+    }
+  },
+  {
+    "context": "ProjectSearchBar",
+    "bindings": {
+      "cmd-enter": "project_search::SearchInNew"
+    }
+  },
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "left": "project_panel::CollapseSelectedEntry",
+      "right": "project_panel::ExpandSelectedEntry",
+      "cmd-n": "project_panel::NewFile",
+      "alt-cmd-n": "project_panel::NewDirectory",
+      "cmd-x": "project_panel::Cut",
+      "cmd-c": "project_panel::Copy",
+      "cmd-v": "project_panel::Paste",
+      "cmd-alt-c": "project_panel::CopyPath",
+      "alt-cmd-shift-c": "project_panel::CopyRelativePath",
+      "f2": "project_panel::Rename",
+      "enter": "project_panel::Rename",
+      "space": "project_panel::Open",
+      "backspace": "project_panel::Delete",
+      "alt-cmd-r": "project_panel::RevealInFinder",
+      "alt-shift-f": "project_panel::NewSearchInDirectory"
+    }
+  },
+  {
+    "context": "CollabPanel",
+    "bindings": {
+      "ctrl-backspace": "collab_panel::Remove",
+      "space": "menu::Confirm"
+    }
+  },
+  {
+    "context": "ChannelModal",
+    "bindings": {
+      "tab": "channel_modal::ToggleMode"
+    }
+  },
+  {
+    "context": "ChannelModal > Picker > Editor",
+    "bindings": {
+      "tab": "channel_modal::ToggleMode"
     }
   },
   {
@@ -133,13 +144,6 @@
         "workspace::ActivatePaneInDirection",
         "Down"
       ]
-    }
-  },
-  {
-    "context": "Editor && vim_mode == insert && !menu",
-    "bindings": {
-      "j k": "vim::NormalBefore",
-      "ctrl-h": "vim::Backspace"
     }
   }
 ]

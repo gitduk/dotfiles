@@ -1,2 +1,0 @@
-DOMAIN,voice.google.com
-DOMAIN-SUFFIX,notebooklm.google

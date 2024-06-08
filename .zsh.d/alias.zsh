@@ -60,6 +60,7 @@ alias clg="c log"
 alias cme="c commit --edit"
 alias cma="c commit --amend"
 alias cmn="c commit --amend --no-edit"
+alias cmm="c commit -m"
 alias cpl="c pull --rebase"
 alias cps="c push"
 alias cst="c stash"
@@ -561,6 +562,9 @@ alias spof="sudo swapoff -a && free -h"
 
 # python env
 alias senv="source venv/bin/activate"
+
+# ssh to soft-server
+alias ssgit="ssh localhost -p 1024"
 
 # ###  T  #####################################################################
 

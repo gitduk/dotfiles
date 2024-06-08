@@ -3,7 +3,7 @@
     "copilot": false
   },
   "hour_format": "hour24",
-  "autosave": "on_focus_change",
+  "autosave": "on_window_change",
   "auto_update": false,
   "buffer_font_size": 14,
   "buffer_font_family": "MesloLGM Nerd Font",
@@ -14,7 +14,7 @@
   },
   "theme": {
     "mode": "light",
-    "light": "Catppuccin Latte",
+    "light": "One Dark Pro",
     "dark": "One Dark"
   },
   "format_on_save": "on",
