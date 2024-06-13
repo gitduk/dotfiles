@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Zed Devel
+GenericName=Text Editor
+Comment=A high-performance, multiplayer code editor.
+TryExec=/home/wukaige/.local/zed-dev.app/libexec/zed-editor
+StartupNotify=true
+Exec=/home/wukaige/.local/zed-dev.app/libexec/zed-editor 
+Icon=/home/wukaige/.local/zed-dev.app/share/icons/hicolor/512x512/apps/zed.png
+Categories=Utility;TextEditor;Development;IDE;
+Keywords=zed;
+MimeType=text/plain;inode/directory;

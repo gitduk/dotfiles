@@ -8,6 +8,7 @@ if ! hash nala &>/dev/null; then
   apps=(
     "jq"
     "gh"
+    "vim"
     "curl"
     "lua5.3"
     "aria2"
@@ -18,18 +19,15 @@ if ! hash nala &>/dev/null; then
     "tmux"
     "silversearcher-ag"
     "sqlite3"
-    "redshift"
     "nmap"
     "inotify-tools"
     "sccache"
     "chromium-browser"
     "s-nail"
   )
-
   for app in "${apps[@]}"; do
     sudo nala install -y $app
   done
-
 fi
 
 # Astrovim
