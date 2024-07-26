@@ -3,15 +3,15 @@
 # Get my public IP address
 
 hosts=(
-	"ipinfo.io/ip"
-	"ifconfig.me/ip"
-	"icanhazip.com"
-	"ident.me"
-	"ipecho.net/plain"
-	"checkip.amazonaws.com"
-	"api.ipify.org"
-	"icanhazip.com"
-	"checkipv4.dedyn.io"
+  "ipinfo.io/ip"
+  "ifconfig.me/ip"
+  "icanhazip.com"
+  "ident.me"
+  "ipecho.net/plain"
+  "checkip.amazonaws.com"
+  "api.ipify.org"
+  "icanhazip.com"
+  "checkipv4.dedyn.io"
 )
 
 local local_ip

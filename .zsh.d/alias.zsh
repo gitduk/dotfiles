@@ -164,15 +164,14 @@ alias denv="deactivate"
 # ###  E  #####################################################################
 
 # edit file
-alias ezs="$EDITOR $HOME/.zshrc"
-alias eas="$EDITOR $HOME/.zsh.d/alias.zsh"
-alias exr="$EDITOR $HOME/.Xresources"
-alias ehx="$EDITOR $HOME/.config/helix/config.toml"
-alias eis="$EDITOR $HOME/.init.zsh"
-alias eds="$EDITOR $HOME/.desktop.zsh"
-alias ehr="$EDITOR $HOME/.config/hypr/hyprland.conf"
-alias ev2="$EDITOR $HOME/.v2ray/config.json"
-alias ehs="sudo $EDITOR /etc/hosts"
+alias ezs="v $HOME/.zshrc"
+alias eas="v $HOME/.zsh.d/alias.zsh"
+alias exr="v $HOME/.Xresources"
+alias ehx="v $HOME/.config/helix/config.toml"
+alias eis="v $HOME/.init.zsh"
+alias eds="v $HOME/.desktop.zsh"
+alias ehr="v $HOME/.config/hypr/hyprland.conf"
+alias ev2="v $HOME/.v2ray/config.json"
 
 # editor
 alias e="emacs --no-window-system"
@@ -327,9 +326,8 @@ alias jad="wd add"
 alias jrm="wd rm"
 
 # journalctl
-alias jcf="journalctl -f -t"
-alias jcb="journalctl -xb"
-alias jcu="journalctl -xeu"
+alias jcl="journalctl"
+alias jcu="journalctl -u"
 
 # jupyter
 alias jki="ipython kernel install --user --name"
@@ -463,6 +461,9 @@ alias pddf="podman diff"
 alias pdcm="podman commit"
 alias pdis="podman inspect"
 
+# podman-compose
+alias pc="podman-compose"
+
 # pueue
 alias p="pueue"
 alias pad="pueue add --"
@@ -484,11 +485,11 @@ alias prst="pueue restart"
 alias psts="pueue stash"
 alias prs="pueue reset"
 
-# pip
-alias pis="pip install"
-alias pls="pip list"
-alias pui="pip uninstall"
-alias pfz="pip freeze"
+# pipx
+alias px="pipx"
+
+# python
+alias py="python3"
 
 # mitmproxy
 alias ptc="openssl x509 -outform der -in mitmproxy-ca-cert.pem -out mitmproxy-ca-cert.crt"
@@ -607,6 +608,8 @@ alias y="yazi"
 
 # ###  Z  #####################################################################
 
+alias z="zellij"
+alias zr="zellij run --floating --width 50% --height 100% -x 50% -y 0% --"
 alias zif="zipinfo"
 
 # ###  ?  #####################################################################

@@ -5,7 +5,7 @@ Documentation=man:mpd(1) man:mpd.conf(5)
 [Service]
 Type = simple
 ExecStart = /usr/bin/mpd --no-daemon
-Restart = always
+Restart = on-failure
 RestartSec = 5s
 
 [Install]

@@ -6,7 +6,7 @@ Wants = network.target
 [Service]
 Type = simple
 ExecStart = %h/.sh.d/remote.sh
-Restart = always
+Restart = on-failure
 RestartSec = 5s
 
 [Install]

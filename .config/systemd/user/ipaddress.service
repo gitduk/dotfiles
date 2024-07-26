@@ -6,7 +6,7 @@ Wants = network.target
 [Service]
 Type = simple
 ExecStart = %h/.tmux.d/scripts/ip_address.sh
-Restart = always
+Restart = on-failure
 RestartSec = 5s
 
 [Install]

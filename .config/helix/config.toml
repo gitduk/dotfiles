@@ -91,6 +91,9 @@ C = [
 ]
 S = "surround_add"
 
+# multi cursor
+C-v = "copy_selection_on_next_line"
+
 # Clipboards over registers
 x = "delete_selection"
 s = "change_selection"

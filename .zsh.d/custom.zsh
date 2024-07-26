@@ -9,6 +9,8 @@ export ROFITHEMES=$HOME/.config/rofi/themes
 # navi
 export NAVI_PATH=$HOME/.config/navi/cheats
 export NAVI_CONFIG=$HOME/.config/navi/config.yaml
+hash navi &>/dev/null && eval "$(navi widget zsh)"
+bindkey '^N' _navi_widget
 
 # tmuxp
 export TMUXP_CONFIGDIR=$HOME/.tmuxp
@@ -60,20 +62,6 @@ export GITLAB_HOME="$HOME/.docker/gitlab"
 
 # zoxide
 hash zoxide &>/dev/null && eval "$(zoxide init zsh --cmd j)"
-
-# conda
-# CONDA_HOME="/home/Public/anaconda3"
-# __conda_setup="$($CONDA_HOME'/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-# if [ $? -eq 0 ]; then
-#     eval "$__conda_setup"
-# else
-#     if [ -f "$CONDA_HOME/etc/profile.d/conda.sh" ]; then
-#       . "$CONDA_HOME/etc/profile.d/conda.sh"  # commented out by conda initialize
-#     else
-#       export PATH="$CONDA_HOME/bin:$PATH"  # commented out by conda initialize
-#     fi
-# fi
-# unset __conda_setup
 
 # hyprland socket
 export HYPRLAND_INSTANCE_SIGNATURE="$(ls /tmp/hypr/*.lock &>/dev/null|tail -n 1|awk -F '/' '{print $4}'|sed 's|.lock||')"

@@ -1,0 +1,23 @@
+% docker, run
+
+# sing-box
+podman run --name sing-box -d \
+  -v $HOME/.docker/sing-box:/etc/sing-box/ \
+  --restart always \
+  --network host \
+  ghcr.io/sagernet/sing-box \
+  -D /var/lib/sing-box \
+  -C /etc/sing-box/ run
+
+# stirling-pdf
+podman run -d \
+  -p 7000:8080 \
+  -v ./trainingData:/usr/share/tessdata \
+  -v ./extraConfigs:/configs \
+  -v ./logs:/logs \
+  -v ./customFiles:/customFiles \
+  -e DOCKER_ENABLE_SECURITY=false \
+  -e INSTALL_BOOK_AND_ADVANCED_HTML_OPS=false \
+  -e LANGS=en_GB \
+  --name stirling-pdf \
+  frooodle/s-pdf:latest

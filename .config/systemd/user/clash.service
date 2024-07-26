@@ -4,8 +4,8 @@ After = network.target
 
 [Service]
 Type = simple
-ExecStart = %h/.local/bin/clash -f %h/.config/mihomo/config.yaml
-Restart = always
+ExecStart = %h/.local/bin/mihomo -f %h/.config/mihomo/config.yaml
+Restart = on-failure
 RestartSec = 5s
 
 [Install]

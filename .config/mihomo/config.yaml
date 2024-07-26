@@ -43,7 +43,7 @@ external-controller: 0.0.0.0:9090
 # secret: ""
 
 # 可以将静态网页资源 (比如 Clash-dashboard) 运行在 Clash API, 路径为 API 地址/ui
-external-ui: ./dashboard/
+external-ui: ui/metacubexd-gh-pages
 
 # 外部用户界面名字，合并为 external-ui/xd
 # external-ui-name: xd
@@ -96,7 +96,7 @@ hosts:
   '*.clash.dev': 127.0.0.1
   'alpha.clash.dev': '::1'
   test.com: [1.1.1.1, 2.2.2.2]
-  baidu.com: google.com
+  baidu.com: bing.com
 
 # DNS 配置
 dns:
@@ -236,39 +236,39 @@ p: &p
 proxy-providers:
   ALL:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re="
+    url: "http://sv:3078/provider?re="
     path: ./proxies/all.yaml
   香港:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E9%A6%99%E6%B8%AF"
+    url: "http://sv:3078/provider?re=%E9%A6%99%E6%B8%AF"
     path: ./proxies/hk.yaml
   台湾:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E5%8F%B0%E6%B9%BE"
+    url: "http://sv:3078/provider?re=%E5%8F%B0%E6%B9%BE"
     path: ./proxies/tw.yaml
   新加坡:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E7%8B%AE%E5%9F%8E"
+    url: "http://sv:3078/provider?re=%E7%8B%AE%E5%9F%8E"
     path: ./proxies/sg.yaml
   日本:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E6%97%A5%E6%9C%AC"
+    url: "http://sv:3078/provider?re=%E6%97%A5%E6%9C%AC"
     path: ./proxies/jp.yaml
   美国:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E7%BE%8E%E5%9B%BD"
+    url: "http://sv:3078/provider?re=%E7%BE%8E%E5%9B%BD"
     path: ./proxies/us.yaml
   韩国:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E9%9F%A9%E5%9B%BD"
+    url: "http://sv:3078/provider?re=%E9%9F%A9%E5%9B%BD"
     path: ./proxies/kr.yaml
   印度:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E5%8D%B0%E5%BA%A6"
+    url: "http://sv:3078/provider?re=%E5%8D%B0%E5%BA%A6"
     path: ./proxies/in.yaml
   土耳其:
     <<: *p
-    url: "http://127.0.0.1:3078/provider?re=%E5%9C%9F%E8%80%B3%E5%85%B6"
+    url: "http://sv:3078/provider?re=%E5%9C%9F%E8%80%B3%E5%85%B6"
     path: ./proxies/tr.yaml
 
 proxy-groups:
@@ -292,11 +292,11 @@ proxy-groups:
     use:
       - "ALL"
   
-  - name: "🐼 全球直连"
-    type: "select" 
+  - name: "🦍 广告拦截"
+    type: "select"
     proxies:
-      - "DIRECT"
-      - "🌻 节点选择"
+      - "REJECT"
+      - "🐼 全球直连"
   
   - name: "🐻 Chat"
     type: "select"
@@ -308,17 +308,17 @@ proxy-groups:
       - "🇺🇲 美国"
       - "🐏 手动切换"
   
+  - name: "🐼 全球直连"
+    type: "select" 
+    proxies:
+      - "DIRECT"
+      - "🌻 节点选择"
+  
   - name: "🐟 漏网之鱼"
     type: "select"
     proxies:
       - "🌻 节点选择"
       - "DIRECT"
-  
-  - name: "🦍 广告拦截"
-    type: "select"
-    proxies:
-      - "REJECT"
-      - "🐼 全球直连"
   
   - name: "🌲 负载轮询"
     type: "load-balance"
@@ -404,44 +404,113 @@ proxy-groups:
     use:
       - "土耳其"
 
+hdy: &hdy
+  type: http
+  behavior: domain
+  format: yaml
+  proxy: DIRECT
+  interval: 86400
+
+fct: &fct
+  type: file
+  behavior: classical
+  format: text
+  interval: 86400
+
 rule-providers:
-  lan_cidr:
-    type: file
-    path: ./rules/lan_cidr.txt
-    behavior: classical
-    format: text
-  cn_cidr:
-    type: file
-    path: ./rules/cn_cidr.txt
-    behavior: classical
-    format: text
-  chat:
-    type: file
-    path: ./rules/chat.txt
-    behavior: classical
-    format: text
-  force-direct:
-    type: file
-    path: ./rules/force-direct.txt
-    behavior: classical
-    format: text
-  force-proxy:
-    type: file
-    path: ./rules/force-proxy.txt
-    behavior: classical
-    format: text
+  reject:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt"
+    path: ./ruleset/reject.yaml
+
+  icloud:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt"
+    path: ./ruleset/icloud.yaml
+
+  apple:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt"
+    path: ./ruleset/apple.yaml
+
+  google:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt"
+    path: ./ruleset/google.yaml
+
+  proxy:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt"
+    path: ./ruleset/proxy.yaml
+
   direct:
-    type: file
-    path: ./rules/direct.txt
-    behavior: classical
-    format: text
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt"
+    path: ./ruleset/direct.yaml
+
+  private:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt"
+    path: ./ruleset/private.yaml
+
+  gfw:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt"
+    path: ./ruleset/gfw.yaml
+
+  tld-not-cn:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/tld-not-cn.txt"
+    path: ./ruleset/tld-not-cn.yaml
+
+  telegramcidr:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt"
+    path: ./ruleset/telegramcidr.yaml
+
+  cncidr:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt"
+    path: ./ruleset/cncidr.yaml
+
+  lancidr:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt"
+    path: ./ruleset/lancidr.yaml
+
+  applications:
+    <<: *hdy
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt"
+    path: ./ruleset/applications.yaml
+
+  chat:
+    <<: *fct
+    path: ./ruleset/chat.txt
+
+  force-direct:
+    <<: *fct
+    path: ./ruleset/force-direct.txt
+
+  force-proxy:
+    <<: *fct
+    path: ./ruleset/force-proxy.txt
 
 rules:
-  - RULE-SET,lan_cidr,DIRECT,no-resolve
-  - RULE-SET,cn_cidr,DIRECT,no-resolve
   - RULE-SET,chat,🐻 Chat
   - RULE-SET,force-proxy,🐟 漏网之鱼
-  - RULE-SET,force-direct,DIRECT,no-resolve
-  - RULE-SET,direct,DIRECT,no-resolve
+  - RULE-SET,force-direct,🐼 全球直连
+  - RULE-SET,applications,🐼 全球直连
+  - RULE-SET,private,🐼 全球直连
+  - RULE-SET,reject,🦍 广告拦截
+  - RULE-SET,icloud,🐼 全球直连
+  - RULE-SET,apple,🐼 全球直连
+  - RULE-SET,google,🐟 漏网之鱼
+  - RULE-SET,proxy,🐟 漏网之鱼
+  - RULE-SET,direct,🐼 全球直连
+  - RULE-SET,lancidr,🐼 全球直连
+  - RULE-SET,cncidr,🐼 全球直连
+  - RULE-SET,telegramcidr,🐟 漏网之鱼
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT
   - MATCH,🐟 漏网之鱼
 

@@ -1,0 +1,19 @@
+layout {
+    pane split_direction="vertical" { // first logical container
+        // all these panes will be laid out vertically next to each other
+        pane
+        pane split_direction="horizontal" { // second logical container
+            // all these panes will be laid out horizontally next to each other
+            cargo { args "check"; }
+            cargo { args "run"; }
+            cargo { args "test"; }
+        }
+    }
+    pane size=1 borderless=true {
+        plugin location="zellij:compact-bar"
+    }
+    pane_template name="cargo" {
+        command "cargo"
+        start_suspended true
+    }
+}

@@ -70,26 +70,6 @@ export http_proxy="http://127.0.0.1:7890"
 export https_proxy="http://127.0.0.1:7890"
 export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
-# ###  Autoload  ##############################################################
-
-# Autoload functions
-autoload -Uz ${ZLOAD}/**/*(:t)
-
-# Source scripts
-for script ($ZSH_DIR/*.zsh(N)) source "$script"
-
-# cadd list
-export AUTOADD_DIRS=(
-  "$HOME/.zsh.d/"
-  "$HOME/.etc.d/"
-  "$HOME/.tmux.d/"
-  "$HOME/.compose.d/"
-  "$HOME/.config/hypr/"
-  "$HOME/.config/nvim/lua/"
-  "$HOME/.config/systemd/user/"
-  "$HOME/.local/share/applications/"
-)
-
 # ###  Brew  ##################################################################
 
 # set remote
@@ -142,7 +122,7 @@ export GOPRIVATE=*.corp.example.com,rsc.io/private
 
 # install golang
 if ! hash go &>/dev/null; then
-  go_version="1.22.2"
+  go_version="1.22.4"
   wget -c "https://go.dev/dl/go${go_version}.linux-amd64.tar.gz" -P /tmp
   sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$go_version.linux-amd64.tar.gz
 fi
@@ -159,6 +139,14 @@ hash sccache &>/dev/null && export RUSTC_WRAPPER="$(which sccache)"
 # install rust
 hash rustup &>/dev/null || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
+# ###  Autoload  ##############################################################
+
+# Autoload functions
+autoload -Uz ${ZLOAD}/**/*(:t)
+
+# Source scripts
+for script ($ZSH_DIR/*.zsh(N)) source "$script"
+
 # ###  Starship  ##############################################################
 
 # starship: shell prompts
@@ -169,4 +157,3 @@ hash starship &>/dev/null && eval "$(starship init zsh)"
 # you need add `zmodload zsh/zprof` to the top of .zshrc file
 # zprof | head -n 20; zmodload -u zsh/zprof
 # echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
-

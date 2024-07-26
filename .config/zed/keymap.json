@@ -12,7 +12,8 @@
     "context": "Editor && vim_mode == insert && !menu",
     "bindings": {
       "j k": "vim::NormalBefore",
-      "ctrl-h": "editor::Backspace"
+      "ctrl-h": "editor::Backspace",
+      "ctrl-shift-v": "editor::Paste"
     }
   },
   {
