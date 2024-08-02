@@ -7,14 +7,23 @@
   "dns": {
     "servers": [
       {
+        "tag": "dns_resolver",
+        "address": "local",
+        "strategy": "ipv4_only",
+        "detour": "DIRECT"
+      },
+      {
         "tag": "dns_proxy",
-        "address": "tls://1.1.1.1",
-        "address_resolver": "dns_resolver"
+        "address": "https://1.1.1.1/dns-query",
+        "address_resolver": "dns_resolver",
+        "strategy": "ipv4_only",
+        "detour": "🚀 节点选择"
       },
       {
         "tag": "dns_direct",
-        "address": "h3://dns.alidns.com/dns-query",
+        "address": "h3://223.5.5.5/dns-query",
         "address_resolver": "dns_resolver",
+        "strategy": "ipv4_only",
         "detour": "DIRECT"
       },
       {
@@ -22,49 +31,50 @@
         "address": "fakeip"
       },
       {
-        "tag": "dns_resolver",
-        "address": "223.5.5.5",
-        "detour": "DIRECT"
-      },
-      {
-        "tag": "block",
+        "tag": "dns_block",
         "address": "rcode://success"
       }
     ],
     "rules": [
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "outbound": [
-              "any"
-            ]
-          },
-          {
-            "clash_mode": "Direct"
-          },
-          {
-            "rule_set": [
-              "geosite-cn"
-            ]
-          },
-          {
-            "domain_suffix": [
-              ".cn"
-            ]
-          }
+        "outbound": "any",
+        "server": "dns_proxy"
+      },
+      {
+        "rule_set": [
+          "geoip-google",
+          "geoip-twitter",
+          "geoip-telegram",
+          "geosite-google",
+          "geosite-github",
+          "geosite-twitter",
+          "geosite-youtube",
+          "geosite-telegram",
+          "geosite-microsoft"
         ],
-        "server": "dns_resolver"
+        "package_name": [
+          "com.google.android.youtube",
+          "com.android.vending",
+          "org.telegram.messenger",
+          "org.telegram.plus"
+        ],
+        "server": "dns_fakeip",
+        "rewrite_ttl": 0
+      },
+      {
+        "rule_set": [
+          "geosite-category-ads-all"
+        ],
+        "server": "dns_block"
       }
     ],
     "final": "dns_direct",
     "strategy": "prefer_ipv4",
     "fakeip": {
       "enabled": true,
-      "inet4_range": "198.18.0.0/15"
+      "inet4_range": "198.18.0.0/15",
+      "inet6_range": "fc00::/18"
     },
-    "independent_cache": true,
     "disable_cache": false,
     "disable_expire": false
   },
@@ -79,6 +89,41 @@
       "sniff": true,
       "sniff_override_destination": true,
       "set_system_proxy": false
+    },
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "tun0",
+      "inet4_address": "198.18.0.1/16",
+      "auto_route": true,
+      "exclude_package": [
+        "com.autonavi.minimap",
+        "com.alibaba.android.rimet",
+        "com.bilibili.app.in",
+        "com.eg.android.AlipayGphone",
+        "com.jingdong.app.mall",
+        "com.netease.cloudmusic",
+        "com.taobao.taobao",
+        "com.tencent.mm",
+        "com.tencent.mp",
+        "com.tencent.mobileqq",
+        "com.tencent.wemeet.app",
+        "com.unionpay"
+      ],
+      "stack": "mixed",
+      "sniff": true
+    }
+  ],
+  "outbound_providers": [
+    {
+      "tag": "FB",
+      "type": "http",
+      "download_url": "https://fbapiv2.fbsublink.com/flydsubal/7cwykclkyp95knm2?sub=2&extend=1",
+      "download_interval": "24h",
+      "path": "subc.fb.txt",
+      "healthcheck_interval": "1h",
+      "download_ua": "v2ray",
+      "download_detour": "🚀 节点选择"
     }
   ],
   "outbounds": [
@@ -95,746 +140,6 @@
       "tag": "dns-out"
     },
     {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56001,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56002,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-03",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56003,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-04",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56004,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-05",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56005,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-06",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56006,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-07",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56007,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-08",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56008,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-09",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56009,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-10",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56010,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-11",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56011,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-12",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56012,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-13",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56013,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-14",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56014,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-15",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56015,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-16",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56016,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-17",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56017,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-18",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56018,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-19",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56019,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇭🇰 Hong Kong-20",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56020,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56021,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56022,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-03",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56023,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-04",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56024,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-05",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56025,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-06",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56026,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-07",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56027,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-08",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56028,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-09",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56029,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇼 Taiwan-10",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56030,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56031,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56032,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-03",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56033,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-04",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56034,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-05",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56035,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-06",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56036,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-07",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56037,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-08",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56038,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-09",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56039,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇯🇵 Japan-10",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56040,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56041,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56042,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-03",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56043,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-04",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56044,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-05",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56045,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-06",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56046,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-07",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56047,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-08",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56048,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-09",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56049,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇸🇬 Singapore-10",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56050,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56051,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56052,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-03",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56053,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-04",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56054,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-05",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56055,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-06",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56056,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-07",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56057,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-08",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56058,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-09",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56059,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇺🇸 USA-10",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56060,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇬🇧 UK-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56061,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇬🇧 UK-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56062,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇬🇧 UK-03",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56063,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇬🇧 UK-04",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56064,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇬🇧 UK-05",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56065,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇲🇾 Malaysia-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56066,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇲🇾 Malaysia-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56067,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇲🇾 Malaysia-03",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56068,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇲🇾 Malaysia-04",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56069,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇲🇾 Malaysia-05",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56070,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇷 Turkey-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56097,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇹🇷 Turkey-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56098,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇦🇷 Argentina-01",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56099,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
-      "type": "shadowsocks",
-      "tag": "🇦🇷 Argentina-02",
-      "server": "8a43fd69.pnd6xm1ljcfpc3b-fbnode.6pzfwf.com",
-      "server_port": 56100,
-      "method": "chacha20-ietf-poly1305",
-      "password": "PIKBxm",
-      "network": "tcp",
-      "tcp_fast_open": false
-    },
-    {
       "tag": "🚀 节点选择",
       "type": "selector",
       "outbounds": [
@@ -844,88 +149,7 @@
         "🇯🇵 日本节点",
         "🇺🇲 美国节点",
         "🇰🇷 韩国节点",
-        "🚀 手动切换",
-        "DIRECT"
-      ]
-    },
-    {
-      "tag": "🚀 手动切换",
-      "type": "selector",
-      "outbounds": [
-        "🇭🇰 Hong Kong-01",
-        "🇭🇰 Hong Kong-02",
-        "🇭🇰 Hong Kong-03",
-        "🇭🇰 Hong Kong-04",
-        "🇭🇰 Hong Kong-05",
-        "🇭🇰 Hong Kong-06",
-        "🇭🇰 Hong Kong-07",
-        "🇭🇰 Hong Kong-08",
-        "🇭🇰 Hong Kong-09",
-        "🇭🇰 Hong Kong-10",
-        "🇭🇰 Hong Kong-11",
-        "🇭🇰 Hong Kong-12",
-        "🇭🇰 Hong Kong-13",
-        "🇭🇰 Hong Kong-14",
-        "🇭🇰 Hong Kong-15",
-        "🇭🇰 Hong Kong-16",
-        "🇭🇰 Hong Kong-17",
-        "🇭🇰 Hong Kong-18",
-        "🇭🇰 Hong Kong-19",
-        "🇭🇰 Hong Kong-20",
-        "🇹🇼 Taiwan-01",
-        "🇹🇼 Taiwan-02",
-        "🇹🇼 Taiwan-03",
-        "🇹🇼 Taiwan-04",
-        "🇹🇼 Taiwan-05",
-        "🇹🇼 Taiwan-06",
-        "🇹🇼 Taiwan-07",
-        "🇹🇼 Taiwan-08",
-        "🇹🇼 Taiwan-09",
-        "🇹🇼 Taiwan-10",
-        "🇯🇵 Japan-01",
-        "🇯🇵 Japan-02",
-        "🇯🇵 Japan-03",
-        "🇯🇵 Japan-04",
-        "🇯🇵 Japan-05",
-        "🇯🇵 Japan-06",
-        "🇯🇵 Japan-07",
-        "🇯🇵 Japan-08",
-        "🇯🇵 Japan-09",
-        "🇯🇵 Japan-10",
-        "🇸🇬 Singapore-01",
-        "🇸🇬 Singapore-02",
-        "🇸🇬 Singapore-03",
-        "🇸🇬 Singapore-04",
-        "🇸🇬 Singapore-05",
-        "🇸🇬 Singapore-06",
-        "🇸🇬 Singapore-07",
-        "🇸🇬 Singapore-08",
-        "🇸🇬 Singapore-09",
-        "🇸🇬 Singapore-10",
-        "🇺🇸 USA-01",
-        "🇺🇸 USA-02",
-        "🇺🇸 USA-03",
-        "🇺🇸 USA-04",
-        "🇺🇸 USA-05",
-        "🇺🇸 USA-06",
-        "🇺🇸 USA-07",
-        "🇺🇸 USA-08",
-        "🇺🇸 USA-09",
-        "🇺🇸 USA-10",
-        "🇬🇧 UK-01",
-        "🇬🇧 UK-02",
-        "🇬🇧 UK-03",
-        "🇬🇧 UK-04",
-        "🇬🇧 UK-05",
-        "🇲🇾 Malaysia-01",
-        "🇲🇾 Malaysia-02",
-        "🇲🇾 Malaysia-03",
-        "🇲🇾 Malaysia-04",
-        "🇲🇾 Malaysia-05",
-        "🇹🇷 Turkey-01",
-        "🇹🇷 Turkey-02",
-        "🇦🇷 Argentina-01",
-        "🇦🇷 Argentina-02"
+        "GLOBAL"
       ]
     },
     {
@@ -933,14 +157,13 @@
       "type": "selector",
       "outbounds": [
         "🚀 节点选择",
-        "🇸🇬 狮城节点",
         "🇭🇰 香港节点",
         "🇨🇳 台湾节点",
+        "🇸🇬 狮城节点",
         "🇯🇵 日本节点",
         "🇺🇲 美国节点",
         "🇰🇷 韩国节点",
-        "🚀 手动切换",
-        "DIRECT"
+        "GLOBAL"
       ]
     },
     {
@@ -948,52 +171,13 @@
       "type": "selector",
       "outbounds": [
         "🚀 节点选择",
-        "🇸🇬 狮城节点",
-        "🇭🇰 香港节点",
-        "🇨🇳 台湾节点",
-        "🇯🇵 日本节点",
-        "🇺🇲 美国节点",
-        "🇰🇷 韩国节点",
-        "🚀 手动切换",
-        "DIRECT"
-      ]
-    },
-    {
-      "tag": "📺 哔哩哔哩",
-      "type": "selector",
-      "outbounds": [
-        "🎯 全球直连",
-        "🇨🇳 台湾节点",
-        "🇭🇰 香港节点"
-      ]
-    },
-    {
-      "tag": "📢 谷歌FCM",
-      "type": "selector",
-      "outbounds": [
-        "🇺🇲 美国节点",
         "🇭🇰 香港节点",
         "🇨🇳 台湾节点",
         "🇸🇬 狮城节点",
         "🇯🇵 日本节点",
-        "🇰🇷 韩国节点",
-        "🚀 节点选择",
-        "🚀 手动切换"
-      ]
-    },
-    {
-      "tag": "Ⓜ️ 微软Bing",
-      "type": "selector",
-      "outbounds": [
-        "DIRECT",
-        "🚀 节点选择",
         "🇺🇲 美国节点",
-        "🇭🇰 香港节点",
-        "🇨🇳 台湾节点",
-        "🇸🇬 狮城节点",
-        "🇯🇵 日本节点",
         "🇰🇷 韩国节点",
-        "🚀 手动切换"
+        "GLOBAL"
       ]
     },
     {
@@ -1013,196 +197,76 @@
       ]
     },
     {
-      "tag": "🐟 漏网之鱼",
-      "type": "selector",
-      "outbounds": [
-        "🚀 节点选择",
-        "DIRECT",
-        "🇭🇰 香港节点",
-        "🇨🇳 台湾节点",
-        "🇸🇬 狮城节点",
-        "🇯🇵 日本节点",
-        "🇺🇲 美国节点",
-        "🇰🇷 韩国节点",
-        "🚀 手动切换"
-      ]
-    },
-    {
       "tag": "🇭🇰 香港节点",
       "type": "urltest",
-      "outbounds": [
-        "🇭🇰 Hong Kong-01",
-        "🇭🇰 Hong Kong-02",
-        "🇭🇰 Hong Kong-03",
-        "🇭🇰 Hong Kong-04",
-        "🇭🇰 Hong Kong-05",
-        "🇭🇰 Hong Kong-06",
-        "🇭🇰 Hong Kong-07",
-        "🇭🇰 Hong Kong-08",
-        "🇭🇰 Hong Kong-09",
-        "🇭🇰 Hong Kong-10",
-        "🇭🇰 Hong Kong-11",
-        "🇭🇰 Hong Kong-12",
-        "🇭🇰 Hong Kong-13",
-        "🇭🇰 Hong Kong-14",
-        "🇭🇰 Hong Kong-15",
-        "🇭🇰 Hong Kong-16",
-        "🇭🇰 Hong Kong-17",
-        "🇭🇰 Hong Kong-18",
-        "🇭🇰 Hong Kong-19",
-        "🇭🇰 Hong Kong-20"
+      "providers": [
+        "FB"
+      ],
+      "includes": [
+        "Hong Kong-+|香港"
       ]
     },
     {
       "tag": "🇯🇵 日本节点",
       "type": "urltest",
-      "outbounds": [
-        "🇯🇵 Japan-01",
-        "🇯🇵 Japan-02",
-        "🇯🇵 Japan-03",
-        "🇯🇵 Japan-04",
-        "🇯🇵 Japan-05",
-        "🇯🇵 Japan-06",
-        "🇯🇵 Japan-07",
-        "🇯🇵 Japan-08",
-        "🇯🇵 Japan-09",
-        "🇯🇵 Japan-10"
+      "providers": [
+        "FB"
+      ],
+      "includes": [
+        "Japan+|日本"
       ]
     },
     {
       "tag": "🇺🇲 美国节点",
       "type": "urltest",
-      "outbounds": [
-        "🇺🇸 USA-01",
-        "🇺🇸 USA-02",
-        "🇺🇸 USA-03",
-        "🇺🇸 USA-04",
-        "🇺🇸 USA-05",
-        "🇺🇸 USA-06",
-        "🇺🇸 USA-07",
-        "🇺🇸 USA-08",
-        "🇺🇸 USA-09",
-        "🇺🇸 USA-10"
+      "providers": [
+        "FB"
+      ],
+      "includes": [
+        "(UK|USA)-+|美国"
       ]
     },
     {
       "tag": "🇸🇬 狮城节点",
       "type": "urltest",
-      "outbounds": [
-        "🇸🇬 Singapore-01",
-        "🇸🇬 Singapore-02",
-        "🇸🇬 Singapore-03",
-        "🇸🇬 Singapore-04",
-        "🇸🇬 Singapore-05",
-        "🇸🇬 Singapore-06",
-        "🇸🇬 Singapore-07",
-        "🇸🇬 Singapore-08",
-        "🇸🇬 Singapore-09",
-        "🇸🇬 Singapore-10"
+      "providers": [
+        "FB"
+      ],
+      "includes": [
+        "Singapore-+|新加坡"
       ]
     },
     {
       "tag": "🇨🇳 台湾节点",
       "type": "urltest",
-      "outbounds": [
-        "🇹🇼 Taiwan-01",
-        "🇹🇼 Taiwan-02",
-        "🇹🇼 Taiwan-03",
-        "🇹🇼 Taiwan-04",
-        "🇹🇼 Taiwan-05",
-        "🇹🇼 Taiwan-06",
-        "🇹🇼 Taiwan-07",
-        "🇹🇼 Taiwan-08",
-        "🇹🇼 Taiwan-09",
-        "🇹🇼 Taiwan-10"
+      "providers": [
+        "FB"
+      ],
+      "includes": [
+        "Taiwan-+|台湾"
       ]
     },
     {
       "tag": "🇰🇷 韩国节点",
-      "type": "selector",
-      "outbounds": [
-        "DIRECT"
+      "type": "urltest",
+      "providers": [
+        "FB"
+      ],
+      "includes": [
+        "韩国"
       ]
     },
     {
       "tag": "GLOBAL",
       "type": "selector",
+      "providers": [
+        "FB"
+      ],
+      "includes": [
+        ".*"
+      ],
       "outbounds": [
-        "DIRECT",
-        "🇭🇰 Hong Kong-01",
-        "🇭🇰 Hong Kong-02",
-        "🇭🇰 Hong Kong-03",
-        "🇭🇰 Hong Kong-04",
-        "🇭🇰 Hong Kong-05",
-        "🇭🇰 Hong Kong-06",
-        "🇭🇰 Hong Kong-07",
-        "🇭🇰 Hong Kong-08",
-        "🇭🇰 Hong Kong-09",
-        "🇭🇰 Hong Kong-10",
-        "🇭🇰 Hong Kong-11",
-        "🇭🇰 Hong Kong-12",
-        "🇭🇰 Hong Kong-13",
-        "🇭🇰 Hong Kong-14",
-        "🇭🇰 Hong Kong-15",
-        "🇭🇰 Hong Kong-16",
-        "🇭🇰 Hong Kong-17",
-        "🇭🇰 Hong Kong-18",
-        "🇭🇰 Hong Kong-19",
-        "🇭🇰 Hong Kong-20",
-        "🇹🇼 Taiwan-01",
-        "🇹🇼 Taiwan-02",
-        "🇹🇼 Taiwan-03",
-        "🇹🇼 Taiwan-04",
-        "🇹🇼 Taiwan-05",
-        "🇹🇼 Taiwan-06",
-        "🇹🇼 Taiwan-07",
-        "🇹🇼 Taiwan-08",
-        "🇹🇼 Taiwan-09",
-        "🇹🇼 Taiwan-10",
-        "🇯🇵 Japan-01",
-        "🇯🇵 Japan-02",
-        "🇯🇵 Japan-03",
-        "🇯🇵 Japan-04",
-        "🇯🇵 Japan-05",
-        "🇯🇵 Japan-06",
-        "🇯🇵 Japan-07",
-        "🇯🇵 Japan-08",
-        "🇯🇵 Japan-09",
-        "🇯🇵 Japan-10",
-        "🇸🇬 Singapore-01",
-        "🇸🇬 Singapore-02",
-        "🇸🇬 Singapore-03",
-        "🇸🇬 Singapore-04",
-        "🇸🇬 Singapore-05",
-        "🇸🇬 Singapore-06",
-        "🇸🇬 Singapore-07",
-        "🇸🇬 Singapore-08",
-        "🇸🇬 Singapore-09",
-        "🇸🇬 Singapore-10",
-        "🇺🇸 USA-01",
-        "🇺🇸 USA-02",
-        "🇺🇸 USA-03",
-        "🇺🇸 USA-04",
-        "🇺🇸 USA-05",
-        "🇺🇸 USA-06",
-        "🇺🇸 USA-07",
-        "🇺🇸 USA-08",
-        "🇺🇸 USA-09",
-        "🇺🇸 USA-10",
-        "🇬🇧 UK-01",
-        "🇬🇧 UK-02",
-        "🇬🇧 UK-03",
-        "🇬🇧 UK-04",
-        "🇬🇧 UK-05",
-        "🇲🇾 Malaysia-01",
-        "🇲🇾 Malaysia-02",
-        "🇲🇾 Malaysia-03",
-        "🇲🇾 Malaysia-04",
-        "🇲🇾 Malaysia-05",
-        "🇹🇷 Turkey-01",
-        "🇹🇷 Turkey-02",
-        "🇦🇷 Argentina-01",
-        "🇦🇷 Argentina-02"
+        "DIRECT"
       ]
     }
   ],
@@ -1213,98 +277,101 @@
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geoip/cn.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-cn",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/cn.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-category-ads-all",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo/geosite/category-ads-all.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-openai",
         "type": "remote",
         "format": "source",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/openai.json",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geoip-google",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geoip/google.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-google",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/google.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-microsoft",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/microsoft.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-github",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/github.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-youtube",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/youtube.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geoip-telegram",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geoip/telegram.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
         "tag": "geosite-telegram",
         "type": "remote",
         "format": "binary",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/telegram.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "download_detour": "🚀 节点选择"
       },
       {
-        "tag": "geoip-bilibili",
+        "tag": "geoip-twitter",
         "type": "remote",
         "format": "binary",
-        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geoip/bilibili.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geoip/twitter.srs",
+        "download_detour": "🚀 节点选择"
       },
       {
-        "tag": "geosite-bilibili",
+        "tag": "geosite-twitter",
         "type": "remote",
         "format": "binary",
-        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/bilibili.srs",
-        "download_detour": "🐟 漏网之鱼"
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/sing/geo-lite/geosite/twitter.srs",
+        "download_detour": "🚀 节点选择"
+      },
+      {
+        "tag": "geosite-geolocation-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
+        "download_detour": "🚀 节点选择"
       }
     ],
     "rules": [
-      {
-        "ip_is_private": true,
-        "outbound": "DIRECT"
-      },
       {
         "type": "logical",
         "mode": "or",
@@ -1319,187 +386,8 @@
         "outbound": "dns-out"
       },
       {
-        "clash_mode": "Direct",
-        "outbound": "DIRECT"
-      },
-      {
-        "clash_mode": "Global",
-        "outbound": "GLOBAL"
-      },
-      {
-        "rule_set": "geosite-category-ads-all",
-        "outbound": "🛑 广告拦截"
-      },
-      {
-        "rule_set": "geosite-openai",
-        "outbound": "💬 OpenAi"
-      },
-      {
         "rule_set": [
-          "geoip-google",
-          "geoip-telegram"
-        ],
-        "outbound": "🐟 漏网之鱼"
-      },
-      {
-        "rule_set": [
-          "geosite-google",
-          "geosite-microsoft",
-          "geosite-github",
-          "geosite-youtube",
-          "geosite-telegram"
-        ],
-        "outbound": "🐟 漏网之鱼"
-      },
-      {
-        "rule_set": [
-          "geoip-bilibili",
-          "geosite-bilibili"
-        ],
-        "outbound": "📺 哔哩哔哩"
-      },
-      {
-        "rule_set": [
-          "geoip-cn",
-          "geosite-cn"
-        ],
-        "outbound": "🎯 全球直连"
-      },
-      {
-        "domain": [
-          "clash.razord.top",
-          "yacd.metacubex.one",
-          "yacd.haishan.me",
-          "d.metacubex.one"
-        ],
-        "outbound": "DIRECT"
-      },
-      {
-        "domain_suffix": [
-          "acl4.ssr",
-          "ip6-localhost",
-          "ip6-loopback",
-          "lan",
-          "local",
-          "localhost",
-          "hiwifi.com",
-          "leike.cc",
-          "miwifi.com",
-          "my.router",
-          "p.to",
-          "peiluyou.com",
-          "phicomm.me",
-          "router.ctc",
-          "routerlogin.com",
-          "tendawifi.com",
-          "zte.home",
-          "tplogin.cn",
-          "wifi.cmcc"
-        ],
-        "ip_cidr": [
-          "0.0.0.0/8",
-          "10.0.0.0/8",
-          "100.64.0.0/10",
-          "127.0.0.0/8",
-          "172.16.0.0/12",
-          "192.168.0.0/16",
-          "198.18.0.0/16",
-          "224.0.0.0/4"
-        ],
-        "domain": [
-          "instant.arubanetworks.com",
-          "setmeup.arubanetworks.com",
-          "router.asus.com",
-          "www.asusrouter.com"
-        ],
-        "outbound": "🎯 全球直连"
-      },
-      {
-        "domain_suffix": [
-          "ol.epicgames.com",
-          "dizhensubao.getui.com",
-          "googletraveladservices.com",
-          "tracking-protection.cdn.mozilla.net",
-          "koodomobile.com",
-          "koodomobile.ca"
-        ],
-        "domain": [
-          "dl.google.com",
-          "origin-a.akamaihd.net",
-          "fairplay.l.qq.com",
-          "livew.l.qq.com",
-          "vd.l.qq.com",
-          "errlog.umeng.com",
-          "msg.umeng.com",
-          "msg.umengcloud.com",
-          "tracking.miui.com",
-          "app.adjust.com",
-          "bdtj.tagtic.cn",
-          "rewards.hypixel.net"
-        ],
-        "outbound": "🎯 全球直连"
-      },
-      {
-        "domain": [
-          "alt1-mtalk.google.com",
-          "alt2-mtalk.google.com",
-          "alt3-mtalk.google.com",
-          "alt4-mtalk.google.com",
-          "alt5-mtalk.google.com",
-          "alt6-mtalk.google.com",
-          "alt7-mtalk.google.com",
-          "alt8-mtalk.google.com",
-          "mtalk.google.com"
-        ],
-        "ip_cidr": [
-          "64.233.177.188/32",
-          "64.233.186.188/32",
-          "64.233.187.188/32",
-          "64.233.188.188/32",
-          "64.233.189.188/32",
-          "74.125.23.188/32",
-          "74.125.24.188/32",
-          "74.125.28.188/32",
-          "74.125.127.188/32",
-          "74.125.137.188/32",
-          "74.125.203.188/32",
-          "74.125.204.188/32",
-          "74.125.206.188/32",
-          "108.177.125.188/32",
-          "142.250.4.188/32",
-          "142.250.10.188/32",
-          "142.250.31.188/32",
-          "142.250.96.188/32",
-          "172.217.194.188/32",
-          "172.217.218.188/32",
-          "172.217.219.188/32",
-          "172.253.63.188/32",
-          "172.253.122.188/32",
-          "173.194.175.188/32",
-          "173.194.218.188/32",
-          "209.85.233.188/32"
-        ],
-        "outbound": "📢 谷歌FCM"
-      },
-      {
-        "domain_suffix": [
-          "t.me",
-          "tdesktop.com",
-          "telegra.ph",
-          "telegram.me",
-          "telegram.org",
-          "telesco.pe"
-        ],
-        "ip_cidr": [
-          "91.108.0.0/16",
-          "109.239.140.0/24",
-          "149.154.160.0/20"
-        ],
-        "outbound": "📲 电报消息"
-      },
-      {
-        "domain_keyword": [
-          "openai"
+          "geosite-openai"
         ],
         "domain": [
           "gemini.google.com"
@@ -1521,322 +409,109 @@
           "sentry.io",
           "stripe.com"
         ],
+        "domain_keyword": [
+          "openai"
+        ],
+        "package_name": [
+          "com.openai.chatgpt"
+        ],
         "outbound": "💬 OpenAi"
       },
       {
+        "domain_suffix": [
+          "t.me",
+          "tdesktop.com",
+          "telegra.ph",
+          "telegram.me",
+          "telegram.org",
+          "telesco.pe"
+        ],
+        "package_name": [
+          "org.telegram.messenger",
+          "org.telegram.plus"
+        ],
+        "outbound": "📲 电报消息"
+      },
+      {
+        "rule_set": [
+          "geoip-google",
+          "geoip-twitter",
+          "geoip-telegram",
+          "geosite-google",
+          "geosite-github",
+          "geosite-twitter",
+          "geosite-youtube",
+          "geosite-telegram",
+          "geosite-microsoft"
+        ],
+        "package_name": [
+          "com.google.android.gms",
+          "com.google.android.youtube",
+          "com.google.android.googlequicksearchbox",
+          "com.google.android.apps.youtube.music",
+          "org.telegram.messenger",
+          "org.telegram.plus",
+          "com.android.vending",
+          "com.twitter.android"
+        ],
+        "outbound": "🚀 节点选择"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite-geolocation-!cn"
+          },
+          {
+            "rule_set": "geoip-cn",
+            "invert": true
+          }
+        ],
+        "outbound": "🚀 节点选择"
+      },
+      {
+        "rule_set": [
+          "geoip-cn",
+          "geosite-cn"
+        ],
+        "domain_suffix": [
+          "cn"
+        ],
+        "ip_cidr": [
+          "0.0.0.0/8",
+          "10.0.0.0/8",
+          "100.64.0.0/10",
+          "127.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16",
+          "198.18.0.0/16"
+        ],
         "domain": [
-          "p-bstarstatic.akamaized.net",
-          "p.bstarstatic.com",
-          "upos-bstar-mirrorakam.akamaized.net",
-          "upos-bstar1-mirrorakam.akamaized.net",
-          "apiintl.biliapi.net",
-          "upos-hz-mirrorakam.akamaized.net"
-        ],
-        "domain_suffix": [
-          "acg.tv",
-          "acgvideo.com",
-          "b23.tv",
-          "bigfun.cn",
-          "bigfunapp.cn",
-          "biliapi.com",
-          "biliapi.net",
-          "bilibili.co",
-          "bilibili.com",
-          "bilibili.tv",
-          "biligame.com",
-          "biligame.net",
-          "biliintl.co",
-          "bilivideo.cn",
-          "bilivideo.com",
-          "hdslb.com",
-          "im9.com",
-          "smtcdns.net"
-        ],
-        "ip_cidr": [
-          "45.43.32.234/32",
-          "103.151.150.0/23",
-          "119.29.29.29/32",
-          "128.1.62.200/32",
-          "128.1.62.201/32",
-          "150.116.92.250/32",
-          "164.52.33.178/32",
-          "164.52.33.182/32",
-          "164.52.76.18/32",
-          "203.107.1.33/32",
-          "203.107.1.34/32",
-          "203.107.1.65/32",
-          "203.107.1.66/32"
-        ],
-        "outbound": "📺 哔哩哔哩"
-      },
-      {
-        "ip_cidr": [
-          "8.128.0.0/10",
-          "8.208.0.0/12",
-          "14.1.112.0/22",
-          "41.222.240.0/22",
-          "41.223.119.0/24",
-          "43.242.168.0/22",
-          "45.112.212.0/22",
-          "47.52.0.0/16",
-          "47.56.0.0/15",
-          "47.74.0.0/15",
-          "47.76.0.0/14",
-          "47.80.0.0/12",
-          "47.235.0.0/16",
-          "47.236.0.0/14",
-          "47.240.0.0/14",
-          "47.244.0.0/15",
-          "47.246.0.0/16",
-          "47.250.0.0/15",
-          "47.252.0.0/15",
-          "47.254.0.0/16",
-          "59.82.0.0/20",
-          "59.82.240.0/21",
-          "59.82.248.0/22",
-          "72.254.0.0/16",
-          "103.38.56.0/22",
-          "103.52.76.0/22",
-          "103.206.40.0/22",
-          "110.76.21.0/24",
-          "110.76.23.0/24",
-          "112.125.0.0/17",
-          "116.251.64.0/18",
-          "119.38.208.0/20",
-          "119.38.224.0/20",
-          "119.42.224.0/20",
-          "139.95.0.0/16",
-          "140.205.1.0/24",
-          "140.205.122.0/24",
-          "147.139.0.0/16",
-          "149.129.0.0/16",
-          "155.102.0.0/16",
-          "161.117.0.0/16",
-          "163.181.0.0/16",
-          "170.33.0.0/16",
-          "198.11.128.0/18",
-          "205.204.96.0/19",
-          "19.28.0.0/23",
-          "45.40.192.0/19",
-          "49.51.0.0/16",
-          "62.234.0.0/16",
-          "94.191.0.0/17",
-          "103.7.28.0/22",
-          "103.116.50.0/23",
-          "103.231.60.0/24",
-          "109.244.0.0/16",
-          "111.30.128.0/21",
-          "111.30.136.0/24",
-          "111.30.139.0/24",
-          "111.30.140.0/23",
-          "115.159.0.0/16",
-          "119.28.0.0/15",
-          "120.88.56.0/23",
-          "121.51.0.0/16",
-          "129.28.0.0/16",
-          "129.204.0.0/16",
-          "129.211.0.0/16",
-          "132.232.0.0/16",
-          "134.175.0.0/16",
-          "146.56.192.0/18",
-          "148.70.0.0/16",
-          "150.109.0.0/16",
-          "152.136.0.0/16",
-          "162.14.0.0/16",
-          "162.62.0.0/16",
-          "170.106.130.0/24",
-          "182.254.0.0/16",
-          "188.131.128.0/17",
-          "203.195.128.0/17",
-          "203.205.128.0/17",
-          "210.4.138.0/24",
-          "211.152.128.0/23",
-          "211.152.132.0/23",
-          "211.152.148.0/23",
-          "212.64.0.0/17",
-          "212.129.128.0/17",
-          "45.113.192.0/22",
-          "63.217.23.0/24",
-          "63.243.252.0/24",
-          "103.235.44.0/22",
-          "104.193.88.0/22",
-          "106.12.0.0/15",
-          "114.28.224.0/20",
-          "119.63.192.0/21",
-          "180.76.0.0/24",
-          "180.76.0.0/16",
-          "182.61.0.0/16",
-          "185.10.104.0/22",
-          "202.46.48.0/20",
-          "203.90.238.0/24",
-          "43.254.0.0/22",
-          "45.249.212.0/22",
-          "49.4.0.0/17",
-          "78.101.192.0/19",
-          "78.101.224.0/20",
-          "81.52.161.0/24",
-          "85.97.220.0/22",
-          "103.31.200.0/22",
-          "103.69.140.0/23",
-          "103.218.216.0/22",
-          "114.115.128.0/17",
-          "114.116.0.0/16",
-          "116.63.128.0/18",
-          "116.66.184.0/22",
-          "116.71.96.0/20",
-          "116.71.128.0/21",
-          "116.71.136.0/22",
-          "116.71.141.0/24",
-          "116.71.142.0/24",
-          "116.71.243.0/24",
-          "116.71.244.0/24",
-          "116.71.251.0/24",
-          "117.78.0.0/18",
-          "119.3.0.0/16",
-          "119.8.0.0/21",
-          "119.8.32.0/19",
-          "121.36.0.0/17",
-          "121.36.128.0/18",
-          "121.37.0.0/17",
-          "122.112.128.0/17",
-          "139.9.0.0/18",
-          "139.9.64.0/19",
-          "139.9.100.0/22",
-          "139.9.104.0/21",
-          "139.9.112.0/20",
-          "139.9.128.0/18",
-          "139.9.192.0/19",
-          "139.9.224.0/20",
-          "139.9.240.0/21",
-          "139.9.248.0/22",
-          "139.159.128.0/19",
-          "139.159.160.0/22",
-          "139.159.164.0/23",
-          "139.159.168.0/21",
-          "139.159.176.0/20",
-          "139.159.192.0/18",
-          "159.138.0.0/18",
-          "159.138.64.0/21",
-          "159.138.79.0/24",
-          "159.138.80.0/20",
-          "159.138.96.0/20",
-          "159.138.112.0/21",
-          "159.138.125.0/24",
-          "159.138.128.0/18",
-          "159.138.192.0/20",
-          "159.138.223.0/24",
-          "159.138.224.0/19",
-          "168.195.92.0/22",
-          "185.176.76.0/22",
-          "197.199.0.0/18",
-          "197.210.163.0/24",
-          "197.252.1.0/24",
-          "197.252.2.0/23",
-          "197.252.4.0/22",
-          "197.252.8.0/21",
-          "200.32.52.0/24",
-          "200.32.54.0/24",
-          "200.32.57.0/24",
-          "203.135.0.0/22",
-          "203.135.4.0/23",
-          "203.135.8.0/23",
-          "203.135.11.0/24",
-          "203.135.13.0/24",
-          "203.135.20.0/24",
-          "203.135.22.0/23",
-          "203.135.24.0/23",
-          "203.135.26.0/24",
-          "203.135.29.0/24",
-          "203.135.33.0/24",
-          "203.135.38.0/23",
-          "203.135.40.0/24",
-          "203.135.43.0/24",
-          "203.135.48.0/24",
-          "203.135.50.0/24",
-          "42.186.0.0/16",
-          "45.127.128.0/22",
-          "45.195.24.0/24",
-          "45.253.132.0/22",
-          "45.253.240.0/22",
-          "45.254.48.0/23",
-          "59.111.0.0/20",
-          "59.111.128.0/17",
-          "103.71.120.0/21",
-          "103.71.128.0/22",
-          "103.71.196.0/22",
-          "103.71.200.0/22",
-          "103.72.12.0/22",
-          "103.72.18.0/23",
-          "103.72.24.0/22",
-          "103.72.28.0/23",
-          "103.72.38.0/23",
-          "103.72.40.0/23",
-          "103.72.44.0/22",
-          "103.72.48.0/21",
-          "103.72.128.0/21",
-          "103.74.24.0/21",
-          "103.74.48.0/22",
-          "103.126.92.0/22",
-          "103.129.252.0/22",
-          "103.131.252.0/22",
-          "103.135.240.0/22",
-          "103.196.64.0/22",
-          "106.2.32.0/19",
-          "106.2.64.0/18",
-          "114.113.196.0/22",
-          "114.113.200.0/22",
-          "115.236.112.0/20",
-          "115.238.76.0/22",
-          "123.58.160.0/19",
-          "223.252.192.0/19",
-          "101.198.128.0/18",
-          "101.198.192.0/19",
-          "101.199.196.0/22"
+          "n.sunlawyers.com"
         ],
         "outbound": "🎯 全球直连"
       },
       {
-        "process_name": [
-          "aria2c.exe",
-          "fdm.exe",
-          "folx.exe",
-          "nettransport.exe",
-          "thunder.exe",
-          "transmission.exe",
-          "utorrent.exe",
-          "webtorrent.exe",
-          "webtorrent helper.exe",
-          "qbittorrent.exe",
-          "downloadservice.exe",
-          "weiyun.exe",
-          "baidunetdisk.exe"
-        ],
-        "domain_suffix": [
-          "smtp"
-        ],
-        "domain_keyword": [
-          "aria2"
-        ],
-        "outbound": "🎯 全球直连"
-      },
-      {
-        "geoip": "cn",
-        "outbound": "🎯 全球直连"
+        "rule_set": "geosite-category-ads-all",
+        "outbound": "🛑 广告拦截"
       }
     ],
     "auto_detect_interface": true,
-    "final": "🐟 漏网之鱼"
+    "final": "🚀 节点选择"
   },
   "experimental": {
     "cache_file": {
       "enabled": true,
       "store_fakeip": true,
-      "path": "/home/wukaige/.config/sing-box/cache.db",
+      "path": "cache.db",
       "cache_id": "cache_id"
     },
     "clash_api": {
       "external_controller": "127.0.0.1:9090",
-      "external_ui": "dashboard"
+      "external_ui": "dashboard",
+      "external_ui_download_detour": "🚀 节点选择",
+      "default_mode": "rule"
     }
   }
 }

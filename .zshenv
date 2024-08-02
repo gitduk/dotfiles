@@ -15,15 +15,6 @@ export XCURSOR_THEME=Vimix
 # Skip the not really helping Ubuntu global compinit
 export skip_global_compinit=1
 
-# zsh
-export ZSH_DIR=$HOME/.zsh.d
-
-# tmux
-export TMUX_DIR=$HOME/.tmux.d
-
-# plugin
-export PLUGIN_DIR=$HOME/.plugin.d
-
 # cache
 export XDG_CACHE_HOME=$HOME/.cache
 
@@ -143,42 +134,4 @@ addPath() {
     [[ ":$PATH:" != *":$p:"* ]] && export PATH="$p:$PATH"
   done
 }
-
-# ###  Path  ##################################################################
-
-# sh
-addPath "/usr/sbin"
-addPath "$HOME/.local/bin"
-
-# snap
-addPath "/snap/bin"
-
-# go
-export GOROOT="/usr/local/go"
-export GOPATH="$HOME/go"
-export GOENV="$HOME/go/env"
-addPath "$GOROOT/bin"
-addPath "$GOPATH/bin"
-
-# sqlserver
-addPath "/opt/mssql-tools/bin"
-
-# dotnet
-addPath "$HOME/.dotnet:$HOME/.dotnet/tools"
-
-# cuda
-addPath "/usr/local/cuda/bin"
-
-# pnpm
-export PNPM_HOME="/home/wukaige/.local/share/pnpm"
-addPath "$PNPM_HOME"
-
-# TiDB
-addPath "$HOME/.tiup/bin"
-
-# doom emacs
-addPath "$HOME/.config/emacs/bin"
-
-# conda
-addPath "$HOME/anaconda3/bin"
 

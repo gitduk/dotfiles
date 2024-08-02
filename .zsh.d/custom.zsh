@@ -9,8 +9,10 @@ export ROFITHEMES=$HOME/.config/rofi/themes
 # navi
 export NAVI_PATH=$HOME/.config/navi/cheats
 export NAVI_CONFIG=$HOME/.config/navi/config.yaml
-hash navi &>/dev/null && eval "$(navi widget zsh)"
-bindkey '^N' _navi_widget
+if hash navi &>/dev/null; then
+  eval "$(navi widget zsh)"
+  bindkey '^N' _navi_widget
+fi
 
 # tmuxp
 export TMUXP_CONFIGDIR=$HOME/.tmuxp
@@ -28,6 +30,7 @@ export DOTNET_ROOT=$HOME/.dotnet
 
 # cuda path
 export CUDA_HOME="/usr/local/cuda"
+addPath "$CUDA_HOME/bin"
 
 # for gunicorn & flask & celery
 export OMP_NUM_THREADS=1
@@ -57,14 +60,8 @@ export GITLAB_HOME="$HOME/.docker/gitlab"
 # Rye
 [[ -f "$HOME/.rye/env" ]] && source "$HOME/.rye/env"
 
-# cargo
-[[ -e "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
-
 # zoxide
 hash zoxide &>/dev/null && eval "$(zoxide init zsh --cmd j)"
-
-# hyprland socket
-export HYPRLAND_INSTANCE_SIGNATURE="$(ls /tmp/hypr/*.lock &>/dev/null|tail -n 1|awk -F '/' '{print $4}'|sed 's|.lock||')"
 
 # ###  Token  #################################################################
 

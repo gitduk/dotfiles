@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
 
 # 获取默认网关 IP 地址
-GATEWAY_IP=$(ip route show default | awk '/default/ {print $3}')
+GATEWAY_IP=$(ip route show default | head -n 1 | awk '/default/ {print $3}')
 
 # 获取网关接口的 IP 地址和子网掩码
-INTERFACE=$(ip route show default | awk '/default/ {print $5}')
+INTERFACE=$(ip route show default | head -n 1 | awk '/default/ {print $5}')
 INTERFACE_IP=$(ip addr show dev $INTERFACE | awk '/inet / {print $2}' | cut -d'/' -f1)
 SUBNET_MASK=$(ip addr show dev $INTERFACE | awk '/inet / {print $2}' | cut -d'/' -f2)
 

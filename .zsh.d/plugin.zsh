@@ -7,8 +7,8 @@ locals=(
 )
 
 for plugin in "${locals[@]}"; do
-  [[ -f "$ZSH_DIR/plugins/$plugin.plugin.zsh" ]] && source "$ZSH_DIR/plugins/$plugin.plugin.zsh"
-  [[ -f "$ZSH_DIR/plugins/$plugin.custom.zsh" ]] && source "$ZSH_DIR/plugins/$plugin.custom.zsh"
+  [[ -f "$ZPLUG/$plugin.plugin.zsh" ]] && source "$ZPLUG/$plugin.plugin.zsh"
+  [[ -f "$ZPLUG/$plugin.custom.zsh" ]] && source "$ZPLUG/$plugin.custom.zsh"
 done
 
 # ###  Raw  ###################################################################
@@ -39,7 +39,7 @@ for plugin in "${plugins[@]}"; do
   if [[ -d "$ZPLUG/$plugin" ]]; then
     [[ -e "$ZPLUG/$plugin/$plugin.plugin.zsh" ]] && source "$ZPLUG/$plugin/$plugin.plugin.zsh"
     [[ -f "$ZPLUG/$plugin.custom.zsh" ]] && source "$ZPLUG/$plugin.custom.zsh"
-    [[ -f "$ZSH_DIR/plugins/$plugin.custom.zsh" ]] && source "$ZSH_DIR/plugins/$plugin.custom.zsh"
+    [[ -f "$ZROOT/plugins/$plugin.custom.zsh" ]] && source "$ZROOT/plugins/$plugin.custom.zsh"
   else
     git clone --depth=1 "https://github.com/$user/$plugin.git" "$ZPLUG/$plugin"
     [[ $? -eq 0 ]] && source "$ZPLUG/$plugin/$plugin.plugin.zsh" || echo "Failed to clone $user/$plugin"

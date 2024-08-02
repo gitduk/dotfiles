@@ -48,10 +48,10 @@ setopt NONOMATCH              # re mode
 setopt PROMPTSUBST
 
 # custom path
-export ZPFX="$HOME/.local"
-export ZLOAD="$ZSH_DIR/autoload"
-export ZCOMP="$ZSH_DIR/completions"
-export ZPLUG="$PLUGIN_DIR/zsh"
+export ZROOT=$HOME/.zsh.d
+export ZLOAD="$ZROOT/autoload"
+export ZCOMP="$ZROOT/completions"
+export ZPLUG="$ZROOT/plugins"
 
 # set fpath
 fpath+=($ZLOAD $ZCOMP $ZPLUG)
@@ -66,8 +66,8 @@ xhost +local: &>/dev/null
 bindkey -v
 
 # set proxy
-export http_proxy="http://127.0.0.1:7890"
-export https_proxy="http://127.0.0.1:7890"
+export http_proxy="${http_proxy:-http://127.0.0.1:7890}"
+export https_proxy="${http_proxy:-http://127.0.0.1:7890}"
 export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
 # ###  Brew  ##################################################################
@@ -95,6 +95,8 @@ if ! hash brew &>/dev/null; then
   git clone --depth 1 https://github.com/Homebrew/brew $HOMEBREW_PREFIX
   brew update --force --quiet
   chmod -R go-w "$(brew --prefix)/share/zsh"
+else
+  hash atuin &>/dev/null || brew install atuin
 fi
 
 # ###  Npm  ###################################################################
@@ -107,6 +109,13 @@ hash node &>/dev/null || sudo apt install nodejs
 hash npm &>/dev/null || curl -qL https://www.npmjs.com/install.sh | sh
 
 # ###  Golang  ################################################################
+
+# go path
+export GOROOT="/usr/local/go"
+export GOPATH="$HOME/go"
+export GOENV="$HOME/go/env"
+addPath "$GOROOT/bin"
+addPath "$GOPATH/bin"
 
 # Set the Go proxy
 export GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct
@@ -122,22 +131,28 @@ export GOPRIVATE=*.corp.example.com,rsc.io/private
 
 # install golang
 if ! hash go &>/dev/null; then
-  go_version="1.22.4"
+  go_version="$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | grep -oE '"version": "[0-9]{1}.[0-9]{1,}(.[0-9]{1,})?"' | head -1 | cut -d ':' -f2 | sed 's/ //g; s/"//g')"
   wget -c "https://go.dev/dl/go${go_version}.linux-amd64.tar.gz" -P /tmp
   sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$go_version.linux-amd64.tar.gz
 fi
 
 # ###  Rust  ##################################################################
 
-# set cargo home
+# cargo home
 export CARGO_HOME="$HOME/.cargo"
 addPath "$CARGO_HOME/bin"
 
-# set build wrapper
-hash sccache &>/dev/null && export RUSTC_WRAPPER="$(which sccache)"
+# install rustup
+if ! hash rustup &>/dev/null; then
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+else
+  hash sccache &>/dev/null && export RUSTC_WRAPPER="$(which sccache)"
+  hash navi &>/dev/null || cargo install --locked navi
+fi
 
-# install rust
-hash rustup &>/dev/null || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# ###  Conda  #################################################################
+
+addPath "$HOME/anaconda3/bin"
 
 # ###  Autoload  ##############################################################
 
@@ -145,7 +160,7 @@ hash rustup &>/dev/null || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustu
 autoload -Uz ${ZLOAD}/**/*(:t)
 
 # Source scripts
-for script ($ZSH_DIR/*.zsh(N)) source "$script"
+for script ($ZROOT/*.zsh(N)) source "$script"
 
 # ###  Starship  ##############################################################
 
