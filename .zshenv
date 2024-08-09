@@ -135,3 +135,8 @@ addPath() {
   done
 }
 
+# ###  Custom  ################################################################
+
+# custom path
+addPath "$HOME/.local/bin"
+

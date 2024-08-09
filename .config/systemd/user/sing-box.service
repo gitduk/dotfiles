@@ -1,0 +1,14 @@
+[Unit]
+Description=sing-box tproxy daemon.
+After=network.target nss-lookup.target network-online.target
+
+[Service]
+Type = simple
+LimitNOFILE = 1000000
+ExecStart = %h/go/bin/sing-box run -c %h/.config/sing-box/config.json -D %h/.config/sing-box/
+# ExecStartPost=sh %h/go/bin/sing-box/nftables.sh set
+# ExecStop=sh %h/go/bin/sing-box/nftables.sh clear
+
+[Install]
+WantedBy=multi-user.target
+

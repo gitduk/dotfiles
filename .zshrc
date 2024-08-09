@@ -78,17 +78,17 @@ export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 # export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
 
 # brew options
-export HOMEBREW_PREFIX="$HOME/.linuxbrew";
-export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar";
-export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew";
+export HOMEBREW_PREFIX="$HOME/.linuxbrew"
+export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
 export HOMEBREW_NO_AUTO_UPDATE=true                               # 关闭自动更新
 export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))                    # 自动更新间隔时间
-export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH:+:$MANPATH}";
-export INFOPATH="$HOMEBREW_PREFIX/share/info:$INFOPATH";
+export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH:+:$MANPATH}"
+export INFOPATH="$HOMEBREW_PREFIX/share/info:$INFOPATH"
 
 # add brew to path
-addPath "$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin";
-addPath "$HOMEBREW_PREFIX/opt/llvm/bin";
+addPath "$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
+addPath "$HOMEBREW_PREFIX/opt/llvm/bin"
 
 # install brew
 if ! hash brew &>/dev/null; then

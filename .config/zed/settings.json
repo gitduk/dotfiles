@@ -1,5 +1,6 @@
 {
   "features": {
+    "inline_completion_provider": "none",
     "copilot": false
   },
   "hour_format": "hour24",
