@@ -247,9 +247,6 @@ alias hcn="hyprctl notify -1 5000 'rgb(a3be8c)'"
 alias hck="hyprctl keyword"
 alias hcsd="hyprctl seterror disable"
 
-# github
-alias hub="sudo sh -c 'sed -i \"/# GitHub520 Host Start/Q\" /etc/hosts && curl https://raw.hellogithub.com/hosts >> /etc/hosts'"
-
 # hurl
 alias hr="hurl -k"
 
@@ -499,7 +496,7 @@ alias ptv="openssl x509 -inform PEM -subject_hash_old -in mitmproxy-ca-cert.pem 
 alias path="echo $PATH | tr ':' '\n'"
 
 # set proxy
-alias pre="export http_proxy=http://${proxy:-127.0.0.1:7890} https_proxy=http://${proxy:-127.0.0.1:7890}"
+alias pre="host=127.0.0.1 port=7890 export http_proxy=http://\$host:\$port https_proxy=http://\$host:\$port"
 alias prd="unset http_proxy https_proxy"
 
 # pid
