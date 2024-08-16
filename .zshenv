@@ -44,10 +44,11 @@ export QT_QPA_PLATFORM=wayland
 export QT_QPA_PLATFORMTHEME=qt5ct
 
 # fcitx input-related
-export GTK_IM_MODULE=fcitx5
-export QT_IM_MODULE=fcitx5
-export XMODIFIERS=@im=fcitx5
-export QT_IM_MODULES="wayland;fcitx5;ibus"
+export XMODIFIERS=@im=fcitx
+export QT_IM_MODULE=fcitx
+export QT_IM_MODULES="wayland;fcitx;ibus"
+export SDL_IM_MODULE=fcitx
+export CLUTTER_IM_MODULE=fcitx
 
 # xdg
 export XDG_SESSION_TYPE=wayland

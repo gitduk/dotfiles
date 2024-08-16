@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=WeChat
+GenericName=WeChat Messenger
+Comment=Official WeChat desktop application
+Exec=flatpak run com.tencent.WeChat
+Icon=com.tencent.WeChat
+Terminal=false
+Type=Application
+Categories=Network;InstantMessaging;Chat;
+StartupNotify=true
+StartupWMClass=WeChat

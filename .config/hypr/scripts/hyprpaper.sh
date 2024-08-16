@@ -3,22 +3,22 @@
 # settings
 WALLPAPER_DIR="$HOME/Pictures/wallpaper"
 HYPRPAPER_CONF="$HOME/.config/hypr/hyprpaper.conf"
-MONITOR="$(hyprctl -i 0 monitors|grep 'ID 0'|awk '{print $2}')"
+MONITOR="$(hyprctl monitors|grep 'ID 0'|awk '{print $2}')"
 
-pgrep hyprpaper &>/dev/null || {hyprctl -i 0 dispatch exec hyprpaper && sleep 1}
+pgrep hyprpaper &>/dev/null || {hyprctl dispatch exec hyprpaper && sleep 1}
 
 load_wallpaper() {
   local wallpaper="${1##*/}"
 
   if [[ -n "$wallpaper" ]]; then
-    load_status="$(hyprctl -i 0 hyprpaper preload "$WALLPAPER_DIR/$wallpaper")"
+    load_status="$(hyprctl hyprpaper preload "$WALLPAPER_DIR/$wallpaper")"
     if [[ $load_status == "ok" ]]; then
       notify-send "${wallpaper%.*}"
-      hyprctl -i 0 hyprpaper wallpaper "$MONITOR,$WALLPAPER_DIR/$wallpaper"
+      hyprctl hyprpaper wallpaper "$MONITOR,$WALLPAPER_DIR/$wallpaper"
     else
       notify-send "Load $wallpaper faield: $load_status"
     fi
-    hyprctl -i 0 hyprpaper unload unused
+    hyprctl hyprpaper unload unused
   else
     notify-send "No wallpaper found"
   fi
@@ -31,7 +31,7 @@ switch_wallpaper() {
   local next_wallpaper
   local current_wallpaper
 
-  current_wallpaper="$(hyprctl -i 0 hyprpaper listactive | grep -v 'no wallpapers' | sed 's|.*/||' | head -n 1)"
+  current_wallpaper="$(hyprctl hyprpaper listactive | grep -v 'no wallpapers' | sed 's|.*/||' | head -n 1)"
 
   ls -1v $WALLPAPER_DIR | while read -r file; do
     [[ -n "$next_wallpaper" ]] && next_wallpaper="$file" && break

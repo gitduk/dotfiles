@@ -5,26 +5,8 @@
 # zmodload zsh/zprof
 
 # completion
-# load compinit, but not execute
-autoload -Uz compinit
-
-# set completion cache
-zstyle ':completion::complete:*' use-cache 1
-
-# set cache dir
-ZCOMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump-$ZSH_VERSION"
-zstyle ':completion::complete:*' cache-path "$ZCOMPDUMP"
-
-# load or generation zsh complete cache file
-if [[ -f "$ZCOMPDUMP" ]]; then
-  compinit -i -d "$ZCOMPDUMP"
-else
-  compinit -C -d "$ZCOMPDUMP"
-fi
-compinit -u
-
-# load complist
-zmodload zsh/complist
+autoload -Uz compinit; compinit -Cu
+zmodload -i zsh/complist
 
 # zsh opts
 setopt AUTOCD                 # enter dir without cd command
@@ -146,8 +128,9 @@ addPath "$CARGO_HOME/bin"
 if ! hash rustup &>/dev/null; then
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 else
+  hash navi &>/dev/null || cargo install navi --locked
+  hash sccache &>/dev/null || cargo install sccache --locked
   hash sccache &>/dev/null && export RUSTC_WRAPPER="$(which sccache)"
-  hash navi &>/dev/null || cargo install --locked navi
 fi
 
 # ###  Conda  #################################################################

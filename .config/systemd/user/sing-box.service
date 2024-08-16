@@ -1,6 +1,6 @@
 [Unit]
-Description=sing-box tproxy daemon.
-After=network.target nss-lookup.target network-online.target
+Description = sing-box tproxy daemon.
+After = network.target nss-lookup.target network-online.target
 
 [Service]
 Type = simple
@@ -10,5 +10,5 @@ ExecStart = %h/go/bin/sing-box run -c %h/.config/sing-box/config.json -D %h/.con
 # ExecStop=sh %h/go/bin/sing-box/nftables.sh clear
 
 [Install]
-WantedBy=multi-user.target
+WantedBy = default.target
 

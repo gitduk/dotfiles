@@ -156,7 +156,7 @@ zbindkey -M vicmd '^w' backward-delete-word
 
 # zbindkey ins
 zbindkey -M viins " " expand-alias-space
-zbindkey -M viins '^T' fzf-apt-widget
+zbindkey -M viins '^P' fzf-apt-widget
 zbindkey -M viins '^_' fzf-commands-widget
 zbindkey -M viins '^B' fzf-bindkeys-widget
 zbindkey -M viins '^V' fzf-services-widget

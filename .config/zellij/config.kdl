@@ -191,7 +191,7 @@ keybinds clear-defaults=true {
     }
 
     shared_except "pane" "locked" {
-        bind "Ctrl p" { SwitchToMode "Pane"; }
+        // bind "Ctrl p" { SwitchToMode "Pane"; }
     }
 
     shared_except "scroll" "locked" {

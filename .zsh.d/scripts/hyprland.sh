@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-# hyprland v0.41.1
+# hyprland v0.42.0
 cd && mkdir Hyprland && cd Hyprland
 
 # build wayland
@@ -9,6 +9,9 @@ mkdir build && cd build \
   && meson setup .. --prefix=/usr --buildtype=release -Ddocumentation=false \
   && sudo ninja -C . install
 cd ../..
+
+# libdisplay-info.so.2
+# https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.2.0/downloads//libdisplay-info-0.2.0.tar.xz
 
 # build wayland-protocols
 sudo nala install -y libcairo2-dev libpango1.0-dev libgbm-dev libliftoff-dev libdisplay-info-dev
