@@ -1,0 +1,7 @@
+[[sources]]
+name = "friendly-snippets"
+git = "https://github.com/rafamadriz/friendly-snippets"
+
+[[sources.paths]]
+scope = ["rust"]
+path = "snippets/rust/rust.json"

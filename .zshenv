@@ -1,4 +1,6 @@
-# ###  Envs  ##################################################################
+############
+### ENVS ###
+############
 
 # editor
 export EDITOR="hx"
@@ -89,7 +91,9 @@ export LD_LIBRARY_PATH="/usr/local/lib:\
 /usr/local/cuda/targets/x86_64-linux/lib:\
 /usr/local/cuda/targets/x86_64-linux/lib/stubs"
 
-# ###  Funtion  ###############################################################
+################
+### FUNCTION ###
+################
 
 # blank aliases
 typeset -a baliases
@@ -136,8 +140,16 @@ addPath() {
   done
 }
 
-# ###  Custom  ################################################################
+##############
+### CUSTOM ###
+##############
 
-# custom path
+# local
 addPath "$HOME/.local/bin"
+
+# npm
+addPath "$HOME/.npm/bin"
+
+# update HYPRLAND_INSTANCE_SIGNATURE for zellij
+export HYPRLAND_INSTANCE_SIGNATURE="$(ls /run/user/$UID/hypr | tail -n 1)"
 

@@ -1,6 +1,14 @@
 {
+  "proxy": "socks5://127.0.0.1:7890",
+  "assistant": {
+    "default_model": {
+      "provider": "openai",
+      "model": "gpt-4o-mini"
+    },
+    "version": "2"
+  },
   "features": {
-    "inline_completion_provider": "none",
+    "inline_completion_provider": "supermaven",
     "copilot": false
   },
   "hour_format": "hour24",
@@ -15,7 +23,7 @@
   },
   "theme": {
     "mode": "light",
-    "light": "One Dark Pro",
+    "light": "One Dark",
     "dark": "One Dark"
   },
   "format_on_save": "on",
@@ -103,6 +111,21 @@
           "includeInlayEnumMemberValueHints": true
         }
       }
+    },
+    "yaml-language-server": {
+      "settings": {
+        "yaml": {
+          "keyOrdering": true,
+          "format": {
+            "singleQuote": true
+          },
+          "schemas": {
+            "http://json.schemastore.org/composer": [
+              "/*"
+            ]
+          }
+        }
+      }
     }
   },
   "language_overrides": {
@@ -116,6 +139,7 @@
     "enable_preview_from_code_navigation": false
   },
   "terminal": {
+    "dock": "right",
     "alternate_scroll": "off",
     "blinking": "terminal_controlled",
     "copy_on_select": true,
@@ -133,8 +157,16 @@
   },
   "project_panel": {
     "button": true,
+    "default_width": 200,
     "dock": "left",
+    "file_icons": true,
+    "folder_icons": true,
     "git_status": true,
-    "default_width": 10
+    "indent_size": 20,
+    "auto_reveal_entries": true,
+    "auto_fold_dirs": true,
+    "scrollbar": {
+      "show": "always"
+    }
   }
 }

@@ -93,13 +93,13 @@
     {
       "type": "direct",
       "tag": "dns-in",
-      "listen": "::",
+      "listen": "127.0.0.1",
       "listen_port": 7853
     },
     {
       "type": "mixed",
       "tag": "mixed-in",
-      "listen": "::",
+      "listen": "127.0.0.1",
       "listen_port": 7890,
       "tcp_fast_open": true,
       "udp_fragment": true,
@@ -110,7 +110,7 @@
     {
       "type": "tproxy",
       "tag": "tproxy-in",
-      "listen": "::",
+      "listen": "127.0.0.1",
       "listen_port": 7891,
       "tcp_fast_open": true,
       "tcp_multi_path": false,
@@ -146,7 +146,7 @@
     {
       "tag": "CY",
       "type": "http",
-      "download_url": "https://time1723081553.cdn-x286vi14-caiyun.top/api/v1/client/subscribe?token=c69fa77708cc4ab2f56b5cae3c2d7b4d",
+      "download_url": "https://cdn1726306478.nginx24caiyun.xyz/api/v1/client/subscribe?token=803921cb4b1a91ab0de24f61b3209361",
       "download_interval": "24h",
       "path": "./sub.cy.txt",
       "healthcheck_interval": "1h",
@@ -247,6 +247,7 @@
       "type": "urltest",
       "use_all_providers": false,
       "providers": [
+        "CY",
         "FB"
       ],
       "includes": [
@@ -422,7 +423,8 @@
       },
       {
         "domain": [
-          "gemini.google.com"
+          "gemini.google.com",
+          "claude.ai"
         ],
         "outbound": "💬 OpenAi"
       },

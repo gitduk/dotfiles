@@ -1,0 +1,45 @@
+{
+  "include": "~/.config/waybar/modules",
+  "layer": "top",
+  "exclusive": true,
+  "passthrough": false,
+  "position": "top",
+  "spacing": 3,
+  "fixed-center": true,
+  "ipc": true,
+  "margin-top": 3,
+  "margin-left": 8,
+  "margin-right": 8,
+
+  "modules-left": [
+    "hyprland/workspaces#roman",
+    "custom/separator#dot-line",
+    "cpu",
+    "custom/separator#dot-line", 
+    "temperature",
+    "custom/separator#dot-line", 
+    "memory",
+  ],
+  
+  "modules-center": [
+    "custom/menu",
+    "custom/separator#dot-line",
+    "idle_inhibitor",
+    "custom/separator#dot-line",
+    "clock",
+    "custom/separator#dot-line",
+    "custom/light_dark",
+    "custom/separator#dot-line",
+    "custom/swaync",
+  ],
+  
+  "modules-right": [
+    "network#speed",
+    "custom/separator#dot-line",
+    "pulseaudio",
+    "custom/separator#dot-line",
+    "pulseaudio#microphone",
+    "custom/separator#dot-line",
+    "custom/power",
+  ],
+}

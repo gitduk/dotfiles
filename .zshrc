@@ -1,45 +1,32 @@
-# ###  Zsh Config  ############################################################
+###################
+### ZSH OPTIONS ###
+###################
 
 # zsh boot time report
 # start=$(date +%s.%N)
 # zmodload zsh/zprof
 
-# completion
-autoload -Uz compinit; compinit -Cu
-zmodload -i zsh/complist
+# Directory navigation and stack management
+setopt AUTOCD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT PUSHDMINUS
 
-# zsh opts
-setopt AUTOCD                 # enter dir without cd command
-setopt AUTO_PUSHD             # Push the current directory visited on the stack.
-setopt PUSHD_IGNORE_DUPS      # Do not store duplicates in the stack.
-setopt PUSHD_SILENT           # Do not print the directory stack after pushd or popd.
-setopt PUSHDMINUS
+# Auto-completion settings
+setopt AUTO_MENU AUTO_LIST AUTO_PARAM_SLASH COMPLETE_IN_WORD ALWAYS_TO_END MENU_COMPLETE
+setopt LIST_PACKED LIST_TYPES EXTENDED_GLOB
 
-setopt AUTO_MENU              # Show completion menu on a successive tab press.
-setopt AUTO_LIST              # Automatically list choices on ambiguous completion.
-setopt AUTO_PARAM_SLASH       # If completed parameter is a directory, add a trailing slash.
+# History management
+setopt HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_VERIFY SHARE_HISTORY
 
-setopt COMPLETE_IN_WORD       # Complete from both ends of a word.
-setopt ALWAYS_TO_END          # Move cursor to the end of a completed word.
-setopt PATH_DIRS              # Perform path search even on command names with slashes.
-setopt EXTENDED_GLOB          # Needed for file modification glob modifiers with compinit.
-setopt MENU_COMPLETE          # Autoselect the first completion entry.
-setopt FLOW_CONTROL           # Ensable start/stop characters in shell editor.
-setopt HIST_IGNORE_ALL_DUPS   # remove dups command
-setopt NONOMATCH              # re mode
-setopt PROMPTSUBST
+# Input and editing optimization
+setopt FLOW_CONTROL MAGIC_EQUAL_SUBST CORRECT PROMPTSUBST NO_BEEP NO_HUP
 
-# custom path
-export ZROOT=$HOME/.zsh.d
-export ZLOAD="$ZROOT/autoload"
-export ZCOMP="$ZROOT/completions"
-export ZPLUG="$ZROOT/plugins"
+# Path and command lookup
+setopt PATH_DIRS
 
-# set fpath
-fpath+=($ZLOAD $ZCOMP $ZPLUG)
+# Safety and error handling
+setopt NO_CASE_GLOB NONOMATCH
 
-# enable hidden files completion
-_comp_options+=(globdots)
+# Other optimizations
+unsetopt BEEP
 
 # xhost access control
 xhost +local: &>/dev/null
@@ -47,111 +34,219 @@ xhost +local: &>/dev/null
 # set bindkey mode to vi
 bindkey -v
 
-# set proxy
-export http_proxy="${http_proxy:-http://127.0.0.1:7890}"
-export https_proxy="${http_proxy:-http://127.0.0.1:7890}"
+# proxy
+export http_proxy="${proxy:-http://127.0.0.1:7890}"
+export https_proxy="${proxy:-http://127.0.0.1:7890}"
 export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
-# ###  Brew  ##################################################################
+#############
+### ZINIT ###
+#############
+# Order of execution of related Ice-mods:
+# atinit -> atpull! -> make'!!' -> mv -> cp -> make! ->
+# atclone/atpull -> make -> (plugin script loading) -> 
+# src -> multisrc -> atload.
 
-# set remote
-# export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
-# export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
-# export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+[ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
+[ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+source "${ZINIT_HOME}/zinit.zsh"
 
-# brew options
-export HOMEBREW_PREFIX="$HOME/.linuxbrew"
-export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
-export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
-export HOMEBREW_NO_AUTO_UPDATE=true                               # 关闭自动更新
-export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))                    # 自动更新间隔时间
-export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH:+:$MANPATH}"
-export INFOPATH="$HOMEBREW_PREFIX/share/info:$INFOPATH"
+# prompt
+zinit ice lucid as"program" from"gh-r" \
+  atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
+  atload"export STARSHIP_CONFIG=~/.starship.toml" \
+  src"init.zsh" \
+  atpull"%atclone"
+zinit light starship/starship
 
-# add brew to path
-addPath "$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin"
-addPath "$HOMEBREW_PREFIX/opt/llvm/bin"
+# settings & functions
+zinit ice wait"1" lucid as"program" id-as'local' \
+  atinit'fpath+=$HOME/.zsh/functions' \
+  atload'
+    autoload -Uz $HOME/.zsh/functions/**/*(:t)
+    for script ($HOME/.zsh/*.zsh(N)) source $script
+  '
+zinit light zdharma-continuum/null
 
-# install brew
-if ! hash brew &>/dev/null; then
-  git clone --depth 1 https://github.com/Homebrew/brew $HOMEBREW_PREFIX
-  brew update --force --quiet
-  chmod -R go-w "$(brew --prefix)/share/zsh"
-else
-  hash atuin &>/dev/null || brew install atuin
-fi
+###############
+### PLUGINS ###
+###############
 
-# ###  Npm  ###################################################################
+# zdharma-continuum/fast-syntax-highlighting
+zinit ice wait"1" lucid atinit"zicompinit; zicdreplay"
+zinit light zdharma-continuum/fast-syntax-highlighting
 
-# add npm to path
-addPath "$HOME/.npm/bin"
+# Aloxaf/fzf-tab
+zinit ice wait"2" lucid
+zinit light Aloxaf/fzf-tab
 
-# install npm
-hash node &>/dev/null || sudo apt install nodejs
-hash npm &>/dev/null || curl -qL https://www.npmjs.com/install.sh | sh
+# zsh-users/zsh-history-substring-search
+zinit ice wait"3" lucid \
+  atload"
+    export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
+    bindkey '^[[A' history-substring-search-up
+    bindkey '^[OA' history-substring-search-up
+    bindkey '^k' history-substring-search-up
+    bindkey '^j' history-substring-search-down
+  "
+zinit light zsh-users/zsh-history-substring-search
 
-# ###  Golang  ################################################################
+# zsh-users/zsh-autosuggestions
+zinit ice wait"3" lucid \
+  atload"
+    _zsh_autosuggest_start
+    export ZSH_AUTOSUGGEST_MANUAL_REBIND='1'
+    export ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
+    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+    bindkey -M viins '^q' autosuggest-clear
+    bindkey -M viins '^@' autosuggest-execute
+    bindkey -M vicmd '^@' autosuggest-execute
+  "
+zinit light zsh-users/zsh-autosuggestions
 
-# go path
-export GOROOT="/usr/local/go"
-export GOPATH="$HOME/go"
-export GOENV="$HOME/go/env"
-addPath "$GOROOT/bin"
-addPath "$GOPATH/bin"
+############
+### APPS ###
+############
 
-# Set the Go proxy
-export GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct
+# brew
+zinit ice wait"1" lucid as"program" id-as'brew' \
+  atclone'
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
+    brew install lnav
+    ' \
+  atload"
+    export HOMEBREW_NO_AUTO_UPDATE=true
+    export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))
+    " \
+  src"init.zsh"
+zinit light zdharma-continuum/null
 
-# Enable Go modules
-export GO111MODULE=on
+# cargo
+zinit ice wait"1" lucid as"program" id-as'cargo' \
+  atclone"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    cargo install --locked sccache
+    cargo install --locked zellij
+    " \
+  atload'
+    export PATH="$HOME/.cargo/bin:$PATH"
+    [[ -n "$commands[sccache]" ]] && export RUSTC_WRAPPER="$commands[sccache]"
+  '
+zinit light zdharma-continuum/null
 
-# Go checksum database
-export GOSUMDB=off
+# golang
+zinit ice wait'1' lucid as"program" id-as'golang' \
+  atclone'
+    version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
+    echo \$version
+    wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
+    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go\$version.linux-amd64.tar.gz
+    ' \
+  atload'
+    export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
+    export GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct
+    export GO111MODULE=on
+    export GOSUMDB=off
+    export GOPRIVATE=*.corp.example.com,rsc.io/private
+    ' \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
 
-# 1.13 开始支持，配置私有 module，不去校验 checksum
-export GOPRIVATE=*.corp.example.com,rsc.io/private
+# zoxide
+zinit ice wait"1" lucid as"program" from"gh-r" \
+  atclone"./zoxide init zsh --cmd j > init.zsh" \
+  src"init.zsh" \
+  atpull"%atclone"
+zinit light ajeetdsouza/zoxide
 
-# install golang
-if ! hash go &>/dev/null; then
-  go_version="$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | grep -oE '"version": "[0-9]{1}.[0-9]{1,}(.[0-9]{1,})?"' | head -1 | cut -d ':' -f2 | sed 's/ //g; s/"//g')"
-  wget -c "https://go.dev/dl/go${go_version}.linux-amd64.tar.gz" -P /tmp
-  sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$go_version.linux-amd64.tar.gz
-fi
+# fzf
+zinit ice wait"1" lucid as"program" from"gh-r" \
+  atclone'./fzf --zsh > init.zsh && mv ./fzf $HOME/.local/bin/' \
+  src"init.zsh" \
+  atpull"%atclone"
+zinit light junegunn/fzf
 
-# ###  Rust  ##################################################################
+# fd
+zinit ice wait'2' lucid as"program" from"gh-r" \
+  atclone'mv fd*/fd $HOME/.local/bin/' \
+  atpull"%atclone"
+zinit light sharkdp/fd
 
-# cargo home
-export CARGO_HOME="$HOME/.cargo"
-addPath "$CARGO_HOME/bin"
+# yazi
+zinit ice wait'3' lucid as"program" from"gh-r" \
+  bpick"yazi-x86_64-unknown-linux-musl.zip" \
+  atclone"mv yazi*/* ./" \
+  atpull"%atclone"
+zinit light sxyazi/yazi
 
-# install rustup
-if ! hash rustup &>/dev/null; then
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-else
-  hash navi &>/dev/null || cargo install navi --locked
-  hash sccache &>/dev/null || cargo install sccache --locked
-  hash sccache &>/dev/null && export RUSTC_WRAPPER="$(which sccache)"
-fi
+# direnv
+zinit ice wait"3" lucid as"program" from"gh-r" \
+  mv"direnv* -> direnv" pick"direnv" \
+  atclone"./direnv hook zsh > init.zsh" \
+  src"init.zsh" \
+  atpull"%atclone"
+zinit light direnv/direnv
 
-# ###  Conda  #################################################################
+# casey/just
+zinit ice wait"3" lucid as"program" from"gh-r" \
+  atclone'./just --completions zsh > _just' \
+  atpull"%atclone"
+zinit light casey/just
 
-addPath "$HOME/anaconda3/bin"
+# node version manager
+zinit ice wait'3' lucid as"program" id-as'nodejs' \
+  atclone'
+    sudo apt install nodejs
+    curl -fsSL https://fnm.vercel.app/install | bash
+    $HOME/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
+    $HOME/.local/share/fnm/fnm completions --shell zsh > _fnm
+    ln -fs $HOME/.local/share/fnm/fnm $HOME/.local/bin/fnm
+    ' \
+  src"init.zsh" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
 
-# ###  Autoload  ##############################################################
+# atuin
+zinit ice wait'[[ -n "$commands[brew]" ]]' lucid as"program" id-as'atuin' \
+  atclone"brew install atuin && atuin init zsh > init.zsh" \
+  src"init.zsh"
+zinit light zdharma-continuum/null
 
-# Autoload functions
-autoload -Uz ${ZLOAD}/**/*(:t)
+# navi
+zinit ice wait'[[ -n "$commands[cargo]" ]]' lucid as"program" id-as'navi' \
+  atclone"cargo install navi --locked && navi widget zsh > init.zsh" \
+  atload'
+    export NAVI_PATH=$HOME/.config/navi/cheats
+    export NAVI_CONFIG=$HOME/.config/navi/config.yaml
+    [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
+    bindkey "^N" _navi_widget
+    ' \
+  src"init.zsh"
+zinit light zdharma-continuum/null
 
-# Source scripts
-for script ($ZROOT/*.zsh(N)) source "$script"
+##################
+### COMPLETION ###
+##################
 
-# ###  Starship  ##############################################################
+# completions
+zinit ice wait"3" blockf lucid \
+  atpull"zinit creinstall -q ."
+zinit light zsh-users/zsh-completions
 
-# starship: shell prompts
-export STARSHIP_CONFIG=~/.starship.toml
-hash starship &>/dev/null && eval "$(starship init zsh)"
+# docker
+zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)docker]} ]]' lucid as"completion"
+zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
 
-# ###  Zprof  #################################################################
+# git
+zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)git]} ]]' lucid as"completion"
+zinit snippet OMZ::plugins/git/git.plugin.zsh
+
+#############
+### Zprof ###
+#############
 # you need add `zmodload zsh/zprof` to the top of .zshrc file
 # zprof | head -n 20; zmodload -u zsh/zprof
 # echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
+

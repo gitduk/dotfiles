@@ -1,71 +1,43 @@
-# brew install llvm
-# rustup component add rust-analyzer
-[[language]]
-name = "rust"
-auto-format = true
-roots = ["Cargo.toml", "Cargo.lock"]
-indent = { tab-width = 4, unit = "    " }
+##################
+### efm server ###
+##################
+# yarn global add prettier
 
-[language-server.rust-analyzer.config.check]
-command = "clippy"
+[language-server.efm]
+command = "efm-langserver"
 
-# npm install --location=global pyright
-[[language]]
-name = "python"
-auto-format = true
-indent = { tab-width = 4, unit = "    " }
-language-servers = ["pyright"]
+[language-server.efm.config]
+documentFormatting = true
+languages = { typescript = [ { formatCommand ="prettier --stdin-filepath ${INPUT}", formatStdin = true } ] }
 
-# npm install -g typescript typescript-language-server
-[[language]]
-name = "typescript"
-auto-format = true
-indent = { tab-width = 4, unit = "    " }
+###################
+### scls server ###
+###################
+# cargo install --git https://github.com/estin/simple-completion-language-server.git
 
-# =============================================================================
+# introduce new language server
+[language-server.scls]
+command = "simple-completion-language-server"
 
-# cargo install taplo-cli --locked --features lsp
-[[language]]
-name = "toml"
-auto-format = true
-indent = { tab-width = 2, unit = "  " }
-formatter = { command = "taplo", args = ["fmt", "-"] }
+[language-server.scls.config]
+max_completion_items = 20            # set max completion results len for each group: words, snippets, unicode-input
+snippets_first = true                # completions will return before snippets by default
+snippets_inline_by_word_tail = false # suggest snippets by WORD tail, for example text `xsq|` become `x^2|` when snippet `sq` has body `^2`
+feature_words = true                 # enable completion by word
+feature_snippets = true              # enable snippets
+feature_unicode_input = true         # enable "unicode input"
+feature_paths = true                 # enable path completion
+feature_citations = false            # enable citation completion (only on `citation` feature enabled)
 
-# brew install marksman
-[[language]]
-name = "markdown"
-auto-format = true
-language-servers = ["marksman", "ltex-ls"]
+# write logs to /tmp/completion.log
+[language-server.scls.environment]
+RUST_LOG = "info,simple-completion-language-server=info"
+LOG_FILE = "/tmp/completion.log"
 
-# npm i -g sql-language-server
-[[language]]
-name = "sql"
-auto-format = true
-indent = { tab-width = 2, unit = "  " }
-language-servers = ["sql-language-server"]
-
-[language-server.sql-language-server]
-command = "sql-language-server"
-args = ["up", "--method", "stdio"]
-
-# npm i -g vscode-langservers-extracted
-[[language]]
-name = "json"
-auto-format = true
-indent = { tab-width = 2, unit = "  " }
-
-[[language]]
-name = "html"
-auto-format = true
-indent = { tab-width = 2, unit = "  " }
-
+###################
+### yaml server ###
+###################
 # npm i -g yaml-language-server@next ansible-language-server
-[[language]]
-name = "yaml"
-auto-format = true
-file-types = ["yaml", "yml"]
-indent = { tab-width = 2, unit = "  " }
-language-servers = ["yaml-language-server", "ansible-language-server"]
 
 [language-server.yaml-language-server.config.yaml]
 format = { enable = true }
@@ -74,3 +46,172 @@ validation = true
 [language-server.yaml-language-server.config.yaml.schemas]
 "https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.{yml,yaml}"
 "https://raw.githubusercontent.com/ansible-community/schemas/main/f/ansible-tasks.json" = "roles/{tasks,handlers}/*.{yml,yaml}"
+
+###################
+### rust server ###
+###################
+# brew install llvm
+# rustup component add rust-analyzer
+# go install github.com/mattn/efm-langserver@latest
+
+[language-server.rust-analyzer.config.check]
+command = "clippy"
+
+#####################
+### python server ###
+#####################
+# npm install --location=global pyright
+
+#########################
+### typescript server ###
+#########################
+# npm install -g typescript typescript-language-server
+
+###################
+### toml server ###
+###################
+# cargo install taplo-cli --locked --features lsp
+
+#######################
+### markdown server ###
+#######################
+# brew install marksman
+
+##################
+### sql server ###
+##################
+# npm i -g sql-language-server
+
+[language-server.sql-language-server]
+command = "sql-language-server"
+args = ["up", "--method", "stdio"]
+
+###################
+### json server ###
+###################
+# npm i -g vscode-langservers-extracted
+
+#####################
+### rust language ###
+#####################
+
+[[language]]
+name = "rust"
+auto-format = true
+roots = ["Cargo.toml", "Cargo.lock"]
+indent = { tab-width = 4, unit = "    " }
+language-servers = [
+  "scls",
+  "rust-analyzer",
+  { name = "efm", only-features = [ "diagnostics", "format" ] }
+]
+
+[language.debugger]
+command = "codelldb"
+name = "codelldb"
+port-arg = "--port {}"
+transport = "tcp"
+
+[[language.debugger.templates]]
+name = "binary"
+request = "launch"
+[[language.debugger.templates.completion]]
+completion = "filename"
+name = "binary"
+
+[language.debugger.templates.args]
+program = "{0}"
+runInTerminal = true
+
+#######################
+### python language ###
+#######################
+
+[[language]]
+name = "python"
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+language-servers = ["pyright"]
+
+###########################
+### typescript language ###
+###########################
+
+[[language]]
+name = "typescript"
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+
+#####################
+### json language ###
+#####################
+
+[[language]]
+name = "json"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+
+#####################
+### yaml language ###
+#####################
+
+[[language]]
+name = "yaml"
+auto-format = true
+file-types = ["yaml", "yml"]
+indent = { tab-width = 2, unit = "  " }
+language-servers = ["yaml-language-server", "ansible-language-server"]
+
+#####################
+### toml language ###
+#####################
+
+[[language]]
+name = "toml"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+formatter = { command = "taplo", args = ["fmt", "-"] }
+
+#########################
+### markdown language ###
+#########################
+
+[[language]]
+name = "markdown"
+auto-format = true
+language-servers = ["marksman", "ltex-ls"]
+
+####################
+### sql language ###
+####################
+
+[[language]]
+name = "sql"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+language-servers = ["sql-language-server"]
+
+#####################
+### html language ###
+#####################
+
+[[language]]
+name = "html"
+auto-format = true
+indent = { tab-width = 2, unit = "  " }
+
+# introduce a new language to enable completion on any doc by forcing set language with :set-language stub
+# [[language]]
+# name = "stub"
+# scope = "text.stub"
+# file-types = []
+# shebangs = []
+# roots = []
+# auto-format = false
+# language-servers = [ "scls" ]
+
+################
+### debugger ###
+################
+
+

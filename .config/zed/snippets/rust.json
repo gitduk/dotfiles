@@ -1,0 +1,8 @@
+{
+  "println": {
+    "prefix": "pr",
+    "body": ["println!(\"$1\");", "$0"],
+    "description": "println"
+  }
+}
+

@@ -1,6 +1,6 @@
 [global]
-disable_stdin = true
 load_dotenv = true
 
 [whitelist]
-prefix = ["/home/wukaige/Rust", "/home/wukaige/Python"]
+prefix = ["~/"]
+

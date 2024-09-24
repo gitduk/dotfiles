@@ -1,0 +1,76 @@
+% init system
+
+# must
+command -v nala &>/dev/null || sudo apt install nala
+command -v ssh &>/dev/null || sudo nala install ssh
+command -v git &>/dev/null || sudo nala install git
+command -v vim &>/dev/null || sudo nala install vim
+command -v curl &>/dev/null || sudo nala install curl
+command -v nala &>/dev/null || sudo nala install nala
+command -v foot &>/dev/null || sudo nala install foot
+command -v gcc &>/dev/null || sudo nala install build-essential
+command -v cmake &>/dev/null || sudo nala install cmake
+command -v openssl &>/dev/null || sudo nala install openssh
+command -v kitty &>/dev/null || sudo nala install kitty
+command -v npm &>/dev/null || sudo nala install npm
+command -v yarn &>/dev/null || npm install -g yarn
+dpkg -l | grep libssl-dev | grep ii &>/dev/null || sudo nala install libssl-dev
+
+# sing-box for linux
+cd /tmp && [[ -e "./sing-box/" ]] && rm -rf ./sing-box/
+git clone --depth 1 -b 'outbound-providers' https://github.com/PuerNya/sing-box.git && cd sing-box/
+go install -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box
+sudo setcap cap_net_admin=ep $HOME/go/bin/sing-box
+
+# sing-box for android
+git clone --depth 1 -b 'outbound-providers' https://github.com/PuerNya/sing-box.git && cd sing-box/
+GOOS=android GOARCH=arm64 go build -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box
+sudo setcap cap_net_admin=ep ./cmd/sing-box
+
+# fcitx5-rime - 白霜拼音
+sudo nala install -y fcitx5 \
+  fcitx5-chinese-addons \
+  fcitx5-frontend-gtk4 fcitx5-frontend-gtk3 fcitx5-frontend-gtk2 \
+  fcitx5-frontend-qt5 fcitx5-rime
+im-config -n fcitx5
+cd ~/.local/share/fcitx5
+git clone --depth 1 https://github.com/gaboolic/rime-frost rime
+cd rime && git pull
+
+# zed
+curl https://zed.dev/install.sh | bash
+
+# waybar
+git clone https://github.com/Alexays/Waybar && cd Waybar/
+meson setup build && sudo ninja -C build install
+
+# rofi - wayland support
+open https://github.com/lbonn/rofi/blob/wayland/INSTALL.md
+
+# chsrc
+curl -L https://gitee.com/RubyMetric/chsrc/releases/download/pre/chsrc-x64-linux -o ~/.local/bin/chsrc
+chmod +x ~/.local/bin/chsrc
+
+# hyprlock
+sudo nala install -y libpam0g-dev
+git clone https://github.com/hyprwm/hyprlock.git && cd hyprlock
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
+  && cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
+# hypridle
+sudo nala install -y libsdbus-c++-dev
+git clone https://github.com/hyprwm/hypridle.git && cd hypridle
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
+  && cmake --build ./build --config Release --target hypridle -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build \
+  && systemctl --user enable --now hypridle.service
+
+# hyprland
+sudo nala install -y meson wget build-essential ninja-build cmake-extras cmake gettext gettext-base fontconfig libfontconfig-dev libffi-dev libxml2-dev libdrm-dev libxkbcommon-x11-dev libxkbregistry-dev libxkbcommon-dev libpixman-1-dev libudev-dev libseat-dev seatd libxcb-dri3-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev xdg-desktop-portal-wlr libtomlplusplus3
+git clone --recursive https://github.com/hyprwm/Hyprland hyprland && cd hyprland
+sudo make all && sudo make install
+
+# yazi
+cargo install --locked --git https://github.com/sxyazi/yazi.git yazi-fm yazi-cli
+
