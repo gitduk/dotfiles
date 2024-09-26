@@ -265,6 +265,12 @@ alias prd="unset http_proxy https_proxy"
 # remove
 alias rf="rm -rf"
 
+# realpath
+alias rp="realpath"
+
+# reallink
+alias rl="readlink -f"
+
 # os release
 alias rls="lsb_release -a"
 

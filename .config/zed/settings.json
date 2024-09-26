@@ -2,8 +2,8 @@
   "proxy": "socks5://127.0.0.1:7890",
   "assistant": {
     "default_model": {
-      "provider": "openai",
-      "model": "gpt-4o-mini"
+      "provider": "zed.dev",
+      "model": "claude-3-5-sonnet-20240620"
     },
     "version": "2"
   },
@@ -167,6 +167,28 @@
     "auto_fold_dirs": true,
     "scrollbar": {
       "show": "always"
+    }
+  },
+  "language_models": {
+    "ollama": {
+      "api_url": "http://wk:11434",
+      "low_speed_timeout_in_seconds": 120,
+      "available_models": [
+        {
+          "provider": "ollama",
+          "name": "deepseek-coder-v2",
+          "display_name": "DeepSeek Coder v2",
+          "max_tokens": 33000,
+          "keep_alive": "10m"
+        },
+        {
+          "provider": "ollama",
+          "name": "codestral:latest",
+          "display_name": "Codestral",
+          "max_tokens": 33000,
+          "keep_alive": "10m"
+        }
+      ]
     }
   }
 }
