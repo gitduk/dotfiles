@@ -14,13 +14,13 @@ eval set -- "$ARGS"
 FOCUSED_MONITOR=$(hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}')
 INTERVAL=1800
 DURATION=1
+SCRIPT="$0"
 
 wallpaper_from() {
-  local current_wallpaper="$(swww query | cut -d ' ' -f 8-)"
   find "$1" -type f -iname "*.jpg" \
     -o -iname "*.jpeg" \
     -o -iname "*.png" \
-    -o -iname "*.gif" | grep -v "$current_wallpaper" | sort
+    -o -iname "*.gif" | sort
 }
 
 wallpaper_set() {
@@ -61,12 +61,14 @@ wallpaper_select() {
   local preview="kitty icat --align center --clear --transfer-mode file {} 2>/dev/null"
   local window="top:70%:wrap"
 
-  # update random wallpaper
-  random="$(wallpaper_from $wallpaper_dir | shuf -n 1)"
-  cp $random $wallpaper_dir/0-random.jpg
-
   # set selected wallpaper
-  selected="$(wallpaper_from $wallpaper_dir | fzf --preview=$preview --preview-window=$window)"
+  wallpapers="$(wallpaper_from $wallpaper_dir)"
+  selected="$(
+    echo $wallpapers | \
+      fzf --preview=$preview \
+      --preview-window=$window \
+      --bind "ctrl-r:reload(echo '$wallpapers' | shuf)"
+  )"
   wallpaper_set "$selected"
 }
 
@@ -77,7 +79,9 @@ while true; do
       shift 2
       ;;
     -r|--random)
-      wallpaper_set "$(wallpaper_from $2 | shuf -n 1)"
+      current_wallpaper="$(swww query | cut -d ' ' -f 8-)"
+      random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
+      wallpaper_set "$random"
       shift 2
       ;;
     -l|--loop)

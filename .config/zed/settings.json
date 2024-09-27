@@ -2,14 +2,42 @@
   "proxy": "socks5://127.0.0.1:7890",
   "assistant": {
     "default_model": {
-      "provider": "zed.dev",
-      "model": "claude-3-5-sonnet-20240620"
+      "provider": "ollama",
+      "model": "codestral:latest"
     },
+    "inline_alternatives": [
+      {
+        "provider": "zed.dev",
+        "model": "gpt-4o"
+      }
+    ],
     "version": "2"
   },
   "features": {
     "inline_completion_provider": "supermaven",
     "copilot": false
+  },
+  "language_models": {
+    "ollama": {
+      "api_url": "http://wk:11434",
+      "low_speed_timeout_in_seconds": 120,
+      "available_models": [
+        {
+          "provider": "ollama",
+          "name": "deepseek-coder-v2",
+          "display_name": "DeepSeek Coder v2",
+          "max_tokens": 33000,
+          "keep_alive": "10m"
+        },
+        {
+          "provider": "ollama",
+          "name": "codestral:latest",
+          "display_name": "Codestral",
+          "max_tokens": 33000,
+          "keep_alive": "10m"
+        }
+      ]
+    }
   },
   "hour_format": "hour24",
   "autosave": "on_window_change",
@@ -35,8 +63,7 @@
     "line_numbers": true
   },
   "centered_layout": {
-    "left_padding": 0.2,
-    "right_padding": 0.2
+    "left_padding": 0.2, "right_padding": 0.2
   },
   "vim": {
     "use_system_clipboard": "on_yank",
@@ -138,23 +165,6 @@
     "enable_preview_from_file_finder": false,
     "enable_preview_from_code_navigation": false
   },
-  "terminal": {
-    "dock": "right",
-    "alternate_scroll": "off",
-    "blinking": "terminal_controlled",
-    "copy_on_select": true,
-    "env": {},
-    "font_family": null,
-    "font_features": null,
-    "font_size": null,
-    "option_as_meta": false,
-    "button": false,
-    "shell": {},
-    "toolbar": {
-      "title": true
-    },
-    "working_directory": "current_project_directory"
-  },
   "project_panel": {
     "button": true,
     "default_width": 200,
@@ -169,26 +179,30 @@
       "show": "always"
     }
   },
-  "language_models": {
-    "ollama": {
-      "api_url": "http://wk:11434",
-      "low_speed_timeout_in_seconds": 120,
-      "available_models": [
-        {
-          "provider": "ollama",
-          "name": "deepseek-coder-v2",
-          "display_name": "DeepSeek Coder v2",
-          "max_tokens": 33000,
-          "keep_alive": "10m"
-        },
-        {
-          "provider": "ollama",
-          "name": "codestral:latest",
-          "display_name": "Codestral",
-          "max_tokens": 33000,
-          "keep_alive": "10m"
-        }
-      ]
-    }
+  "terminal": {
+    "alternate_scroll": "off",
+    "blinking": "terminal_controlled",
+    "copy_on_select": false,
+    "dock": "bottom",
+    "detect_venv": {
+      "on": {
+        "directories": [".env", "env", ".venv", "venv"],
+        "activate_script": "default"
+      }
+    },
+    "env": {
+      "TERM": "xterm-256color"
+    },
+    "font_family": null,
+    "font_features": null,
+    "font_size": null,
+    "line_height": "comfortable",
+    "option_as_meta": true,
+    "button": false,
+    "shell": "system",
+    "toolbar": {
+      "title": true
+    },
+    "working_directory": "current_project_directory"
   }
 }

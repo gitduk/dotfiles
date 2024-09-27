@@ -23,7 +23,6 @@
       "cmd-c": "terminal::Copy",
       "cmd-v": "terminal::Paste",
       "cmd-k": "terminal::Clear",
-      // Some nice conveniences
       "cmd-backspace": [
         "terminal::SendText",
         "\u0015"
@@ -36,7 +35,6 @@
         "terminal::SendText",
         "\u0001"
       ],
-      // Terminal.app compatibility
       "alt-left": [
         "terminal::SendText",
         "\u001bb"
@@ -45,8 +43,6 @@
         "terminal::SendText",
         "\u001bf"
       ],
-      // There are conflicting bindings for these keys in the global context.
-      // these bindings override them, remove at your own risk:
       "up": [
         "terminal::SendKeystroke",
         "up"
