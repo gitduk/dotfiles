@@ -1,24 +1,22 @@
 #!/usr/bin/env zsh
 
-# Kill already running processes
-_ps=(waybar swaync ags tofi)
-for _prs in "${_ps[@]}"; do
-  if pidof "${_prs}" >/dev/null; then
-    pkill "${_prs}"
-  fi
-done
+############
+### tofi ###
+############
 
-# quit ags
-ags -q
+pkill tofi &>/dev/null
 
-# Relaunch waybar
-waybar &
+###########
+### ags ###
+###########
 
-# relaunch swaync
-swaync > /dev/null 2>&1 &
-
-# relaunch ags
+killall ags &>/dev/null
 ags &
 
-exit 0
+##############
+### waybar ###
+##############
+
+killall waybar &>/dev/null
+waybar &
 

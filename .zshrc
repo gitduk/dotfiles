@@ -105,9 +105,9 @@ zinit ice wait"3" lucid \
   "
 zinit light zsh-users/zsh-autosuggestions
 
-############
-### APPS ###
-############
+###############
+### PROGRAM ###
+###############
 
 # brew
 zinit ice wait"1" lucid as"program" id-as'brew' \
@@ -154,13 +154,6 @@ zinit ice wait'1' lucid as"program" id-as'golang' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# zoxide
-zinit ice wait"1" lucid as"program" from"gh-r" \
-  atclone"./zoxide init zsh --cmd j > init.zsh" \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light ajeetdsouza/zoxide
-
 # fzf
 zinit ice wait"1" lucid as"program" from"gh-r" \
   atclone'./fzf --zsh > init.zsh && mv ./fzf $HOME/.local/bin/' \
@@ -168,32 +161,23 @@ zinit ice wait"1" lucid as"program" from"gh-r" \
   atpull"%atclone"
 zinit light junegunn/fzf
 
+# navi
+zinit ice wait'1' lucid as"program" id-as'navi' \
+  atclone"cargo install navi --locked && navi widget zsh > init.zsh" \
+  atload'
+    export NAVI_PATH=$HOME/.config/navi/cheats
+    export NAVI_CONFIG=$HOME/.config/navi/config.yaml
+    [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
+    bindkey "^N" _navi_widget
+    ' \
+  src"init.zsh"
+zinit light zdharma-continuum/null
+
 # fd
 zinit ice wait'2' lucid as"program" from"gh-r" \
   atclone'mv fd*/fd $HOME/.local/bin/' \
   atpull"%atclone"
 zinit light sharkdp/fd
-
-# yazi
-zinit ice wait'3' lucid as"program" from"gh-r" \
-  bpick"yazi-x86_64-unknown-linux-musl.zip" \
-  atclone"mv yazi*/* ./" \
-  atpull"%atclone"
-zinit light sxyazi/yazi
-
-# direnv
-zinit ice wait"3" lucid as"program" from"gh-r" \
-  mv"direnv* -> direnv" pick"direnv" \
-  atclone"./direnv hook zsh > init.zsh" \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light direnv/direnv
-
-# casey/just
-zinit ice wait"3" lucid as"program" from"gh-r" \
-  atclone'./just --completions zsh > _just' \
-  atpull"%atclone"
-zinit light casey/just
 
 # node version manager
 zinit ice wait'3' lucid as"program" id-as'nodejs' \
@@ -208,23 +192,43 @@ zinit ice wait'3' lucid as"program" id-as'nodejs' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# atuin
-zinit ice wait'[[ -n "$commands[brew]" ]]' lucid as"program" id-as'atuin' \
-  atclone"brew install atuin && atuin init zsh > init.zsh" \
-  src"init.zsh"
-zinit light zdharma-continuum/null
+###############
+### COMMAND ###
+###############
 
-# navi
-zinit ice wait'[[ -n "$commands[cargo]" ]]' lucid as"program" id-as'navi' \
-  atclone"cargo install navi --locked && navi widget zsh > init.zsh" \
-  atload'
-    export NAVI_PATH=$HOME/.config/navi/cheats
-    export NAVI_CONFIG=$HOME/.config/navi/config.yaml
-    [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
-    bindkey "^N" _navi_widget
-    ' \
-  src"init.zsh"
-zinit light zdharma-continuum/null
+# zoxide
+zinit ice wait"1" lucid as"command" from"gh-r" \
+  atclone"./zoxide init zsh --cmd j > init.zsh" \
+  src"init.zsh" \
+  atpull"%atclone"
+zinit light ajeetdsouza/zoxide
+
+# atuin
+zinit ice wait'1' lucid as"command" from"gh-r" bpick"atuin-*.tar.gz" mv"atuin*/atuin -> atuin" \
+    atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
+    atpull"%atclone" src"init.zsh"
+zinit light atuinsh/atuin
+
+# yazi
+zinit ice wait'3' lucid as"command" from"gh-r" \
+  bpick"yazi-x86_64-unknown-linux-musl.zip" \
+  atclone"mv yazi*/* ./" \
+  atpull"%atclone"
+zinit light sxyazi/yazi
+
+# direnv
+zinit ice wait"3" lucid as"command" from"gh-r" \
+  mv"direnv* -> direnv" pick"direnv" \
+  atclone"./direnv hook zsh > init.zsh" \
+  src"init.zsh" \
+  atpull"%atclone"
+zinit light direnv/direnv
+
+# just
+zinit ice wait"3" lucid as"command" from"gh-r" \
+  atclone'./just --completions zsh > _just' \
+  atpull"%atclone"
+zinit light casey/just
 
 ##################
 ### COMPLETION ###

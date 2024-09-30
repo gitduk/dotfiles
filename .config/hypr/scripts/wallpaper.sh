@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 OPTIONS="s:r:l:i:q"
-LONGOPTS="set:,random:,loop:,interval:,query,select:"
+LONGOPTS="set:,random:,loop:,interval:,query,select:,remote:"
 ARGS=`getopt -a --options=$OPTIONS --longoptions=$LONGOPTS --name "${0##*/}" -- "$@"`
 if [[ $? -ne 0 || $# -eq 0 ]]; then
   cat <<- EOF
@@ -15,6 +15,7 @@ FOCUSED_MONITOR=$(hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{pri
 INTERVAL=1800
 DURATION=1
 SCRIPT="$0"
+WALLPAPER_DIR="$HOME/Pictures/wallpapers"
 
 wallpaper_from() {
   find "$1" -type f -iname "*.jpg" \
@@ -63,51 +64,81 @@ wallpaper_select() {
 
   # set selected wallpaper
   wallpapers="$(wallpaper_from $wallpaper_dir)"
+  find_cmd="find $wallpaper_dir -type f -iname '*.' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif'"
   selected="$(
-    echo $wallpapers | \
+    echo $wallpapers | shuf | \
       fzf --preview=$preview \
       --preview-window=$window \
-      --bind "ctrl-r:reload(echo '$wallpapers' | shuf)"
+      --bind "ctrl-r:reload(echo '$wallpapers' | shuf)" \
+      --bind "D:reload(rm -rf {}; $find_cmd | shuf)"
   )"
   wallpaper_set "$selected"
+}
+
+bing() {
+  # 1366 1920 3840
+  local resolution=3840
+  local download_dir="$WALLPAPER_DIR/bing"
+  [[ ! -d "$download_dir" ]] && mkdir -p "$download_dir"
+  resp=$(curl "https://bing.biturl.top/?resolution=$resolution&format=json&index=random&mkt=random")
+  url=$(jq .url <<< $resp)
+  name=$(jq .copyright <<< $resp)
+  name=${name//\"/}
+  name=${name%%\(*}
+  name=${name%%,*}
+  name="$(echo $name)"
+  img_path="$download_dir/$name.jpg"
+  if [[ ! -e "$img_path" ]]; then
+    aria2c ${url//\"/} -d "$download_dir" -o "$name.jpg" &>/dev/null
+  fi
+  echo $img_path
 }
 
 while true; do
   case "$1" in
     -s|--set)
       wallpaper_set "$2"
-      shift 2
+      shift
       ;;
     -r|--random)
       current_wallpaper="$(swww query | cut -d ' ' -f 8-)"
       random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
       wallpaper_set "$random"
-      shift 2
+      shift
       ;;
     -l|--loop)
       WALLPAPER_DIR="$2"
-      shift 2
+      LOOP=true
+      shift
       ;;
     -i|--interval)
       INTERVAL="$2"
-      shift 2
+      shift
       ;;
     --select)
       wallpaper_select "$2"
-      shift 2
-      ;;
-    -q|--query)
       shift
       ;;
-    --) shift ; break ;;
+    --remote)
+      case "$2" in
+        bing) wallpaper="$(bing)" ;;
+        *) wallpaper="$(bing)" ;;
+      esac
+      notify-send "$2" "$wallpaper"
+      wallpaper_set "$wallpaper"
+      shift
+      ;;
+    -q|--query) ;;
+    --) shift; break ;;
     *)
       echo "Invalid option: $1"
       exit 1
       ;;
   esac
+  shift
 done
 
-if [[ -n "$WALLPAPER_DIR" ]]; then
+if [[ -n "$LOOP" ]]; then
   wallpaper_loop "$WALLPAPER_DIR"
 fi
 

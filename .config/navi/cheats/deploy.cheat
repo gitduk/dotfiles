@@ -53,24 +53,67 @@ chmod +x ~/.local/bin/chsrc
 
 # hyprlock
 sudo nala install -y libpam0g-dev
-git clone https://github.com/hyprwm/hyprlock.git && cd hyprlock
+git clone https://github.com/hyprwm/hyprlock.git && cd hyprlock/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
-  && sudo cmake --install ./build
+  && sudo cmake --install build
 
 # hypridle
 sudo nala install -y libsdbus-c++-dev
-git clone https://github.com/hyprwm/hypridle.git && cd hypridle
+git clone https://github.com/hyprwm/hypridle.git && cd hypridle/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && cmake --build ./build --config Release --target hypridle -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
-  && sudo cmake --install ./build \
+  && sudo cmake --install build \
   && systemctl --user enable --now hypridle.service
 
 # hyprland
 sudo nala install -y meson wget build-essential ninja-build cmake-extras cmake gettext gettext-base fontconfig libfontconfig-dev libffi-dev libxml2-dev libdrm-dev libxkbcommon-x11-dev libxkbregistry-dev libxkbcommon-dev libpixman-1-dev libudev-dev libseat-dev seatd libxcb-dri3-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev xdg-desktop-portal-wlr libtomlplusplus3
-git clone --recursive https://github.com/hyprwm/Hyprland hyprland && cd hyprland
+git clone --recursive https://github.com/hyprwm/Hyprland hyprland && cd hyprland/
 sudo make all && sudo make install
+
+# hyprnotify
+git clone https://github.com/codelif/hyprnotify.git && cd hyprnotify/
+go build ./cmd/hyprnotify
+mv ./hyprnotify ~/.local/bin/hyprnotify
 
 # yazi
 cargo install --locked --git https://github.com/sxyazi/yazi.git yazi-fm yazi-cli
+
+# Spotube - Spotify music open source client
+sudo nala install -y gir1.2-appindicator3-0.1
+wget "https://github.com/KRTirtho/spotube/releases/download/v3.8.1/Spotube-linux-x86_64.deb"
+sudo dpkg -i ./Spotube-linux-x86_64.deb
+
+# wl-clipboard
+git clone https://github.com/bugaevc/wl-clipboard.git && cd wl-clipboard/
+mkdir build && cd build \
+  && meson setup .. --prefix=/usr --buildtype=release \
+  && sudo ninja -C . install
+
+# flameshot - screenshot tool
+sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
+sudo nala install -y libqt5dbus5 libqt5network5 libqt5core5a libqt5widgets5 libqt5gui5 libqt5svg5
+git clone https://github.com/flameshot-org/flameshot.git && cd flameshot/
+cmake -S . -B build \
+  -DUSE_WAYLAND_CLIPBOARD=true \
+  -DUSE_WAYLAND_GRIM=ON \
+  && cmake --build build \
+  && sudo cmake --install build
+
+# greetd - login manager daemon
+git clone https://git.sr.ht/~kennylevinsen/greetd && cd greetd/
+cargo build --release
+sudo cp target/release/{greetd,agreety} /usr/local/bin/
+sudo cp greetd.service /etc/systemd/system/greetd.service
+mkdir /etc/greetd && cp ~/.etc/greetd/config.toml /etc/greetd/config.toml
+sudo useradd -M -G video greeter
+sudo chmod -R go+r /etc/greetd/
+
+# tuigreet - Graphical console greeter for greetd.
+git clone https://github.com/apognu/tuigreet.git && cd tuigreet/
+cargo build --release
+sudo mv target/release/tuigreet /usr/local/bin/tuigreet
+sudo mkdir /var/cache/tuigreet
+sudo chown greeter:greeter /var/cache/tuigreet
+sudo chmod 0755 /var/cache/tuigreet
 

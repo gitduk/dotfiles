@@ -151,5 +151,7 @@ addPath "$HOME/.local/bin"
 addPath "$HOME/.npm/bin"
 
 # update HYPRLAND_INSTANCE_SIGNATURE for zellij
-export HYPRLAND_INSTANCE_SIGNATURE="$(ls /run/user/$UID/hypr | tail -n 1)"
+if [[ -d "/run/user/$UID/hypr" ]]; then
+  export HYPRLAND_INSTANCE_SIGNATURE="$(ls /run/user/$UID/hypr | tail -n 1)"
+fi
 

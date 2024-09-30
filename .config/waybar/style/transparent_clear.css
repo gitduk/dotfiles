@@ -32,7 +32,6 @@ window#waybar.empty #window {
   text-shadow: none;
   padding: 4px 6px;
   border-radius: 1px;
-  transition: all 0.5s cubic-bezier(.55,-0.68,.48,1.682);
 }
 
 #workspaces button:hover {
