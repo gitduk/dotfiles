@@ -144,11 +144,9 @@ addPath() {
 ### CUSTOM ###
 ##############
 
-# local
-addPath "$HOME/.local/bin"
-
-# npm
-addPath "$HOME/.npm/bin"
+# PATH
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.npm/bin:$PATH"
 
 # update HYPRLAND_INSTANCE_SIGNATURE for zellij
 if [[ -d "/run/user/$UID/hypr" ]]; then

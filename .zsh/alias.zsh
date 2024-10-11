@@ -111,6 +111,12 @@ alias ds="dust"
 alias denv="deactivate"
 
 #########
+### E ###
+#########
+
+alias eas="v ~/.zsh/alias.zsh"
+
+#########
 ### F ###
 #########
 
@@ -129,6 +135,9 @@ alias ff="fzf"
 #########
 ### G ###
 #########
+
+# gitui
+alias gu="gitui"
 
 # git
 alias gad="git add ."
@@ -286,6 +295,7 @@ alias rsy="rsync -avP"
 
 # source
 alias sc="source"
+alias szs="source ~/.zshrc"
 
 # systemctl
 alias scs="sudo systemctl status"

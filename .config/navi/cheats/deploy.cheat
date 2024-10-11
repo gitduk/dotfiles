@@ -1,31 +1,17 @@
 % init system
 
-# must
-command -v nala &>/dev/null || sudo apt install nala
-command -v ssh &>/dev/null || sudo nala install ssh
-command -v git &>/dev/null || sudo nala install git
-command -v vim &>/dev/null || sudo nala install vim
-command -v curl &>/dev/null || sudo nala install curl
-command -v nala &>/dev/null || sudo nala install nala
-command -v foot &>/dev/null || sudo nala install foot
-command -v gcc &>/dev/null || sudo nala install build-essential
-command -v cmake &>/dev/null || sudo nala install cmake
-command -v openssl &>/dev/null || sudo nala install openssh
-command -v kitty &>/dev/null || sudo nala install kitty
-command -v npm &>/dev/null || sudo nala install npm
-command -v yarn &>/dev/null || npm install -g yarn
-dpkg -l | grep libssl-dev | grep ii &>/dev/null || sudo nala install libssl-dev
-
 # sing-box for linux
 cd /tmp && [[ -e "./sing-box/" ]] && rm -rf ./sing-box/
 git clone --depth 1 -b 'outbound-providers' https://github.com/PuerNya/sing-box.git && cd sing-box/
-go install -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box
-sudo setcap cap_net_admin=ep $HOME/go/bin/sing-box
+go install -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box \
+  && sudo setcap cap_net_admin=ep $HOME/go/bin/sing-box
 
 # sing-box for android
+wget https://googledownloads.cn/android/repository/android-ndk-r27-linux.zip && unzip android-ndk-r27-linux.zip
 git clone --depth 1 -b 'outbound-providers' https://github.com/PuerNya/sing-box.git && cd sing-box/
-GOOS=android GOARCH=arm64 go build -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box
-sudo setcap cap_net_admin=ep ./cmd/sing-box
+export CC="/tmp/android-ndk-r27/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
+GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box \
+  && sudo setcap cap_net_admin=ep ./sing-box
 
 # fcitx5-rime - 白霜拼音
 sudo nala install -y fcitx5 \
@@ -51,12 +37,74 @@ open https://github.com/lbonn/rofi/blob/wayland/INSTALL.md
 curl -L https://gitee.com/RubyMetric/chsrc/releases/download/pre/chsrc-x64-linux -o ~/.local/bin/chsrc
 chmod +x ~/.local/bin/chsrc
 
+# libdisplay-info.so.2
+wget https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.2.0/downloads//libdisplay-info-0.2.0.tar.xz
+
+# wayland-protocols
+sudo nala install -y libcairo2-dev libpango1.0-dev libgbm-dev libliftoff-dev libdisplay-info-dev
+git clone https://gitlab.freedesktop.org/wayland/wayland-protocols.git && cd wayland-protocols
+meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
+
+# wayland
+sudo nala install -y graphviz xsltproc xmlto
+git clone https://gitlab.freedesktop.org/wayland/wayland.git && cd wayland/
+meson build/ --prefix=/usr && sudo ninja -C build/ install
+
+# hyprutils
+git clone https://github.com/hyprwm/hyprutils.git && cd hyprutils/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
+# hyprlang
+git clone https://github.com/hyprwm/hyprlang.git && cd hyprlang/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target hyprlang -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
+# hyprcursor
+sudo nala install -y libzip-dev librsvg2-dev libtomlplusplus-dev libxcb-util-dev libxcb-image0-dev
+git clone https://github.com/hyprwm/hyprcursor.git && cd hyprcursor/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
+# hyprwayland-scanner
+sudo nala install -y libpugixml-dev
+git clone https://github.com/hyprwm/hyprwayland-scanner.git && cd hyprwayland-scanner/
+cmake -DCMAKE_INSTALL_PREFIX=/usr -B build \
+  && cmake --build build -j `nproc` \
+  && sudo cmake --install ./build
+
+# xcb-errors
+sudo nala install -y dh-autoreconf xutils-dev
+git clone https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git && cd libxcb-errors/
+sudo ./autogen.sh --prefix=/usr/local && sudo make && sudo make install
+
+# aquamarine
+git clone https://github.com/hyprwm/aquamarine.git && cd aquamarine/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
+  && sudo cmake --install build
+
+# hyprland
+sudo nala install -y meson wget build-essential ninja-build cmake-extras cmake gettext gettext-base fontconfig libfontconfig-dev libffi-dev libxml2-dev libdrm-dev libxkbcommon-x11-dev libxkbregistry-dev libxkbcommon-dev libpixman-1-dev libudev-dev libseat-dev seatd libxcb-dri3-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev xdg-desktop-portal-wlr libtomlplusplus3
+git clone --recursive https://github.com/hyprwm/Hyprland hyprland && cd hyprland/
+sudo make all && sudo make install
+
+# hyprpaper
+sudo nala install -y libmagic-dev
+git clone https://github.com/hyprwm/hyprpaper.git && cd hyprpaper/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target hyprpaper -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
 # hyprlock
 sudo nala install -y libpam0g-dev
 git clone https://github.com/hyprwm/hyprlock.git && cd hyprlock/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
-  && sudo cmake --install build
+  && sudo cmake --install ./build
 
 # hypridle
 sudo nala install -y libsdbus-c++-dev
@@ -66,15 +114,22 @@ cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && sudo cmake --install build \
   && systemctl --user enable --now hypridle.service
 
-# hyprland
-sudo nala install -y meson wget build-essential ninja-build cmake-extras cmake gettext gettext-base fontconfig libfontconfig-dev libffi-dev libxml2-dev libdrm-dev libxkbcommon-x11-dev libxkbregistry-dev libxkbcommon-dev libpixman-1-dev libudev-dev libseat-dev seatd libxcb-dri3-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev xdg-desktop-portal-wlr libtomlplusplus3
-git clone --recursive https://github.com/hyprwm/Hyprland hyprland && cd hyprland/
-sudo make all && sudo make install
-
 # hyprnotify
 git clone https://github.com/codelif/hyprnotify.git && cd hyprnotify/
 go build ./cmd/hyprnotify
 mv ./hyprnotify ~/.local/bin/hyprnotify
+
+# hyprpicker
+git clone https://github.com/hyprwm/hyprpicker.git && cd hyprpicker/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target hyprpicker -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
+# xdg-desktop-portal-hyprland
+sudo nala install -y qt6-base-dev
+git clone --recursive https://github.com/hyprwm/xdg-desktop-portal-hyprland && cd xdg-desktop-portal-hyprland/
+cmake -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib -DCMAKE_INSTALL_PREFIX=/usr -B build \
+  && cmake --build ./build && sudo cmake --install build
 
 # yazi
 cargo install --locked --git https://github.com/sxyazi/yazi.git yazi-fm yazi-cli
@@ -86,9 +141,7 @@ sudo dpkg -i ./Spotube-linux-x86_64.deb
 
 # wl-clipboard
 git clone https://github.com/bugaevc/wl-clipboard.git && cd wl-clipboard/
-mkdir build && cd build \
-  && meson setup .. --prefix=/usr --buildtype=release \
-  && sudo ninja -C . install
+meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
 
 # flameshot - screenshot tool
 sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev

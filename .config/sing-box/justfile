@@ -1,0 +1,5 @@
+default:
+  sing-box run -c ./config.json
+
+edit:
+  hx ./config.json

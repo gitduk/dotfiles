@@ -192,6 +192,29 @@ zinit ice wait'3' lucid as"program" id-as'nodejs' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
+# must
+zinit ice wait'[[ ! -f ~/.must ]]' lucid as"program" id-as'must' \
+  atload'
+    ok=0
+    command -v nala &>/dev/null || sudo apt install nala || ok=1
+    command -v ssh &>/dev/null || sudo nala install ssh || ok=1
+    command -v git &>/dev/null || sudo nala install git || ok=1
+    command -v vim &>/dev/null || sudo nala install vim || ok=1
+    command -v curl &>/dev/null || sudo nala install curl || ok=1
+    command -v nala &>/dev/null || sudo nala install nala || ok=1
+    command -v foot &>/dev/null || sudo nala install foot || ok=1
+    command -v gcc &>/dev/null || sudo nala install build-essential || ok=1
+    command -v cmake &>/dev/null || sudo nala install cmake || ok=1
+    command -v sccache &>/dev/null || sudo nala install sccache || ok=1
+    command -v openssl &>/dev/null || sudo nala install openssh || ok=1
+    command -v kitty &>/dev/null || sudo nala install kitty || ok=1
+    command -v npm &>/dev/null || sudo nala install npm || ok=1
+    command -v yarn &>/dev/null || npm install -g yarn || ok=1
+    dpkg -l | grep libssl-dev | grep ii &>/dev/null || sudo nala install libssl-dev || ok=1
+    [[ $ok -eq 0 ]] && touch ~/.must
+  '
+zinit light zdharma-continuum/null
+
 ###############
 ### COMMAND ###
 ###############
@@ -229,6 +252,10 @@ zinit ice wait"3" lucid as"command" from"gh-r" \
   atclone'./just --completions zsh > _just' \
   atpull"%atclone"
 zinit light casey/just
+
+# gitui
+zinit ice wait"3" lucid as"command" from"gh-r"
+zinit light extrawurst/gitui
 
 ##################
 ### COMPLETION ###

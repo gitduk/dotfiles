@@ -13,7 +13,6 @@ eval set -- "$ARGS"
 # vars
 FOCUSED_MONITOR=$(hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}')
 INTERVAL=1800
-DURATION=1
 SCRIPT="$0"
 WALLPAPER_DIR="$HOME/Pictures/wallpapers"
 
@@ -26,22 +25,18 @@ wallpaper_from() {
 
 wallpaper_set() {
   local wallpaper="$1"
-  local FPS=60
-  local TYPE="random"
-  local BEZIER=".43,1.19,1,.4"
   if [[ -f "$wallpaper" ]]; then
     wallust_waybar "$wallpaper"
-    swww img -o $FOCUSED_MONITOR "$wallpaper" \
-      --transition-fps $FPS \
-      --transition-type $TYPE \
-      --transition-duration $DURATION
+    hyprctl hyprpaper unload all &>/dev/null
+    hyprctl hyprpaper preload "$wallpaper" &>/dev/null
+    hyprctl hyprpaper wallpaper "$FOCUSED_MONITOR,$wallpaper" &>/dev/null
   fi
 }
 
 wallust_waybar() {
-  wallust run "$1" -s
+  wallust run "$1" -s 2>/dev/null
   sleep 0.3
-  pidof waybar && killall -SIGUSR2 waybar
+  pidof waybar &>/dev/null && killall -SIGUSR2 waybar
   sleep 0.2
 }
 
@@ -101,14 +96,13 @@ while true; do
       shift
       ;;
     -r|--random)
-      current_wallpaper="$(swww query | cut -d ' ' -f 8-)"
+      current_wallpaper="$(hyprctl hyprpaper listactive | awk -F' = ' "/$FOCUSED_MONITOR/{print \$2}")"
       random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
       wallpaper_set "$random"
       shift
       ;;
     -l|--loop)
-      WALLPAPER_DIR="$2"
-      LOOP=true
+      wallpaper_loop "$2"
       shift
       ;;
     -i|--interval)
@@ -137,8 +131,4 @@ while true; do
   esac
   shift
 done
-
-if [[ -n "$LOOP" ]]; then
-  wallpaper_loop "$WALLPAPER_DIR"
-fi
 

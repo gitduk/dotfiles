@@ -1,9 +1,21 @@
 {
+  "ssh_connections": [
+    {
+      "host": "wk",
+      "projects": [
+        {
+          "paths": [
+            "~/Rust/knn_search"
+          ]
+        }
+      ]
+    }
+  ],
   "proxy": "socks5://127.0.0.1:7890",
   "assistant": {
     "default_model": {
-      "provider": "ollama",
-      "model": "codestral:latest"
+      "provider": "anthropic",
+      "model": "claude-3-5-sonnet-20240620"
     },
     "inline_alternatives": [
       {
@@ -63,7 +75,8 @@
     "line_numbers": true
   },
   "centered_layout": {
-    "left_padding": 0.2, "right_padding": 0.2
+    "left_padding": 0.2,
+    "right_padding": 0.2
   },
   "vim": {
     "use_system_clipboard": "on_yank",
@@ -186,7 +199,12 @@
     "dock": "bottom",
     "detect_venv": {
       "on": {
-        "directories": [".env", "env", ".venv", "venv"],
+        "directories": [
+          ".env",
+          "env",
+          ".venv",
+          "venv"
+        ],
         "activate_script": "default"
       }
     },
