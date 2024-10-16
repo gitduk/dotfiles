@@ -37,6 +37,8 @@ wallust_waybar() {
   wallust run "$1" -s 2>/dev/null
   sleep 0.3
   pidof waybar &>/dev/null && killall -SIGUSR2 waybar
+  pidof hyprpaper &>/dev/null || nohup hyprpaper > /dev/null 2>&1 &
+  disown
   sleep 0.2
 }
 
@@ -96,8 +98,13 @@ while true; do
       shift
       ;;
     -r|--random)
-      current_wallpaper="$(hyprctl hyprpaper listactive | awk -F' = ' "/$FOCUSED_MONITOR/{print \$2}")"
-      random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
+      listactive="$(hyprctl hyprpaper listactive)"
+      if [[ ! "$listactive" == "no wallpapers active" ]]; then
+        current_wallpaper="$(echo -n "$listactive" | awk -F' = ' "/$FOCUSED_MONITOR/{print \$2}")"
+        random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
+      else
+        random="$(wallpaper_from $2 | shuf -n 1)"
+      fi
       wallpaper_set "$random"
       shift
       ;;

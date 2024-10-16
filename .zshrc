@@ -53,7 +53,7 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
 
 # prompt
-zinit ice lucid as"program" from"gh-r" \
+zinit ice lucid as"program" from"gh-r" id-as"starship" \
   atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
   atload"export STARSHIP_CONFIG=~/.starship.toml" \
   src"init.zsh" \
@@ -61,11 +61,11 @@ zinit ice lucid as"program" from"gh-r" \
 zinit light starship/starship
 
 # settings & functions
-zinit ice wait"1" lucid as"program" id-as'local' \
-  atinit'fpath+=$HOME/.zsh/functions' \
+zinit ice wait"1" lucid as"program" id-as"autoload" \
+  atinit"fpath+=~/.zsh/functions" \
   atload'
-    autoload -Uz $HOME/.zsh/functions/**/*(:t)
-    for script ($HOME/.zsh/*.zsh(N)) source $script
+    autoload -Uz ~/.zsh/functions/**/*(:t)
+    for script (~/.zsh/*.zsh(N)) source $script
   '
 zinit light zdharma-continuum/null
 
@@ -74,15 +74,15 @@ zinit light zdharma-continuum/null
 ###############
 
 # zdharma-continuum/fast-syntax-highlighting
-zinit ice wait"1" lucid atinit"zicompinit; zicdreplay"
+zinit ice wait"1" lucid atinit"zicompinit; zicdreplay" id-as"fast-syntax-highlighting"
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 # Aloxaf/fzf-tab
-zinit ice wait"2" lucid
+zinit ice wait"2" lucid id-as"fzf-tab"
 zinit light Aloxaf/fzf-tab
 
 # zsh-users/zsh-history-substring-search
-zinit ice wait"3" lucid \
+zinit ice wait"3" lucid id-as"zsh-history-substring-search" \
   atload"
     export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
     bindkey '^[[A' history-substring-search-up
@@ -93,7 +93,7 @@ zinit ice wait"3" lucid \
 zinit light zsh-users/zsh-history-substring-search
 
 # zsh-users/zsh-autosuggestions
-zinit ice wait"3" lucid \
+zinit ice wait"3" lucid id-as"zsh-autosuggestions" \
   atload"
     _zsh_autosuggest_start
     export ZSH_AUTOSUGGEST_MANUAL_REBIND='1'
@@ -155,8 +155,8 @@ zinit ice wait'1' lucid as"program" id-as'golang' \
 zinit light zdharma-continuum/null
 
 # fzf
-zinit ice wait"1" lucid as"program" from"gh-r" \
-  atclone'./fzf --zsh > init.zsh && mv ./fzf $HOME/.local/bin/' \
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
+  atclone"./fzf --zsh > init.zsh && mv ./fzf ~/.local/bin/" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light junegunn/fzf
@@ -174,26 +174,26 @@ zinit ice wait'1' lucid as"program" id-as'navi' \
 zinit light zdharma-continuum/null
 
 # fd
-zinit ice wait'2' lucid as"program" from"gh-r" \
-  atclone'mv fd*/fd $HOME/.local/bin/' \
+zinit ice wait'2' lucid as"program" from"gh-r" id-as"fd" \
+  atclone"mv fd*/fd ~/.local/bin/" \
   atpull"%atclone"
 zinit light sharkdp/fd
 
 # node version manager
 zinit ice wait'3' lucid as"program" id-as'nodejs' \
-  atclone'
+  atclone"
     sudo apt install nodejs
     curl -fsSL https://fnm.vercel.app/install | bash
-    $HOME/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
-    $HOME/.local/share/fnm/fnm completions --shell zsh > _fnm
-    ln -fs $HOME/.local/share/fnm/fnm $HOME/.local/bin/fnm
-    ' \
+    ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
+    ~/.local/share/fnm/fnm completions --shell zsh > _fnm
+    ln -fs ~/.local/share/fnm/fnm ~/.local/bin/fnm
+    " \
   src"init.zsh" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # must
-zinit ice wait'[[ ! -f ~/.must ]]' lucid as"program" id-as'must' \
+zinit ice wait"[[ ! -f ~/.must ]]" lucid as"program" id-as'must' \
   atload'
     ok=0
     command -v nala &>/dev/null || sudo apt install nala || ok=1
@@ -220,27 +220,28 @@ zinit light zdharma-continuum/null
 ###############
 
 # zoxide
-zinit ice wait"1" lucid as"command" from"gh-r" \
+zinit ice wait"1" lucid as"command" from"gh-r" id-as"zoxide" \
   atclone"./zoxide init zsh --cmd j > init.zsh" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light ajeetdsouza/zoxide
 
 # atuin
-zinit ice wait'1' lucid as"command" from"gh-r" bpick"atuin-*.tar.gz" mv"atuin*/atuin -> atuin" \
-    atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
-    atpull"%atclone" src"init.zsh"
+zinit ice wait'1' lucid as"command" from"gh-r" id-as"atuin" \
+  bpick"atuin-*.tar.gz" mv"atuin*/atuin -> atuin" \
+  atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
+  atpull"%atclone" src"init.zsh"
 zinit light atuinsh/atuin
 
 # yazi
-zinit ice wait'3' lucid as"command" from"gh-r" \
+zinit ice wait'3' lucid as"command" from"gh-r" id-as"yazi" \
   bpick"yazi-x86_64-unknown-linux-musl.zip" \
   atclone"mv yazi*/* ./" \
   atpull"%atclone"
 zinit light sxyazi/yazi
 
 # direnv
-zinit ice wait"3" lucid as"command" from"gh-r" \
+zinit ice wait"3" lucid as"command" from"gh-r" id-as"direnv" \
   mv"direnv* -> direnv" pick"direnv" \
   atclone"./direnv hook zsh > init.zsh" \
   src"init.zsh" \
@@ -248,13 +249,13 @@ zinit ice wait"3" lucid as"command" from"gh-r" \
 zinit light direnv/direnv
 
 # just
-zinit ice wait"3" lucid as"command" from"gh-r" \
+zinit ice wait"3" lucid as"command" from"gh-r" id-as"just" \
   atclone'./just --completions zsh > _just' \
   atpull"%atclone"
 zinit light casey/just
 
 # gitui
-zinit ice wait"3" lucid as"command" from"gh-r"
+zinit ice wait"3" lucid as"command" from"gh-r" id-as"gitui"
 zinit light extrawurst/gitui
 
 ##################
@@ -262,7 +263,7 @@ zinit light extrawurst/gitui
 ##################
 
 # completions
-zinit ice wait"3" blockf lucid \
+zinit ice wait"3" blockf lucid id-as"zsh-completions" \
   atpull"zinit creinstall -q ."
 zinit light zsh-users/zsh-completions
 

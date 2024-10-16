@@ -170,3 +170,8 @@ sudo mkdir /var/cache/tuigreet
 sudo chown greeter:greeter /var/cache/tuigreet
 sudo chmod 0755 /var/cache/tuigreet
 
+# tdf - A terminal-based PDF viewer.
+sudo nala install -y libpoppler-dev libpoppler-glib-dev
+git clone --recursive https://github.com/itsjunetime/tdf.git && cd tdf/
+cargo build --release && cp target/release/tdf ~/.local/bin/
+
