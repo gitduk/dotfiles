@@ -62,12 +62,22 @@ wallpaper_select() {
   # set selected wallpaper
   wallpapers="$(wallpaper_from $wallpaper_dir)"
   find_cmd="find $wallpaper_dir -type f -iname '*.' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif'"
+  star_cmd='
+    wname="${wallpaper##*/}"
+    wpath="${wallpaper%/*}"
+    if [[ "$wname" == \** ]]; then
+      mv "${wallpaper}" "${wpath}/${wname#\*}"
+    else
+      mv "${wallpaper}" "${wpath}/*${wname}"
+    fi
+  '
   selected="$(
     echo $wallpapers | shuf | \
       fzf --preview=$preview \
       --preview-window=$window \
       --bind "ctrl-r:reload(echo '$wallpapers' | shuf)" \
-      --bind "D:reload(rm -rf {}; $find_cmd | shuf)"
+      --bind "D:reload(rm -rf {}; $find_cmd)" \
+      --bind "L:reload(wallpaper={} && $star_cmd; $find_cmd)+change-query(*)"
   )"
   wallpaper_set "$selected"
 }
