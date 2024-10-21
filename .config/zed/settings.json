@@ -1,16 +1,4 @@
 {
-  "ssh_connections": [
-    {
-      "host": "wk",
-      "projects": [
-        {
-          "paths": [
-            "~/Rust/knn_search"
-          ]
-        }
-      ]
-    }
-  ],
   "proxy": "socks5://127.0.0.1:7890",
   "assistant": {
     "default_model": {

@@ -24,7 +24,7 @@ git clone --depth 1 https://github.com/gaboolic/rime-frost rime
 cd rime && git pull
 
 # zed
-curl https://zed.dev/install.sh | bash
+curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
 
 # waybar
 git clone https://github.com/Alexays/Waybar && cd Waybar/
