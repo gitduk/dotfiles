@@ -22,7 +22,7 @@ podman run -d --name stirling-pdf \
   frooodle/s-pdf:latest
 
 # pairdrop
-podman run -d --name=pairdrop \
+podman run -d --name pairdrop \
   -p 0.0.0.0:3000:3000 \
   -e PUID=1000 \ -e PGID=1000 \
   -e WS_SERVER=false \
@@ -31,6 +31,13 @@ podman run -d --name=pairdrop \
   -e RATE_LIMIT=false \
   -e DEBUG_MODE=false \
   -e TZ=Etc/UTC \
-  --restart=unless-stopped \
+  --restart unless-stopped \
   lscr.io/linuxserver/pairdrop 
+
+# uptime-kuma
+podman run -d --name uptime-kuma \
+  -v uptime-kuma:/app/data \
+  --network host \
+  --restart always \
+  louislam/uptime-kuma:1
 
