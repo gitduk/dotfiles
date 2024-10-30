@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Zen
+GenericName=Zen Browser
+Comment=Access the Internet
+Exec=zen
+Type=Application
+Icon=Zen
+Categories=Network;WebBrowser;
+StartupNotify=true
+Actions=NewWindow;Incognito;TempProfile;

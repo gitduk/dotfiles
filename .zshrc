@@ -52,6 +52,26 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 [ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 source "${ZINIT_HOME}/zinit.zsh"
 
+# must
+zinit ice wait"[[ ! -f ~/.must.ok ]]" lucid as"program" id-as'must' \
+  atload'
+    ok=0
+    command -v nala &>/dev/null || sudo apt install nala || ok=1
+    command -v ssh &>/dev/null || sudo nala install ssh || ok=1
+    command -v curl &>/dev/null || sudo nala install curl || ok=1
+    command -v foot &>/dev/null || sudo nala install foot || ok=1
+    command -v kitty &>/dev/null || sudo nala install kitty || ok=1
+    command -v gcc &>/dev/null || sudo nala install build-essential || ok=1
+    command -v cmake &>/dev/null || sudo nala install cmake || ok=1
+    command -v sccache &>/dev/null || sudo nala install sccache || ok=1
+    command -v openssl &>/dev/null || sudo nala install openssh || ok=1
+    command -v npm &>/dev/null || sudo nala install npm || ok=1
+    command -v yarn &>/dev/null || npm install -g yarn || ok=1
+    dpkg -l | grep libssl-dev | grep ii &>/dev/null || sudo nala install libssl-dev || ok=1
+    [[ $ok -eq 0 ]] && touch ~/.must.ok
+  '
+zinit light zdharma-continuum/null
+
 # prompt
 zinit ice lucid as"program" from"gh-r" id-as"starship" \
   atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
@@ -174,13 +194,13 @@ zinit ice wait'1' lucid as"program" id-as'navi' \
 zinit light zdharma-continuum/null
 
 # fd
-zinit ice wait'2' lucid as"program" from"gh-r" id-as"fd" \
+zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
   atclone"mv fd*/fd ~/.local/bin/" \
   atpull"%atclone"
 zinit light sharkdp/fd
 
 # node version manager
-zinit ice wait'3' lucid as"program" id-as'nodejs' \
+zinit ice wait'[[ ! -n "$commands[fnm]" ]]' lucid as"program" id-as'nodejs' \
   atclone"
     sudo apt install nodejs
     curl -fsSL https://fnm.vercel.app/install | bash
@@ -192,28 +212,12 @@ zinit ice wait'3' lucid as"program" id-as'nodejs' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# must
-zinit ice wait"[[ ! -f ~/.must ]]" lucid as"program" id-as'must' \
-  atload'
-    ok=0
-    command -v nala &>/dev/null || sudo apt install nala || ok=1
-    command -v ssh &>/dev/null || sudo nala install ssh || ok=1
-    command -v git &>/dev/null || sudo nala install git || ok=1
-    command -v vim &>/dev/null || sudo nala install vim || ok=1
-    command -v curl &>/dev/null || sudo nala install curl || ok=1
-    command -v nala &>/dev/null || sudo nala install nala || ok=1
-    command -v foot &>/dev/null || sudo nala install foot || ok=1
-    command -v gcc &>/dev/null || sudo nala install build-essential || ok=1
-    command -v cmake &>/dev/null || sudo nala install cmake || ok=1
-    command -v sccache &>/dev/null || sudo nala install sccache || ok=1
-    command -v openssl &>/dev/null || sudo nala install openssh || ok=1
-    command -v kitty &>/dev/null || sudo nala install kitty || ok=1
-    command -v npm &>/dev/null || sudo nala install npm || ok=1
-    command -v yarn &>/dev/null || npm install -g yarn || ok=1
-    dpkg -l | grep libssl-dev | grep ii &>/dev/null || sudo nala install libssl-dev || ok=1
-    [[ $ok -eq 0 ]] && touch ~/.must
-  '
-zinit light zdharma-continuum/null
+# zen
+zinit ice wait'[[ ! -n "$commands[zen]" ]]' lucid as"program" from"gh-r" id-as'zen' \
+  bpick"zen-specific.AppImage" \
+  atclone"mv zen-specific.appimage ~/.local/bin/zen" \
+  atpull"%atclone"
+zinit light zen-browser/desktop
 
 ###############
 ### COMMAND ###
@@ -257,6 +261,10 @@ zinit light casey/just
 # gitui
 zinit ice wait"3" lucid as"command" from"gh-r" id-as"gitui"
 zinit light extrawurst/gitui
+
+# curlie
+zinit ice wait'[[ ! -n "$commands[curlie]" ]]' lucid as"command" from"gh-r" id-as"curlie"
+zinit light rs/curlie
 
 ##################
 ### COMPLETION ###

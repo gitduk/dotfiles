@@ -8,10 +8,11 @@ export SUDO_EDITOR="$EDITOR"
 export VISUAL="$EDITOR"
 
 # browser
-export BROWSER=google-chrome
+export BROWSER=zen
 
 # cursor
 export XCURSOR_PATH="$HOME/.local/share/icons"
+export XCURSOR_SIZE=16
 export XCURSOR_THEME=Vimix
 
 # Skip the not really helping Ubuntu global compinit
@@ -87,6 +88,7 @@ export PKG_CONFIG_PATH="/usr/lib/pkgconfig:\
 # ld library
 export LD_LIBRARY_PATH="/usr/local/lib:\
 /usr/lib/x86_64-linux-gnu:\
+/usr/local/lib/x86_64-linux-gnu:\
 /usr/local/cuda/lib64:\
 /usr/local/cuda/targets/x86_64-linux/lib:\
 /usr/local/cuda/targets/x86_64-linux/lib/stubs"

@@ -63,7 +63,7 @@ alias cwn="sudo chown -Rv $USER:$USER"
 alias cre="crontab -e"
 
 # curlie
-alias cl="curlie -s"
+alias cl="curlie"
 
 #########
 ### D ###

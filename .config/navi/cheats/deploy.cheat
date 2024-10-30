@@ -31,7 +31,8 @@ git clone https://github.com/Alexays/Waybar && cd Waybar/
 meson setup build && sudo ninja -C build install
 
 # rofi - wayland support
-open https://github.com/lbonn/rofi/blob/wayland/INSTALL.md
+git clone --depth=1 https://github.com/lbonn/rofi.git && cd rofi/
+meson setup build && ninja -C build && ninja -C build install
 
 # chsrc
 curl -L https://gitee.com/RubyMetric/chsrc/releases/download/pre/chsrc-x64-linux -o ~/.local/bin/chsrc
