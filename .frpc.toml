@@ -6,7 +6,7 @@ user = "wukaige"
 # A literal address or host name for IPv6 must be enclosed
 # in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
 # For single serverAddr field, no need square brackets, like serverAddr = "::".
-serverAddr = "120.78.164.217"
+serverAddr = "vultr"
 serverPort = 7000
 
 # STUN server to help penetrate NAT hole.

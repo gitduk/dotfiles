@@ -75,6 +75,7 @@ wallpaper_select() {
     echo $wallpapers | shuf | \
       fzf --preview=$preview \
       --preview-window=$window \
+      --bind "J:down,K:up" \
       --bind "ctrl-r:reload(echo '$wallpapers' | shuf)" \
       --bind "D:reload(rm -rf {}; $find_cmd)" \
       --bind "L:reload(wallpaper={} && $star_cmd; $find_cmd)+change-query(*)"

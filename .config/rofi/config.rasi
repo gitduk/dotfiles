@@ -146,13 +146,16 @@ configuration {
 /*	me-accept-entry: "MouseDPrimary";*/
 /*	me-accept-custom: "Control+MouseDPrimary";*/
 
-  kb-row-up: "Up,K";
-  kb-row-down: "Down,J";
+  kb-remove-to-eol: "";
+  kb-remove-to-sol: "";
+  kb-accept-entry: "Control+m,Return,KP_Enter";
+  kb-row-up: "Up,Control+k";
+  kb-row-down: "Down,Control+j";
 
-  display-run: "󰘳  ";
-  display-ssh: "  ";
-  display-drun: "󰵆  ";
-  display-combi: " ";
+  display-run: "  ";
+  display-ssh: "  ";
+  display-drun: "  ";
+  display-combi: "󰘳 ";
 
   drun-display-format: "{name}";
 
@@ -161,6 +164,8 @@ configuration {
   kb-select-3: "Control+3";
   kb-select-4: "Control+4";
   kb-select-5: "Control+5";
+
+  ssh-command: "foot sh -c '{ssh-client} {host}'";
 
   timeout {
       action: "kb-cancel";

@@ -2,7 +2,7 @@
 Name=Zen
 GenericName=Zen Browser
 Comment=Access the Internet
-Exec=zen
+Exec=env QT_IM_MODULE=fcitx QT_AUTO_SCREEN_SCALE_FACTOR=1 'QT_QPA_PLATFORM=wayland;xcb' %h/.local/bin/zen
 Type=Application
 Icon=Zen
 Categories=Network;WebBrowser;

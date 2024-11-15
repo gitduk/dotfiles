@@ -1,0 +1,11 @@
+% iptables
+
+# list filter table
+sudo iptables --list
+
+# delete rule
+sudo iptables --table <table> --delete <chain> 
+
+$ table: echo "filter\nmanagle\nnat\nraw\nsecurity"
+$ chain: echo "INPUT\nOUTPUT\nFORWARD"
+

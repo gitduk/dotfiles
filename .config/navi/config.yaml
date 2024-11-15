@@ -3,20 +3,25 @@
 
 style:
   tag:
-    color: cyan # text color. possible values: https://bit.ly/3gloNNI
-    width_percentage: 26 # column width relative to the terminal window
-    min_width: 20 # minimum column width as number of characters
+    color: cyan
+    width_percentage: 15
+    min_width: 15
   comment:
     color: blue
-    width_percentage: 42
-    min_width: 45
+    width_percentage: 20
+    min_width: 20
   snippet:
+    width_percentage: 55
+    min_width: 60
     color: white
 
 finder:
-  command: fzf # equivalent to the --finder option
-  # overrides: --tac # equivalent to the --fzf-overrides option
-  # overrides_var: --tac # equivalent to the --fzf-overrides-var option
+  # equivalent to the --finder option
+  command: fzf
+  # equivalent to the --fzf-overrides option
+  overrides: --with-nth='1,2,3' --no-preview
+  # equivalent to the --fzf-overrides-var option
+  # overrides_var: --tac
 
 # cheats:
 #   paths:

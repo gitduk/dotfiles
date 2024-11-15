@@ -1,0 +1,5 @@
+% network
+
+# easytier
+sudo easytier-core --ipv4 10.144.144.1
+

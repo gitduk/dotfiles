@@ -43,7 +43,7 @@ export WLR_NO_HARDWARE_CURSORS=1
 # export __GLX_VENDOR_LIBRARY_NAME=nvidia
 
 # qt
-export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORM='wayland;xcb'
 export QT_QPA_PLATFORMTHEME=qt5ct
 
 # fcitx input-related

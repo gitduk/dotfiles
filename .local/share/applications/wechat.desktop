@@ -1,12 +1,11 @@
 [Desktop Entry]
-Version=1.0
-Name=WeChat
-GenericName=WeChat Messenger
-Comment=Official WeChat desktop application
-Exec=flatpak run com.tencent.WeChat
-Icon=com.tencent.WeChat
-Terminal=false
-Type=Application
-Categories=Network;InstantMessaging;Chat;
+Name=wechat
+Name[zh_CN]=微信
+Exec=env QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx 'XMODIFIERS=@im=fcitx' QT_AUTO_SCREEN_SCALE_FACTOR=1 'QT_QPA_PLATFORM=wayland;xcb' /usr/bin/wechat %U
 StartupNotify=true
-StartupWMClass=WeChat
+Terminal=false
+Icon=/usr/share/icons/hicolor/256x256/apps/wechat.png
+Type=Application
+Categories=Utility;
+Comment=Wechat Desktop
+Comment[zh_CN]=微信桌面版

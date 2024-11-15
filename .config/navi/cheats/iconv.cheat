@@ -1,0 +1,7 @@
+% iconv
+
+# GBK to UTF-8
+iconv -f GBK -t UTF-8 <file> -o <file>
+
+$ file: find . -type f
+

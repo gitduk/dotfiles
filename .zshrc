@@ -47,10 +47,15 @@ export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 # atclone/atpull -> make -> (plugin script loading) -> 
 # src -> multisrc -> atload.
 
+[[ -n "$commands[git]" ]] || sudo apt install git
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 [ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
 [ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 source "${ZINIT_HOME}/zinit.zsh"
+
+# ensure zbin dir
+export ZBIN="$HOME/.local/bin"
+[[ ! -d "$ZBIN" ]] && mkdir -p $ZBIN
 
 # must
 zinit ice wait"[[ ! -f ~/.must.ok ]]" lucid as"program" id-as'must' \
@@ -176,7 +181,7 @@ zinit light zdharma-continuum/null
 
 # fzf
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh && mv ./fzf ~/.local/bin/" \
+  atclone"./fzf --zsh > init.zsh && mv ./fzf $ZBIN/" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light junegunn/fzf
@@ -187,37 +192,45 @@ zinit ice wait'1' lucid as"program" id-as'navi' \
   atload'
     export NAVI_PATH=$HOME/.config/navi/cheats
     export NAVI_CONFIG=$HOME/.config/navi/config.yaml
+    [[ ! -d "$NAVI_PATH" ]] && mkdir -p $NAVI_PATH
     [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
     bindkey "^N" _navi_widget
     ' \
   src"init.zsh"
 zinit light zdharma-continuum/null
 
-# fd
-zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"mv fd*/fd ~/.local/bin/" \
-  atpull"%atclone"
-zinit light sharkdp/fd
-
 # node version manager
-zinit ice wait'[[ ! -n "$commands[fnm]" ]]' lucid as"program" id-as'nodejs' \
+zinit ice wait'1' lucid as"program" id-as'nodejs' \
   atclone"
     sudo apt install nodejs
     curl -fsSL https://fnm.vercel.app/install | bash
     ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
     ~/.local/share/fnm/fnm completions --shell zsh > _fnm
-    ln -fs ~/.local/share/fnm/fnm ~/.local/bin/fnm
+    ln -fs ~/.local/share/fnm/fnm $ZBIN/fnm
     " \
   src"init.zsh" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
+# fd
+zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
+  atclone"mv fd*/fd $ZBIN/" \
+  atpull"%atclone"
+zinit light sharkdp/fd
+
 # zen
 zinit ice wait'[[ ! -n "$commands[zen]" ]]' lucid as"program" from"gh-r" id-as'zen' \
   bpick"zen-specific.AppImage" \
-  atclone"mv zen-specific.appimage ~/.local/bin/zen" \
+  atclone"mv zen-specific.appimage $ZBIN/zen" \
   atpull"%atclone"
 zinit light zen-browser/desktop
+
+# sing-box
+zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as'sing-box' \
+  bpick"sing-box-*-linux-amd64.tar.gz" \
+  atclone"mv */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=ep $ZBIN/sing-box" \
+  atpull"%atclone"
+zinit light SagerNet/sing-box
 
 ###############
 ### COMMAND ###
@@ -282,6 +295,10 @@ zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_
 # git
 zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)git]} ]]' lucid as"completion"
 zinit snippet OMZ::plugins/git/git.plugin.zsh
+
+# fzf
+zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)fzf]} ]]' lucid as"completion"
+zinit snippet https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/zsh/completions/_fzf
 
 #############
 ### Zprof ###
