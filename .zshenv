@@ -8,7 +8,7 @@ export SUDO_EDITOR="$EDITOR"
 export VISUAL="$EDITOR"
 
 # browser
-export BROWSER=zen
+export BROWSER=google-chrome
 
 # cursor
 export XCURSOR_PATH="$HOME/.local/share/icons"

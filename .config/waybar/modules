@@ -87,9 +87,7 @@
     }
   },
   "hyprland/workspaces#4": {
-    "format": "{name}",
     "format": " {name} {icon} ",
-    //"format": " {icon} ",
     "show-special": false,
     "on-click": "activate",
     "on-scroll-up": "hyprctl dispatch workspace e+1",
@@ -248,8 +246,8 @@
     "on-click-middle": "",
     "on-click-right": "",
     "on-update": "",
-    "on-scroll-up": "~/.config/hypr/scripts/Brightness.sh --inc",
-    "on-scroll-down": "~/.config/hypr/scripts/Brightness.sh --dec",
+    "on-scroll-up": "~/.config/hypr/scripts/brightness.sh --inc 10",
+    "on-scroll-down": "~/.config/hypr/scripts/brightness.sh --dec 10",
     "smooth-scrolling-threshold": 1,
   },
   "backlight#2": {
@@ -695,9 +693,17 @@
     "interval": 3600,
     "return-type": "json",
     "exec": "~/.config/hypr/scripts/weather.sh",
-    // "exec": "~/.config/hypr/cripts/weather.py",
     "exec-if": "ping wttr.in -c1",
     "tooltip": true,
+    "tooltip-format": "",
+  },
+  "custom/backlight": {
+    "format": " 󰃠 {} ",
+    "interval": 2,
+    "exec": "~/.config/hypr/scripts/brightness.sh --get",
+    "exec-if": "hash ddcutil",
+    "on-click": "~/.config/hypr/scripts/brightness.sh --set $(echo -n '10\n20\n30\n40\n50' | rofi -dmenu -i -p 'backlight:')",
+    "tooltip": false,
   },
   // Separators
   "custom/separator#dot": {

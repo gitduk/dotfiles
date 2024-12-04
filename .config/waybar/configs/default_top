@@ -40,6 +40,8 @@
     "custom/separator#dot-line",
     "pulseaudio#microphone",
     "custom/separator#dot-line",
+    "custom/backlight",
+    "custom/separator#dot-line",
     "custom/power",
   ],
 }

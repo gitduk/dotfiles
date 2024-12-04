@@ -70,6 +70,7 @@ zinit ice wait"[[ ! -f ~/.must.ok ]]" lucid as"program" id-as'must' \
     command -v cmake &>/dev/null || sudo nala install cmake || ok=1
     command -v sccache &>/dev/null || sudo nala install sccache || ok=1
     command -v openssl &>/dev/null || sudo nala install openssh || ok=1
+    command -v ddcutil &>/dev/null || sudo nala install ddcutil || ok=1
     command -v npm &>/dev/null || sudo nala install npm || ok=1
     command -v yarn &>/dev/null || npm install -g yarn || ok=1
     dpkg -l | grep libssl-dev | grep ii &>/dev/null || sudo nala install libssl-dev || ok=1
@@ -153,7 +154,6 @@ zinit ice wait"1" lucid as"program" id-as'cargo' \
   atclone"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     cargo install --locked sccache
-    cargo install --locked zellij
     " \
   atload'
     export PATH="$HOME/.cargo/bin:$PATH"
@@ -218,19 +218,19 @@ zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd
   atpull"%atclone"
 zinit light sharkdp/fd
 
-# zen
-zinit ice wait'[[ ! -n "$commands[zen]" ]]' lucid as"program" from"gh-r" id-as'zen' \
-  bpick"zen-specific.AppImage" \
-  atclone"mv zen-specific.appimage $ZBIN/zen" \
-  atpull"%atclone"
-zinit light zen-browser/desktop
-
 # sing-box
 zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as'sing-box' \
   bpick"sing-box-*-linux-amd64.tar.gz" \
   atclone"mv */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=ep $ZBIN/sing-box" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
+
+# zellij
+zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as'zellij' \
+  bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
+  atclone"mv zellij $ZBIN/" \
+  atpull"%atclone"
+zinit light zellij-org/zellij
 
 ###############
 ### COMMAND ###

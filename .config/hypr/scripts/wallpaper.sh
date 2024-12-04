@@ -87,18 +87,38 @@ bing() {
   # 1366 1920 3840
   local resolution=3840
   local download_dir="$WALLPAPER_DIR/bing"
+  local agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+
   [[ ! -d "$download_dir" ]] && mkdir -p "$download_dir"
-  resp=$(curl "https://bing.biturl.top/?resolution=$resolution&format=json&index=random&mkt=random")
+
+  # Perform the curl request and store the response
+  resp=$(curl -A "$agent" "https://bing.biturl.top/?resolution=$resolution&format=json&index=random&mkt=random")
+
+  # Check if the response is valid JSON
+  if ! echo "$resp" | jq empty 2>/dev/null; then
+    echo "Error: Invalid JSON response received. Please try again later."
+    return 1
+  fi
+
+  # Extract URL and copyright
   url=$(jq .url <<< $resp)
   name=$(jq .copyright <<< $resp)
-  name=${name//\"/}
-  name=${name%%\(*}
-  name=${name%%,*}
-  name="$(echo $name)"
+
+    # Handle cases where URL or copyright might be missing
+  if [[ -z "$url" || -z "$name" ]]; then
+    echo "Error: Missing data in response."
+    return 1
+  fi
+
+  # Clean up the name for the file (remove leading/trailing quotes, everything after the first '(' and any trailing commas)
+  name=$(echo "$name" | sed -e 's/^"\(.*\)"$/\1/' -e 's/(\(.*\))//g' -e 's/,.*//')
+
+  # Download the image if it doesn't already exist
   img_path="$download_dir/$name.jpg"
   if [[ ! -e "$img_path" ]]; then
     aria2c ${url//\"/} -d "$download_dir" -o "$name.jpg" &>/dev/null
   fi
+
   echo $img_path
 }
 
