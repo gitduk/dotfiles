@@ -1,36 +1,4 @@
-% init system
-
-# sing-box for android
-wget https://googledownloads.cn/android/repository/android-ndk-r27-linux.zip && unzip android-ndk-r27-linux.zip
-git clone --depth 1 -b 'outbound-providers' https://github.com/PuerNya/sing-box.git && cd sing-box/
-export CC="/tmp/android-ndk-r27/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
-GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box \
-  && sudo setcap cap_net_admin=+ep ./sing-box
-
-# fcitx5-rime - 白霜拼音
-sudo nala install -y fcitx5 \
-  fcitx5-chinese-addons \
-  fcitx5-frontend-gtk4 fcitx5-frontend-gtk3 fcitx5-frontend-gtk2 \
-  fcitx5-frontend-qt5 fcitx5-rime
-im-config -n fcitx5
-cd ~/.local/share/fcitx5
-git clone --depth 1 https://github.com/gaboolic/rime-frost rime
-cd rime && git pull
-
-# zed
-curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
-
-# waybar
-git clone https://github.com/Alexays/Waybar && cd Waybar/
-meson setup build && sudo ninja -C build install
-
-# rofi - wayland support
-git clone --depth=1 https://github.com/lbonn/rofi.git && cd rofi/
-meson setup build && ninja -C build && ninja -C build install
-
-# chsrc
-curl -L https://gitee.com/RubyMetric/chsrc/releases/download/pre/chsrc-x64-linux -o ~/.local/bin/chsrc
-chmod +x ~/.local/bin/chsrc
+% hyprland, desktop
 
 # libdisplay-info.so.2
 wget https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.2.0/downloads//libdisplay-info-0.2.0.tar.xz
@@ -50,6 +18,17 @@ git clone https://github.com/hyprwm/hyprutils.git && cd hyprutils/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
   && sudo cmake --install ./build
+
+# hyprgraphics
+sudo apt install cmake pkg-config libbrotli-dev
+sudo apt install libgif-dev libjpeg-dev libopenexr-dev libpng-dev libwebp-dev
+git clone https://github.com/libjxl/libjxl.git --recursive --shallow-submodules && cd libjxl/
+mkdir build && cd build/
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DJPEGXL_ENABLE_SKCMS=ON -DJPEGXL_BUNDLE_SKCMS=ON .. && cmake --build . -- -j$(nproc) && sudo cmake --install .
+git clone https://github.com/hyprwm/hyprgraphics && cd hyprgraphics/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF`
+sudo cmake --install build
 
 # hyprlang
 git clone https://github.com/hyprwm/hyprlang.git && cd hyprlang/
@@ -81,11 +60,6 @@ git clone https://github.com/hyprwm/aquamarine.git && cd aquamarine/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
   && sudo cmake --install build
-
-# hyprland
-sudo nala install -y meson wget build-essential ninja-build cmake-extras cmake gettext gettext-base fontconfig libfontconfig-dev libffi-dev libxml2-dev libdrm-dev libxkbcommon-x11-dev libxkbregistry-dev libxkbcommon-dev libpixman-1-dev libudev-dev libseat-dev seatd libxcb-dri3-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev xdg-desktop-portal-wlr libtomlplusplus3
-git clone --recursive https://github.com/hyprwm/Hyprland hyprland && cd hyprland/
-sudo make all && sudo make install
 
 # hyprpaper
 sudo nala install -y libmagic-dev
@@ -130,65 +104,6 @@ git clone --recursive https://github.com/hyprwm/xdg-desktop-portal-hyprland && c
 cmake -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib -DCMAKE_INSTALL_PREFIX=/usr -B build \
   && cmake --build ./build && sudo cmake --install build
 
-# yazi
-cargo install --locked --git https://github.com/sxyazi/yazi.git yazi-fm yazi-cli
-
-# Spotube - Spotify music open source client
-sudo nala install -y gir1.2-appindicator3-0.1
-wget "https://github.com/KRTirtho/spotube/releases/download/v3.8.1/Spotube-linux-x86_64.deb"
-sudo dpkg -i ./Spotube-linux-x86_64.deb
-
-# wl-clipboard
-git clone https://github.com/bugaevc/wl-clipboard.git && cd wl-clipboard/
-meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
-
-# flameshot - screenshot tool
-sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
-sudo nala install -y libqt5dbus5 libqt5network5 libqt5core5a libqt5widgets5 libqt5gui5 libqt5svg5
-git clone https://github.com/flameshot-org/flameshot.git && cd flameshot/
-cmake -S . -B build \
-  -DUSE_WAYLAND_CLIPBOARD=true \
-  -DUSE_WAYLAND_GRIM=ON \
-  && cmake --build build \
-  && sudo cmake --install build
-
-# greetd - login manager daemon
-git clone https://git.sr.ht/~kennylevinsen/greetd && cd greetd/
-cargo build --release
-sudo cp target/release/{greetd,agreety} /usr/local/bin/
-sudo cp greetd.service /etc/systemd/system/greetd.service
-mkdir /etc/greetd && cp ~/.etc/greetd/config.toml /etc/greetd/config.toml
-sudo useradd -M -G video greeter
-sudo chmod -R go+r /etc/greetd/
-
-# tuigreet - Graphical console greeter for greetd.
-git clone https://github.com/apognu/tuigreet.git && cd tuigreet/
-cargo build --release
-sudo mv target/release/tuigreet /usr/local/bin/tuigreet
-sudo mkdir /var/cache/tuigreet
-sudo chown greeter:greeter /var/cache/tuigreet
-sudo chmod 0755 /var/cache/tuigreet
-
-# tdf - A terminal-based PDF viewer.
-sudo nala install -y libpoppler-dev libpoppler-glib-dev
-git clone --recursive https://github.com/itsjunetime/tdf.git && cd tdf/
-cargo build --release && cp target/release/tdf ~/.local/bin/
-
-# frp
-wget "$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep browser_download_url | cut -d '"' -f 4|grep frp_.*_linux_amd64.tar.gz)" \
-  && tar -xzvf frp_*_linux_amd64.tar.gz && cd frp_*_linux_amd64/ \
-  && mv frpc ~/.local/bin/
-
-# pnpm
-curl -fsSL https://get.pnpm.io/install.sh | sh -
-
-# wechat
-wget "https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.AppImage" \
-  -O /usr/bin/wechat \
-  && sudo chmod 744 /usr/bin/wechat
-
-# qq
-wget "https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.13_241104_x86_64_01.AppImage" \
-  -O /usr/bin/qq \
-  && sudo chmod 744 /usr/bin/qq
-
+# hyproled
+wget "$(curl -s https://api.github.com/repos/mklan/hyproled/releases/latest | jq -r '.assets[0].browser_download_url')"
+sudo chmod 744 hyproled && mv ./hyproled ~/.local/bin/hyproled

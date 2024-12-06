@@ -11,6 +11,7 @@ Usage:
   -s, --set VALUE  Set brightness by VALUE
   -i, --inc VALUE  Increase brightness by VALUE
   -d, --dec VALUE  Decrease brightness by VALUE
+
 EOF
 fi
 eval set -- "$ARGS"

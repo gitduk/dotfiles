@@ -232,6 +232,13 @@ zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-a
   atpull"%atclone"
 zinit light zellij-org/zellij
 
+# hyprland
+zinit ice wait'[[ ! -n "$commands[hyprctl]" ]]' lucid as"program" from"gh-r" id-as'hyprland' \
+  bpick"v0.45.2.tar.gz" \
+  atclone"sudo mv */hypr* */Hypr* /usr/bin/" \
+  atpull"%atclone"
+zinit light hyprwm/Hyprland
+
 ###############
 ### COMMAND ###
 ###############
