@@ -19,6 +19,8 @@
     "temperature",
     "custom/separator#dot-line", 
     "memory",
+    "custom/separator#dot-line", 
+    "mpd",
   ],
   
   "modules-center": [
@@ -31,8 +33,9 @@
     "custom/light_dark",
     "custom/separator#dot-line",
     "custom/swaync",
+    "custom/separator#dot-line",
   ],
-  
+
   "modules-right": [
     "network#speed",
     "custom/separator#dot-line",
