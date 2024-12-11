@@ -33,10 +33,10 @@
     "custom/light_dark",
     "custom/separator#dot-line",
     "custom/swaync",
-    "custom/separator#dot-line",
   ],
 
   "modules-right": [
+    "hyprland/submap",
     "network#speed",
     "custom/separator#dot-line",
     "pulseaudio",
