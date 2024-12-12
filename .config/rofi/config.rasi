@@ -63,9 +63,7 @@ configuration {
 /* display-ssh: ;*/
 /* display-drun: ;*/
 /* display-combi: ;*/
-/* display-keys: ;*/
-/* display-filebrowser: ;*/
-/* display-recursivebrowser: ;*/
+/* display-keys: ;*/ /* display-filebrowser: ;*/ /* display-recursivebrowser: ;*/
 /* kb-primary-paste: "Control+V,Shift+Insert";*/
 /* kb-secondary-paste: "Control+v,Insert";*/
 /* kb-secondary-copy: "Control+c";*/
@@ -156,12 +154,13 @@ configuration {
   kb-row-left: "Control+h";
   kb-row-right: "Control+l";
 
-  display-run: "  ";
-  display-ssh: "  ";
-  display-drun: "  ";
-  display-combi: "󰘳 ";
+  display-run: " ";
+  display-ssh: " ";
+  display-drun: " ";
+  display-combi: "Input:";
+  show-icons: true;
 
-  drun-display-format: "{name}";
+  drun-display-format: "{name} [<span weight='light' size='small'><i>({generic})</i></span>]";
 
   kb-select-1: "Control+1";
   kb-select-2: "Control+2";
@@ -183,5 +182,5 @@ configuration {
 
 }
 
-@theme "themes/squared-everforest.rasi"
+@theme "theme.rasi"
 

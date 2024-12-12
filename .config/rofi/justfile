@@ -1,0 +1,5 @@
+default:
+  find themes/ -type f | fzf | xargs -I {} ln -sf {} ./theme.rasi
+
+c:
+  find colors/ -type f | fzf | xargs -I {} ln -sf {} ./color.rasi
