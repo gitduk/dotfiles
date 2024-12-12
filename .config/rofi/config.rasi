@@ -157,7 +157,7 @@ configuration {
   display-run: " ";
   display-ssh: " ";
   display-drun: " ";
-  display-combi: "Input:";
+  display-combi: "Run:";
   show-icons: true;
 
   drun-display-format: "{name} [<span weight='light' size='small'><i>({generic})</i></span>]";
