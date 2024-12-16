@@ -221,7 +221,7 @@ zinit light sharkdp/fd
 # sing-box
 zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as'sing-box' \
   bpick"sing-box-*-linux-amd64.tar.gz" \
-  atclone"mv */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=ep $ZBIN/sing-box" \
+  atclone"mv */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=+ep $ZBIN/sing-box" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
 
