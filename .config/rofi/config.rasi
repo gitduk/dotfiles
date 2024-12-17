@@ -149,6 +149,8 @@ configuration {
   kb-mode-complete: "";
   kb-move-front: "";
   kb-move-end: "";
+  kb-move-char-back: "Left";
+  kb-move-char-forward: "Right";
   kb-remove-char-forward: "Delete";
   kb-remove-char-back: "BackSpace,Shift+BackSpace";
   kb-accept-entry: "Control+m,Return,KP_Enter";
@@ -156,8 +158,8 @@ configuration {
   kb-row-down: "Down,Control+j";
   kb-row-left: "Control+h";
   kb-row-right: "Control+l";
-  kb-page-prev: "Page_Up,Control+u";
-  kb-page-next: "Page_Down,Control+d";
+  kb-page-prev: "Page_Up,Control+b";
+  kb-page-next: "Page_Down,Control+f";
   kb-row-first: "Control+a";
   kb-row-last: "Control+e";
 
