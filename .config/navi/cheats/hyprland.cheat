@@ -107,3 +107,9 @@ cmake -DCMAKE_INSTALL_LIBEXECDIR=/usr/lib -DCMAKE_INSTALL_PREFIX=/usr -B build \
 # hyproled
 wget "$(curl -s https://api.github.com/repos/mklan/hyproled/releases/latest | jq -r '.assets[0].browser_download_url')"
 sudo chmod 744 hyproled && mv ./hyproled ~/.local/bin/hyproled
+
+# hyprland
+wget "$(curl -s https://api.github.com/repos/hyprwm/Hyprland/releases/latest | jq -r '.assets[1].browser_download_url')"
+tar -xzvf *.tar.gz && cd hyprland/
+sudo mv hypr* /usr/bin/
+
