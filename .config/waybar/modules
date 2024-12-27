@@ -368,7 +368,7 @@
     "on-click": "hyprctl switchxkblayout $SET_KB next"
   },
   "hyprland/submap": {
-    "format": "  {}",
+    "format": "  {} ",
     "tooltip": false,
   },
   "hyprland/window": {

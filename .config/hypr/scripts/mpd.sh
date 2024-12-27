@@ -21,6 +21,7 @@ export FZF_DEFAULT_OPTS="
   --bind 'ctrl-b:page-up'
   --bind 'ctrl-u:half-page-up'
   --bind 'ctrl-d:half-page-down'
+  --bind 'ctrl-r:reload(mpc playlist|cat -n|shuf)'
 "
 
 play() {

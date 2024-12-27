@@ -60,8 +60,7 @@ wallpaper_select() {
   local window="top:70%:wrap"
 
   # set selected wallpaper
-  wallpapers="$(wallpaper_from $wallpaper_dir)"
-  find_cmd="find $wallpaper_dir -type f -iname '*.' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif'"
+  find_cmd="find $wallpaper_dir -type f -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif'"
   star_cmd='
     wname="${wallpaper##*/}"
     wpath="${wallpaper%/*}"
@@ -72,11 +71,11 @@ wallpaper_select() {
     fi
   '
   selected="$(
-    echo $wallpapers | shuf | \
+    wallpaper_from $wallpaper_dir | shuf | \
       fzf --preview=$preview \
       --preview-window=$window \
       --bind "J:down,K:up" \
-      --bind "ctrl-r:reload(echo '$wallpapers' | shuf)" \
+      --bind "ctrl-r:reload($find_cmd | shuf)" \
       --bind "D:reload(rm -rf {}; $find_cmd)" \
       --bind "L:reload(wallpaper={} && $star_cmd; $find_cmd)+change-query(*)"
   )"
