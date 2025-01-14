@@ -34,6 +34,28 @@ xhost +local: &>/dev/null
 # set bindkey mode to vi
 bindkey -v
 
+# os
+export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -d '"')"
+
+# install function
+ins() {
+  case "$OS" in
+    debian|ubuntu)
+      sudo apt install $@
+      ;;
+    fedora|centos|rocky|almalinux)
+      sudo dnf install $@
+      ;;
+    rhel)
+      sudo yum install $@
+      ;;
+    *)
+      echo "Unsupported OS: $OS"
+      ;;
+  esac
+  return 1
+}
+
 # proxy
 export http_proxy="${proxy:-http://127.0.0.1:7890}"
 export https_proxy="${proxy:-http://127.0.0.1:7890}"
@@ -46,8 +68,7 @@ export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 # atinit -> atpull! -> make'!!' -> mv -> cp -> make! ->
 # atclone/atpull -> make -> (plugin script loading) -> 
 # src -> multisrc -> atload.
-
-[[ -n "$commands[git]" ]] || sudo apt install git
+[[ -n "$commands[git]" ]] || ins git
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 [ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
 [ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
@@ -58,23 +79,30 @@ export ZBIN="$HOME/.local/bin"
 [[ ! -d "$ZBIN" ]] && mkdir -p $ZBIN
 
 # must
-zinit ice wait"[[ ! -f ~/.must.ok ]]" lucid as"program" id-as'must' \
+zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as'must' \
   atload'
     ok=0
-    command -v nala &>/dev/null || sudo apt install nala || ok=1
-    command -v ssh &>/dev/null || sudo nala install ssh || ok=1
-    command -v curl &>/dev/null || sudo nala install curl || ok=1
-    command -v foot &>/dev/null || sudo nala install foot || ok=1
-    command -v kitty &>/dev/null || sudo nala install kitty || ok=1
-    command -v gcc &>/dev/null || sudo nala install build-essential || ok=1
-    command -v cmake &>/dev/null || sudo nala install cmake || ok=1
-    command -v sccache &>/dev/null || sudo nala install sccache || ok=1
-    command -v openssl &>/dev/null || sudo nala install openssh || ok=1
-    command -v ddcutil &>/dev/null || sudo nala install ddcutil || ok=1
-    command -v npm &>/dev/null || sudo nala install npm || ok=1
+    command -v ssh &>/dev/null || ins ssh || ok=1
+    command -v curl &>/dev/null || ins curl || ok=1
+    command -v gcc &>/dev/null || ins build-essential || ok=1
+    command -v cmake &>/dev/null || ins cmake || ok=1
+    command -v sccache &>/dev/null || ins sccache || ok=1
+    command -v openssl &>/dev/null || ins openssh || ok=1
+    command -v ddcutil &>/dev/null || ins ddcutil || ok=1
+    command -v npm &>/dev/null || ins npm || ok=1
     command -v yarn &>/dev/null || npm install -g yarn || ok=1
-    dpkg -l | grep libssl-dev | grep ii &>/dev/null || sudo nala install libssl-dev || ok=1
+    dpkg -l | grep libssl-dev | grep ii &>/dev/null || ins libssl-dev || ok=1
     [[ $ok -eq 0 ]] && touch ~/.must.ok
+  '
+zinit light zdharma-continuum/null
+
+# display
+zinit ice wait'[[ -n $DISPLAY && ! -f ~/.desktop.ok ]]' lucid as"program" id-as'display' \
+  atload'
+    ok=0
+    command -v foot &>/dev/null || ins foot || ok=1
+    command -v kitty &>/dev/null || ins kitty || ok=1
+    [[ $ok -eq 0 ]] && touch ~/.display.ok
   '
 zinit light zdharma-continuum/null
 
@@ -202,7 +230,7 @@ zinit light zdharma-continuum/null
 # node version manager
 zinit ice wait'1' lucid as"program" id-as'nodejs' \
   atclone"
-    sudo apt install nodejs
+    ins nodejs
     curl -fsSL https://fnm.vercel.app/install | bash
     ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
     ~/.local/share/fnm/fnm completions --shell zsh > _fnm
@@ -217,6 +245,12 @@ zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd
   atclone"mv fd*/fd $ZBIN/" \
   atpull"%atclone"
 zinit light sharkdp/fd
+
+# hx
+zinit ice wait'[[ ! -n "$commands[hx]" ]]' lucid as"program" from"gh-r" id-as"hx" \
+  atclone"mv */hx $ZBIN/ && mv */runtime ~/.config/helix/" \
+  atpull"%atclone"
+zinit light helix-editor/helix
 
 # sing-box
 zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as'sing-box' \

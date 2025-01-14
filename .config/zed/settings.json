@@ -18,28 +18,6 @@
     "inline_completion_provider": "copilot",
     "copilot": true
   },
-  "language_models": {
-    "ollama": {
-      "api_url": "http://wk:11434",
-      "low_speed_timeout_in_seconds": 120,
-      "available_models": [
-        {
-          "provider": "ollama",
-          "name": "deepseek-coder-v2",
-          "display_name": "DeepSeek Coder v2",
-          "max_tokens": 33000,
-          "keep_alive": "10m"
-        },
-        {
-          "provider": "ollama",
-          "name": "codestral:latest",
-          "display_name": "Codestral",
-          "max_tokens": 33000,
-          "keep_alive": "10m"
-        }
-      ]
-    }
-  },
   "hour_format": "hour24",
   "autosave": "on_window_change",
   "auto_update": false,
