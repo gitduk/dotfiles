@@ -44,6 +44,12 @@ sudo dpkg -i ./Spotube-linux-x86_64.deb
 git clone https://github.com/bugaevc/wl-clipboard.git && cd wl-clipboard/
 meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
 
+# clipse
+git clone https://github.com/savedra1/clipse
+cd clipse
+go mod tidy
+go build -o clipse && mv ./clipse ~/.local/bin/
+
 # flameshot - screenshot tool
 sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
 sudo nala install -y libqt5dbus5 libqt5network5 libqt5core5a libqt5widgets5 libqt5gui5 libqt5svg5

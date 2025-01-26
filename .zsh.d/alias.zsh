@@ -114,7 +114,7 @@ alias denv="deactivate"
 ### E ###
 #########
 
-alias eas="v ~/.zsh/alias.zsh"
+alias eas="v ~/.zsh.d/alias.zsh"
 
 #########
 ### F ###
@@ -231,6 +231,9 @@ alias ncl="nmcli"
 #########
 ### P ###
 #########
+
+# pueue
+alias p="pueue"
 
 # podmain
 alias pd="podman"

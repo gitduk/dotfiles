@@ -34,7 +34,10 @@ xhost +local: &>/dev/null
 # set bindkey mode to vi
 bindkey -v
 
-# os
+# fpath
+fpath=(~/.zsh.d/completions $fpath)
+
+# envs
 export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -d '"')"
 
 # install function
@@ -116,10 +119,10 @@ zinit light starship/starship
 
 # settings & functions
 zinit ice wait"1" lucid as"program" id-as"autoload" \
-  atinit"fpath+=~/.zsh/functions" \
+  atinit"fpath+=~/.zsh.d/functions" \
   atload'
-    autoload -Uz ~/.zsh/functions/**/*(:t)
-    for script (~/.zsh/*.zsh(N)) source $script
+    autoload -Uz ~/.zsh.d/functions/**/*(:t)
+    for script (~/.zsh.d/*.zsh(N)) source $script
   '
 zinit light zdharma-continuum/null
 
@@ -253,18 +256,29 @@ zinit ice wait'[[ ! -n "$commands[hx]" ]]' lucid as"program" from"gh-r" id-as"hx
 zinit light helix-editor/helix
 
 # sing-box
-zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as'sing-box' \
+zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" \
   atclone"mv */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=+ep $ZBIN/sing-box" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
 
 # zellij
-zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as'zellij' \
+zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as"zellij" \
   bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
   atclone"mv zellij $ZBIN/" \
   atpull"%atclone"
 zinit light zellij-org/zellij
+
+# pueue
+zinit ice wait'[[ ! -n "$commands[pueue]" ]]' lucid as"program" from"gh" id-as"pueue" \
+  atclone"
+    cd pueue && cargo build --release --locked
+    cp ../target/release/{pueue,pueued} $ZBIN/
+    sudo chmod 744 $ZBIN/pueue*
+    $ZBIN/pueue completions zsh > ../_pueue
+  " \
+  atpull"%atclone"
+zinit light Nukesor/pueue
 
 ###############
 ### COMMAND ###
