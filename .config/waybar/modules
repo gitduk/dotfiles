@@ -256,11 +256,11 @@
     "format-icons": ["", ""]
   },
   "battery": {
-    //"interval": 5,
+    // "interval": 5,
     "align": 0,
     "rotate": 0,
-    //"bat": "BAT1",
-    //"adapter": "ACAD",
+    // "bat": "BAT1",
+    // "adapter": "ACAD",
     "full-at": 100,
     "design-capacity": false,
     "states": {
@@ -295,8 +295,8 @@
   },
   "clock": {
     "interval": 1,
-      //"format": " {:%I:%M %p}", // AM PM format
-      "format": " {:%H:%M:%S}", // 24H
+    "timezone": "Asia/Shanghai",
+    "format": " {:%H:%M:%S}",
     "format-alt": " {:%H:%M   %Y, %d %B, %A}",
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "calendar": {
@@ -311,37 +311,14 @@
           "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
           "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
       }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-click-forward": "tz_up",
+      "on-click-backward": "tz_down",
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
     }
-  },
-  "actions": {
-    "on-click-right": "mode",
-    "on-click-forward": "tz_up",
-    "on-click-backward": "tz_down",
-    "on-scroll-up": "shift_up",
-    "on-scroll-down": "shift_down"
-  },
-  "clock#2": {
-      //"format": " {:%I:%M %p}", // AM PM format
-      "format": "  {:%H:%M}", // 24H
-      "format-alt": "{:%A  |  %H:%M  |  %e %B}",
-      "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
-  },
-  "clock#3": {
-      //"format": "{:%I:%M %p - %d/%b}", //for AM/PM
-      "format": "{:%H:%M - %d/%b}", // 24H
-    "tooltip": false
-  },
-  "clock#4": {
-    "interval": 60,
-      //"format": "{:%B | %a %d, %Y | %I:%M %p}", // AM PM format
-      "format": "{:%B | %a %d, %Y | %H:%M}", // 24H
-    "format-alt": "{:%a %b %d, %G}",
-    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
-  },
-  "clock#5": {
-      //"format": "{:%A, %I:%M %P}", // AM PM format
-      "format": "{:%a %d | %H:%M}", // 24H
-    "format-alt": "{:%A, %d %B, %Y (%R)}"
   },
   "cpu": {
     "format": "{usage}% 󰍛",
