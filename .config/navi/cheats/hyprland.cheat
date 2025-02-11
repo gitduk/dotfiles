@@ -1,27 +1,41 @@
 % hyprland, desktop
 
-# libdisplay-info.so.2
-wget https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.2.0/downloads//libdisplay-info-0.2.0.tar.xz
+# requirements
+sudo nala install -y build-essential meson ninja-build
 
-# wayland-protocols
-sudo nala install -y libcairo2-dev libpango1.0-dev libgbm-dev libliftoff-dev libdisplay-info-dev
-git clone https://gitlab.freedesktop.org/wayland/wayland-protocols.git && cd wayland-protocols
-meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
+cd /tmp
+git clone https://github.com/Kistler-Group/sdbus-cpp.git && cd sdbus-cpp/
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . && sudo cmake --build . --target install
 
-# wayland
-sudo nala install -y graphviz xsltproc xmlto
-git clone https://gitlab.freedesktop.org/wayland/wayland.git && cd wayland/
-meson build/ --prefix=/usr && sudo ninja -C build/ install
+cd /tmp
+wget https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.2.0/downloads/libdisplay-info-0.2.0.tar.xz
+tar -xvf libdisplay-info-0.2.0.tar.xz && cd libdisplay-info-0.2.0/
+meson setup build && sudo ninja -C build/ install
 
-# hyprutils
+cd /tmp
+sudo nala install -y libpugixml-dev
+git clone https://github.com/hyprwm/hyprwayland-scanner.git && cd hyprwayland-scanner/
+cmake -DCMAKE_INSTALL_PREFIX=/usr -B build \
+  && cmake --build build -j `nproc` \
+  && sudo cmake --install ./build
+
+cd /tmp
 git clone https://github.com/hyprwm/hyprutils.git && cd hyprutils/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
-# hyprgraphics
+cd /tmp
+git clone https://github.com/hyprwm/hyprlang.git && cd hyprlang/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target hyprlang -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
+cd /tmp
 sudo apt install cmake pkg-config libbrotli-dev
-sudo apt install libgif-dev libjpeg-dev libopenexr-dev libpng-dev libwebp-dev
+sudo apt install libgif-dev libjpeg-dev libopenexr-dev libpng-dev libwebp-dev libspng-dev
 git clone https://github.com/libjxl/libjxl.git --recursive --shallow-submodules && cd libjxl/
 mkdir build && cd build/
 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DJPEGXL_ENABLE_SKCMS=ON -DJPEGXL_BUNDLE_SKCMS=ON .. && cmake --build . -- -j$(nproc) && sudo cmake --install .
@@ -30,24 +44,21 @@ cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PRE
 cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF`
 sudo cmake --install build
 
-# hyprlang
-git clone https://github.com/hyprwm/hyprlang.git && cd hyprlang/
-cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
-  && cmake --build ./build --config Release --target hyprlang -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
-  && sudo cmake --install ./build
+# wayland-protocols
+sudo nala install -y libcairo2-dev libpango1.0-dev libgbm-dev libliftoff-dev libdisplay-info-dev
+git clone https://gitlab.freedesktop.org/wayland/wayland-protocols.git && cd wayland-protocols
+meson setup build --prefix=/usr --buildtype=release && sudo ninja -C build/ install
+
+# wayland
+sudo nala install -y graphviz xsltproc xmlto
+git clone https://gitlab.freedesktop.org/wayland/wayland.git && cd wayland/
+meson build/ --prefix=/usr && sudo ninja -C build/ install
 
 # hyprcursor
 sudo nala install -y libzip-dev librsvg2-dev libtomlplusplus-dev libxcb-util-dev libxcb-image0-dev
 git clone https://github.com/hyprwm/hyprcursor.git && cd hyprcursor/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
-  && sudo cmake --install ./build
-
-# hyprwayland-scanner
-sudo nala install -y libpugixml-dev
-git clone https://github.com/hyprwm/hyprwayland-scanner.git && cd hyprwayland-scanner/
-cmake -DCMAKE_INSTALL_PREFIX=/usr -B build \
-  && cmake --build build -j `nproc` \
   && sudo cmake --install ./build
 
 # xcb-errors
@@ -69,18 +80,13 @@ cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PRE
   && sudo cmake --install ./build
 
 # hyprlock
-sudo nala install -y libpam0g-dev
+sudo nala install -y libpam0g-dev libdrm-dev 
 git clone https://github.com/hyprwm/hyprlock.git && cd hyprlock/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
 # hypridle
-git clone https://github.com/Kistler-Group/sdbus-cpp.git && cd sdbus-cpp/
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . && sudo cmake --build . --target install
-cd ../..
 git clone https://github.com/hyprwm/hypridle.git && cd hypridle/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && cmake --build ./build --config Release --target hypridle -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \

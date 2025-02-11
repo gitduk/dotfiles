@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# pamixer warning
+hash pamixer &>/dev/null || notify-send "volume.sh" "pamixer is not installed."
+
 # options
 OPTIONS=""
 LONGOPTS="get,inc,dec,toggle,toggle-mic,mic-inc,mic-dec"

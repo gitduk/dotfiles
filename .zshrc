@@ -196,9 +196,8 @@ zinit light zdharma-continuum/null
 zinit ice wait'1' lucid as"program" id-as'golang' \
   atclone'
     version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
-    echo \$version
     wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
-    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go\$version.linux-amd64.tar.gz
+    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
     ' \
   atload'
     export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"

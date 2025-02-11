@@ -1,0 +1,5 @@
+% setup
+
+# setup cap for singbox
+sudo setcap cap_net_admin=+ep `which sing-box`
+

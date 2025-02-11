@@ -1,4 +1,6 @@
-# global config
+#####################
+### global config ###
+#####################
 
 live_config_reload = true
 
@@ -78,7 +80,9 @@ y = 10
 x = 0
 y = 0
 
-# ###  Themes  ################################################################
+##############
+### Themes ###
+##############
 
 [colors.primary]
 background = "#111111"
@@ -103,3 +107,4 @@ blue = "#61afef"
 magenta = "#c678dd"
 cyan = "#56b6c2"
 white = "#ffffff"
+

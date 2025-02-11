@@ -1,14 +1,5 @@
 % podman, run
 
-# sing-box
-podman run --name sing-box -d \
-  -v $HOME/.docker/sing-box:/etc/sing-box/ \
-  --network host \
-  --restart always \
-  ghcr.io/sagernet/sing-box \
-  -D /var/lib/sing-box \
-  -C /etc/sing-box/ run
-
 # stirling-pdf
 podman run -d --name stirling-pdf \
   -e DOCKER_ENABLE_SECURITY=false \

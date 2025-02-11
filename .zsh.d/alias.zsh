@@ -123,12 +123,6 @@ alias eas="v ~/.zsh.d/alias.zsh"
 # fdisk
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 
-# flomo
-alias fl="flomo-cli new"
-
-# font
-alias fls="fc-list | awk -F': ' '{print \$NF}' | fzf"
-
 # fzf
 alias ff="fzf"
 

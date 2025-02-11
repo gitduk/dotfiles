@@ -1,5 +1,11 @@
 % install
 
+# google-chrome
+cd /tmp
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo dpkg -i google-chrome-stable_current_amd64.deb
+cd -
+
 # sing-box for android
 wget https://googledownloads.cn/android/repository/android-ndk-r27-linux.zip && unzip android-ndk-r27-linux.zip
 git clone --depth 1 -b 'outbound-providers' https://github.com/PuerNya/sing-box.git && cd sing-box/
@@ -21,10 +27,15 @@ cd rime && git pull
 curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
 
 # waybar
+sudo nala install libspdlog-dev libgtkmm-3.0-dev libjsoncpp-dev libnl-genl-3-dev libupower-glib-dev \
+  libpipewire-0.3-dev libplayerctl-dev libpulse-dev libxkbregistry-dev scdoc
 git clone https://github.com/Alexays/Waybar && cd Waybar/
 meson setup build && sudo ninja -C build install
 
 # rofi - wayland support
+sudo nala install librust-xkbcommon-dev libgdk-pixbuf-2.0-dev libxcb-util-dev libxcb-ewmh-dev libxcb-icccm4-dev libmpdclient-dev libnl-3-dev \
+  libalsa-ocaml-dev libxcb-randr0-dev libxcb-cursor-dev libxcb-xinerama0-dev libxcb-keysyms1-dev libstartup-notification0-dev flex bison \
+  pandoc doxygen cppcheck ohcount
 git clone --depth=1 https://github.com/lbonn/rofi.git && cd rofi/
 meson setup build && ninja -C build && ninja -C build install
 
@@ -34,6 +45,9 @@ chmod +x ~/.local/bin/chsrc
 
 # yazi
 cargo install --locked --git https://github.com/sxyazi/yazi.git yazi-fm yazi-cli
+
+# wallust
+cargo install --locked wallust
 
 # Spotube - Spotify music open source client
 sudo nala install -y gir1.2-appindicator3-0.1
@@ -85,7 +99,7 @@ cargo build --release && cp target/release/tdf ~/.local/bin/
 # frp
 wget "$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep browser_download_url | cut -d '"' -f 4|grep frp_.*_linux_amd64.tar.gz)" \
   && tar -xzvf frp_*_linux_amd64.tar.gz && cd frp_*_linux_amd64/ \
-  && mv frpc ~/.local/bin/
+  && mv frpc frps ~/.local/bin/
 
 # pnpm
 curl -fsSL https://get.pnpm.io/install.sh | sh -
