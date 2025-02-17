@@ -1,5 +1,4 @@
 default:
-  find themes/ -type f | fzf | xargs -I {} ln -sf {} ./theme.rasi
+  find colors/ -type f | fzf --prompt="color: " | xargs -I {} ln -sf {} ./color.rasi
+  find themes/ -type f | fzf --prompt="theme: " | xargs -I {} ln -sf {} ./theme.rasi
 
-c:
-  find colors/ -type f | fzf | xargs -I {} ln -sf {} ./color.rasi

@@ -15,6 +15,7 @@ FOCUSED_MONITOR=$(hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{pri
 INTERVAL=1800
 SCRIPT="$0"
 WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+[[ -d "$WALLPAPER_DIR" ]] || mkdir -p "$WALLPAPER_DIR"
 
 wallpaper_from() {
   find "$1" -type f -iname "*.jpg" \

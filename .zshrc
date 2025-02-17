@@ -44,13 +44,13 @@ export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -
 ins() {
   case "$OS" in
     debian|ubuntu)
-      sudo apt install $@
+      sudo nala install -y $@
       ;;
     fedora|centos|rocky|almalinux)
-      sudo dnf install $@
+      sudo dnf install -y $@
       ;;
     rhel)
-      sudo yum install $@
+      sudo yum install -y $@
       ;;
     *)
       echo "Unsupported OS: $OS"
@@ -64,6 +64,11 @@ export http_proxy="${proxy:-http://127.0.0.1:7890}"
 export https_proxy="${proxy:-http://127.0.0.1:7890}"
 export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 
+# pre-install
+[[ -n "$commands[nala]" ]] || sudo apt install -y nala
+[[ -n "$commands[git]" ]] || ins git
+[[ -n "$commands[curl]" ]] || ins curl
+
 #############
 ### ZINIT ###
 #############
@@ -71,7 +76,6 @@ export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
 # atinit -> atpull! -> make'!!' -> mv -> cp -> make! ->
 # atclone/atpull -> make -> (plugin script loading) -> 
 # src -> multisrc -> atload.
-[[ -n "$commands[git]" ]] || ins git
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 [ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
 [ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
@@ -86,12 +90,13 @@ zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as
   atload'
     ok=0
     command -v ssh &>/dev/null || ins ssh || ok=1
-    command -v curl &>/dev/null || ins curl || ok=1
     command -v gcc &>/dev/null || ins build-essential || ok=1
     command -v cmake &>/dev/null || ins cmake || ok=1
+    command -v pkg-config &>/dev/null || ins pkg-config || ok=1
     command -v sccache &>/dev/null || ins sccache || ok=1
     command -v openssl &>/dev/null || ins openssh || ok=1
     command -v ddcutil &>/dev/null || ins ddcutil || ok=1
+    command -v nodejs &>/dev/null || ins nodejs || ok=1
     command -v npm &>/dev/null || ins npm || ok=1
     command -v yarn &>/dev/null || npm install -g yarn || ok=1
     dpkg -l | grep libssl-dev | grep ii &>/dev/null || ins libssl-dev || ok=1
@@ -167,7 +172,7 @@ zinit light zsh-users/zsh-autosuggestions
 ###############
 
 # brew
-zinit ice wait"1" lucid as"program" id-as'brew' \
+zinit ice wait"0" lucid as"program" id-as'brew' \
   atclone'
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
@@ -181,10 +186,10 @@ zinit ice wait"1" lucid as"program" id-as'brew' \
 zinit light zdharma-continuum/null
 
 # cargo
-zinit ice wait"1" lucid as"program" id-as'cargo' \
+zinit ice wait"0" lucid as"program" id-as'cargo' \
   atclone"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    cargo install --locked sccache
+    cargo install --locked git-delta
     " \
   atload'
     export PATH="$HOME/.cargo/bin:$PATH"
@@ -193,7 +198,7 @@ zinit ice wait"1" lucid as"program" id-as'cargo' \
 zinit light zdharma-continuum/null
 
 # golang
-zinit ice wait'1' lucid as"program" id-as'golang' \
+zinit ice wait'0' lucid as"program" id-as'golang' \
   atclone'
     version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
     wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
@@ -209,12 +214,17 @@ zinit ice wait'1' lucid as"program" id-as'golang' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# fzf
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh && mv ./fzf $ZBIN/" \
+# fnm - node version manager
+zinit ice wait'1' lucid as"program" id-as'fnm' \
+  atclone"
+    curl -fsSL https://fnm.vercel.app/install | bash
+    ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
+    ~/.local/share/fnm/fnm completions --shell zsh > _fnm
+    ln -fs ~/.local/share/fnm/fnm $ZBIN/fnm
+    " \
   src"init.zsh" \
   atpull"%atclone"
-zinit light junegunn/fzf
+zinit light zdharma-continuum/null
 
 # navi
 zinit ice wait'1' lucid as"program" id-as'navi' \
@@ -229,18 +239,12 @@ zinit ice wait'1' lucid as"program" id-as'navi' \
   src"init.zsh"
 zinit light zdharma-continuum/null
 
-# node version manager
-zinit ice wait'1' lucid as"program" id-as'nodejs' \
-  atclone"
-    ins nodejs
-    curl -fsSL https://fnm.vercel.app/install | bash
-    ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
-    ~/.local/share/fnm/fnm completions --shell zsh > _fnm
-    ln -fs ~/.local/share/fnm/fnm $ZBIN/fnm
-    " \
+# fzf
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
+  atclone"./fzf --zsh > init.zsh && mv ./fzf $ZBIN/" \
   src"init.zsh" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light junegunn/fzf
 
 # fd
 zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
@@ -264,7 +268,7 @@ zinit light SagerNet/sing-box
 # zellij
 zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as"zellij" \
   bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
-  atclone"mv zellij $ZBIN/" \
+  atclone"sudo mv zellij /usr/bin/" \
   atpull"%atclone"
 zinit light zellij-org/zellij
 

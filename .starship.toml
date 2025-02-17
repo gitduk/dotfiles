@@ -50,7 +50,7 @@ ssh_symbol = " "
 
 [time]
 disabled = false
-time_format = "%H:%M:%S"
+time_format = "%H:%M"
 style = "fg:#5c6370"
 format = '[$time]($style)'
  
