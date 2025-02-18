@@ -266,11 +266,11 @@ zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id
 zinit light SagerNet/sing-box
 
 # zellij
-zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as"zellij" \
-  bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
-  atclone"sudo mv zellij /usr/bin/" \
-  atpull"%atclone"
-zinit light zellij-org/zellij
+# zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as"zellij" \
+#   bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
+#   atclone"sudo mv zellij /usr/bin/" \
+#   atpull"%atclone"
+# zinit light zellij-org/zellij
 
 # pueue
 zinit ice wait'[[ ! -n "$commands[pueue]" ]]' lucid as"program" from"gh" id-as"pueue" \
