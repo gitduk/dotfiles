@@ -4,22 +4,20 @@
 style:
   tag:
     color: cyan
-    width_percentage: 15
-    min_width: 15
+    width_percentage: 25
+    min_width: 20
   comment:
     color: blue
-    width_percentage: 20
-    min_width: 20
-  snippet:
-    width_percentage: 55
+    width_percentage: 65
     min_width: 60
+  snippet:
     color: white
 
 finder:
   # equivalent to the --finder option
   command: fzf
   # equivalent to the --fzf-overrides option
-  overrides: --with-nth='1,2,3' --no-preview
+  overrides: --with-nth='1,2' --preview-window=up:3
   # equivalent to the --fzf-overrides-var option
   # overrides_var: --tac
 

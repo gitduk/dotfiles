@@ -136,6 +136,9 @@ git clone --depth 1 https://github.com/gaboolic/rime-frost rime
 cd rime && git pull
 
 # zed
+curl -f https://zed.dev/install.sh | sh
+
+# zed preview
 curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
 
 # waybar
@@ -213,14 +216,8 @@ wget "$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep
 curl -fsSL https://get.pnpm.io/install.sh | sh -
 
 # wechat
-wget "https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.AppImage" \
-  -O /usr/bin/wechat \
-  && sudo chmod 744 /usr/bin/wechat
-
-# qq
-wget "https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.13_241104_x86_64_01.AppImage" \
-  -O /usr/bin/qq \
-  && sudo chmod 744 /usr/bin/qq
+wget "https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb" -P /tmp/
+sudo dpkg -i /tmp/WeChatLinux_x86_64.deb
 
 # Vimix cursor
 git clone https://github.com/vinceliuice/Vimix-cursors.git && cd Vimix-cursors/

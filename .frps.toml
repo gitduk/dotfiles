@@ -40,9 +40,6 @@ transport.maxPoolCount = 5
 # If negative, keep-alive probes are disabled.
 # transport.tcpKeepalive = 7200
 
-# transport.tls.force specifies whether to only accept TLS-encrypted connections. By default, the value is false.
-tls.force = false
-
 # transport.tls.certFile = "server.crt"
 # transport.tls.keyFile = "server.key"
 # transport.tls.trustedCaFile = "ca.crt"

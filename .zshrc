@@ -99,6 +99,8 @@ zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as
     command -v nodejs &>/dev/null || ins nodejs || ok=1
     command -v npm &>/dev/null || ins npm || ok=1
     command -v yarn &>/dev/null || npm install -g yarn || ok=1
+    command -v tmux &>/dev/null || ins tmux || ok=1
+    command -v unzip &>/dev/null || ins unzip || ok=1
     dpkg -l | grep libssl-dev | grep ii &>/dev/null || ins libssl-dev || ok=1
     [[ $ok -eq 0 ]] && touch ~/.must.ok
   '
@@ -228,6 +230,7 @@ zinit light zdharma-continuum/null
 
 # navi
 zinit ice wait'1' lucid as"program" id-as'navi' \
+  atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
   atclone"cargo install navi --locked && navi widget zsh > init.zsh" \
   atload'
     export NAVI_PATH=$HOME/.config/navi/cheats
@@ -254,7 +257,7 @@ zinit light sharkdp/fd
 
 # hx
 zinit ice wait'[[ ! -n "$commands[hx]" ]]' lucid as"program" from"gh-r" id-as"hx" \
-  atclone"mv */hx $ZBIN/ && mv */runtime ~/.config/helix/" \
+  atclone"sudo mv */hx /usr/bin/ && mv */runtime ~/.config/helix/" \
   atpull"%atclone"
 zinit light helix-editor/helix
 
@@ -321,10 +324,6 @@ zinit ice wait"3" lucid as"command" from"gh-r" id-as"just" \
   atclone'./just --completions zsh > _just' \
   atpull"%atclone"
 zinit light casey/just
-
-# gitui
-zinit ice wait"3" lucid as"command" from"gh-r" id-as"gitui"
-zinit light extrawurst/gitui
 
 # curlie
 zinit ice wait'[[ ! -n "$commands[curlie]" ]]' lucid as"command" from"gh-r" id-as"curlie"

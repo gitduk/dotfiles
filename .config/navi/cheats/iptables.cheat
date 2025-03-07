@@ -9,3 +9,6 @@ sudo iptables --table <table> --delete <chain>
 $ table: echo "filter\nmanagle\nnat\nraw\nsecurity"
 $ chain: echo "INPUT\nOUTPUT\nFORWARD"
 
+# allow special ip and port
+sudo firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" source address="<ip>" port port="<port>" protocol="tcp" accept'
+

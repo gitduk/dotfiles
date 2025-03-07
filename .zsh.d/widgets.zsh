@@ -119,6 +119,6 @@ zbindkey -M vicmd 'e' edit-command-line
 zbindkey -M viins " " expand-alias-space
 zbindkey -M viins '^P' fzf-apt-widget
 zbindkey -M viins '^B' fzf-bindkeys-widget
-zbindkey -M viins '^V' fzf-services-widget
-zbindkey -M viins '^Z' fzf-crontab-widget
+# zbindkey -M viins '' fzf-services-widget
+# zbindkey -M viins '' fzf-crontab-widget
 

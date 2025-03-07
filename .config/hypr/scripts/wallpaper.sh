@@ -116,7 +116,7 @@ bing() {
   # Download the image if it doesn't already exist
   img_path="$download_dir/$name.jpg"
   if [[ ! -e "$img_path" ]]; then
-    aria2c ${url//\"/} -d "$download_dir" -o "$name.jpg" &>/dev/null
+    wget "${url//\"/}" -O "$download_dir/$name.jpg"
   fi
 
   echo $img_path

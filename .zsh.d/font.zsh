@@ -2,6 +2,9 @@
 ### MesloLGM Nerd Font ###
 ##########################
 
+# fc-list command is not found
+hash fc-list &>/dev/null || return 0
+
 # ensure font dir
 [[ ! -e "$HOME/.local/share/fonts" ]] && mkdir -p $HOME/.local/share/fonts
 
@@ -22,5 +25,5 @@ for fc in "${fc_list[@]}"; do
   fi
 done
 
-[[ $updated -eq 1 ]] && fc-cache -fv && exit 0
+[[ $updated -eq 1 ]] && fc-cache -fv
 
