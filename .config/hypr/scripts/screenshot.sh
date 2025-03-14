@@ -1,129 +1,87 @@
-#!/bin/bash
+#!/bin/env zsh
+
+# Short options and long options
+SHORT_OPTS="aAwns"
+LONG_OPTS="area,active,window,now,swappy"
+
+# Parse the command-line arguments
+ARGS=$(getopt -a --options=$SHORT_OPTS --longoptions=$LONG_OPTS --name "${0##*/}" -- "$@")
+
+# Check if getopt failed or if no arguments were provided
+if [[ $? -ne 0 || $# -eq 0 ]]; then
+  echo "Usage: $0 [-$SHORT_OPTS] [--$LONG_OPTS]"
+  exit 1
+fi
+
+# Set the parsed arguments
+eval set -- "$ARGS"
 
 # Screenshots scripts
-iDIR="$HOME/.config/swaync/icons"
-sDIR="$HOME/.config/hypr/scripts"
-notify_cmd_shot="notify-send -h string:x-canonical-private-synchronous:shot-notify -u low -i ${iDIR}/picture.png"
-
 time=$(date "+%d-%b_%H-%M-%S")
-dir="$(xdg-user-dir)/Pictures/Screenshots"
-file="Screenshot_${time}_${RANDOM}.png"
+save_dir="$HOME/Pictures/Screenshots"
+file="screenshot_${time}_${RANDOM}.png"
 
 active_window_class=$(hyprctl -j activewindow | jq -r '(.class)')
 active_window_file="Screenshot_${time}_${active_window_class}.png"
-active_window_path="${dir}/${active_window_file}"
-
-# notify and view screenshot
-notify_view() {
-  if [[ "$1" == "active" ]]; then
-    if [[ -e "${active_window_path}" ]]; then
-      ${notify_cmd_shot} "Screenshot of '${active_window_class}' Saved."
-      "${sDIR}/sounds.sh" --screenshot
-    else
-      ${notify_cmd_shot} "Screenshot of '${active_window_class}' not Saved"
-      "${sDIR}/sounds.sh" --error
-    fi
-  elif [[ "$1" == "swappy" ]]; then
-    ${notify_cmd_shot} "Screenshot Captured."
-  else
-    local check_file="$dir/$file"
-    if [[ -e "$check_file" ]]; then
-      ${notify_cmd_shot} "Screenshot Saved."
-      "${sDIR}/sounds.sh" --screenshot
-    else
-      ${notify_cmd_shot} "Screenshot NOT Saved."
-      "${sDIR}/sounds.sh" --error
-    fi
-  fi
-}
-
-
+active_window_path="${save_dir}/${active_window_file}"
 
 # countdown
 countdown() {
-  for sec in $(seq $1 -1 1);
-    notify-send -h string:x-canonical-private-synchronous:shot-notify -t 1000 -i "$iDIR"/timer.png "Taking shot in : $sec"
+  for sec in $(seq $1 -1 1); do
+    notify-send "Taking shot in : ${sec}s"
     sleep 1
   done
 }
 
 # take shots
 shotnow() {
-  cd ${dir} && grim - | tee "$file" | wl-copy
-  sleep 2
-  notify_view
+  grim - | tee "$save_dir/$file" | wl-copy && notify-send "$file"
 }
 
-shot5() {
-  countdown '5'
-  sleep 1 && cd ${dir} && grim - | tee "$file" | wl-copy
-  sleep 1
-  notify_view
-}
-
-shot10() {
-  countdown '10'
-  sleep 1 && cd ${dir} && grim - | tee "$file" | wl-copy
-  notify_view
-}
-
-shotwin() {
-  w_pos=$(hyprctl activewindow | grep 'at:' | cut -d':' -f2 | tr -d ' ' | tail -n1)
-  w_size=$(hyprctl activewindow | grep 'size:' | cut -d':' -f2 | tr -d ' ' | tail -n1 | sed s/,/x/g)
-  cd ${dir} && grim -g "$w_pos $w_size" - | tee "$file" | wl-copy
-  notify_view
+_shotdelay() {
+  countdown "$1"
+  grim - | tee "$save_dir/$file" | wl-copy && notify-send "$file"
 }
 
 shotarea() {
-  tmpfile=$(mktemp)
-  grim -g "$(slurp)" - >"$tmpfile"
-  if [[ -s "$tmpfile" ]]; then
-    wl-copy <"$tmpfile"
-    mv "$tmpfile" "$dir/$file"
-  fi
-  rm "$tmpfile"
-  notify_view
+  grim -g "$(slurp)" - | tee "$save_dir/$file" | wl-copy && notify-send "$file"
 }
 
 shotactive() {
-  active_window_class=$(hyprctl -j activewindow | jq -r '(.class)')
-  active_window_file="Screenshot_${time}_${active_window_class}.png"
-  active_window_path="${dir}/${active_window_file}"
-
-  hyprctl -j activewindow | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | grim -g - "${active_window_path}"
-  sleep 1
-  notify_view "active"  
+  hyprctl -j activewindow | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' | \
+    grim -g - - | tee "${active_window_path}" | wl-copy && \
+    notify-send "$active_window_file"
 }
 
 shotswappy() {
-  tmpfile=$(mktemp)
-  grim -g "$(slurp)" - >"$tmpfile" && "${sDIR}/Sounds.sh" --screenshot && notify_view "swappy"
-  swappy -f - <"$tmpfile"
-  rm "$tmpfile"
+  grim -g "$(slurp)" - | swappy -f -
 }
 
+# ensure save dir
+[[ ! -d "$save_dir" ]] && mkdir -p $save_dir
 
-if [[ ! -d "$dir" ]]; then
-  mkdir -p "$dir"
-fi
-
-if [[ "$1" == "--now" ]]; then
-  shotnow
-elif [[ "$1" == "--in5" ]]; then
-  shot5
-elif [[ "$1" == "--in10" ]]; then
-  shot10
-elif [[ "$1" == "--win" ]]; then
-  shotwin
-elif [[ "$1" == "--area" ]]; then
-  shotarea
-elif [[ "$1" == "--active" ]]; then
-  shotactive
-elif [[ "$1" == "--swappy" ]]; then
-  shotswappy
-else
-  echo -e "Available Options : --now --in5 --in10 --win --area --active --swappy"
-fi
-
-exit 0
+while true; do
+  case "$1" in
+    -n|--now)
+      shotnow
+      ;;
+    -a|--area)
+      shotarea
+      ;;
+    -A|--active)
+      shotactive
+      ;;
+    -s|--swappy)
+      shotswappy
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      exit 1
+      ;;
+  esac
+  shift
+done
 

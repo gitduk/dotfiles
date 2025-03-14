@@ -225,3 +225,7 @@ mkdir -p ~/.local/share/icons/
 cp -r ./dist ~/.local/share/icons/Vimix
 cp -r ./dist-white ~/.local/share/icons/Vimix-white
 
+# swappy
+git clone https://github.com/jtheoof/swappy.git && cd swappy/
+meson setup build && sudo ninja -C build/ install
+

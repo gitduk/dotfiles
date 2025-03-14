@@ -74,11 +74,11 @@ wallpaper_select() {
   selected="$(
     wallpaper_from $wallpaper_dir | shuf | \
       fzf --preview=$preview \
-      --preview-window=$window \
-      --bind "J:down,K:up" \
-      --bind "ctrl-r:reload($find_cmd | shuf)" \
-      --bind "D:reload(rm -rf {}; $find_cmd)" \
-      --bind "L:reload(wallpaper={} && $star_cmd; $find_cmd)+change-query(*)"
+        --preview-window=$window \
+        --bind "J:down,K:up" \
+        --bind "ctrl-r:reload($find_cmd | shuf)" \
+        --bind "D:reload(rm -rf {}; $find_cmd)" \
+        --bind "L:reload(wallpaper={} && $star_cmd; $find_cmd)+change-query(*)"
   )"
   wallpaper_set "$selected"
 }
