@@ -130,8 +130,8 @@ while true; do
       ;;
     -r|--random)
       listactive="$(hyprctl hyprpaper listactive)"
-      if [[ ! "$listactive" == "no wallpapers active" ]]; then
-        current_wallpaper="$(echo -n "$listactive" | awk -F' = ' "/$FOCUSED_MONITOR/{print \$2}")"
+      current_wallpaper="$(echo -n "$listactive" | awk -F' = ' "/$FOCUSED_MONITOR/{print \$2}")"
+      if [[ -f "$current_wallpaper" ]]; then
         random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
       else
         random="$(wallpaper_from $2 | shuf -n 1)"

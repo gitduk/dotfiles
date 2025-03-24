@@ -4,7 +4,6 @@
     "bindings": {
       "alt-enter": "editor::OpenExcerpts",
       "cmd-f8": "editor::GoToHunk",
-      "cmd-shift-f8": "editor::GoToPrevHunk",
       "ctrl-enter": "assistant::InlineAssist"
     }
   },
@@ -23,58 +22,19 @@
       "cmd-c": "terminal::Copy",
       "cmd-v": "terminal::Paste",
       "cmd-k": "terminal::Clear",
-      "cmd-backspace": [
-        "terminal::SendText",
-        "\u0015"
-      ],
-      "cmd-right": [
-        "terminal::SendText",
-        "\u0005"
-      ],
-      "cmd-left": [
-        "terminal::SendText",
-        "\u0001"
-      ],
-      "alt-left": [
-        "terminal::SendText",
-        "\u001bb"
-      ],
-      "alt-right": [
-        "terminal::SendText",
-        "\u001bf"
-      ],
-      "up": [
-        "terminal::SendKeystroke",
-        "up"
-      ],
-      "pageup": [
-        "terminal::SendKeystroke",
-        "pageup"
-      ],
-      "down": [
-        "terminal::SendKeystroke",
-        "down"
-      ],
-      "pagedown": [
-        "terminal::SendKeystroke",
-        "pagedown"
-      ],
-      "escape": [
-        "terminal::SendKeystroke",
-        "escape"
-      ],
-      "enter": [
-        "terminal::SendKeystroke",
-        "enter"
-      ],
-      "ctrl-c": [
-        "terminal::SendKeystroke",
-        "ctrl-c"
-      ],
-      "ctrl-w": [
-        "terminal::SendKeystroke",
-        "ctrl-w"
-      ]
+      "cmd-backspace": ["terminal::SendText", "\u0015"],
+      "cmd-right": ["terminal::SendText", "\u0005"],
+      "cmd-left": ["terminal::SendText", "\u0001"],
+      "alt-left": ["terminal::SendText", "\u001bb"],
+      "alt-right": ["terminal::SendText", "\u001bf"],
+      "up": ["terminal::SendKeystroke", "up"],
+      "pageup": ["terminal::SendKeystroke", "pageup"],
+      "down": ["terminal::SendKeystroke", "down"],
+      "pagedown": ["terminal::SendKeystroke", "pagedown"],
+      "escape": ["terminal::SendKeystroke", "escape"],
+      "enter": ["terminal::SendKeystroke", "enter"],
+      "ctrl-c": ["terminal::SendKeystroke", "ctrl-c"],
+      "ctrl-w": ["terminal::SendKeystroke", "ctrl-w"]
     }
   },
   {
@@ -93,8 +53,6 @@
       "cmd-x": "project_panel::Cut",
       "cmd-c": "project_panel::Copy",
       "cmd-v": "project_panel::Paste",
-      "cmd-alt-c": "project_panel::CopyPath",
-      "alt-cmd-shift-c": "project_panel::CopyRelativePath",
       "f2": "project_panel::Rename",
       "enter": "project_panel::Rename",
       "space": "project_panel::Open",
@@ -119,27 +77,6 @@
     "context": "ChannelModal > Picker > Editor",
     "bindings": {
       "tab": "channel_modal::ToggleMode"
-    }
-  },
-  {
-    "context": "Dock",
-    "bindings": {
-      "ctrl-w h": [
-        "workspace::ActivatePaneInDirection",
-        "Left"
-      ],
-      "ctrl-w l": [
-        "workspace::ActivatePaneInDirection",
-        "Right"
-      ],
-      "ctrl-w k": [
-        "workspace::ActivatePaneInDirection",
-        "Up"
-      ],
-      "ctrl-w j": [
-        "workspace::ActivatePaneInDirection",
-        "Down"
-      ]
     }
   }
 ]

@@ -1,0 +1,66 @@
+- name: Home
+  # Optionally, if you only have a single page you can hide the desktop navigation for a cleaner look
+  # hide-desktop-navigation: true
+  columns:
+    - size: small
+      widgets:
+        - type: calendar
+          first-day-of-week: monday
+
+        - type: bookmarks
+          groups:
+            - links:
+                - title: YouTube
+                  url: https://www.youtube.com/
+                - title: YouTube Music
+                  url: https://music.youtube.com/
+            - links:
+                - title: X
+                  url: https://x.com/home/
+                - title: V2EX
+                  url: https://www.v2ex.com/
+                - title: Reddit
+                  url: https://www.reddit.com/
+                - title: Instagram
+                  url: https://www.instagram.com/
+
+    - size: full
+      widgets:
+        - type: group
+          widgets:
+            - type: reddit
+              subreddit: hyprland
+              show-thumbnails: true
+
+        - type: videos
+          channels:
+            - UCjHZB7VNA_z_50pDI5EuWNQ # 陈翔六点半
+    
+    - size: small
+      widgets:
+        - type: weather
+          location: Longhua, Guangdong, China
+          units: metric # alternatively "imperial"
+          hour-format: 24h # alternatively "24h"
+          # Optionally hide the location from being displayed in the widget
+          # hide-location: true
+
+        - type: markets
+          markets:
+            - symbol: BTC-USD
+              name: Bitcoin
+            - symbol: ETH-USD
+              name: Ethereum
+            - symbol: SOL-USD
+              name: Solana
+
+        - type: search
+          search-engine: google
+          bangs:
+            - title: YouTube
+              shortcut: "!yt"
+              url: https://www.youtube.com/results?search_query={QUERY}
+            - title: YouTube Music
+              shortcut: "!ym"
+              url: https://music.youtube.com/search?q={QUERY}
+
