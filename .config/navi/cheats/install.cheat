@@ -57,11 +57,16 @@ sudo nala install -y gir1.2-appindicator3-0.1
 wget "https://github.com/KRTirtho/spotube/releases/download/v3.8.1/Spotube-linux-x86_64.deb"
 sudo dpkg -i ./Spotube-linux-x86_64.deb
 
-# clipse
+# wl-clipboard
 git clone https://github.com/bugaevc/wl-clipboard.git && cd wl-clipboard/
 meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
+
+# clipse
 git clone https://github.com/savedra1/clipse && cd clipse
 go mod tidy && go build -o clipse && sudo mv ./clipse /usr/bin/
+
+# cliphist
+go install go.senan.xyz/cliphist@latest
 
 # flameshot - screenshot tool
 sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
