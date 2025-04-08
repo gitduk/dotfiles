@@ -99,6 +99,7 @@ zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as
     command -v nodejs &>/dev/null || ins nodejs || ok=1
     command -v npm &>/dev/null || ins npm || ok=1
     command -v yarn &>/dev/null || npm install -g yarn || ok=1
+    command -v neovim &>/dev/null || ins neovim || ok=1
     command -v tmux &>/dev/null || ins tmux || ok=1
     command -v unzip &>/dev/null || ins unzip || ok=1
     dpkg -l | grep libssl-dev | grep ii &>/dev/null || ins libssl-dev || ok=1

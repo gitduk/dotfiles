@@ -122,3 +122,9 @@ cp -r ./dist-white ~/.local/share/icons/Vimix-white
 git clone https://github.com/jtheoof/swappy.git && cd swappy/
 meson setup build && sudo ninja -C build/ install
 
+# lazyvim
+[[ -d "$HOME/.config/nvim" ]] && mv ~/.config/nvim ~/.config/nvim.bak
+[[ -d "$HOME/.local/share/nvim" ]] && mv ~/.local/share/nvim ~/.local/share/nvim.bak
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+rm -rf ~/.config/nvim/.git
+

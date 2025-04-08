@@ -2,8 +2,8 @@
 
 # Set a default editor if $EDITOR is not set
 editors=(
-  "hx"
   "nvim"
+  "hx"
   "vim"
 )
 
