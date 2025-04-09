@@ -256,6 +256,13 @@ zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd
   atpull"%atclone"
 zinit light sharkdp/fd
 
+# nvim
+zinit ice wait'[[ ! -n "$commands[nvim]" ]]' lucid as"program" from"gh-r" id-as"nvim" \
+  bpick"nvim-linux-x86_64.appimage" \
+  atclone"sudo mv nvim-linux-x86_64.appimage /usr/bin/nvim" \
+  atpull"%atclone"
+zinit light neovim/neovim
+
 # hx
 zinit ice wait'[[ ! -n "$commands[hx]" ]]' lucid as"program" from"gh-r" id-as"hx" \
   atclone"sudo mv */hx /usr/bin/ && mv */runtime ~/.config/helix/" \
