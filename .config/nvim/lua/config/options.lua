@@ -91,3 +91,10 @@ vim.o.formatexpr = "v:lua.require'lazyvim.util'.format.formatexpr()"
 
 -- Fix markdown indentation settings
 vim.g.markdown_recommended_style = 0
+
+-- LSP Server to use for Rust.
+-- Set to "bacon-ls" to use bacon-ls instead of rust-analyzer.
+-- only for diagnostics. The rest of LSP support will still be
+-- provided by rust-analyzer.
+-- use `rustup component add rust-analyzer` install rust-analyzer
+vim.g.lazyvim_rust_diagnostics = "rust-analyzer"

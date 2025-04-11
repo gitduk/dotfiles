@@ -107,9 +107,6 @@ alias dim="echo $(tput cols)x$(tput lines)"
 # dust
 alias ds="dust"
 
-# deactivate python env
-alias denv="deactivate"
-
 #########
 ### E ###
 #########
@@ -313,12 +310,12 @@ alias sue="systemctl --user enable"
 alias sud="systemctl --user disable"
 alias sued="systemctl --user edit"
 
-# python env
-alias senv="source venv/bin/activate"
-
 #########
 ### U ###
 #########
+
+# uv
+alias u="uv"
 
 # mount devices
 alias umt="sudo umount"
