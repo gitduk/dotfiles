@@ -150,6 +150,9 @@ addPath() {
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.npm/bin:$PATH"
 
+# Qt
+export PATH="/opt/Qt/6.9.0/gcc_64/bin:$PATH"
+
 # update HYPRLAND_INSTANCE_SIGNATURE for zellij
 if [[ -d "/run/user/$UID/hypr" ]]; then
   export HYPRLAND_INSTANCE_SIGNATURE="$(ls /run/user/$UID/hypr | tail -n 1)"

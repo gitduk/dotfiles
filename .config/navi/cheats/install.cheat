@@ -1,17 +1,8 @@
 % install
 
 # google-chrome
-cd /tmp
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i google-chrome-stable_current_amd64.deb
-cd -
-
-# sing-box for android
-wget https://googledownloads.cn/android/repository/android-ndk-r27-linux.zip && unzip android-ndk-r27-linux.zip
-git clone --depth 1 -b 'outbound-providers' https://github.com/PuerNya/sing-box.git && cd sing-box/
-export CC="/tmp/android-ndk-r27/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang"
-GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build -v -trimpath -ldflags "-s -w -buildid=" -tags with_quic,with_wireguard,with_acme,with_gvisor,with_clash_api ./cmd/sing-box \
-  && sudo setcap cap_net_admin=+ep ./sing-box
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -P /tmp
+sudo dpkg -i /tmp/google-chrome-stable_current_amd64.deb
 
 # fcitx5-rime - 白霜拼音
 sudo nala install -y fcitx5 \
@@ -32,14 +23,14 @@ curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
 # waybar
 sudo nala install libspdlog-dev libgtkmm-3.0-dev libjsoncpp-dev libnl-genl-3-dev libupower-glib-dev \
   libpipewire-0.3-dev libplayerctl-dev libpulse-dev libxkbregistry-dev scdoc
-git clone https://github.com/Alexays/Waybar && cd Waybar/
+git clone https://github.com/Alexays/Waybar /tmp/Waybar && cd /tmp/Waybar/
 meson setup build && sudo ninja -C build install
 
 # rofi - wayland support
 sudo nala install librust-xkbcommon-dev libgdk-pixbuf-2.0-dev libxcb-util-dev libxcb-ewmh-dev libxcb-icccm4-dev libmpdclient-dev libnl-3-dev \
   libalsa-ocaml-dev libxcb-randr0-dev libxcb-cursor-dev libxcb-xinerama0-dev libxcb-keysyms1-dev libstartup-notification0-dev flex bison \
   pandoc doxygen cppcheck ohcount
-git clone --depth=1 https://github.com/lbonn/rofi.git && cd rofi/
+git clone --depth=1 https://github.com/lbonn/rofi.git /tmp/rofi && cd /tmp/rofi/
 meson setup build && ninja -C build && sudo ninja -C build install
 
 # chsrc
@@ -50,7 +41,7 @@ chmod +x ~/.local/bin/chsrc
 cargo install --locked --git https://github.com/sxyazi/yazi.git yazi-fm yazi-cli
 
 # wallust
-cargo install --locked wallust
+cargo install --locked wallust && wallust theme Tokyo-Night
 
 # Spotube - Spotify music open source client
 sudo nala install -y gir1.2-appindicator3-0.1
@@ -58,11 +49,11 @@ wget "https://github.com/KRTirtho/spotube/releases/download/v3.8.1/Spotube-linux
 sudo dpkg -i ./Spotube-linux-x86_64.deb
 
 # wl-clipboard
-git clone https://github.com/bugaevc/wl-clipboard.git && cd wl-clipboard/
+git clone https://github.com/bugaevc/wl-clipboard.git /tmp/wl-clipboard && cd /tmp/wl-clipboard/
 meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
 
 # clipse
-git clone https://github.com/savedra1/clipse && cd clipse
+git clone https://github.com/savedra1/clipse /tmp/clipse && cd /tmp/clipse/
 go mod tidy && go build -o clipse && sudo mv ./clipse /usr/bin/
 
 # cliphist
@@ -71,7 +62,7 @@ go install go.senan.xyz/cliphist@latest
 # flameshot - screenshot tool
 sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
 sudo nala install -y libqt5dbus5 libqt5network5 libqt5core5a libqt5widgets5 libqt5gui5 libqt5svg5
-git clone https://github.com/flameshot-org/flameshot.git && cd flameshot/
+git clone https://github.com/flameshot-org/flameshot.git /tmp/flameshot && cd /tmp/flameshot/
 cmake -S . -B build \
   -DUSE_WAYLAND_CLIPBOARD=true \
   -DUSE_WAYLAND_GRIM=ON \
@@ -79,7 +70,7 @@ cmake -S . -B build \
   && sudo cmake --install build
 
 # greetd - login manager daemon
-git clone https://git.sr.ht/~kennylevinsen/greetd && cd greetd/
+git clone https://git.sr.ht/~kennylevinsen/greetd /tmp/greetd && cd /tmp/greetd/
 cargo build --release
 sudo cp target/release/{greetd,agreety} /usr/local/bin/
 sudo cp greetd.service /etc/systemd/system/greetd.service
@@ -88,7 +79,7 @@ sudo useradd -M -G video greeter
 sudo chmod -R go+r /etc/greetd/
 
 # tuigreet - Graphical console greeter for greetd.
-git clone https://github.com/apognu/tuigreet.git && cd tuigreet/
+git clone https://github.com/apognu/tuigreet.git /tmp/tuigreet && cd /tmp/tuigreet/
 cargo build --release
 sudo mv target/release/tuigreet /usr/local/bin/tuigreet
 sudo mkdir /var/cache/tuigreet
@@ -97,12 +88,13 @@ sudo chmod 0755 /var/cache/tuigreet
 
 # tdf - A terminal-based PDF viewer.
 sudo nala install -y libpoppler-dev libpoppler-glib-dev
-git clone --recursive https://github.com/itsjunetime/tdf.git && cd tdf/
+git clone --recursive https://github.com/itsjunetime/tdf.git /tmp/tdf && cd /tmp/tdf/
 cargo build --release && cp target/release/tdf ~/.local/bin/
 
 # frp
-wget "$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep browser_download_url | cut -d '"' -f 4|grep frp_.*_linux_amd64.tar.gz)" \
-  && tar -xzvf frp_*_linux_amd64.tar.gz && cd frp_*_linux_amd64/ \
+wget "$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep browser_download_url | cut -d '"' -f 4|grep frp_.*_linux_amd64.tar.gz)" -P /tmp \
+  && tar -xzvf /tmp/frp_*_linux_amd64.tar.gz -C /tmp \
+  && cd /tmp/frp_*_linux_amd64/ \
   && mv frpc frps ~/.local/bin/
 
 # pnpm
@@ -113,13 +105,13 @@ wget "https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb" -P 
 sudo dpkg -i /tmp/WeChatLinux_x86_64.deb
 
 # Vimix cursor
-git clone https://github.com/vinceliuice/Vimix-cursors.git && cd Vimix-cursors/
+git clone https://github.com/vinceliuice/Vimix-cursors.git /tmp/Vimix-cursors && cd /tmp/Vimix-cursors/
 mkdir -p ~/.local/share/icons/
 cp -r ./dist ~/.local/share/icons/Vimix
 cp -r ./dist-white ~/.local/share/icons/Vimix-white
 
 # swappy
-git clone https://github.com/jtheoof/swappy.git && cd swappy/
+git clone https://github.com/jtheoof/swappy.git /tmp/swappy && cd /tmp/swappy/
 meson setup build && sudo ninja -C build/ install
 
 # lazyvim

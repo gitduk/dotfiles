@@ -1,0 +1,6 @@
+waybar_root := "~/.config/waybar/"
+
+default:
+  $HOME/.config/hypr/scripts/waybar.sh -l {{waybar_root}}/configs
+  $HOME/.config/hypr/scripts/waybar.sh -s {{waybar_root}}/style
+
