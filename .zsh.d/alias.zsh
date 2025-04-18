@@ -289,6 +289,8 @@ alias rsy="rsync -avP"
 
 # source
 alias sc="source"
+alias senv="source .venv/bin/activate"
+alias denv="deactivate"
 alias szs="source ~/.zshrc"
 
 # systemctl
@@ -313,9 +315,6 @@ alias sued="systemctl --user edit"
 #########
 ### U ###
 #########
-
-# uv
-alias u="uv"
 
 # mount devices
 alias umt="sudo umount"
