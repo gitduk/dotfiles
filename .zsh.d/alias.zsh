@@ -183,9 +183,6 @@ alias kbc="minikube kubectl --"
 # lsof
 balias li="sudo lsof -i:"
 
-# ls
-ialias ls="ls --color=auto"
-
 #########
 ### M ###
 #########

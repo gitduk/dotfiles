@@ -85,6 +85,9 @@ source "${ZINIT_HOME}/zinit.zsh"
 export ZBIN="$HOME/.local/bin"
 [[ ! -d "$ZBIN" ]] && mkdir -p $ZBIN
 
+# Add the following snippet as the first plugin in your configuration
+zinit light-mode for zdharma-continuum/zinit-annex-bin-gem-node
+
 # must
 zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as'must' \
   atload'
@@ -99,7 +102,6 @@ zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as
     command -v nodejs &>/dev/null || ins nodejs || ok=1
     command -v npm &>/dev/null || ins npm || ok=1
     command -v yarn &>/dev/null || npm install -g yarn || ok=1
-    command -v neovim &>/dev/null || ins neovim || ok=1
     command -v tmux &>/dev/null || ins tmux || ok=1
     command -v unzip &>/dev/null || ins unzip || ok=1
     dpkg -l | grep libssl-dev | grep ii &>/dev/null || ins libssl-dev || ok=1
@@ -245,7 +247,7 @@ zinit light zdharma-continuum/null
 
 # fzf
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh && mv ./fzf $ZBIN/" \
+  atclone"./fzf --zsh > init.zsh && mv -vf ./fzf $ZBIN/" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light junegunn/fzf
@@ -258,34 +260,34 @@ zinit light zdharma-continuum/null
 
 # fd
 zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"mv fd*/fd $ZBIN/" \
+  atclone"mv -vf fd*/fd $ZBIN/" \
   atpull"%atclone"
 zinit light sharkdp/fd
 
 # nvim
 zinit ice wait'[[ ! -n "$commands[nvim]" ]]' lucid as"program" from"gh-r" id-as"nvim" \
   bpick"nvim-linux-x86_64.appimage" \
-  atclone"sudo mv nvim-linux-x86_64.appimage /usr/bin/nvim" \
+  atclone"sudo mv -vf nvim-linux-x86_64.appimage /usr/bin/nvim" \
   atpull"%atclone"
 zinit light neovim/neovim
 
 # hx
 zinit ice wait'[[ ! -n "$commands[hx]" ]]' lucid as"program" from"gh-r" id-as"hx" \
-  atclone"sudo mv */hx /usr/bin/ && mv */runtime ~/.config/helix/" \
+  atclone"sudo mv -vf */hx /usr/bin/ && mv -vf */runtime ~/.config/helix/" \
   atpull"%atclone"
 zinit light helix-editor/helix
 
 # sing-box
 zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" \
-  atclone"mv */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=+ep $ZBIN/sing-box" \
+  atclone"mv -vf */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=+ep $ZBIN/sing-box" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
 
 # zellij
 # zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as"zellij" \
 #   bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
-#   atclone"sudo mv zellij /usr/bin/" \
+#   atclone"sudo mv -vf zellij /usr/bin/" \
 #   atpull"%atclone"
 # zinit light zellij-org/zellij
 
@@ -299,6 +301,14 @@ zinit ice wait'[[ ! -n "$commands[pueue]" ]]' lucid as"program" from"gh" id-as"p
   " \
   atpull"%atclone"
 zinit light Nukesor/pueue
+
+# caddy
+# zinit ice wait'[[ ! -n "$commands[caddy]" ]]' lucid as"program" from"gh-r" id-as"caddy" \
+#   bpick"caddy_*_linux_amd64.deb" \
+#   atclone"sudo cp -rvf ./etc/caddy /etc/" \
+#   atclone"sudo cp -rvf ./usr/bin/caddy /usr/bin/" \
+#   atpull"%atclone"
+# zinit light caddyserver/caddy
 
 ###############
 ### COMMAND ###
@@ -321,7 +331,7 @@ zinit light atuinsh/atuin
 # yazi
 zinit ice wait'3' lucid as"command" from"gh-r" id-as"yazi" \
   bpick"yazi-x86_64-unknown-linux-musl.zip" \
-  atclone"mv yazi*/* ./" \
+  atclone"mv -vf yazi*/* ./" \
   atpull"%atclone"
 zinit light sxyazi/yazi
 
@@ -342,6 +352,48 @@ zinit light casey/just
 # curlie
 zinit ice wait'[[ ! -n "$commands[curlie]" ]]' lucid as"command" from"gh-r" id-as"curlie"
 zinit light rs/curlie
+
+# dust
+zinit ice wait'[[ ! -n "$commands[dust]" ]]' lucid as"command" from"gh-r" id-as"dust" \
+  atclone"sudo mv -vf */dust /usr/bin/" \
+  atpull"%atclone"
+zinit light bootandy/dust
+
+# eza - eza is a modern replacement for ls
+zinit ice wait'[[ ! -n "$commands[eza]" ]]' lucid as"command" from"gh-r" id-as"eza"
+zinit light eza-community/eza
+
+# fx - Command-line tool and terminal JSON viewer
+zinit ice wait'[[ ! -n "$commands[fx]" ]]' lucid as"command" from"gh-r" id-as"fx" \
+  mv"fx* -> fx"
+zinit light antonmedv/fx
+
+# gh
+zinit ice wait'[[ ! -n "$commands[gh]" ]]' lucid as"command" from"gh-r" id-as"gh" \
+  atclone"sudo mv -vf */bin/gh /usr/bin/" \
+  atpull"%atclone"
+zinit light cli/cli
+
+# glow - Glow is a terminal-based markdown reader designed from the ground up to bring out the beauty—and power—of the CLI
+zinit ice wait'[[ ! -n "$commands[glow]" ]]' lucid as"command" from"gh-r" id-as"glow" \
+  pick"**/glow"
+zinit light charmbracelet/glow
+
+# grex - A command-line tool and library for generating regular expressions from user-provided test cases
+zinit ice wait'[[ ! -n "$commands[grex]" ]]' lucid as"command" from"gh-r" id-as"grex" \
+  pick"**/grex"
+zinit light pemistahl/grex
+
+# procs - procs is a replacement for ps written in Rust
+zinit ice wait'[[ ! -n "$commands[procs]" ]]' lucid as"command" from"gh-r" id-as"procs" \
+  pick"**/procs"
+zinit light dalance/procs
+
+# ripgrep - ripgrep recursively searches directories for a regex pattern while respecting your gitignore
+zinit ice wait'[[ ! -n "$commands[rg]" ]]' lucid as"command" from"gh-r" id-as"rg" \
+  atclone"sudo mv -vf */rg /usr/bin/" \
+  atpull"%atclone"
+zinit light burntSushi/ripgrep
 
 ##################
 ### COMPLETION ###
@@ -371,3 +423,10 @@ zinit snippet https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/
 # zprof | head -n 20; zmodload -u zsh/zprof
 # echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 
+
+# fnm
+FNM_PATH="/home/wukaige/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="/home/wukaige/.local/share/fnm:$PATH"
+  eval "`fnm env`"
+fi

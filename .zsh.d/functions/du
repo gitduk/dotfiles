@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+if hash dust &>/dev/null; then
+  dust "$@"
+else
+  /usr/bin/du "$@"
+fi
+
