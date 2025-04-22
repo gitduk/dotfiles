@@ -82,8 +82,8 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
 
 # ensure zbin dir
-export ZBIN="$HOME/.local/bin"
-[[ ! -d "$ZBIN" ]] && mkdir -p $ZBIN
+export BPFX="$HOME/.local/bin"
+[[ ! -d "$BPFX" ]] && mkdir -p $BPFX
 
 # Add the following snippet as the first plugin in your configuration
 zinit light-mode for zdharma-continuum/zinit-annex-bin-gem-node
@@ -172,6 +172,9 @@ zinit ice wait"3" lucid id-as"zsh-autosuggestions" \
   "
 zinit light zsh-users/zsh-autosuggestions
 
+# sudo
+zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
+
 ###############
 ### PROGRAM ###
 ###############
@@ -194,7 +197,6 @@ zinit light zdharma-continuum/null
 zinit ice wait"0" lucid as"program" id-as'cargo' \
   atclone"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    cargo install --locked git-delta
     " \
   atload'
     export PATH="$HOME/.cargo/bin:$PATH"
@@ -225,7 +227,7 @@ zinit ice wait'1' lucid as"program" id-as'fnm' \
     curl -fsSL https://fnm.vercel.app/install | bash
     ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
     ~/.local/share/fnm/fnm completions --shell zsh > _fnm
-    ln -fs ~/.local/share/fnm/fnm $ZBIN/fnm
+    ln -fs ~/.local/share/fnm/fnm $BPFX/fnm
     " \
   src"init.zsh" \
   atpull"%atclone"
@@ -247,7 +249,7 @@ zinit light zdharma-continuum/null
 
 # fzf
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh && mv -vf ./fzf $ZBIN/" \
+  atclone"./fzf --zsh > init.zsh && mv -vf ./fzf $BPFX/" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light junegunn/fzf
@@ -260,7 +262,7 @@ zinit light zdharma-continuum/null
 
 # fd
 zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"mv -vf fd*/fd $ZBIN/" \
+  atclone"mv -vf fd*/fd $BPFX/" \
   atpull"%atclone"
 zinit light sharkdp/fd
 
@@ -280,7 +282,7 @@ zinit light helix-editor/helix
 # sing-box
 zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" \
-  atclone"mv -vf */sing-box $ZBIN/sing-box && sudo setcap cap_net_admin=+ep $ZBIN/sing-box" \
+  atclone"mv -vf */sing-box $BPFX/sing-box && sudo setcap cap_net_admin=+ep $BPFX/sing-box" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
 
@@ -295,9 +297,9 @@ zinit light SagerNet/sing-box
 zinit ice wait'[[ ! -n "$commands[pueue]" ]]' lucid as"program" from"gh" id-as"pueue" \
   atclone"
     cd pueue && cargo build --release --locked
-    cp ../target/release/{pueue,pueued} $ZBIN/
-    sudo chmod 744 $ZBIN/pueue*
-    $ZBIN/pueue completions zsh > ../_pueue
+    cp ../target/release/{pueue,pueued} $BPFX/
+    sudo chmod 744 $BPFX/pueue*
+    $BPFX/pueue completions zsh > ../_pueue
   " \
   atpull"%atclone"
 zinit light Nukesor/pueue
@@ -328,13 +330,6 @@ zinit ice wait'1' lucid as"command" from"gh-r" id-as"atuin" \
   atpull"%atclone" src"init.zsh"
 zinit light atuinsh/atuin
 
-# yazi
-zinit ice wait'3' lucid as"command" from"gh-r" id-as"yazi" \
-  bpick"yazi-x86_64-unknown-linux-musl.zip" \
-  atclone"mv -vf yazi*/* ./" \
-  atpull"%atclone"
-zinit light sxyazi/yazi
-
 # direnv
 zinit ice wait"3" lucid as"command" from"gh-r" id-as"direnv" \
   mv"direnv* -> direnv" pick"direnv" \
@@ -344,10 +339,15 @@ zinit ice wait"3" lucid as"command" from"gh-r" id-as"direnv" \
 zinit light direnv/direnv
 
 # just
-zinit ice wait"3" lucid as"command" from"gh-r" id-as"just" \
+zinit ice wait'[[ ! -n "$commands[just]" ]]' lucid as"command" from"gh-r" id-as"just" \
   atclone'./just --completions zsh > _just' \
   atpull"%atclone"
 zinit light casey/just
+
+# delta - A syntax-highlighting pager for git, diff, and grep output
+zinit ice wait'[[ ! -n "$commands[delta]" ]]' lucid as"command" from"gh-r" id-as"delta" \
+  pick"**/delta"
+zinit light dandavison/delta
 
 # curlie
 zinit ice wait'[[ ! -n "$commands[curlie]" ]]' lucid as"command" from"gh-r" id-as"curlie"
@@ -394,6 +394,19 @@ zinit ice wait'[[ ! -n "$commands[rg]" ]]' lucid as"command" from"gh-r" id-as"rg
   atclone"sudo mv -vf */rg /usr/bin/" \
   atpull"%atclone"
 zinit light burntSushi/ripgrep
+
+# frp - A fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet
+zinit ice wait'[[ ! -n "$commands[frpc]" ]]' lucid as"command" from"gh-r" id-as"frp" \
+  atclone"mv -vf */frpc $BPFX/ && mv -vf */frps $BPFX/" \
+  atpull"%atclone"
+zinit light fatedier/frp
+
+# yazi - file browser
+zinit ice wait'[[ ! -n "$commands[yazi]" ]]' lucid as"command" from"gh-r" id-as"yazi" \
+  bpick"yazi-x86_64-unknown-linux-musl.zip" \
+  atclone"mv -vf yazi*/* ./" \
+  atpull"%atclone"
+zinit light sxyazi/yazi
 
 ##################
 ### COMPLETION ###

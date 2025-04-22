@@ -37,9 +37,6 @@ meson setup build && ninja -C build && sudo ninja -C build install
 curl -L https://gitee.com/RubyMetric/chsrc/releases/download/pre/chsrc-x64-linux -o ~/.local/bin/chsrc
 chmod +x ~/.local/bin/chsrc
 
-# yazi
-cargo install --locked --git https://github.com/sxyazi/yazi.git yazi-fm yazi-cli
-
 # wallust
 cargo install --locked wallust && wallust theme Tokyo-Night
 
@@ -90,12 +87,6 @@ sudo chmod 0755 /var/cache/tuigreet
 sudo nala install -y libpoppler-dev libpoppler-glib-dev
 git clone --recursive https://github.com/itsjunetime/tdf.git /tmp/tdf && cd /tmp/tdf/
 cargo build --release && cp target/release/tdf ~/.local/bin/
-
-# frp
-wget "$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep browser_download_url | cut -d '"' -f 4|grep frp_.*_linux_amd64.tar.gz)" -P /tmp \
-  && tar -xzvf /tmp/frp_*_linux_amd64.tar.gz -C /tmp \
-  && cd /tmp/frp_*_linux_amd64/ \
-  && mv frpc frps ~/.local/bin/
 
 # pnpm
 curl -fsSL https://get.pnpm.io/install.sh | sh -

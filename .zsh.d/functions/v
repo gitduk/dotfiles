@@ -1,43 +1,79 @@
 #!/usr/bin/env zsh
 
 # Set a default editor if $EDITOR is not set
-editors=(
-  "nvim"
-  "hx"
-  "vim"
-)
+set_default_editor() {
+  local editors=("nvim" "hx" "vim" "vi")
+  local editor
 
-for e in $editors; do
-  if hash $e &>/dev/null; then
-    export EDITOR=$e
-    break
-  fi
-done
+  for editor in "${editors[@]}"; do
+    if command -v "$editor" &>/dev/null; then
+      export EDITOR="$editor"
+      return
+    fi
+  done
 
-# Function to edit a file or open the editor
-function edit_file {
-  # If no file specified, open editor in current directory if writable
-  if [[ -z "$1" ]]; then
-    [[ -w "." ]] && $EDITOR || { echo "Error: Current directory is not writable."; exit 1; }
-    return
-  fi
+  echo "Error: No suitable editor found. Please install one of (${editors[*]})." >&2
+  return 1
+}
 
-  # If file exists and is writable, or does not exist but directory is writable, use EDITOR
-  if [[ -w "$1" ]] || { [[ ! -f "$1" ]] && [[ -w $(dirname "$1") ]]; }; then
-    $EDITOR "$1"
-  # If file exists but is not writable, use sudo EDITOR
-  elif [[ -f "$1" ]]; then
-    sudo $EDITOR "$1"
-  # Otherwise, create file
-  else
-    $EDITOR "$1"
+# Verify editor command exists
+verify_editor() {
+  if ! command -v "$EDITOR" &>/dev/null; then
+    echo "Error: Configured editor '$EDITOR' not found in PATH." >&2
+    return 1
   fi
 }
 
-# Main logic
-if [[ -n "$1" ]]; then
-  edit_file "$1"
-else
-  edit_file
-fi
+# Function to edit a file or open the editor
+edit_file() {
+  local file_path=$1
+  local parent_dir
 
+  # Handle no-argument case
+  if [[ -z "$file_path" ]]; then
+    if [[ -w "." ]]; then
+      "$EDITOR"
+    else
+      echo "Error: Current directory is not writable." >&2
+      return 1
+    fi
+    return
+  fi
+
+  # Resolve absolute path for better permission checks
+  file_path=${file_path:A}
+
+  # Existing file handling
+  if [[ -f "$file_path" ]]; then
+    if [[ -w "$file_path" ]]; then
+      "$EDITOR" "$file_path"
+    else
+      sudo --preserve-env=EDITOR "$EDITOR" "$file_path"
+    fi
+    return
+  fi
+
+  # New file handling
+  parent_dir=$(dirname -- "$file_path")
+  if [[ -w "$parent_dir" ]]; then
+    "$EDITOR" "$file_path"
+  else
+    sudo --preserve-env=EDITOR "$EDITOR" "$file_path"
+  fi
+}
+
+# Main execution
+main() {
+  set_default_editor
+  verify_editor
+
+  if (( $# > 1 )); then
+    echo "Error: Too many arguments. Usage: ${0:t} [FILE]" >&2
+    return 2
+  fi
+
+  edit_file "${@}"
+}
+
+# Run main function
+main "$@"
