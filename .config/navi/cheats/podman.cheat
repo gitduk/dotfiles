@@ -32,9 +32,12 @@ podman run -d --name uptime-kuma \
   --restart always \
   louislam/uptime-kuma:1
 
-# focalboard: project manager
-podman run -d --name focalboard \
-  -p 8000:8000 \
-  --restart always \
-  mattermost/focalboard
+# beszel: a lightweight server monitoring
+mkdir -p ~/.beszel_data && \
+podman run -d \
+  --name beszel \
+  --restart=unless-stopped \
+  -v ~/.beszel_data:/beszel_data \
+  -p 8090:8090 \
+  docker.io/henrygd/beszel
 

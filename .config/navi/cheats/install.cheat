@@ -23,7 +23,7 @@ curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
 # waybar
 sudo nala install libspdlog-dev libgtkmm-3.0-dev libjsoncpp-dev libnl-genl-3-dev libupower-glib-dev \
   libpipewire-0.3-dev libplayerctl-dev libpulse-dev libxkbregistry-dev scdoc
-git clone https://github.com/Alexays/Waybar /tmp/Waybar && cd /tmp/Waybar/
+git clone --depth 1 https://github.com/Alexays/Waybar /tmp/Waybar && cd /tmp/Waybar/
 meson setup build && sudo ninja -C build install
 
 # rofi - wayland support
@@ -46,20 +46,24 @@ wget "https://github.com/KRTirtho/spotube/releases/download/v3.8.1/Spotube-linux
 sudo dpkg -i ./Spotube-linux-x86_64.deb
 
 # wl-clipboard
-git clone https://github.com/bugaevc/wl-clipboard.git /tmp/wl-clipboard && cd /tmp/wl-clipboard/
+git clone --depth 1 https://github.com/bugaevc/wl-clipboard.git /tmp/wl-clipboard && cd /tmp/wl-clipboard/
 meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
-
-# clipse
-git clone https://github.com/savedra1/clipse /tmp/clipse && cd /tmp/clipse/
-go mod tidy && go build -o clipse && sudo mv ./clipse /usr/bin/
 
 # cliphist
 go install go.senan.xyz/cliphist@latest
 
+# wl-clip-persist
+git clone --depth 1 https://github.com/Linus789/wl-clip-persist.git /tmp/wl-clip-persist && cd /tmp/wl-clip-persist/
+cargo build --release && cp -vf ./target/release/wl-clip-persist ~/.local/bin/
+
+# clipse
+git clone --depth 1 https://github.com/savedra1/clipse /tmp/clipse && cd /tmp/clipse/
+go mod tidy && go build -o clipse && sudo mv ./clipse /usr/bin/
+
 # flameshot - screenshot tool
 sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
 sudo nala install -y libqt5dbus5 libqt5network5 libqt5core5a libqt5widgets5 libqt5gui5 libqt5svg5
-git clone https://github.com/flameshot-org/flameshot.git /tmp/flameshot && cd /tmp/flameshot/
+git clone --depth 1 https://github.com/flameshot-org/flameshot.git /tmp/flameshot && cd /tmp/flameshot/
 cmake -S . -B build \
   -DUSE_WAYLAND_CLIPBOARD=true \
   -DUSE_WAYLAND_GRIM=ON \
@@ -67,7 +71,7 @@ cmake -S . -B build \
   && sudo cmake --install build
 
 # greetd - login manager daemon
-git clone https://git.sr.ht/~kennylevinsen/greetd /tmp/greetd && cd /tmp/greetd/
+git clone --depth 1 https://git.sr.ht/~kennylevinsen/greetd /tmp/greetd && cd /tmp/greetd/
 cargo build --release
 sudo cp target/release/{greetd,agreety} /usr/local/bin/
 sudo cp greetd.service /etc/systemd/system/greetd.service
@@ -76,7 +80,7 @@ sudo useradd -M -G video greeter
 sudo chmod -R go+r /etc/greetd/
 
 # tuigreet - Graphical console greeter for greetd.
-git clone https://github.com/apognu/tuigreet.git /tmp/tuigreet && cd /tmp/tuigreet/
+git clone --depth 1 https://github.com/apognu/tuigreet.git /tmp/tuigreet && cd /tmp/tuigreet/
 cargo build --release
 sudo mv target/release/tuigreet /usr/local/bin/tuigreet
 sudo mkdir /var/cache/tuigreet
@@ -96,18 +100,18 @@ wget "https://dldir1v6.qq.com/weixin/Universal/Linux/WeChatLinux_x86_64.deb" -P 
 sudo dpkg -i /tmp/WeChatLinux_x86_64.deb
 
 # Vimix cursor
-git clone https://github.com/vinceliuice/Vimix-cursors.git /tmp/Vimix-cursors && cd /tmp/Vimix-cursors/
+git clone --depth 1 https://github.com/vinceliuice/Vimix-cursors.git /tmp/Vimix-cursors && cd /tmp/Vimix-cursors/
 mkdir -p ~/.local/share/icons/
 cp -r ./dist ~/.local/share/icons/Vimix
 cp -r ./dist-white ~/.local/share/icons/Vimix-white
 
 # swappy
-git clone https://github.com/jtheoof/swappy.git /tmp/swappy && cd /tmp/swappy/
+git clone --depth 1 https://github.com/jtheoof/swappy.git /tmp/swappy && cd /tmp/swappy/
 meson setup build && sudo ninja -C build/ install
 
 # lazyvim
 [[ -d "$HOME/.config/nvim" ]] && mv ~/.config/nvim ~/.config/nvim.bak
 [[ -d "$HOME/.local/share/nvim" ]] && mv ~/.local/share/nvim ~/.local/share/nvim.bak
-git clone https://github.com/LazyVim/starter ~/.config/nvim
+git clone --depth 1 https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 
