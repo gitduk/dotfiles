@@ -1,20 +1,29 @@
 % podman, run
 
+# postgresql
+mkdir -p ~/.postgres
+podman run -d --name postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=changeme \
+  -e PGDATA=/var/lib/postgresql/data/pgdata \
+  -v ~/.postgres:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres
+
 # stirling-pdf
 podman run -d --name stirling-pdf \
   -e DOCKER_ENABLE_SECURITY=false \
   -e INSTALL_BOOK_AND_ADVANCED_HTML_OPS=false \
   -e LANGS=en_GB \
-  -p 7000:8080 \
   -v ./trainingData:/usr/share/tessdata \
   -v ./extraConfigs:/configs \
   -v ./logs:/logs \
   -v ./customFiles:/customFiles \
+  -p 7000:8080 \
   frooodle/s-pdf:latest
 
 # pairdrop
 podman run -d --name pairdrop \
-  -p 0.0.0.0:3000:3000 \
   -e PUID=1000 \ -e PGID=1000 \
   -e WS_SERVER=false \
   -e WS_FALLBACK=false \
@@ -22,6 +31,7 @@ podman run -d --name pairdrop \
   -e RATE_LIMIT=false \
   -e DEBUG_MODE=false \
   -e TZ=Etc/UTC \
+  -p 0.0.0.0:3000:3000 \
   --restart unless-stopped \
   lscr.io/linuxserver/pairdrop 
 
@@ -33,11 +43,10 @@ podman run -d --name uptime-kuma \
   louislam/uptime-kuma:1
 
 # beszel: a lightweight server monitoring
-mkdir -p ~/.beszel_data && \
-podman run -d \
-  --name beszel \
-  --restart=unless-stopped \
+mkdir -p ~/.beszel_data
+podman run -d --name beszel \
   -v ~/.beszel_data:/beszel_data \
   -p 8090:8090 \
+  --restart=unless-stopped \
   docker.io/henrygd/beszel
 
