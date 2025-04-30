@@ -255,12 +255,6 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
   atpull"%atclone"
 zinit light junegunn/fzf
 
-# uv - python package manager
-zinit ice wait'[[ ! -n "$commands[uv]" ]]' lucid as"program" id-as"uv" \
-  atclone"curl -LsSf https://astral.sh/uv/install.sh | sh" \
-  atpull"%atclone"
-zinit light zdharma-continuum/null
-
 # fd
 zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
   atclone"mv -vf fd*/fd $BPFX/" \
@@ -408,6 +402,12 @@ zinit ice wait'[[ ! -n "$commands[yazi]" ]]' lucid as"command" from"gh-r" id-as"
   atclone"mv -vf yazi*/* ./" \
   atpull"%atclone"
 zinit light sxyazi/yazi
+
+# uv - python package manager
+zinit ice wait'[[ ! -n "$commands[uv]" ]]' lucid as"command" from"gh-r" id-as"uv" \
+  atclone"mv -vf */* ./ && ./uv generate-shell-completion zsh > _uv" \
+  atpull"%atclone"
+zinit light astral-sh/uv
 
 ##################
 ### COMPLETION ###
