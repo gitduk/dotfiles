@@ -114,6 +114,7 @@ zinit ice wait'[[ -n $DISPLAY && ! -f ~/.desktop.ok ]]' lucid as"program" id-as'
   atload'
     ok=0
     command -v foot &>/dev/null || ins foot || ok=1
+    command -v alacritty &>/dev/null || ins alacritty || ok=1
     command -v kitty &>/dev/null || ins kitty || ok=1
     [[ $ok -eq 0 ]] && touch ~/.display.ok
   '
@@ -429,6 +430,10 @@ zinit snippet OMZ::plugins/git/git.plugin.zsh
 zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)fzf]} ]]' lucid as"completion"
 zinit snippet https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/zsh/completions/_fzf
 
+# alacritty
+zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)alacritty]} ]]' lucid as"completion"
+zinit snippet https://raw.githubusercontent.com/alacritty/alacritty/refs/heads/master/extra/completions/_alacritty
+
 #############
 ### Zprof ###
 #############
@@ -436,10 +441,3 @@ zinit snippet https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/
 # zprof | head -n 20; zmodload -u zsh/zprof
 # echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 
-
-# fnm
-FNM_PATH="/home/wukaige/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="/home/wukaige/.local/share/fnm:$PATH"
-  eval "`fnm env`"
-fi

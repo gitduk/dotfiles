@@ -1,0 +1,24 @@
+# This is the configuration file for Ghostty.
+
+# general config
+theme = "light:Brogrammer,dark:ayu"
+
+font-family = "MesloLGM Nerd Font"
+font-size = 10
+
+window-decoration = false
+window-padding-x = 10
+window-padding-y = 8
+window-padding-balance = true
+
+
+background-opacity = 0.80
+background = #111111
+
+confirm-close-surface = false
+
+copy-on-select = true
+
+# keybing
+keybind = global:shift+y=copy_to_clipboard
+
