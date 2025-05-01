@@ -1,0 +1,40 @@
+% virt
+
+# Create virtual machine
+$ ISO: sudo ls /var/lib/libvirt/images/
+sudo virt-install --name win10 \
+  --memory <memory> \
+  --vcpus <vcpus> \
+  --disk size=<size>,format=qcow2 \
+  --cdrom /var/lib/libvirt/images/<ISO> \
+  --os-variant win10 \
+  --boot cdrom,hd \
+  --machine q35 \
+  --features kvm_hidden=on \
+  --graphics spice
+
+# List all virtual machine
+sudo virsh list --all
+
+# Force shutdown the virtual machine and delete the virtual machine definition
+$ machine: sudo virsh list --all --name | grep -v "^$"
+$ remove_storage: echo -e "no\t仅删除配置\nyes\t删除配置及磁盘文件" | fzf --prompt "是否删除磁盘文件？" | cut -f1 | awk '{if ($1=="yes") print "--remove-all-storage"; else print ""}'
+sudo virsh destroy "<machine>" || echo "虚拟机未运行或不存在"
+sudo virsh undefine "<machine>" <remove_storage>
+
+# start and connect machine
+sudo virsh start "<machine>"
+virt-viewer --connect qemu:///system "<machine>"
+
+# shutdown machine
+sudo virsh shutdown "<machine>"
+
+# Check machine info
+sudo virsh dominfo "<machine>"
+
+# Edit machine config
+sudo virsh edit "<machine>"
+
+# Set memory of machine (GB)
+sudo virsh setmem "<machine>" $((<size> * 1024 * 1024)) --live
+

@@ -3,7 +3,7 @@
 #####################
 
 live_config_reload = true
-import = ["~/.config/alacritty/themes/ayu_dark.toml"]
+import = ["~/.config/alacritty/themes/github_dark_default.toml"]
 
 [env]
 TERM = "tmux-256color"

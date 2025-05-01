@@ -176,6 +176,9 @@ zinit light zsh-users/zsh-autosuggestions
 # sudo
 zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
 
+# extract
+zinit snippet OMZ::plugins/extract/extract.plugin.zsh
+
 ###############
 ### PROGRAM ###
 ###############
