@@ -72,10 +72,10 @@
 [http]
   cookieFile = ~/.gitcookies
   postBuffer = 655360000
-  proxy = http://127.0.0.1:7890
+  # proxy = http://127.0.0.1:7890
 
 [https]
-  proxy = http://127.0.0.1:7890
+  # proxy = http://127.0.0.1:7890
 
 [core]
   excludesfile = ~/.gitignore_global
