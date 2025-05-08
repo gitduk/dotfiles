@@ -56,7 +56,7 @@ alias cais="cargo install"
 alias caui="cargo uninstall"
 
 # change
-alias cmd="sudo chmod 744"
+alias cmd="sudo chmod +x"
 alias cwn="sudo chown -Rv $USER:$USER"
 
 # crontab

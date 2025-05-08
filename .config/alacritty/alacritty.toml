@@ -1,7 +1,4 @@
-#####################
-### global config ###
-#####################
-
+[general]
 live_config_reload = true
 import = ["~/.config/alacritty/themes/github_dark_default.toml"]
 
@@ -62,7 +59,7 @@ multiplier = 3
 save_to_clipboard = true
 semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
 
-[shell]
+[terminal.shell]
 args = ["--login"]
 program = "/usr/bin/zsh"
 

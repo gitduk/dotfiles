@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name = Cursor
+Exec = cursor --no-sandbox %U
+Type = Application
+Terminal = false
+Categories = Development;IDE;
+StartupWMClass = cursor

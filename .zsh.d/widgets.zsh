@@ -97,6 +97,11 @@ function fzf-crontab-widget {
   done
 }
 
+function backward-delete-widget() {
+  local WORDCHARS=${WORDCHARS//[\/:]/}
+  zle backward-delete-word
+}
+
 ##################
 ### Keybinding ###
 ##################
@@ -117,6 +122,7 @@ zbindkey -M vicmd 'e' edit-command-line
 
 # zbindkey ins
 zbindkey -M viins " " expand-alias-space
+zbindkey -M viins '^W' backward-delete-widget
 zbindkey -M viins '^P' fzf-apt-widget
 zbindkey -M viins '^B' fzf-bindkeys-widget
 # zbindkey -M viins '' fzf-services-widget

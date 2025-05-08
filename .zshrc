@@ -114,7 +114,6 @@ zinit ice wait'[[ -n $DISPLAY && ! -f ~/.desktop.ok ]]' lucid as"program" id-as'
   atload'
     ok=0
     command -v foot &>/dev/null || ins foot || ok=1
-    command -v alacritty &>/dev/null || ins alacritty || ok=1
     command -v kitty &>/dev/null || ins kitty || ok=1
     [[ $ok -eq 0 ]] && touch ~/.display.ok
   '
@@ -225,20 +224,15 @@ zinit ice wait'0' lucid as"program" id-as'golang' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# fnm - node version manager
-zinit ice wait'1' lucid as"program" id-as'fnm' \
-  atclone"
-    curl -fsSL https://fnm.vercel.app/install | bash
-    ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
-    ~/.local/share/fnm/fnm completions --shell zsh > _fnm
-    ln -fs ~/.local/share/fnm/fnm $BPFX/fnm
-    " \
+# fzf
+zinit ice wait"0" lucid as"program" from"gh-r" id-as"fzf" \
+  atclone"./fzf --zsh > init.zsh && mv -vf ./fzf $BPFX/" \
   src"init.zsh" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light junegunn/fzf
 
 # navi
-zinit ice wait'1' lucid as"program" id-as'navi' \
+zinit ice wait'0' lucid as"program" id-as'navi' \
   atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
   atclone"cargo install navi --locked && navi widget zsh > init.zsh" \
   atload'
@@ -251,12 +245,28 @@ zinit ice wait'1' lucid as"program" id-as'navi' \
   src"init.zsh"
 zinit light zdharma-continuum/null
 
-# fzf
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh && mv -vf ./fzf $BPFX/" \
+# fnm - node version manager
+zinit ice wait'1' lucid as"program" id-as'fnm' \
+  atclone"
+    curl -fsSL https://fnm.vercel.app/install | bash
+    ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
+    ~/.local/share/fnm/fnm completions --shell zsh > _fnm
+    ln -fs ~/.local/share/fnm/fnm $BPFX/fnm
+    " \
   src"init.zsh" \
   atpull"%atclone"
-zinit light junegunn/fzf
+zinit light zdharma-continuum/null
+
+# alacritty
+zinit ice wait'[[ ! -n "$commands[alacritty]" ]]' lucid as"program" id-as'alacritty' \
+  atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
+  atclone"cargo build --release --no-default-features --features=wayland" \
+  atclone"sudo cp -vf target/release/alacritty /usr/bin" \
+  atclone"sudo cp -vf extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg" \
+  atclone"sudo desktop-file-install extra/linux/Alacritty.desktop" \
+  atclone"sudo update-desktop-database" \
+  atpull"%atclone"
+zinit light alacritty/alacritty
 
 # fd
 zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
@@ -314,19 +324,19 @@ zinit light Nukesor/pueue
 ### COMMAND ###
 ###############
 
+# atuin
+zinit ice wait'0' lucid as"command" from"gh-r" id-as"atuin" \
+  bpick"atuin-*.tar.gz" mv"atuin*/atuin -> atuin" \
+  atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
+  atpull"%atclone" src"init.zsh"
+zinit light atuinsh/atuin
+
 # zoxide
 zinit ice wait"1" lucid as"command" from"gh-r" id-as"zoxide" \
   atclone"./zoxide init zsh --cmd j > init.zsh" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light ajeetdsouza/zoxide
-
-# atuin
-zinit ice wait'1' lucid as"command" from"gh-r" id-as"atuin" \
-  bpick"atuin-*.tar.gz" mv"atuin*/atuin -> atuin" \
-  atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
-  atpull"%atclone" src"init.zsh"
-zinit light atuinsh/atuin
 
 # direnv
 zinit ice wait"3" lucid as"command" from"gh-r" id-as"direnv" \
@@ -432,10 +442,6 @@ zinit snippet OMZ::plugins/git/git.plugin.zsh
 # fzf
 zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)fzf]} ]]' lucid as"completion"
 zinit snippet https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/zsh/completions/_fzf
-
-# alacritty
-zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)alacritty]} ]]' lucid as"completion"
-zinit snippet https://raw.githubusercontent.com/alacritty/alacritty/refs/heads/master/extra/completions/_alacritty
 
 #############
 ### Zprof ###
