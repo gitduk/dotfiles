@@ -116,3 +116,7 @@ sudo nala install -y libxcursor-dev libre2-dev libudis86-dev libxcb-xfixes0-dev 
 git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd /tmp/Hyprland/
 make all && sudo make install
 
+# qt6
+wget https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run -P /tmp
+chmod +x /tmp/qt-online-installer-linux-x64-online.run && /tmp/qt-online-installer-linux-x64-online.run
+
