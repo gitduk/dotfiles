@@ -113,6 +113,6 @@ cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PRE
 # Hyprland
 sudo nala install -y libxcursor-dev libre2-dev libudis86-dev libxcb-xfixes0-dev \
   libxcb-icccm4-dev libxcb-composite0-dev libxcb-res0-dev
-git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd Hyprland/
+git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd /tmp/Hyprland/
 make all && sudo make install
 

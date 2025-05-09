@@ -215,7 +215,8 @@ zinit ice wait'0' lucid as"program" id-as'golang' \
     sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
     ' \
   atload'
-    export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
+    export GOPATH=$HOME/go/bin
+    export PATH="/usr/local/go/bin:$GOPATH:$PATH"
     export GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct
     export GO111MODULE=on
     export GOSUMDB=off

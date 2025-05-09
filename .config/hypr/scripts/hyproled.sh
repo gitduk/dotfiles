@@ -9,10 +9,10 @@ hash hyproled 2>/dev/null || {
 # getopt
 OPTIONS="foa:"
 LONGOPTS="focus,off,area:"
-ARGS=`getopt -a --options=$OPTIONS --longoptions=$LONGOPTS --name "${0##*/}" -- "$@"`
+ARGS=$(getopt -a --options=$OPTIONS --longoptions=$LONGOPTS --name "${0##*/}" -- "$@")
 if [[ $? -ne 0 || $# -eq 0 ]]; then
-  cat <<- EOF
-$0: -[`echo $OPTIONS|sed 's/,/|/g'`] --[`echo $LONGOPTS|sed 's/,/|/g'`]
+  cat <<-EOF
+$0: -[$(echo $OPTIONS | sed 's/,/|/g')] --[$(echo $LONGOPTS | sed 's/,/|/g')]
 Usage:
   $0 [options]
 
@@ -38,25 +38,24 @@ focus() {
 
 while true; do
   case "$1" in
-    -f|--focus)
-      focus
-      ;;
-    -o|--off)
-      hyproled -s -a 0:0:0:0
-      ;;
-    -a|--area)
-      hyproled -s -a $2
-      shift
-      ;;
-    --)
-      shift
-      break
-      ;;
-    *)
-      echo "Invalid option: $1"
-      exit 1
-      ;;
+  -f | --focus)
+    focus
+    ;;
+  -o | --off)
+    hyproled -s -a 0:0:0:0
+    ;;
+  -a | --area)
+    hyproled -s -a $2
+    shift
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *)
+    echo "Invalid option: $1"
+    exit 1
+    ;;
   esac
   shift
 done
-

@@ -51,6 +51,7 @@ meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
 
 # cliphist
 go install go.senan.xyz/cliphist@latest
+sudo cp -vf $GOPATH/cliphist /usr/bin/
 
 # wl-clip-persist
 git clone --depth 1 https://github.com/Linus789/wl-clip-persist.git /tmp/wl-clip-persist && cd /tmp/wl-clip-persist/
@@ -59,6 +60,10 @@ cargo build --release && cp -vf ./target/release/wl-clip-persist ~/.local/bin/
 # clipse
 git clone --depth 1 https://github.com/savedra1/clipse /tmp/clipse && cd /tmp/clipse/
 go mod tidy && go build -o clipse && sudo mv ./clipse /usr/bin/
+
+# clipman
+go install github.com/chmouel/clipman@latest
+sudo cp -vf $GOPATH/clipman /usr/bin/
 
 # flameshot - screenshot tool
 sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
