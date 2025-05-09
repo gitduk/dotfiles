@@ -149,6 +149,7 @@ configuration {
   kb-mode-complete: "";
   kb-move-front: "";
   kb-move-end: "";
+  kb-secondary-copy: "";
   kb-move-char-back: "Left";
   kb-move-char-forward: "Right";
   kb-remove-char-forward: "Delete";
@@ -162,6 +163,7 @@ configuration {
   kb-page-next: "Page_Down,Control+f";
   kb-row-first: "Control+a";
   kb-row-last: "Control+e";
+  kb-cancel: "Control+c,Control+bracketleft,Escape";
 
   display-run: " ";
   display-ssh: " ";
@@ -177,7 +179,7 @@ configuration {
   kb-select-4: "Control+4";
   kb-select-5: "Control+5";
 
-  ssh-command: "foot sh -c '{ssh-client} {host}'";
+  ssh-command: "alacritty -e sh -c '{ssh-client} {host}'";
 
   timeout {
     action: "kb-cancel";
