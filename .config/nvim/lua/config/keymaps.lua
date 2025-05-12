@@ -49,10 +49,10 @@ map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsea
 -- Clear search, diff update and redraw
 -- taken from runtime/lua/_editor.lua
 map(
-	"n",
-	"<leader>ur",
-	"<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>",
-	{ desc = "Redraw / clear hlsearch / diff update" }
+  "n",
+  "<leader>ur",
+  "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>",
+  { desc = "Redraw / clear hlsearch / diff update" }
 )
 
 -- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
@@ -92,16 +92,16 @@ map("n", "]q", vim.cmd.cnext, { desc = "Next quickfix" })
 
 -- formatting
 map({ "n", "v" }, "<leader>cf", function()
-	Util.format({ force = true })
+  Util.format({ force = true })
 end, { desc = "Format" })
 
 -- diagnostic
 local diagnostic_goto = function(next, severity)
-	local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
-	severity = severity and vim.diagnostic.severity[severity] or nil
-	return function()
-		go({ severity = severity })
-	end
+  local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
+  severity = severity and vim.diagnostic.severity[severity] or nil
+  return function()
+    go({ severity = severity })
+  end
 end
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
 map("n", "]d", diagnostic_goto(true), { desc = "Next Diagnostic" })
@@ -182,4 +182,25 @@ map("n", "H", "<cmd>bp<cr>", { desc = "Buffer previous" })
 map("n", "L", "<cmd>hn<cr>", { desc = "Buffer next" })
 
 -- quick header
-map("n", "<C-k>", "<cmd>call setline(line('.'), '###  ' . getline('.') . '  ' . repeat('#', 70 - strlen(getline('.'))))<cr>gcc", { desc = "Quick header" })
+vim.keymap.set("n", "<C-k>", function()
+  local line = vim.fn.getline(".")
+  local cs = vim.bo.commentstring or "# %s"
+  local comment_sym = vim.trim(cs:match("^(.-)%%s") or "#")
+
+  local pad = " "
+  local side = comment_sym:rep(3) -- 三个注释符用于中间行包裹
+  local middle_content = side .. pad .. line .. pad .. side
+
+  -- 为了让边框长度与中间行一致，我们使用字符宽度计算而不是注释符重复次数
+  local total_width = vim.fn.strdisplaywidth(middle_content)
+  local border_unit = comment_sym:sub(1, 1) -- 只用单个字符来画边框（美观）
+  local border_line = border_unit:rep(total_width)
+
+  local lnum = vim.fn.line(".")
+  vim.fn.setline(lnum, border_line)
+  vim.fn.append(lnum, middle_content)
+  vim.fn.append(lnum + 1, border_line)
+
+  -- 可选：是否调用注释命令
+  -- vim.cmd(lnum .. "," .. (lnum + 2) .. "normal gcc")
+end, { desc = "Adaptive boxed comment header" })

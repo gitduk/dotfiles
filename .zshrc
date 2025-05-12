@@ -128,7 +128,7 @@ zinit ice lucid as"program" from"gh-r" id-as"starship" \
 zinit light starship/starship
 
 # settings & functions
-zinit ice wait"1" lucid as"program" id-as"autoload" \
+zinit ice wait"0" lucid as"program" id-as"autoload" \
   atinit"fpath+=~/.zsh.d/functions" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
@@ -141,15 +141,15 @@ zinit light zdharma-continuum/null
 ###############
 
 # zdharma-continuum/fast-syntax-highlighting
-zinit ice wait"1" lucid atinit"zicompinit; zicdreplay" id-as"fast-syntax-highlighting"
+zinit ice wait"0" lucid atinit"zicompinit; zicdreplay" id-as"fast-syntax-highlighting"
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 # Aloxaf/fzf-tab
-zinit ice wait"2" lucid id-as"fzf-tab"
+zinit ice wait"1" lucid id-as"fzf-tab"
 zinit light Aloxaf/fzf-tab
 
 # zsh-users/zsh-history-substring-search
-zinit ice wait"3" lucid id-as"zsh-history-substring-search" \
+zinit ice wait"2" lucid id-as"zsh-history-substring-search" \
   atload"
     export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
     bindkey '^[[A' history-substring-search-up

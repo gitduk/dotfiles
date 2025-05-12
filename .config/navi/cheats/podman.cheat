@@ -8,7 +8,7 @@ podman run -d --name postgres \
   -e PGDATA=/var/lib/postgresql/data/pgdata \
   -v ~/.postgres:/var/lib/postgresql/data \
   -p 5432:5432 \
-  postgres
+  postgres:latest
 
 # stirling-pdf
 podman run -d --name stirling-pdf \
