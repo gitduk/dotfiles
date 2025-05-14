@@ -1,0 +1,50 @@
+#!/usr/bin/env zsh
+
+# Default parameters
+LENGTH=8
+USE_SPECIAL=0
+
+# Help message
+usage() {
+  echo "Usage: $0 -n <length> [-s]"
+  echo "  -n <length>    Specify the length of the password (required)"
+  echo "  -s             Include special characters (optional)"
+  exit 1
+}
+
+# Parse options
+while getopts "n:s" opt; do
+  case $opt in
+    n)
+      LENGTH=$OPTARG
+      ;;
+    s)
+      USE_SPECIAL=1
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+# Check if a valid length is provided
+if [[ $LENGTH -le 0 ]]; then
+  echo "Error: You must specify a password length greater than 0."
+  usage
+fi
+
+# Define character set
+BASE_CHARS='A-Za-z0-9'
+SPECIAL_CHARS='!@#$%^&*()_+-='
+
+if [[ $USE_SPECIAL -eq 1 ]]; then
+  CHARS="${BASE_CHARS}${SPECIAL_CHARS}"
+else
+  CHARS="${BASE_CHARS}"
+fi
+
+# Generate password
+PASSWORD=$(LC_ALL=C tr -dc "$CHARS" < /dev/urandom | head -c $LENGTH)
+
+# Output result
+echo "$PASSWORD"
