@@ -120,3 +120,7 @@ meson setup build && sudo ninja -C build/ install
 git clone --depth 1 https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
 
+# dataflare
+wget "https://assets.dataflare.app/release/linux/x86_64/Dataflare.AppImage" -O ~/.local/bin/dataflare
+chmod +x ~/.local/bin/dataflare
+

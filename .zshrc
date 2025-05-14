@@ -60,9 +60,13 @@ ins() {
 }
 
 # proxy
-export http_proxy="${proxy:-http://127.0.0.1:7890}"
-export https_proxy="${proxy:-http://127.0.0.1:7890}"
-export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+PROXY_HOST="${PROXY_HOST:-127.0.0.1}"
+PROXY_PORT="${PROXY_PORT:-7890}"
+if nc -z -n "$PROXY_HOST" "$PROXY_PORT" &>/dev/null; then
+  export HTTP_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
+  export HTTPS_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
+  export NO_PROXY="localhost,127.0.0.1,zed.dev"
+fi
 
 # pre-install
 [[ -n "$commands[nala]" ]] || sudo apt install -y nala
