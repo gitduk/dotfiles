@@ -80,7 +80,7 @@ webServer.pprofEnable = false
 enablePrometheus = true
 
 # console or real logFile path like ./frps.log
-log.to = "/tmp/frps.log"
+log.to = "/var/log/frp/frps.log"
 # trace, debug, info, warn, error
 log.level = "info"
 log.maxDays = 3
@@ -115,10 +115,7 @@ auth.token = "changeme"
 # userConnTimeout = 10
 
 # Only allow frpc to bind ports you list. By default, there won't be any limit.
-allowPorts = [
-  { single = 2222 },
-  { start = 7000, end = 10000 }
-]
+allowPorts = [{ single = 2222 }, { start = 7000, end = 10000 }]
 
 # Max ports can be used for each client, default value is 0 means no limit
 maxPortsPerClient = 0
@@ -143,10 +140,9 @@ natholeAnalysisDataReserveHours = 168
 # addr = "127.0.0.1:9000"
 # path = "/handler"
 # ops = ["Login"]
-# 
+
 # [[httpPlugins]]
 # name = "port-manager"
 # addr = "127.0.0.1:9001"
 # path = "/handler"
 # ops = ["NewProxy"]
-# 

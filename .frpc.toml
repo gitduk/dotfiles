@@ -17,7 +17,7 @@ serverPort = 7000
 loginFailExit = true
 
 # console or real logFile path like ./frpc.log
-log.to = "/tmp/frpc.log"
+log.to = "/var/log/frp/frpc.log"
 # trace, debug, info, warn, error
 log.level = "info"
 log.maxDays = 3

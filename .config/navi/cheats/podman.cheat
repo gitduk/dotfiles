@@ -50,3 +50,8 @@ podman run -d --name beszel \
   --restart=unless-stopped \
   docker.io/henrygd/beszel
 
+# mazanoke: A self-hosted local image optimizer that runs in your browser.
+podman run -d --name mazanoke \
+  -p 7374:80 \
+  --restart=unless-stopped \
+  ghcr.io/civilblur/mazanoke:latest

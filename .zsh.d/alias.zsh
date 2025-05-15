@@ -220,8 +220,8 @@ alias ncl="nmcli"
 ### P ###
 #########
 
-# pueue
-alias p="pueue"
+# pw
+ialias pw="cat ~/.pw | fzf | cut -d ':' -f 2 | cp"
 
 # podmain
 alias pd="podman"

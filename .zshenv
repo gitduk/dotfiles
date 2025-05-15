@@ -130,11 +130,6 @@ expand-alias-space() {
   fi
 }
 
-backward-delete-worda() {
-  local WORDCHARS='*?_[]~=&;!#$%^(){}<>'
-  zle backward-kill-word
-}
-
 addPath() {
   local paths="${(@s/:/)1}"
   for p in ${(s/:/)paths}; do

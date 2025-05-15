@@ -108,6 +108,7 @@ zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as
     command -v yarn &>/dev/null || npm install -g yarn || ok=1
     command -v tmux &>/dev/null || ins tmux || ok=1
     command -v unzip &>/dev/null || ins unzip || ok=1
+    command -v jq &>/dev/null || ins jq || ok=1
     dpkg -l | grep libssl-dev | grep ii &>/dev/null || ins libssl-dev || ok=1
     [[ $ok -eq 0 ]] && touch ~/.must.ok
   '
@@ -305,17 +306,6 @@ zinit light SagerNet/sing-box
 #   atclone"sudo mv -vf zellij /usr/bin/" \
 #   atpull"%atclone"
 # zinit light zellij-org/zellij
-
-# pueue
-zinit ice wait'[[ ! -n "$commands[pueue]" ]]' lucid as"program" from"gh" id-as"pueue" \
-  atclone"
-    cd pueue && cargo build --release --locked
-    cp ../target/release/{pueue,pueued} $BPFX/
-    sudo chmod 744 $BPFX/pueue*
-    $BPFX/pueue completions zsh > ../_pueue
-  " \
-  atpull"%atclone"
-zinit light Nukesor/pueue
 
 # caddy
 # zinit ice wait'[[ ! -n "$commands[caddy]" ]]' lucid as"program" from"gh-r" id-as"caddy" \

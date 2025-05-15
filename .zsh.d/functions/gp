@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Default parameters
-LENGTH=8
+LENGTH=12
 USE_SPECIAL=0
 
 # Help message
@@ -47,4 +47,4 @@ fi
 PASSWORD=$(LC_ALL=C tr -dc "$CHARS" < /dev/urandom | head -c $LENGTH)
 
 # Output result
-echo "$PASSWORD"
+echo "$PASSWORD" | tee /dev/tty | cp
