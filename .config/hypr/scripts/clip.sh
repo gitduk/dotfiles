@@ -18,7 +18,7 @@ if [[ "$key" == "ctrl-y" ]]; then
   echo -n "$query" | tr -d '\n' | wl-copy
 elif [[ -n "$result" ]]; then
   # 用户选择了剪贴板历史中的项目
-  echo "$result" | cliphist decode | wl-copy
+  echo "$result" | cliphist decode | wl-copy && sleep 0.01
 else
   # 如果用户只输入了文本但直接按了回车
   echo -n "$query" | tr -d '\n' | wl-copy
