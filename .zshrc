@@ -7,26 +7,40 @@
 # zmodload zsh/zprof
 
 # Directory navigation and stack management
-setopt AUTOCD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT PUSHDMINUS
+setopt AUTOCD            # 允许直接输入目录名就 cd 进去，例如输入 "~/Downloads" 会自动进入目录
+setopt AUTO_PUSHD        # 使用 cd 命令时将目录压入目录栈（可以用 `dirs` / `popd` / `pushd` 管理历史）
+setopt PUSHD_IGNORE_DUPS # 忽略重复目录，避免栈中有多个相同路径
+setopt PUSHD_SILENT      # 使用 pushd/popd 时不打印栈内容
+setopt PUSHDMINUS        # 允许 `cd -1` `cd -2` 等来切换到目录栈中前面的目录
 
 # Auto-completion settings
-setopt AUTO_MENU AUTO_LIST AUTO_PARAM_SLASH COMPLETE_IN_WORD ALWAYS_TO_END MENU_COMPLETE
-setopt LIST_PACKED LIST_TYPES EXTENDED_GLOB
+setopt AUTO_MENU             # 连续按 Tab 时循环候选项
+setopt AUTO_LIST             # 模糊补全后自动显示候选项列表
+setopt AUTO_PARAM_SLASH      # 自动在目录后加 `/`，方便继续补全
+setopt COMPLETE_IN_WORD      # 允许在单词中间补全，而不是只能在末尾
+setopt ALWAYS_TO_END         # 补全后光标移到词末尾
+setopt LIST_PACKED           # 紧凑排列候选项列表（节省空间）
+setopt LIST_TYPES            # 在候选项中加上 `/`, `*`, `@` 等文件类型标志
+setopt EXTENDED_GLOB         # 启用更强大的通配符语法
 
 # History management
-setopt HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_VERIFY SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS  # 忽略所有重复命令，只保留最后一次
+setopt HIST_REDUCE_BLANKS    # 去除命令中的多余空格
+setopt HIST_VERIFY           # 先显示历史命令，让你确认后再执行
+setopt SHARE_HISTORY         # 在多个终端间共享历史
 
 # Input and editing optimization
-setopt FLOW_CONTROL MAGIC_EQUAL_SUBST CORRECT PROMPTSUBST NO_BEEP NO_HUP
+setopt MAGIC_EQUAL_SUBST      # 允许 foo=bar somecmd $foo 等形式（适合脚本）
+setopt PROMPTSUBST            # 允许 prompt 中的变量实时更新（用于复杂 prompt）
+setopt NO_BEEP                # 禁用蜂鸣（大部分人会关）
+setopt NO_HUP                 # 退出 shell 不发送 HUP 信号，避免关闭后台作业
 
 # Path and command lookup
-setopt PATH_DIRS
+setopt PATH_DIRS     # 输入目录中的命令名会自动搜索 PATH 中的目录
 
 # Safety and error handling
-setopt NO_CASE_GLOB NONOMATCH
-
-# Other optimizations
-unsetopt BEEP
+setopt NO_CASE_GLOB  # 文件名匹配大小写敏感（你设置的是“关闭大小写敏感”）
+setopt NONOMATCH     # 如果通配符找不到匹配项，不报错（而是原样输出）
 
 # xhost access control
 xhost +local: &>/dev/null

@@ -30,6 +30,8 @@ alias b64="base64"
 # dotfiles
 ialias c="git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git"
 alias cs="c status"
+alias cdf="c diff"
+alias cds="c diff --staged"
 alias cad="cadd"
 alias crs="c restore"
 alias clg="c log"
@@ -162,6 +164,7 @@ alias hr="hurl -k"
 # journalctl
 alias jcl="journalctl"
 alias jcu="journalctl -u"
+alias jcuu="journalctl --user -u"
 
 # just
 alias js="just"
@@ -298,16 +301,16 @@ alias scrst="sudo systemctl restart"
 alias scdr="sudo systemctl daemon-reload"
 alias sce="sudo systemctl enable"
 alias scd="sudo systemctl disable"
-alias sced="sudo -E systemctl edit"
 
-alias sus="systemctl --user status"
-alias sust="systemctl --user start"
-alias sustp="systemctl --user stop"
-alias surst="systemctl --user restart"
-alias sudr="systemctl --user daemon-reload"
-alias sue="systemctl --user enable"
-alias sud="systemctl --user disable"
-alias sued="systemctl --user edit"
+alias sus="systemctl status --user"
+alias sust="systemctl start --user"
+alias sustp="systemctl stop --user"
+alias surst="systemctl restart --user"
+alias sudr="systemctl daemon-reload --user"
+alias sue="systemctl enable --user"
+alias sud="systemctl disable --user"
+alias sued="systemctl edit --user"
+alias suef="systemctl edit --user --force --full"
 
 #########
 ### U ###

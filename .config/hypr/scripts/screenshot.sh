@@ -4,6 +4,14 @@
 SHORT_OPTS="aAwns"
 LONG_OPTS="area,active,window,now,swappy"
 
+if hash grim &>/dev/null; then
+  notify-send "Screenshot" "grim command not found"
+fi
+
+if hash slurp &>/dev/null; then
+  notify-send "Screenshot" "slurp command not found"
+fi
+
 # Parse the command-line arguments
 ARGS=$(getopt -a --options=$SHORT_OPTS --longoptions=$LONG_OPTS --name "${0##*/}" -- "$@")
 
