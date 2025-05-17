@@ -431,6 +431,12 @@ zinit ice wait'[[ ! -n "$commands[uv]" ]]' lucid as"command" from"gh-r" id-as"uv
   atpull"%atclone"
 zinit light astral-sh/uv
 
+# rainfrog - a database management tui
+zinit ice wait'[[ ! -n "$commands[rainfrog]" ]]' lucid as"command" from"gh-r" id-as"rainfrog" \
+  atclone"mv rainfrog rain" \
+  atpull"%atclone"
+zinit light achristmascarl/rainfrog
+
 ##################
 ### COMPLETION ###
 ##################
