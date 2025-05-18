@@ -1,0 +1,12 @@
+% network, ip
+@ network, common
+
+# add ip address
+sudo ip addr add <ip> dev <dev>
+
+# del ip address
+sudo ip addr del <ip> dev <dev>
+
+# change gateway
+sudo ip route del default
+sudo ip route add default via <gateway> dev <dev>

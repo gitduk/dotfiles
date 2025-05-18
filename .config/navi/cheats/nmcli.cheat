@@ -1,0 +1,19 @@
+% network, nmcli
+@ network, common
+
+# change ipv4 method
+nmcli con modify <con> ipv4.method <method>
+nmcli con down <con> && nmcli con up <con>
+
+# change ip address
+nmcli con modify <con> ipv4.addresses <ip>
+nmcli con down <con> && nmcli con up <con>
+
+# change dns
+nmcli con modify <con> ipv4.dns "<dns>"
+nmcli con down <con> && nmcli con up <con>
+
+# change gateway
+nmcli con modify <con> ipv4.gateway <gateway>
+nmcli con down <con> && nmcli con up <con>
+

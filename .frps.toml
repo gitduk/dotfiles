@@ -115,7 +115,7 @@ auth.token = "changeme"
 # userConnTimeout = 10
 
 # Only allow frpc to bind ports you list. By default, there won't be any limit.
-allowPorts = [{ single = 2222 }, { start = 7000, end = 10000 }]
+allowPorts = [{ start = 2000, end = 3000 }]
 
 # Max ports can be used for each client, default value is 0 means no limit
 maxPortsPerClient = 0
