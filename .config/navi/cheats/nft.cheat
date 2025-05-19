@@ -1,0 +1,8 @@
+% network, nft
+
+# list inet filter
+sudo nft list table inet filter
+
+# apply new rules
+sudo nft -f ~/.nftables.conf
+

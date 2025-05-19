@@ -1,0 +1,6 @@
+% database, rainfrog
+
+# connect from url
+$ url: cat ~/.dburl
+rain -u "<url>"
+

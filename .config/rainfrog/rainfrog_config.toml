@@ -1,0 +1,45 @@
+[settings]
+mouse_mode = true
+
+[keybindings.Menu]
+"<Ctrl-c>" = "Quit"
+"q" = "AbortQuery"
+"<Ctrl-l>" = "FocusEditor"
+"<Tab>" = "CycleFocusForwards"
+"<Backtab>" = "CycleFocusBackwards"
+
+[keybindings.Editor]
+"<Ctrl-q>" = "AbortQuery"
+"<F5>" = "SubmitEditorQuery"
+"<Ctrl-h>" = "FocusMenu"
+"<Ctrl-l>" = "FocusHistory"
+"<Ctrl-j>" = "FocusData"
+"<Backtab>" = "CycleFocusBackwards"
+
+[keybindings.History]
+"<Ctrl-c>" = "Quit"
+"q" = "AbortQuery"
+"<Ctrl-h>" = "FocusEditor"
+"<Ctrl-l>" = "FocusFavorites"
+"<Ctrl-j>" = "FocusData"
+"<Tab>" = "CycleFocusForwards"
+"<Backtab>" = "CycleFocusBackwards"
+
+[keybindings.Data]
+"<Ctrl-c>" = "Quit"
+"q" = "AbortQuery"
+"<Ctrl-h>" = "FocusMenu"
+"<Ctrl-k>" = "FocusEditor"
+"<Tab>" = "CycleFocusForwards"
+"<Backtab>" = "CycleFocusBackwards"
+
+[keybindings.Favorites]
+"<Ctrl-c>" = "Quit"
+"q" = "AbortQuery"
+"<Ctrl-h>" = "FocusHistory"
+"<Ctrl-j>" = "FocusData"
+"<Tab>" = "CycleFocusForwards"
+"<Backtab>" = "CycleFocusBackwards"
+
+[keybindings.PopUp]
+"<Ctrl-c>" = "Quit"

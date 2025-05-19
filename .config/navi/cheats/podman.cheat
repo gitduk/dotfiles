@@ -1,3 +1,13 @@
+% podman, generate
+
+# regist server
+$ name: podman container list --all --format json | jq ".[] | .Names[]"
+$ policy: echo "always|unless-stopped|on-failure" | tr "|" "\n"
+podman generate systemd \
+  --name <name> \
+  --restart-policy <policy> \
+  --files
+
 % podman, run
 
 # postgresql
@@ -8,6 +18,7 @@ podman run -d --name postgres \
   -e PGDATA=/var/lib/postgresql/data/pgdata \
   -v ~/.postgres:/var/lib/postgresql/data \
   -p 5432:5432 \
+  --restart unless-stopped \
   postgres:latest
 
 # stirling-pdf
@@ -20,6 +31,7 @@ podman run -d --name stirling-pdf \
   -v ./logs:/logs \
   -v ./customFiles:/customFiles \
   -p 7000:8080 \
+  --restart unless-stopped \
   frooodle/s-pdf:latest
 
 # pairdrop
@@ -37,9 +49,12 @@ podman run -d --name pairdrop \
 
 # uptime-kuma
 podman run -d --name uptime-kuma \
-  -v uptime-kuma:/app/data \
-  --network host \
-  --restart always \
+  -e HTTP_PROXY=http://host.docker.internal:7890 \
+  -e HTTPS_PROXY=http://host.docker.internal:7890 \
+  -v ~/.uptime-kuma:/app/data \
+  -p 3001:3001 \
+  --restart unless-stopped \
+  --add-host host.docker.internal:host-gateway \
   louislam/uptime-kuma:1
 
 # beszel: a lightweight server monitoring
@@ -47,11 +62,12 @@ mkdir -p ~/.beszel_data
 podman run -d --name beszel \
   -v ~/.beszel_data:/beszel_data \
   -p 8090:8090 \
-  --restart=unless-stopped \
+  --restart unless-stopped \
   docker.io/henrygd/beszel
 
 # mazanoke: A self-hosted local image optimizer that runs in your browser.
 podman run -d --name mazanoke \
   -p 7374:80 \
-  --restart=unless-stopped \
+  --restart unless-stopped \
   ghcr.io/civilblur/mazanoke:latest
+

@@ -1,0 +1,6 @@
+% wget
+
+# update sing-box config
+$ file: echo "https://raw.wukaige.com/sing-box/config.json?token=changeme"
+wget 'https://subc.wukaige.com/config/<url>&file=<file>' -O config.json
+

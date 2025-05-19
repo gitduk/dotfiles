@@ -1,0 +1,6 @@
+% curl
+
+# ip info
+$ source: echo "ipinfo.io|ifconfig.me|api.ipify.org|ip-api.com/json|ipwho.is" | tr '|' '\n'
+curl -s "http://<source>"
+
