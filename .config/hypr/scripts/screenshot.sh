@@ -1,14 +1,14 @@
-#!/bin/env zsh
+#!/usr/bin/env zsh
 
 # Short options and long options
 SHORT_OPTS="aAwns"
 LONG_OPTS="area,active,window,now,swappy"
 
-if hash grim &>/dev/null; then
+if ! hash grim &>/dev/null; then
   notify-send "Screenshot" "grim command not found"
 fi
 
-if hash slurp &>/dev/null; then
+if ! hash slurp &>/dev/null; then
   notify-send "Screenshot" "slurp command not found"
 fi
 

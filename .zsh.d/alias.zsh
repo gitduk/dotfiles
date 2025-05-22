@@ -224,7 +224,7 @@ alias ncl="nmcli"
 #########
 
 # pw
-ialias pw="cat ~/.pw | fzf | cut -d ':' -f 2 | cp"
+ialias pw="cat ~/.pw | fzf | cut -d ':' -f 2- | cp"
 
 # podmain
 alias pd="podman"
@@ -255,7 +255,7 @@ alias ptc="openssl x509 -outform der -in mitmproxy-ca-cert.pem -out mitmproxy-ca
 alias ptv="openssl x509 -inform PEM -subject_hash_old -in mitmproxy-ca-cert.pem | head -1"
 
 # path line by line
-alias path="echo \$PATH | tr ':' '\n'"
+alias path="echo \$PATH | tr ':' '\n' | fzf"
 
 # set proxy
 alias pre="host=127.0.0.1 port=7890 export HTTP_PROXY=http://\$host:\$port HTTPS_PROXY=http://\$host:\$port"
@@ -289,7 +289,6 @@ alias rsy="rsync -avP"
 
 # source
 alias sc="source"
-alias senv="source .venv/bin/activate"
 alias denv="deactivate"
 alias szs="source ~/.zshrc"
 
@@ -318,10 +317,6 @@ alias suef="systemctl edit --user --force --full"
 
 # mount devices
 alias umt="sudo umount"
-
-# alternative
-alias uai="sudo update-alternatives --install"
-alias uac="sudo update-alternatives --config"
 
 # unzip
 alias uz="unzip"

@@ -1,0 +1,14 @@
+% update, alternatives
+
+# install version
+sudo update-alternatives --install <link> <name> <path> <priority>
+
+# config version
+sudo update-alternatives --config <name>
+
+# list version
+sudo update-alternatives --query <name>
+
+# remove version
+sudo update-alternatives --remove <name> <path>
+

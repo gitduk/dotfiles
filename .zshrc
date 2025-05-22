@@ -118,8 +118,6 @@ zinit ice wait'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as
     command -v openssl &>/dev/null || ins openssh || ok=1
     command -v ddcutil &>/dev/null || ins ddcutil || ok=1
     command -v nodejs &>/dev/null || ins nodejs || ok=1
-    command -v npm &>/dev/null || ins npm || ok=1
-    command -v yarn &>/dev/null || npm install -g yarn || ok=1
     command -v tmux &>/dev/null || ins tmux || ok=1
     command -v unzip &>/dev/null || ins unzip || ok=1
     command -v jq &>/dev/null || ins jq || ok=1
@@ -278,7 +276,7 @@ zinit ice wait'1' lucid as"program" id-as'fnm' \
 zinit light zdharma-continuum/null
 
 # alacritty
-zinit ice wait'[[ ! -n "$commands[alacritty]" ]]' lucid as"program" id-as'alacritty' \
+zinit ice wait'[[ -n $DISPLAY && ! -n "$commands[alacritty]" ]]' lucid as"program" id-as'alacritty' \
   atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
   atclone"cargo build --release --no-default-features --features=wayland" \
   atclone"sudo cp -vf target/release/alacritty /usr/bin" \
@@ -432,7 +430,7 @@ zinit ice wait'[[ ! -n "$commands[uv]" ]]' lucid as"command" from"gh-r" id-as"uv
 zinit light astral-sh/uv
 
 # rainfrog - a database management tui
-zinit ice wait'[[ ! -n "$commands[rainfrog]" ]]' lucid as"command" from"gh-r" id-as"rainfrog" \
+zinit ice wait'[[ -n $DISPLAY && ! -n "$commands[rainfrog]" ]]' lucid as"command" from"gh-r" id-as"rainfrog" \
   atclone"mv rainfrog rain" \
   atpull"%atclone"
 zinit light achristmascarl/rainfrog

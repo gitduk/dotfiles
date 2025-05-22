@@ -90,8 +90,7 @@ export LD_LIBRARY_PATH="/usr/local/lib:\
 /usr/lib/x86_64-linux-gnu:\
 /usr/local/lib/x86_64-linux-gnu:\
 /usr/local/cuda/lib64:\
-/usr/local/cuda/targets/x86_64-linux/lib:\
-/usr/local/cuda/targets/x86_64-linux/lib/stubs"
+/usr/local/cuda/targets/x86_64-linux/lib"
 
 ################
 ### FUNCTION ###
@@ -128,13 +127,6 @@ expand-alias-space() {
   if [[ "$insertBlank" = "0" ]]; then
     zle backward-delete-char
   fi
-}
-
-addPath() {
-  local paths="${(@s/:/)1}"
-  for p in ${(s/:/)paths}; do
-    [[ ":$PATH:" != *":$p:"* ]] && export PATH="$p:$PATH"
-  done
 }
 
 ##############

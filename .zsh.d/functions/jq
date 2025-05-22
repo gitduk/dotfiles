@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+if hash fx &>/dev/null; then
+  fx "$@"
+else
+  /usr/bin/jq "$@"
+fi
+

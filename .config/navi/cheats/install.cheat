@@ -124,3 +124,7 @@ rm -rf ~/.config/nvim/.git
 wget "https://assets.dataflare.app/release/linux/x86_64/Dataflare.AppImage" -O ~/.local/bin/dataflare
 chmod +x ~/.local/bin/dataflare
 
+# bruno - Postman and Insomnia alternative
+wget "https://github.com/usebruno/bruno/releases/download/v2.3.0/bruno_2.3.0_amd64_linux.deb" -O /tmp/bruno.deb
+sudo dpkg -i /tmp/bruno.deb
+
