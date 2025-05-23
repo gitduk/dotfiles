@@ -128,3 +128,6 @@ chmod +x ~/.local/bin/dataflare
 wget "https://github.com/usebruno/bruno/releases/download/v2.3.0/bruno_2.3.0_amd64_linux.deb" -O /tmp/bruno.deb
 sudo dpkg -i /tmp/bruno.deb
 
+# lynx - Lynx Proxy is a high-performance and flexible proxy tool developed in Rust
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/suxin2017/lynx-server/releases/latest/download/lynx-cli-installer.sh | sh
+

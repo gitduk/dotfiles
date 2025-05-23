@@ -98,7 +98,7 @@ function fzf-crontab-widget {
 }
 
 function backward-delete-widget() {
-  local WORDCHARS=${WORDCHARS//[\/:]/}
+  local WORDCHARS=${WORDCHARS//[\/:=]/}
   zle backward-delete-word
 }
 

@@ -275,6 +275,14 @@ zinit ice wait'1' lucid as"program" id-as'fnm' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
+# bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps.
+zinit ice wait'1' lucid as"program" from"gh-r" id-as'bun' \
+  bpick"bun-linux-x64.zip" \
+  atclone"mv -vf */bun bun" \
+  atclone"wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun" \
+  atpull"%atclone"
+zinit light oven-sh/bun
+
 # alacritty
 zinit ice wait'[[ -n $DISPLAY && ! -n "$commands[alacritty]" ]]' lucid as"program" id-as'alacritty' \
   atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
