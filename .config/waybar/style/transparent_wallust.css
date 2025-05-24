@@ -78,6 +78,7 @@ window#waybar.empty #window {
 #custom-power,
 #custom-swaync,
 #custom-spotify,
+#custom-poetry,
 #custom-updater,
 #custom-weather,
 #custom-weather.clearNight,
@@ -99,7 +100,7 @@ window#waybar.empty #window {
 #temperature.critical {
   background-color: #ff0000;
 }
-   
+
 @keyframes blink {
   to {
     color: #000000;
@@ -111,7 +112,7 @@ window#waybar.empty #window {
   animation: gradient_f 20s ease-in infinite;
   transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
 }
-   
+
 #taskbar button.active {
   background-color: #7f849c;
   padding-left: 12px;
@@ -139,8 +140,8 @@ window#waybar.empty #window {
 }
 
 #pulseaudio-slider trough {
-  min-width: 80px;  
-  min-height: 10px; 
+  min-width: 80px;
+  min-height: 10px;
   border-radius: 5px;
   background-color: black;
 }
@@ -161,15 +162,21 @@ window#waybar.empty #window {
 }
 
 #backlight-slider trough {
-  min-width: 80px;  
+  min-width: 80px;
   min-height: 10px;
   border-radius: 5px;
   background-color: black;
 }
 
 #backlight-slider highlight {
-  min-width: 10px; 
+  min-width: 10px;
   border-radius: 5px;
   background-color: wheat;
+}
+
+/* 诗词模块样式 */
+#custom-poetry {
+  font-family: 'Source Han Sans CN', 'Noto Sans CJK SC', sans-serif;
+  font-size: 12px;
 }
 

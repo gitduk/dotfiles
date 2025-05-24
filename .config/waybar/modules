@@ -819,6 +819,17 @@
     "interval": 86400, // once every day
     "tooltip": true,
   },
+  "custom/poetry": {
+      "exec": "~/.config/hypr/scripts/poetry.sh",
+      "exec-if": "ping -c 1 jinrishici.com",
+      "return-type": "json",
+      "interval": 3600,
+      "tooltip": true,
+      "format": "{}",
+      "max-length": 50,
+      "on-click": "~/.config/hypr/scripts/poetry.sh --refresh",
+      "signal": 8
+  },
   "mpd": {
     "format": " {artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})",
     "format-disconnected": " Disconnected 󰎇",
