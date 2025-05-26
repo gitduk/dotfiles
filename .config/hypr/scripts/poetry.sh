@@ -56,6 +56,7 @@ format_output() {
   local author=$(echo "$json_data" | jq -r '.data.origin.author // ""')
   local title=$(echo "$json_data" | jq -r '.data.origin.title // ""')
   local dynasty=$(echo "$json_data" | jq -r '.data.origin.dynasty // ""')
+  local full=$(echo "$json_data" | jq -r '.data.origin.content // [] | join("\n")')
 
   case "$format" in
   "content-only")
@@ -80,6 +81,8 @@ format_output() {
     if [[ "$display_content" != "$content" ]]; then
       tooltip="$tooltip | $content"
     fi
+
+    tooltip="${tooltip}"$'\n'"${full}"
 
     jq -n -c \
       --arg text "$display_content" \

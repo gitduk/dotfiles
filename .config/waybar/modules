@@ -426,8 +426,8 @@
     "tooltip-format": "{ipaddr} {bandwidthUpBits} {bandwidthDownBits}",
     "format-linked": "󰈁 {ifname} (No IP)",
     "tooltip-format-wifi": "{essid} {icon} {signalStrength}%",
-    "tooltip-format-ethernet": "{ifname} 󰣺",
-    "tooltip-format-disconnected": "󰣻 Disconnected",
+    "tooltip-format-ethernet": "{ifname} {ipaddr}",
+    "tooltip-format-disconnected": "Disconnected",
     "max-length": 30,
     "format-icons": [
       "󰤯", "󰤟", "󰤢", "󰤥", "󰤨"
@@ -443,8 +443,8 @@
     "tooltip-format": "{ipaddr}",
     "format-linked": "󰈁 {ifname} (No IP)",
     "tooltip-format-wifi": "{essid} {icon} {signalStrength}%",
-    "tooltip-format-ethernet": "{ifname} 󰣺",
-    "tooltip-format-disconnected": "󰣻 Disconnected",
+    "tooltip-format-ethernet": "{ifname} {ipaddr}",
+    "tooltip-format-disconnected": "Disconnected",
     "max-length": 20,
     "format-icons": [
       "󰤯", "󰤟", "󰤢", "󰤥", "󰤨"
@@ -827,8 +827,14 @@
       "tooltip": true,
       "format": "{}",
       "max-length": 50,
-      "on-click": "~/.config/hypr/scripts/poetry.sh --refresh",
-      "signal": 8
+      "on-click": "~/.config/hypr/scripts/poetry.sh --refresh"
+  },
+  "custom/ipaddress": {
+      "exec": "jq -r '.ipAddress' ~/.cache/waybar/poetry_cache",
+      "exec-if": "[ -f $HOME/.cache/waybar/poetry_cache ]",
+      "interval": 3,
+      "tooltip": false,
+      "format": " {} "
   },
   "mpd": {
     "format": " {artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})",
