@@ -13,6 +13,9 @@ alias am="alsamixer"
 ### B ###
 #########
 
+# bun
+alias b="bun"
+
 # brew
 alias br="brew"
 

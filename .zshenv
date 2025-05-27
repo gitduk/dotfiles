@@ -136,6 +136,7 @@ expand-alias-space() {
 # PATH
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.npm/bin:$PATH"
+export PATH="$HOME/.bun/bin:$PATH"
 
 # Qt
 export QT_ROOT="$HOME/Qt/6.9.0"

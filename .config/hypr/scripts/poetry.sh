@@ -34,14 +34,13 @@ get_poetry() {
   local response=$(curl -s -H "X-User-Token: $token" "https://v2.jinrishici.com/sentence")
 
   if [[ $? -eq 0 ]]; then
-    echo "$response" >"$CACHE_FILE"
-    echo "$response"
+    echo "$response" | tee "$CACHE_FILE"
   else
     # 如果网络请求失败，尝试使用缓存
     if [[ -f "$CACHE_FILE" ]]; then
       cat "$CACHE_FILE"
     else
-      echo '{"status":"error","data":{"content":"网络连接失败","origin":{"author":"","title":"","dynasty":""}}}'
+      echo '{"status":"error","data":{"content":"醉后不知天在水，满船清梦压星河。","origin":{"author":"","title":"","dynasty":""}}}'
     fi
   fi
 }
@@ -57,9 +56,10 @@ format_output() {
   local title=$(echo "$json_data" | jq -r '.data.origin.title // ""')
   local dynasty=$(echo "$json_data" | jq -r '.data.origin.dynasty // ""')
   local full=$(echo "$json_data" | jq -r '.data.origin.content // [] | join("\n")')
+  local warning=$(echo "$json_data" | jq -r '.warning // ""')
 
   case "$format" in
-  "content-only")
+  "content")
     echo "$content"
     ;;
   "json")
@@ -71,21 +71,15 @@ format_output() {
       tooltip="今日诗词"
     fi
 
-    # 限制显示长度
-    local display_content="$content"
-    if [[ ${#display_content} -gt 30 ]]; then
-      display_content="${display_content:0:27}..."
-    fi
-
-    # 配置 tooltip
-    if [[ "$display_content" != "$content" ]]; then
-      tooltip="$tooltip | $content"
-    fi
-
     tooltip="${tooltip}"$'\n'"${full}"
 
+    # 添加 warning 信息
+    if [[ "$warning" != "" ]]; then
+      tooltip="${tooltip}"$'\n\n'"!!! WARNING !!!"
+    fi
+
     jq -n -c \
-      --arg text "$display_content" \
+      --arg text "$content" \
       --arg tooltip "$tooltip" \
       --arg class "poetry" \
       '{text: $text, tooltip: $tooltip, class: $class}'
@@ -103,20 +97,20 @@ main() {
   # 检查依赖
   if ! command -v jq &>/dev/null; then
     echo "错误：需要安装 jq 工具" >&2
-    echo '{"text":"需要安装jq","class":"error"}'
+    echo '{"text":"需要安装 jq", "class":"error"}'
     exit 1
   fi
 
   if ! command -v curl &>/dev/null; then
     echo "错误：需要安装 curl 工具" >&2
-    echo '{"text":"需要安装curl","class":"error"}'
+    echo '{"text":"需要安装 curl", "class":"error"}'
     exit 1
   fi
 
   # 获取 Token
-  local token=$(get_token)
+  local token="$(get_token)"
   if [[ $? -ne 0 ]]; then
-    echo '{"text":"Token获取失败","class":"error"}'
+    echo '{"text":"Token 获取失败", "class":"error"}'
     exit 1
   fi
 
@@ -126,12 +120,8 @@ main() {
   # 检查 API 响应状态
   local status=$(echo "$poetry_data" | jq -r '.status // "error"')
   if [[ "$status" != "success" ]]; then
-    # Token 可能过期，尝试重新获取
-    rm -f "$TOKEN_FILE"
-    token=$(get_token)
-    if [[ $? -eq 0 ]]; then
-      poetry_data=$(get_poetry "$token")
-    fi
+    echo '{"text":"诗词获取失败", "class":"error"}'
+    exit 1
   fi
 
   # 格式化并输出
@@ -141,11 +131,10 @@ main() {
 # 处理命令行参数
 case "$1" in
 "--refresh" | "-r")
-  rm -f "$CACHE_FILE"
   main json
   ;;
 "--content" | "-c")
-  main content-only
+  main content
   ;;
 "--help" | "-h")
   echo "用法: $0 [选项]"
@@ -156,6 +145,10 @@ case "$1" in
   echo "  无参数           输出 waybar JSON 格式"
   ;;
 *)
-  main json
+  if [[ -f "$CACHE_FILE" ]]; then
+    format_output "$(cat $CACHE_FILE)" json
+  else
+    main json
+  fi
   ;;
 esac

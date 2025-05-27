@@ -50,8 +50,8 @@ podman run -d --name pairdrop \
 # uptime-kuma
 mkdir -p ~/.uptime-kuma
 podman run -d --name uptime-kuma \
-  -e HTTP_PROXY=http://host.docker.internal:7890 \
-  -e HTTPS_PROXY=http://host.docker.internal:7890 \
+  -e HTTP_PROXY=http://127.0.0.1:7890 \
+  -e HTTPS_PROXY=http://127.0.0.1:7890 \
   -v ~/.uptime-kuma:/app/data \
   --network host \
   --restart unless-stopped \

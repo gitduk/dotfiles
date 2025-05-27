@@ -210,7 +210,8 @@ zinit ice wait"0" lucid as"program" id-as'brew' \
     export HOMEBREW_NO_AUTO_UPDATE=true
     export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))
     " \
-  src"init.zsh"
+  src"init.zsh" \
+  atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # cargo
@@ -221,7 +222,8 @@ zinit ice wait"0" lucid as"program" id-as'cargo' \
   atload'
     export PATH="$HOME/.cargo/bin:$PATH"
     [[ -n "$commands[sccache]" ]] && export RUSTC_WRAPPER="$commands[sccache]"
-  '
+  ' \
+  atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # golang
@@ -244,7 +246,8 @@ zinit light zdharma-continuum/null
 
 # fzf
 zinit ice wait"0" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh && mv -vf ./fzf $BPFX/" \
+  atclone"./fzf --zsh > init.zsh" \
+  atclone"mv ./fzf $BPFX/" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light junegunn/fzf
@@ -260,7 +263,8 @@ zinit ice wait'0' lucid as"program" id-as'navi' \
     [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
     bindkey "^N" _navi_widget
     ' \
-  src"init.zsh"
+  src"init.zsh" \
+  atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # fnm - node version manager
@@ -276,10 +280,12 @@ zinit ice wait'1' lucid as"program" id-as'fnm' \
 zinit light zdharma-continuum/null
 
 # bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps.
-zinit ice wait'1' lucid as"program" from"gh-r" id-as'bun' \
+zinit ice wait'[[ ! -n "$commands[bun]" ]]' lucid as"program" from"gh-r" id-as'bun' \
   bpick"bun-linux-x64.zip" \
-  atclone"mv -vf */bun bun" \
-  atclone"wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun" \
+  atclone"mkdir -p ~/.bun/bin && mv */bun ~/.bun/bin/" \
+  atclone"SHELL=zsh ~/.bun/bin/bun completions" \
+  atclone"mv ~/.bun/_bun _bun" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light oven-sh/bun
 
@@ -287,8 +293,8 @@ zinit light oven-sh/bun
 zinit ice wait'[[ -n $DISPLAY && ! -n "$commands[alacritty]" ]]' lucid as"program" id-as'alacritty' \
   atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
   atclone"cargo build --release --no-default-features --features=wayland" \
-  atclone"sudo cp -vf target/release/alacritty /usr/bin" \
-  atclone"sudo cp -vf extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg" \
+  atclone"sudo cp target/release/alacritty /usr/bin" \
+  atclone"sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg" \
   atclone"sudo desktop-file-install extra/linux/Alacritty.desktop" \
   atclone"sudo update-desktop-database" \
   atpull"%atclone"
@@ -296,34 +302,41 @@ zinit light alacritty/alacritty
 
 # fd
 zinit ice wait'[[ ! -n "$commands[fd]" ]]' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"mv -vf fd*/fd $BPFX/" \
+  atclone"mv */fd $BPFX/" \
+  atclone"mv */autocomplete/_fd ." \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light sharkdp/fd
 
 # nvim
 zinit ice wait'[[ ! -n "$commands[nvim]" ]]' lucid as"program" from"gh-r" id-as"nvim" \
   bpick"nvim-linux-x86_64.appimage" \
-  atclone"sudo mv -vf nvim-linux-x86_64.appimage /usr/bin/nvim" \
+  atclone"sudo mv nvim-linux-x86_64.appimage /usr/bin/nvim" \
   atpull"%atclone"
 zinit light neovim/neovim
 
 # hx
 zinit ice wait'[[ ! -n "$commands[hx]" ]]' lucid as"program" from"gh-r" id-as"hx" \
-  atclone"sudo mv -vf */hx /usr/bin/ && mv -vf */runtime ~/.config/helix/" \
+  atclone"sudo mv */hx /usr/bin/" \
+  atclone"mv */runtime ~/.config/helix/" \
+  atclone"mv */contrib/completion/hx.zsh _hx" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light helix-editor/helix
 
 # sing-box
 zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" \
-  atclone"mv -vf */sing-box $BPFX/sing-box && sudo setcap cap_net_admin=+ep $BPFX/sing-box" \
+  atclone"mv */sing-box $BPFX/sing-box" \
+  atclone"sudo setcap cap_net_admin=+ep $BPFX/sing-box" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
 
 # zellij
 # zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as"zellij" \
 #   bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
-#   atclone"sudo mv -vf zellij /usr/bin/" \
+#   atclone"sudo mv zellij /usr/bin/" \
 #   atpull"%atclone"
 # zinit light zellij-org/zellij
 
@@ -332,6 +345,7 @@ zinit light SagerNet/sing-box
 #   bpick"caddy_*_linux_amd64.deb" \
 #   atclone"sudo cp -rvf ./etc/caddy /etc/" \
 #   atclone"sudo cp -rvf ./usr/bin/caddy /usr/bin/" \
+#   atclone"rm -rf */" \
 #   atpull"%atclone"
 # zinit light caddyserver/caddy
 
@@ -341,9 +355,13 @@ zinit light SagerNet/sing-box
 
 # atuin
 zinit ice wait'0' lucid as"command" from"gh-r" id-as"atuin" \
-  bpick"atuin-*.tar.gz" mv"atuin*/atuin -> atuin" \
-  atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
-  atpull"%atclone" src"init.zsh"
+  bpick"atuin-*.tar.gz" \
+  atclone"mv */atuin atuin" \
+  atclone"./atuin init zsh > init.zsh" \
+  atclone"./atuin gen-completions --shell zsh > _atuin" \
+  atclone"rm -rf */" \
+  src"init.zsh" \
+  atpull"%atclone"
 zinit light atuinsh/atuin
 
 # zoxide
@@ -355,7 +373,7 @@ zinit light ajeetdsouza/zoxide
 
 # direnv
 zinit ice wait"3" lucid as"command" from"gh-r" id-as"direnv" \
-  mv"direnv* -> direnv" pick"direnv" \
+  atclone"mv direnv* direnv" \
   atclone"./direnv hook zsh > init.zsh" \
   src"init.zsh" \
   atpull"%atclone"
@@ -369,16 +387,28 @@ zinit light casey/just
 
 # delta - A syntax-highlighting pager for git, diff, and grep output
 zinit ice wait'[[ ! -n "$commands[delta]" ]]' lucid as"command" from"gh-r" id-as"delta" \
-  pick"**/delta"
+  atclone"mv */delta ." \
+  atclone"rm -rf */" \
+  atpull"%atclone"
 zinit light dandavison/delta
 
 # curlie
 zinit ice wait'[[ ! -n "$commands[curlie]" ]]' lucid as"command" from"gh-r" id-as"curlie"
 zinit light rs/curlie
 
+# hurl
+zinit ice wait'[[ ! -n "$commands[hurl]" ]]' lucid as"command" from"gh-r" id-as"hurl" \
+  atclone"mv */bin/* ." \
+  atclone"mv */completions/_hurl ." \
+  atclone"mv */completions/_hurlfmt ." \
+  atclone"rm -rf */" \
+  atpull"%atclone"
+zinit light Orange-OpenSource/hurl
+
 # dust
 zinit ice wait'[[ ! -n "$commands[dust]" ]]' lucid as"command" from"gh-r" id-as"dust" \
-  atclone"sudo mv -vf */dust /usr/bin/" \
+  atclone"sudo mv */dust /usr/bin/" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light bootandy/dust
 
@@ -393,47 +423,57 @@ zinit light antonmedv/fx
 
 # gh
 zinit ice wait'[[ ! -n "$commands[gh]" ]]' lucid as"command" from"gh-r" id-as"gh" \
-  atclone"sudo mv -vf */bin/gh /usr/bin/" \
+  atclone"sudo mv */bin/gh /usr/bin/" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light cli/cli
 
 # glow - Glow is a terminal-based markdown reader designed from the ground up to bring out the beauty—and power—of the CLI
 zinit ice wait'[[ ! -n "$commands[glow]" ]]' lucid as"command" from"gh-r" id-as"glow" \
-  pick"**/glow"
+  atclone"mv */glow ." \
+  atclone"mv */completions/glow.zsh _glow" \
+  atclone"rm -rf */" \
+  atpull"%atclone"
 zinit light charmbracelet/glow
 
 # grex - A command-line tool and library for generating regular expressions from user-provided test cases
-zinit ice wait'[[ ! -n "$commands[grex]" ]]' lucid as"command" from"gh-r" id-as"grex" \
-  pick"**/grex"
+zinit ice wait'[[ ! -n "$commands[grex]" ]]' lucid as"command" from"gh-r" id-as"grex"
 zinit light pemistahl/grex
 
 # procs - procs is a replacement for ps written in Rust
-zinit ice wait'[[ ! -n "$commands[procs]" ]]' lucid as"command" from"gh-r" id-as"procs" \
-  pick"**/procs"
+zinit ice wait'[[ ! -n "$commands[procs]" ]]' lucid as"command" from"gh-r" id-as"procs"
 zinit light dalance/procs
 
 # ripgrep - ripgrep recursively searches directories for a regex pattern while respecting your gitignore
 zinit ice wait'[[ ! -n "$commands[rg]" ]]' lucid as"command" from"gh-r" id-as"rg" \
-  atclone"sudo mv -vf */rg /usr/bin/" \
+  atclone"sudo mv */rg /usr/bin/" \
+  atclone"mv */complete/_rg ." \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light burntSushi/ripgrep
 
 # frp - A fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet
 zinit ice wait'[[ ! -n "$commands[frpc]" ]]' lucid as"command" from"gh-r" id-as"frp" \
-  atclone"mv -vf */frpc $BPFX/ && mv -vf */frps $BPFX/" \
+  atclone"mv */frpc $BPFX/" \
+  atclone"mv */frps $BPFX/" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light fatedier/frp
 
 # yazi - file browser
 zinit ice wait'[[ ! -n "$commands[yazi]" ]]' lucid as"command" from"gh-r" id-as"yazi" \
   bpick"yazi-x86_64-unknown-linux-musl.zip" \
-  atclone"mv -vf yazi*/* ./" \
+  atclone"mv yazi*/* ./" \
+  atclone"mv comp*/_ya ./" \
+  atclone"mv comp*/_yazi ./" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light sxyazi/yazi
 
 # uv - python package manager
 zinit ice wait'[[ ! -n "$commands[uv]" ]]' lucid as"command" from"gh-r" id-as"uv" \
-  atclone"mv -vf */* ./ && ./uv generate-shell-completion zsh > _uv" \
+  atclone"mv */* ./ && ./uv generate-shell-completion zsh > _uv" \
+  atclone"rm -rf */" \
   atpull"%atclone"
 zinit light astral-sh/uv
 

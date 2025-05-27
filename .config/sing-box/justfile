@@ -5,5 +5,5 @@ edit:
   hx ./config.json
 
 update url:
-  wget "https://subs.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O config.json
+  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O config.json
 

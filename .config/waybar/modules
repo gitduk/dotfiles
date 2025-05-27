@@ -623,10 +623,7 @@
   },
   "custom/power": {
     "format": "⏻ ",
-    "on-click": "~/.config/hypr/scripts/wlogout.sh",
-    "on-click-right": "~/.config/hypr/scripts/change_blur.sh",
-    "tooltip": true,
-    "tooltip-format": "Left Click: Logout Menu\nRight Click: Change Blur",
+    "on-click": "hyprctl dispatch dpms off"
   },
   "custom/swaync": {
     "tooltip": true,
@@ -820,14 +817,14 @@
     "tooltip": true,
   },
   "custom/poetry": {
-      "exec": "~/.config/hypr/scripts/poetry.sh",
-      "exec-if": "ping -c 1 jinrishici.com",
-      "return-type": "json",
-      "interval": 3600,
-      "tooltip": true,
-      "format": "{}",
-      "max-length": 50,
-      "on-click": "~/.config/hypr/scripts/poetry.sh --refresh"
+    "exec": "~/.config/hypr/scripts/poetry.sh --refresh",
+    "exec-if": "ping -c 1 jinrishici.com",
+    "return-type": "json",
+    "interval": 1800,
+    "tooltip": true,
+    "format": "{}",
+    "max-length": 50,
+    "on-click": "~/.config/hypr/scripts/poetry.sh"
   },
   "custom/ipaddress": {
       "exec": "jq -r '.ipAddress' ~/.cache/waybar/poetry_cache",
