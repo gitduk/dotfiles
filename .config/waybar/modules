@@ -443,7 +443,7 @@
     "format-disconnected": "󰣻",
     "tooltip-format": "{ipaddr}",
     "format-linked": "󰈁 {ifname} (No IP)",
-    "tooltip-format-wifi": "{essid} {icon} {signalStrength}%",
+    "tooltip-format-wifi": "{icon} {signalStrength}% {essid} \t{ipaddr}",
     "tooltip-format-ethernet": "{ifname} {ipaddr}",
     "tooltip-format-disconnected": "Disconnected",
     "max-length": 20,
