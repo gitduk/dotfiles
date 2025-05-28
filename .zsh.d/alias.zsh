@@ -15,6 +15,10 @@ alias am="alsamixer"
 
 # bun
 alias b="bun"
+alias bx="bun x"
+alias bad="bun add"
+alias bis="bun install -g"
+alias brm="bun remove -g"
 
 # brew
 alias br="brew"

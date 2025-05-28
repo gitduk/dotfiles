@@ -218,6 +218,8 @@ zinit light zdharma-continuum/null
 zinit ice wait"0" lucid as"program" id-as'cargo' \
   atclone"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    $HOME/.cargo/bin/cargo install --locked wallust \
+      && $HOME/.cargo/bin/wallust theme base16-default-dark
     " \
   atload'
     export PATH="$HOME/.cargo/bin:$PATH"
@@ -372,7 +374,7 @@ zinit ice wait"1" lucid as"command" from"gh-r" id-as"zoxide" \
 zinit light ajeetdsouza/zoxide
 
 # direnv
-zinit ice wait"3" lucid as"command" from"gh-r" id-as"direnv" \
+zinit ice wait"2" lucid as"command" from"gh-r" id-as"direnv" \
   atclone"mv direnv* direnv" \
   atclone"./direnv hook zsh > init.zsh" \
   src"init.zsh" \

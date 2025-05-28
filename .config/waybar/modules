@@ -225,10 +225,11 @@
     ]
   },
   "backlight": {
+    "device": "intel_backlight",
     "interval": 2,
     "align": 0,
     "rotate": 0,
-    //"format": "{icon} {percent}%",
+    "format": "{icon} {percent}%",
     "format-icons": [
       " ",
       " ",
@@ -239,7 +240,7 @@
       "󰃠 "
     ],
     "format": "{icon}",
-    //"format-icons": ["","","","","","","","","","","","","","",""],
+    "format-icons": ["","","","","","","","","","","","","","",""],
     "tooltip-format": "backlight {percent}%",
     "icon-size": 10,
     "on-click": "",
@@ -827,11 +828,13 @@
     "on-click": "~/.config/hypr/scripts/poetry.sh"
   },
   "custom/ipaddress": {
-      "exec": "jq -r '.ipAddress' ~/.cache/waybar/poetry_cache",
-      "exec-if": "[ -f $HOME/.cache/waybar/poetry_cache ]",
-      "interval": 3,
-      "tooltip": false,
-      "format": " {} "
+    "exec": "~/.config/hypr/scripts/ipaddress.sh",
+    "exec-if": "[ -f $HOME/.cache/waybar/ip_token ]",
+    "return-type": "json",
+    "interval": 60,
+    "tooltip": true,
+    "format": " {} ",
+    "on-click": "~/.config/hypr/scripts/ipaddress.sh"
   },
   "mpd": {
     "format": " {artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})",

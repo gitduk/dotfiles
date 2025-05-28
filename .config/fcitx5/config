@@ -61,7 +61,7 @@ OverrideXkbOption=False
 # Custom Xkb Option
 CustomXkbOption=
 # Force Enabled Addons
-EnabledAddons=wayland
+EnabledAddons=
 # Force Disabled Addons
 DisabledAddons=
 # Preload input method to be used by default
