@@ -2,15 +2,15 @@
 // ### Minimal -SHORT ### //
 
 {
-"include": "~/.config/waybar/modules",
+"include": "~/.config/waybar/modules.jsonc",
 "layer": "top",
 "position": "top",
 "width": 1050,
 "margin-top": 3,
 
 "modules-left": [
-    "clock",  
-    "custom/weather", 
+    "clock",
+    "custom/weather",
     ],
 
 "modules-center": [

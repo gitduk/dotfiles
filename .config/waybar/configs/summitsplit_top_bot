@@ -2,7 +2,7 @@
 // ### DUAL TOP and BOTTOM ### //
 
 [{
-"include": "~/.config/waybar/modules",
+"include": "~/.config/waybar/modules.jsonc",
 "layer": "top",
 //"mode": "dock",
 "exclusive": true,
@@ -41,7 +41,7 @@
 },
 
 {
-"include": "~/.config/waybar/modules",
+"include": "~/.config/waybar/modules.jsonc",
 "layer": "top",
 //"mode": "dock",
 "exclusive": true,

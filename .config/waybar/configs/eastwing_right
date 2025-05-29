@@ -2,7 +2,7 @@
 // ### RIGHT PANEL ### //
 
 {
-"include": "~/.config/waybar/modules",
+"include": "~/.config/waybar/modules.jsonc",
 "layer": "top",
 "position": "right",
 "margin-top": 8,

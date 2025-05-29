@@ -2,7 +2,7 @@
 // ### TOP and Right PANEL ## //
 
 [{
-"include": "~/.config/waybar/modules",
+"include": "~/.config/waybar/modules.jsonc",
 "layer": "top",
 //"mode": "dock",
 "width": 1200,
@@ -40,7 +40,7 @@
 },
 
 {
-"include": "~/.config/waybar/modules",
+"include": "~/.config/waybar/modules.jsonc",
 "layer": "top",
 "position": "right",
 "height": 650,

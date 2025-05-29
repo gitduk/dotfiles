@@ -1,5 +1,5 @@
 {
-  "include": "~/.config/waybar/modules",
+  "include": "~/.config/waybar/modules.jsonc",
   "layer": "top",
   "exclusive": true,
   "passthrough": false,

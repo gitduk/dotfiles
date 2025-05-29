@@ -142,7 +142,7 @@
       "class<libreoffice-writer>": " ",
       "class<libreoffice-startcenter>": "󰏆 ",
       "class<com.obsproject.Studio>": " "
-      }   
+      }
   },
   "hyprland/workspaces#cam": {
     "active-only":false,
@@ -247,8 +247,8 @@
     "on-click-middle": "",
     "on-click-right": "",
     "on-update": "",
-    "on-scroll-up": "~/.config/hypr/scripts/brightness.sh --inc 10",
-    "on-scroll-down": "~/.config/hypr/scripts/brightness.sh --dec 10",
+    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --inc 10",
+    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --dec 10",
     "smooth-scrolling-threshold": 1,
   },
   "backlight#2": {
@@ -281,8 +281,6 @@
     "format-time": "{H}h {M}min",
     "tooltip": true,
     "tooltip-format": "{timeTo} {power}w",
-    "on-click-middle": "~/.config/hypr/scripts/ChangeBlur.sh",
-    "on-click-right": "~/.config/hypr/scripts/Wlogout.sh",
   },
   "bluetooth": {
     "format": "",
@@ -564,15 +562,11 @@
   },
   "custom/cycle_wall": {
     "format": " ",
-    "on-click": "~/.config/hypr/scripts/wallpaper_select.sh",
-    "on-click-right": "~/.config/hypr/scripts/wallpaper_random.sh",
-    "on-click-middle": "~/.config/hypr/scripts/waybar_styles.sh",
-    "tooltip": true,
-    "tooltip-format": "Left Click: Wallpaper Menu\nMiddle Click: Random wallpaper\nRight Click: Waybar Styles   Menu",
+    "tooltip": false,
   },
   "custom/hint": {
     "format": "󰺁 HINT!",
-    "on-click": "~/.config/hypr/scripts/keyhints.sh",
+    "on-click": "~/.config/waybar/scripts/keyhints.sh",
     "tooltip": true,
     "tooltip-format": "󱧣 Quick Tips",
   },
@@ -580,22 +574,15 @@
     "exec": "cat ~/.cache/kb_layout",
     "interval": 1,
     "format": " {}",
-    "on-click": "~/.config/hypr/scripts/switch_keyboard_layout.sh",
   },
   "custom/light_dark": {
     "format": "󰔎",
-    "on-click": "~/.config/hypr/scripts/dark_light.sh",
-    "on-click-right": "~/.config/hypr/scripts/waybar_styles.sh",
-    "on-click-middle": "~/.config/hypr/scripts/wallpaper_select.sh",
-  "tooltip": true,
-    "tooltip-format": "Left Click: Switch Dark-Light Themes\nMiddle Click: Wallpaper Menu\nRight Click: Waybar   Styles Menu",
   },
   "custom/lock": {
     "format": "󰌾",
     "on-click": "hyprlock -q",
     "tooltip": true,
-    "tooltip-format": "󰷛 Screen Lock",
-  
+    "tooltip-format": "󰷛 Screen Lock"
   },
   "custom/menu": {
     "format": "",
@@ -605,7 +592,7 @@
     "tooltip-format": "Left Click: Waybar Layout Menu\nRight Click: Waybar Style Menu",
   },
   "custom/cava": {
-    "exec": "~/.config/hypr/scripts/waybar_cava.sh",
+    "exec": "~/.config/waybar/scripts/waybar_cava.sh",
     "tooltip": false,
     "format": "{}"
   },
@@ -657,23 +644,12 @@
     "tooltip": true,
     "tooltip-format": "Left Click: Update System\nArch Linux Only",
   },
-  "custom/weather": {
-    "format": "{}",
-    "format-alt": "{alt}: {}",
-    "format-alt-click": "click",
-    "interval": 3600,
-    "return-type": "json",
-    "exec": "~/.config/hypr/scripts/weather.sh",
-    "exec-if": "ping wttr.in -c1",
-    "tooltip": true,
-    "tooltip-format": "",
-  },
   "custom/backlight": {
     "format": " 󰃠 {} ",
     "interval": 2,
-    "exec": "~/.config/hypr/scripts/brightness.sh --get",
+    "exec": "~/.config/waybar/scripts/brightness.sh --get",
     "exec-if": "hash ddcutil",
-    "on-click": "~/.config/hypr/scripts/brightness.sh --set $(echo -n '10\n20\n30\n40\n50' | rofi -dmenu -i -p 'backlight:')",
+    "on-click": "~/.config/waybar/scripts/brightness.sh --set $(echo -n '10\n20\n30\n40\n50' | rofi -dmenu -i -p 'backlight:')",
     "tooltip": false,
   },
   // Separators
@@ -721,8 +697,8 @@
     "on-click-middle": "",
     "on-click-right": "",
     "on-update": "",
-    "on-scroll-up": "~/.config/hypr/scripts/brightness.sh --inc",
-    "on-scroll-down": "~/.config/hypr/scripts/brightness.sh --dec",
+    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --inc",
+    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --dec",
     "smooth-scrolling-threshold": 1,
     "tooltip-format": "{percent}%",
   },
@@ -812,29 +788,27 @@
   "custom/power_vertical": {
     "format": "⏻",
     "exec": "echo ; echo 󰟡 power // blur",
-    "on-click": "~/.config/hypr/scripts/wlogout.sh",
-    "on-click-right": "~/.config/hypr/scripts/change_blur.sh",
-    "interval": 86400, // once every day
+    "interval": 86400,
     "tooltip": true,
   },
   "custom/poetry": {
-    "exec": "~/.config/hypr/scripts/poetry.sh --refresh",
+    "exec": "~/.config/waybar/scripts/poetry.sh --refresh",
     "exec-if": "ping -c 1 jinrishici.com",
     "return-type": "json",
     "interval": 1800,
     "tooltip": true,
     "format": "{}",
     "max-length": 50,
-    "on-click": "~/.config/hypr/scripts/poetry.sh"
+    "on-click": "~/.config/waybar/scripts/poetry.sh"
   },
   "custom/ipaddress": {
-    "exec": "~/.config/hypr/scripts/ipaddress.sh",
+    "exec": "~/.config/waybar/scripts/ipaddress.sh",
     "exec-if": "[ -f $HOME/.cache/waybar/ip_token ]",
     "return-type": "json",
     "interval": 60,
     "tooltip": true,
     "format": " {} ",
-    "on-click": "~/.config/hypr/scripts/ipaddress.sh"
+    "on-click": "~/.config/waybar/scripts/ipaddress.sh"
   },
   "mpd": {
     "format": " {artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})",
