@@ -11,19 +11,19 @@ builtin_box_drawing = true
 size = 10.0
 
 [font.normal]
-family = "MesloLGM Nerd Font"
+family = "Maple Mono NF CN"
 style = "Regular"
 
 [font.italic]
-family = "MesloLGM Nerd Font"
+family = "Maple Mono NF CN"
 style = "Italic"
 
 [font.bold]
-family = "MesloLGM Nerd Font"
+family = "Maple Mono NF CN"
 style = "Bold"
 
 [font.bold_italic]
-family = "MesloLGM Nerd Font"
+family = "Maple Mono NF CN"
 style = "Bold Italic"
 
 [font.glyph_offset]

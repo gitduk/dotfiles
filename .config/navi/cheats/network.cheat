@@ -1,9 +1,6 @@
 % network, common
+@ envs
 
 # show dns
 resolvectl status
-
-$ dev: nmcli dev | grep -E "\sconnected" | cut -d' ' -f 1 | grep -v "DEVICE"
-$ con: nmcli con show | grep -Ev "\s--" | cut -d' ' -f 1 | grep -v "NAME"
-$ method: echo "auto link-local manual shared disabled" | tr ' ' '\n'
 

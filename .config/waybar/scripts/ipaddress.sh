@@ -73,7 +73,7 @@ format_output() {
 
 	jq -n -c \
 		--arg text "$ip" \
-		--arg tooltip "$region | $(format_weather $weather) ${temperature}°C | $time" \
+		--arg tooltip "$region | $weather ${temperature}°C | $time" \
 		--arg class "ip" \
 		'{text: $text, tooltip: $tooltip, class: $class}'
 }

@@ -1,0 +1,17 @@
+% font
+
+# MapleMono-NF-CN
+[[ ! -e "$HOME/.local/share/fonts" ]] && mkdir -p $HOME/.local/share/fonts
+wget -O /tmp/MapleMono-NF-CN.zip "https://github.com/subframe7536/maple-font/releases/latest/download/MapleMono-NF-CN.zip"
+unzip /tmp/MapleMono-NF-CN.zip -d $HOME/.local/share/fonts/
+fc-cache -fv
+
+% font, nerd
+
+# nerd font
+$ font: echo -n "Meslo|JetBrainsMono" | tr '|' '\n'
+[[ ! -e "$HOME/.local/share/fonts" ]] && mkdir -p $HOME/.local/share/fonts
+wget "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/<font>.tar.xz" -O /tmp/<font>.tar.xz
+tar -xvf /tmp/<font>.tar.xz -C $HOME/.local/share/fonts/
+fc-cache -fv
+

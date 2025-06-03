@@ -1,10 +1,11 @@
 % network, nmcli
-@ network, common
+@ envs
 
 # edit connection
 nmcli con edit <con>
 
 # change ipv4 method
+$ method: echo "auto link-local manual shared disabled" | tr ' ' '\n'
 nmcli con modify <con> ipv4.method <method>
 nmcli con down <con> && nmcli con up <con>
 
