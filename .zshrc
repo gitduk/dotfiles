@@ -58,9 +58,17 @@ export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -
 PROXY_HOST="${PROXY_HOST:-127.0.0.1}"
 PROXY_PORT="${PROXY_PORT:-7890}"
 if nc -z -n "$PROXY_HOST" "$PROXY_PORT" &>/dev/null; then
-  export HTTP_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
-  export HTTPS_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
-  export NO_PROXY="localhost,127.0.0.1"
+  # http
+  export http_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
+  export HTTP_PROXY="$http_proxy"
+
+  # https
+  export https_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
+  export HTTPS_PROXY="$https_proxy"
+
+  # no_proxy
+  export no_proxy="localhost,127.0.0.1"
+  export NO_PROXY="$no_proxy"
 fi
 
 # PATH

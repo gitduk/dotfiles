@@ -245,6 +245,6 @@ symbol = "zig "
 [custom.proxy]
 disabled = false
 command = 'echo 󱐡'
-when = ''' test "$HTTP_PROXY" '''
+when = ''' test -n "$http_proxy" '''
 format = '[$output](blue) '
 
