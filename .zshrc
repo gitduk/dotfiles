@@ -48,14 +48,48 @@ xhost +local: &>/dev/null
 # set bindkey mode to vi
 bindkey -v
 
+############
+### ENVS ###
+############
+
+export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -d '"')"
+
+# proxy
+PROXY_HOST="${PROXY_HOST:-127.0.0.1}"
+PROXY_PORT="${PROXY_PORT:-7890}"
+if nc -z -n "$PROXY_HOST" "$PROXY_PORT" &>/dev/null; then
+  export HTTP_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
+  export HTTPS_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
+  export NO_PROXY="localhost,127.0.0.1"
+fi
+
+# PATH
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.npm/bin:$PATH"
+
+# Qt
+QT_VERSION="6.9.1"
+if [[ -d "$HOME/.local/share/Qt/$QT_VERSION" ]]; then
+  export QT_ROOT="$HOME/.local/share/Qt/$QT_VERSION"
+  export PATH="$QT_ROOT/gcc_64/bin:$PATH"
+  export Qt6_DIR="$QT_ROOT/gcc_64/lib/cmake/Qt6"
+  export LD_LIBRARY_PATH="$QT_ROOT/gcc_64/lib:$LD_LIBRARY_PATH"
+fi
+
 # fpath
 fpath=(~/.zsh.d/completions $fpath)
 
-# envs
-export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -d '"')"
+#############
+### TOOLS ###
+#############
+
+# pre-install
+[[ -n "$commands[nala]" ]] || sudo apt install -y nala
+[[ -n "$commands[git]" ]] || ins git
+[[ -n "$commands[curl]" ]] || ins curl
 
 # install function
-ins() {
+function ins() {
   case "$OS" in
     debian|ubuntu)
       sudo nala install -y $@
@@ -72,20 +106,6 @@ ins() {
   esac
   return 1
 }
-
-# proxy
-PROXY_HOST="${PROXY_HOST:-127.0.0.1}"
-PROXY_PORT="${PROXY_PORT:-7890}"
-if nc -z -n "$PROXY_HOST" "$PROXY_PORT" &>/dev/null; then
-  export HTTP_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
-  export HTTPS_PROXY="http://${PROXY_HOST}:${PROXY_PORT}"
-  export NO_PROXY="localhost,127.0.0.1,zed.dev"
-fi
-
-# pre-install
-[[ -n "$commands[nala]" ]] || sudo apt install -y nala
-[[ -n "$commands[git]" ]] || ins git
-[[ -n "$commands[curl]" ]] || ins curl
 
 #############
 ### ZINIT ###
@@ -236,12 +256,12 @@ zinit ice wait'0' lucid as"program" id-as'golang' \
     sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
     ' \
   atload'
-    export GOPATH=$HOME/go/bin
+    export GOPATH="$HOME/go/bin"
     export PATH="/usr/local/go/bin:$GOPATH:$PATH"
-    export GOPROXY=https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct
-    export GO111MODULE=on
+    export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
+    export GOPRIVATE="*.corp.example.com,rsc.io/private"
     export GOSUMDB=off
-    export GOPRIVATE=*.corp.example.com,rsc.io/private
+    export GO111MODULE=on
     ' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
@@ -255,19 +275,17 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"fzf" \
 zinit light junegunn/fzf
 
 # navi
-zinit ice wait'0' lucid as"program" id-as'navi' \
-  atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
-  atclone"cargo install navi --locked && navi widget zsh > init.zsh" \
+zinit ice wait'0' lucid as"program" from"gh-r" id-as'navi' \
   atload'
-    export NAVI_PATH=$HOME/.config/navi/cheats
-    export NAVI_CONFIG=$HOME/.config/navi/config.yaml
+    export NAVI_PATH="$HOME/.config/navi/cheats"
+    export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
     [[ ! -d "$NAVI_PATH" ]] && mkdir -p $NAVI_PATH
     [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
+    eval "$(navi widget zsh)"
     bindkey "^N" _navi_widget
     ' \
-  src"init.zsh" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light denisidoro/navi
 
 # fnm - node version manager
 zinit ice wait'1' lucid as"program" id-as'fnm' \
@@ -288,7 +306,11 @@ zinit ice wait'[[ ! -n "$commands[bun]" ]]' lucid as"program" from"gh-r" id-as'b
   atclone"SHELL=zsh ~/.bun/bin/bun completions" \
   atclone"mv ~/.bun/_bun _bun" \
   atclone"rm -rf */" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    export PATH="$HOME/.bun/bin:$PATH"
+    export PATH="$HOME/.cache/.bun/bin:$PATH"
+  '
 zinit light oven-sh/bun
 
 # alacritty
