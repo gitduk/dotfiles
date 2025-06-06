@@ -3,21 +3,21 @@
 # 显示使用说明
 show_usage() {
   cat << 'EOF'
-Usage: pane-name [OPTIONS] [NAME]
+Usage: tsp [OPTIONS] [NAME]
 
 Set or manage tmux pane names:
-  pane-name "my-name"     Set current pane name
-  pane-name PANE_ID NAME  Set specific pane name (shorthand)
-  pane-name -u            Unset current pane name  
-  pane-name -U            Unset all pane names
-  pane-name -t ID NAME    Set specific pane name
-  pane-name -l            List all panes with names
-  pane-name -h|--help     Show this help
+  tsp "my-name"     Set current pane name
+  tsp PANE_ID NAME  Set specific pane name (shorthand)
+  tsp -u            Unset current pane name  
+  tsp -U            Unset all pane names
+  tsp -t ID NAME    Set specific pane name
+  tsp -l            List all panes with names
+  tsp -h|--help     Show this help
 
 Examples:
-  pane-name "web-server"
-  pane-name -t 1 "database" 
-  pane-name -u
+  tsp "web-server"
+  tsp -t 1 "database" 
+  tsp -u
 EOF
 }
 
@@ -56,7 +56,7 @@ main() {
       local current_name=$(tmux show -p @pane_name 2>/dev/null | cut -d' ' -f2-)
       if [[ -n "$current_name" ]]; then
         tmux set -u -p @pane_name
-        echo "✓ Unset current pane name '$current_name'"
+        echo "✓ Unset current pane [$current_name]"
       else
         echo "Current pane has no name set"
       fi
@@ -68,13 +68,13 @@ main() {
         local pane_name=$(tmux show -p -t "$pane_id" @pane_name 2>/dev/null | cut -d' ' -f2-)
         if [[ -n "$pane_name" ]]; then
           tmux set -u -p -t "$pane_id" @pane_name
-          unset_names+=("pane $pane_id: '$pane_name'")
+          unset_names+=("pane $pane_id: $pane_name")
           ((count++))
         fi
       done
 
       if [[ $count -gt 0 ]]; then
-        echo "✓ Unset $count pane name(s):"
+        echo "✓ Unset $count pane:"
         printf "  %s\n" "${unset_names[@]}"
       else
         echo "No pane names to unset"
@@ -95,7 +95,7 @@ main() {
 
       if validate_pane "$pane_id"; then
         tmux set -p -t "$pane_id" @pane_name "$name"
-        echo "✓ Set pane $pane_id name to '$name'"
+        echo "✓ Set pane $pane_id to [$name]"
       fi
       ;;
     "")
@@ -111,18 +111,18 @@ main() {
     *)
       # 检查第一个参数是否是数字 (pane ID)
       if [[ "$1" =~ ^[0-9]+$ && $# -ge 2 ]]; then
-        # 格式: pane-name PANE_ID NAME
+        # 格式: tsp PANE_ID NAME
         local pane_id="$1"
         local name="$2"
 
         if validate_pane "$pane_id"; then
             tmux set -p -t "$pane_id" @pane_name "$name"
-            echo "✓ Set pane $pane_id name to '$name'"
+            echo "✓ Set pane $pane_id to [$name]"
         fi
       elif [[ -n "$1" ]]; then
-        # 格式: pane-name NAME (设置当前 pane)
+        # 格式: tsp NAME (设置当前 pane)
         tmux set -p @pane_name "$1"
-        echo "✓ Set current pane name to '$1'"
+        echo "✓ Set current pane to [$1]"
       else
         echo "Error: Empty name not allowed" >&2
         return 1

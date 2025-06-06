@@ -268,7 +268,7 @@ zinit ice wait'0' lucid as"program" id-as'golang' \
     export PATH="/usr/local/go/bin:$GOPATH:$PATH"
     export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
     export GOPRIVATE="*.corp.example.com,rsc.io/private"
-    export GOSUMDB=off
+    export GOSUMDB="sum.golang.org"
     export GO111MODULE=on
     ' \
   atpull"%atclone"
