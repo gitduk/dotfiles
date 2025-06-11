@@ -450,7 +450,7 @@ zinit light eza-community/eza
 
 # fx - Command-line tool and terminal JSON viewer
 zinit ice wait'[[ ! -n "$commands[fx]" ]]' lucid as"command" from"gh-r" id-as"fx" \
-  mv"fx* -> fx"
+  atclone"mv fx* fx"
 zinit light antonmedv/fx
 
 # gh
@@ -495,19 +495,36 @@ zinit light fatedier/frp
 # yazi - file browser
 zinit ice wait'[[ ! -n "$commands[yazi]" ]]' lucid as"command" from"gh-r" id-as"yazi" \
   bpick"yazi-x86_64-unknown-linux-musl.zip" \
-  atclone"mv yazi*/* ./" \
-  atclone"mv comp*/_ya ./" \
-  atclone"mv comp*/_yazi ./" \
+  atclone"mv yazi*/* ." \
+  atclone"mv comp*/_ya ." \
+  atclone"mv comp*/_yazi ." \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light sxyazi/yazi
 
 # uv - python package manager
 zinit ice wait'[[ ! -n "$commands[uv]" ]]' lucid as"command" from"gh-r" id-as"uv" \
-  atclone"mv */* ./ && ./uv generate-shell-completion zsh > _uv" \
+  atclone"mv */* . && ./uv generate-shell-completion zsh > _uv" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light astral-sh/uv
+
+# fscan
+zinit ice wait'[[ ! -n "$commands[fscan]" ]]' lucid as"command" from"gh-r" id-as"fscan" \
+  bpick"fscan"
+zinit light shadow1ng/fscan
+
+# sttr
+zinit ice wait'[[ ! -n "$commands[sttr]" ]]' lucid as"command" from"gh-r" id-as"sttr"
+zinit light abhimanyu003/sttr
+
+# dysk - A linux utility to get information on filesystems, like df but better
+zinit ice wait'[[ ! -n "$commands[dysk]" ]]' lucid as"command" from"gh-r" id-as"dysk" \
+  atclone"mv */completion/_dysk ." \
+  atclone"mv */x86_64-unknown-linux-musl/dysk ." \
+  atclone"rm -rf */" \
+  atpull"%atclone"
+zinit light Canop/dysk
 
 # rainfrog - a database management tui
 zinit ice wait'[[ -n $DISPLAY && ! -n "$commands[rainfrog]" ]]' lucid as"command" from"gh-r" id-as"rainfrog" \

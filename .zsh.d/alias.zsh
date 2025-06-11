@@ -26,10 +26,6 @@ alias br="brew"
 # bluetooth
 alias bt="bluetoothctl"
 
-# base encode
-alias b32="base32"
-alias b64="base64"
-
 #########
 ### C ###
 #########
@@ -78,6 +74,12 @@ alias cl="curl"
 ### D ###
 #########
 
+# dysk
+alias dsk="dysk"
+
+# direnv
+alias di="direnv"
+
 # docker
 alias dcv="docker volume"
 alias dcpl="docker pull"
@@ -112,9 +114,6 @@ alias dis="sudo dpkg -i"
 
 # tput: get terminal cols and lines
 alias dim="echo $(tput cols)x$(tput lines)"
-
-# dust
-alias ds="dust"
 
 #########
 ### E ###
@@ -298,6 +297,9 @@ alias rsy="rsync -avP"
 alias sc="source"
 alias denv="deactivate"
 alias szs="source ~/.zshrc"
+
+# sttr
+alias sr="sttr"
 
 # systemctl
 alias scs="sudo systemctl status"

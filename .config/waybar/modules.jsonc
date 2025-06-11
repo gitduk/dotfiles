@@ -575,8 +575,12 @@
     "interval": 1,
     "format": " {}",
   },
-  "custom/light_dark": {
-    "format": "󰔎",
+  "custom/color_scheme": {
+    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark//; s/prefer-light//; t; s/.*/󰖨/'",
+    "format": " {} ",
+    "interval": "once",
+    "signal": 1,
+    "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh",
   },
   "custom/lock": {
     "format": "󰌾",
