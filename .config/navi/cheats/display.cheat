@@ -127,3 +127,8 @@ export CC=gcc-14 CXX=g++-14 && make all && sudo make install
 wget https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run -P /tmp
 chmod +x /tmp/qt-online-installer-linux-x64-online.run && /tmp/qt-online-installer-linux-x64-online.run
 
+# uwsm - Universal Wayland Session Manager
+git clone https://github.com/Vladimir-csp/uwsm.git /tmp/uwsm && cd /tmp/uwsm
+meson setup --prefix=/usr/local -Duuctl=enabled -Dfumon=enabled -Duwsm-app=enabled build \
+  && sudo meson install -C build
+

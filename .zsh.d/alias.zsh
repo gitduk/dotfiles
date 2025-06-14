@@ -264,8 +264,8 @@ alias ptv="openssl x509 -inform PEM -subject_hash_old -in mitmproxy-ca-cert.pem 
 alias path="echo \$PATH | tr ':' '\n' | fzf"
 
 # set proxy
-alias pre="host=127.0.0.1 port=7890 export HTTP_PROXY=http://\$host:\$port HTTPS_PROXY=http://\$host:\$port"
-alias prd="unset HTTP_PROXY HTTPS_PROXY"
+alias pre="export http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 HTTP_PROXY=http://127.0.0.1:7890 HTTPS_PROXY=http://127.0.0.1:7890"
+alias prd="unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY"
 
 #########
 ### R ###

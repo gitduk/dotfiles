@@ -6,18 +6,15 @@ nmcli con edit <con>
 
 # change ipv4 method
 $ method: echo "auto link-local manual shared disabled" | tr ' ' '\n'
-nmcli con modify <con> ipv4.method <method>
-nmcli con down <con> && nmcli con up <con>
+nmcli con modify <con> ipv4.method <method> && nmcli con up <con>
 
 # change ip address
-nmcli con modify <con> ipv4.addresses <ip>
-nmcli con down <con> && nmcli con up <con>
+nmcli con modify <con> ipv4.addresses <ip> && nmcli con up <con>
 
 # modify dns
-nmcli con modify <con> ipv4.dns "<dns>"
-nmcli con down <con> && nmcli con up <con>
+nmcli connection modify <con> ipv4.ignore-auto-dns yes
+nmcli con modify <con> ipv4.dns "<dns>" && nmcli con up <con>
 
 # change gateway
-nmcli con modify <con> ipv4.gateway <gateway>
-nmcli con down <con> && nmcli con up <con>
+nmcli con modify <con> ipv4.gateway <gateway> && nmcli con up <con>
 
