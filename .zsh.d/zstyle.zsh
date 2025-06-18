@@ -2,7 +2,7 @@
 ### OPTIONS ###
 ###############
 # Core completion system configuration
-zstyle ':completion:*' completer _complete _extensions _match _approximate
+zstyle ':completion:*' completer _extensions _complete _approximate
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zcompcache"
 
@@ -30,6 +30,9 @@ zstyle ':completion:*' matcher-list '' \
     'm:{a-zA-Z}={A-Za-z}' \
     'r:|[._-]=* r:|=*' \
     'l:|=* r:|=*'
+
+# try to insert only the longest prefix that will complete to all completions shown
+zstyle ':completion:*:*' matcher-list 'm:{[:lower:]-}={[:upper:]_}' '+r:|[.]=**'
 
 # Error tolerance (allow up to 1/3 input errors)
 zstyle -e ':completion:*:approximate:*' max-errors 'reply=($((($#PREFIX+$#SUFFIX)/3))numeric)'
@@ -98,4 +101,42 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 # Directory navigation
 zstyle ':completion:*:cd:*' tag-order local-directories path-directories
+
+########################
+### zsh-autocomplete ###
+########################
+
+# Pass arguments to compinit
+zstyle '*:compinit' arguments -D -i -u -C -w
+
+# all Tab widgets
+zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
+
+# all history widgets
+zstyle ':autocomplete:*history*:*' insert-unambiguous yes
+
+# ^S
+zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
+
+# Customize common substring message
+zstyle ':autocomplete:*:unambiguous' format \
+  $'%{\e[0;2m%}%Bcommon substring:%b %0F%11K%d%f%k'
+
+# Wait for a minimum amount of input
+zstyle ':autocomplete:*' min-input 3
+
+# Don't show completions if the current word matches a pattern
+# zstyle ':autocomplete:*' ignored-input ''
+
+# $LINES is the number of lines that fit on screen.
+zstyle -e ':autocomplete:*:*' list-lines 'reply=( $(( LINES / 3 )) )'
+
+# Override for recent path search only
+zstyle ':autocomplete:recent-paths:*' list-lines 10
+
+# Override for history search only
+zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 8
+
+# Override for history menu only
+zstyle ':autocomplete:history-search-backward:*' list-lines 2000
 

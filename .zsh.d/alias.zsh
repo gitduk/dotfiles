@@ -229,9 +229,6 @@ alias ncl="nmcli"
 ### P ###
 #########
 
-# pw
-ialias pw="cat ~/.pw | fzf | cut -d ':' -f 2- | cp"
-
 # podmain
 alias pd="podman"
 alias pdc="podman container"

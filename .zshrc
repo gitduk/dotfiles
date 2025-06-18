@@ -185,29 +185,20 @@ zinit light zdharma-continuum/null
 ### PLUGINS ###
 ###############
 
-# zdharma-continuum/fast-syntax-highlighting
-zinit ice wait"0" lucid atinit"zicompinit; zicdreplay" id-as"fast-syntax-highlighting"
-zinit light zdharma-continuum/fast-syntax-highlighting
-
-# Aloxaf/fzf-tab
-zinit ice wait"1" lucid id-as"fzf-tab"
-zinit light Aloxaf/fzf-tab
-
-# zsh-users/zsh-history-substring-search
-zinit ice wait"2" lucid id-as"zsh-history-substring-search" \
-  atload"
-    export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
-    bindkey '^[[A' history-substring-search-up
-    bindkey '^[OA' history-substring-search-up
-    bindkey '^k' history-substring-search-up
-    bindkey '^j' history-substring-search-down
-  "
-zinit light zsh-users/zsh-history-substring-search
+# marlonrichert/zsh-autocomplete
+zinit ice wait"0" lucid id-as"zsh-autocomplete" \
+  atload"bindkey -v" \
+  atload"export skip_global_compinit=1" \
+  atinit"
+    zle -N menu-search;zle -N recent-paths
+    zle -N insert-unambiguous-or-complete
+    "
+zinit light marlonrichert/zsh-autocomplete
 
 # zsh-users/zsh-autosuggestions
-zinit ice wait"3" lucid id-as"zsh-autosuggestions" \
+zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
+  atload"!_zsh_autosuggest_start" \
   atload"
-    _zsh_autosuggest_start
     export ZSH_AUTOSUGGEST_MANUAL_REBIND='1'
     export ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
     export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
@@ -216,6 +207,22 @@ zinit ice wait"3" lucid id-as"zsh-autosuggestions" \
     bindkey -M vicmd '^@' autosuggest-execute
   "
 zinit light zsh-users/zsh-autosuggestions
+
+# zdharma-continuum/fast-syntax-highlighting
+zinit ice wait"0" lucid id-as"fast-syntax-highlighting" \
+  atinit"zicompinit; zicdreplay"
+zinit light zdharma-continuum/fast-syntax-highlighting
+
+# zsh-users/zsh-history-substring-search
+zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
+  atload"
+    export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
+    bindkey '^[[A' history-substring-search-up
+    bindkey '^[OA' history-substring-search-up
+    bindkey '^k' history-substring-search-up
+    bindkey '^j' history-substring-search-down
+  "
+zinit light zsh-users/zsh-history-substring-search
 
 # sudo
 zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
