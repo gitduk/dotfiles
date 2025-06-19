@@ -1,48 +1,62 @@
-% hyprland
+% hyprland, ubuntu 24.04
 
-# building tools
+# 1. building tools
 sudo nala update && sudo nala upgrade
 sudo nala install -y cmake pkg-config build-essential meson ninja-build gcc-14 g++-14
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
 
-# sdbus-cpp
-sudo nala install -y libsystemd-dev
-git clone https://github.com/Kistler-Group/sdbus-cpp.git /tmp/sdbus-cpp && cd /tmp/sdbus-cpp/
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . && sudo cmake --build . --target install
+# 2. cmake
+sudo nala install -y libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev
+wget "https://github.com/Kitware/CMake/releases/download/v3.30.2/cmake-3.30.2-linux-x86_64.sh" -P /tmp
+chmod +x /tmp/cmake-3.30.2-linux-x86_64.sh
+sudo /tmp/cmake-3.30.2-linux-x86_64.sh --skip-license --prefix=/usr/local
 
-# libdisplay-info-0.2.0
-wget https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.2.0/downloads/libdisplay-info-0.2.0.tar.xz -P /tmp
-tar -xvf /tmp/libdisplay-info-0.2.0.tar.xz -C /tmp && cd /tmp/libdisplay-info-0.2.0/
-meson setup build && sudo ninja -C build/ install
-
-# libinput
+# 3. libinput
+sudo nala install -y libudev-dev libmtdev-dev libevdev-dev libwacom-dev libgtk-3-dev libgtk-4-dev
 git clone https://gitlab.freedesktop.org/libinput/libinput.git /tmp/libinput && cd /tmp/libinput
 meson setup build --prefix=/usr -Ddocumentation=false --buildtype=release && sudo ninja -C build/ install
 
-# hyprwayland-scanner
+# 4. libdisplay-info-0.2.0
+wget "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/releases/0.2.0/downloads/libdisplay-info-0.2.0.tar.xz" -P /tmp
+tar -xvf /tmp/libdisplay-info-0.2.0.tar.xz -C /tmp && cd /tmp/libdisplay-info-0.2.0/
+meson setup build && sudo ninja -C build/ install
+
+# 5. hyprwayland-scanner
 sudo nala install -y libpugixml-dev
 git clone https://github.com/hyprwm/hyprwayland-scanner.git /tmp/hyprwayland-scanner && cd /tmp/hyprwayland-scanner/
 cmake -DCMAKE_INSTALL_PREFIX=/usr -B build \
   && cmake --build build -j `nproc` \
   && sudo cmake --install ./build
 
-# hyprutils
+# 6. hyprutils
 sudo nala install -y libpixman-1-dev
 git clone https://github.com/hyprwm/hyprutils.git /tmp/hyprutils && cd /tmp/hyprutils/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
-# hyprlang
+# 7. aquamarine
+sudo nala install -y libseat-dev libdrm-dev libgbm-dev
+git clone https://github.com/hyprwm/aquamarine.git /tmp/aquamarine && cd /tmp/aquamarine/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
+  && sudo cmake --install build
+
+# 8. hyprlang
 git clone https://github.com/hyprwm/hyprlang.git /tmp/hyprlang && cd /tmp/hyprlang/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target hyprlang -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
-# hyprgraphics
+# 9. hyprcursor
+sudo nala install -y libzip-dev librsvg2-dev libtomlplusplus-dev libxcb-util-dev libxcb-image0-dev
+git clone https://github.com/hyprwm/hyprcursor.git /tmp/hyprcursor && cd /tmp/hyprcursor/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
+
+# 10. hyprgraphics
 sudo nala install -y libbrotli-dev libgif-dev libjpeg-dev libopenexr-dev libpng-dev libwebp-dev libspng-dev
 git clone https://github.com/libjxl/libjxl.git --recursive --shallow-submodules /tmp/libjxl && cd /tmp/libjxl/
 mkdir build && cd build/
@@ -54,30 +68,41 @@ cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PRE
 cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF`
 sudo cmake --install build
 
-# wayland-protocols
-sudo nala install -y libcairo2-dev libpango1.0-dev libgbm-dev libliftoff-dev libdisplay-info-dev libwayland-dev
+# 11. wayland
+sudo nala install -y libcairo2-dev libpango1.0-dev libgbm-dev libliftoff-dev libdisplay-info-dev libwayland-dev libxml2-dev graphviz doxygen xsltproc xmlto
 git clone https://gitlab.freedesktop.org/wayland/wayland.git /tmp/wayland && cd /tmp/wayland
 meson setup build --prefix=/usr --buildtype=release && sudo ninja -C build/ install
+
+# 12. wayland-protocols
 git clone https://gitlab.freedesktop.org/wayland/wayland-protocols.git /tmp/wayland-protocols && cd /tmp/wayland-protocols
 meson setup build --prefix=/usr --buildtype=release && sudo ninja -C build/ install
 
-# aquamarine
-git clone https://github.com/hyprwm/aquamarine.git /tmp/aquamarine && cd /tmp/aquamarine/
-cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
-  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
-  && sudo cmake --install build
-
-# hyprcursor
-sudo nala install -y libzip-dev librsvg2-dev libtomlplusplus-dev libxcb-util-dev libxcb-image0-dev
-git clone https://github.com/hyprwm/hyprcursor.git /tmp/hyprcursor && cd /tmp/hyprcursor/
-cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
-  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
-  && sudo cmake --install ./build
-
-# libxcb-errors
+# 13. libxcb-errors
 sudo nala install -y dh-autoreconf xutils-dev xcb-proto
 git clone --recursive https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git /tmp/libxcb-errors && cd /tmp/libxcb-errors/
 sudo ./autogen.sh --prefix=/usr/local && sudo make && sudo make install
+
+# 14. hyprland-protocols
+git clone https://github.com/hyprwm/hyprland-protocols /tmp/hyprland-protocols && cd /tmp/hyprland-protocols/
+meson setup build && sudo meson install -C build
+
+# 15. Hyprland
+sudo nala install -y libxcursor-dev libre2-dev libxcb-xfixes0-dev \
+  libxcb-icccm4-dev libxcb-composite0-dev libxcb-res0-dev libnotify-dev
+git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd /tmp/Hyprland/
+export CC=gcc-14 CXX=g++-14 && make all && sudo make install
+
+# 15. Hyprland -- from release
+wget "https://github.com/hyprwm/Hyprland/releases/download/v0.49.0/source-v0.49.0.tar.gz" -P /tmp
+export CC=gcc-14 CXX=g++-14 && make all && sudo make install
+cd /tmp && tar -xzvf source-v0.49.0.tar.gz && cd hyprland-source/
+
+# sdbus-cpp
+sudo nala install -y libsystemd-dev
+git clone https://github.com/Kistler-Group/sdbus-cpp.git /tmp/sdbus-cpp && cd /tmp/sdbus-cpp/
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . && sudo cmake --build . --target install
 
 # hyprpaper
 sudo nala install -y libmagic-dev
@@ -117,14 +142,8 @@ cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PRE
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install build
 
-# Hyprland
-sudo nala install -y libxcursor-dev libre2-dev libudis86-dev libxcb-xfixes0-dev \
-  libxcb-icccm4-dev libxcb-composite0-dev libxcb-res0-dev libnotify-dev
-git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd /tmp/Hyprland/
-export CC=gcc-14 CXX=g++-14 && make all && sudo make install
-
 # qt6
-wget https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run -P /tmp
+wget "https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run" -P /tmp
 chmod +x /tmp/qt-online-installer-linux-x64-online.run && /tmp/qt-online-installer-linux-x64-online.run
 
 # uwsm - Universal Wayland Session Manager

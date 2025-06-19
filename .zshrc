@@ -185,16 +185,6 @@ zinit light zdharma-continuum/null
 ### PLUGINS ###
 ###############
 
-# marlonrichert/zsh-autocomplete
-zinit ice wait"0" lucid id-as"zsh-autocomplete" \
-  atload"bindkey -v" \
-  atload"export skip_global_compinit=1" \
-  atinit"
-    zle -N menu-search;zle -N recent-paths
-    zle -N insert-unambiguous-or-complete
-    "
-zinit light marlonrichert/zsh-autocomplete
-
 # zsh-users/zsh-autosuggestions
 zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
   atload"!_zsh_autosuggest_start" \

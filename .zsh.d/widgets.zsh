@@ -32,7 +32,7 @@ function cursor_mode() {
 # copy to system clipboard
 function vi-yank-copy {
    zle vi-yank
-   echo -n "$CUTBUFFER" | cp
+   echo -n "$CUTBUFFER" | wl-copy
 }
 
 function fzf-alias-widget {
@@ -51,7 +51,13 @@ function fzf-apt-widget {
     --bind="I:reload(apt list --installed|sed '1d')" \
     --bind="R:reload(apt-cache search .)"
   )
-  echo $package | awk '{printf $1}' | xargs echo -n | cp
+  selected=$(echo $package | awk '{printf $1}' | xargs echo -n)
+  echo -n $selected | wl-copy
+  if command -v nala &>/dev/null; then
+    BUFFER="sudo nala install -y $selected"
+  else
+    BUFFER="sudo apt install -y $selected"
+  fi
   zle reset-prompt
   zle vi-add-eol
 }

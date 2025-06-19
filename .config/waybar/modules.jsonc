@@ -807,7 +807,7 @@
   },
   "custom/ipaddress": {
     "exec": "~/.config/waybar/scripts/ipaddress.sh",
-    "exec-if": "[ -f $HOME/.cache/waybar/ip_token ]",
+    "exec-if": "ping -c 1 jinrishici.com",
     "return-type": "json",
     "interval": 60,
     "tooltip": true,
