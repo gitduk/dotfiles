@@ -1,15 +1,14 @@
 # Get editor completions based on the config schema
-"$schema" = 'https://starship.rs/config-schema.json'
-
+"$schema" = "https://starship.rs/config-schema.json"
 # Inserts a blank line between shell prompts
 add_newline = false
-
 # Use custom format
 format = """$all$line_break$character"""
-
 right_format = """${custom.proxy} $time"""
 
-# ###  modules  ###############################################################
+###############
+### modules ###
+###############
 
 [character]
 success_symbol = "[➜](green)"
@@ -18,7 +17,7 @@ vimcmd_symbol = "[](green)"
 
 [directory]
 truncation_length = 3
-truncation_symbol = '…/'
+truncation_symbol = "…/"
 read_only = " ro"
 style = "bold blue"
 
@@ -52,12 +51,12 @@ ssh_symbol = " "
 disabled = false
 time_format = "%H:%M"
 style = "fg:#5c6370"
-format = '[$time]($style)'
- 
+format = "[$time]($style)"
+
 [os]
 disabled = true
 style = "bold white"
-format = '[$symbol ]($style)'
+format = "[$symbol ]($style)"
 
 [os.symbols]
 Windows = "󰍲"
@@ -244,7 +243,6 @@ symbol = "zig "
 
 [custom.proxy]
 disabled = false
-command = 'echo 󱐡'
+command = "echo 󱐡"
 when = ''' test -n "$http_proxy" '''
-format = '[$output](blue) '
-
+format = "[$output](blue) "

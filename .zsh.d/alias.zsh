@@ -206,6 +206,9 @@ alias mk="mkdir -p"
 ### N ###
 #########
 
+# nb
+alias n="nb"
+
 # nala
 alias nai="sudo nala install -y"
 alias nar="sudo nala remove"
@@ -349,4 +352,3 @@ alias y="yazi"
 alias zl="zellij"
 alias zr="zellij run --floating --width 50% --height 100% -x 50% -y 0% --"
 alias zif="zipinfo"
-

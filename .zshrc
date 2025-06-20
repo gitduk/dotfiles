@@ -14,33 +14,33 @@ setopt PUSHD_SILENT      # 使用 pushd/popd 时不打印栈内容
 setopt PUSHDMINUS        # 允许 `cd -1` `cd -2` 等来切换到目录栈中前面的目录
 
 # Auto-completion settings
-setopt AUTO_MENU             # 连续按 Tab 时循环候选项
-setopt AUTO_LIST             # 模糊补全后自动显示候选项列表
-setopt AUTO_PARAM_SLASH      # 自动在目录后加 `/`，方便继续补全
-setopt COMPLETE_IN_WORD      # 允许在单词中间补全，而不是只能在末尾
-setopt ALWAYS_TO_END         # 补全后光标移到词末尾
-setopt LIST_PACKED           # 紧凑排列候选项列表（节省空间）
-setopt LIST_TYPES            # 在候选项中加上 `/`, `*`, `@` 等文件类型标志
-setopt EXTENDED_GLOB         # 启用更强大的通配符语法
+setopt AUTO_MENU        # 连续按 Tab 时循环候选项
+setopt AUTO_LIST        # 模糊补全后自动显示候选项列表
+setopt AUTO_PARAM_SLASH # 自动在目录后加 `/`，方便继续补全
+setopt COMPLETE_IN_WORD # 允许在单词中间补全，而不是只能在末尾
+setopt ALWAYS_TO_END    # 补全后光标移到词末尾
+setopt LIST_PACKED      # 紧凑排列候选项列表（节省空间）
+setopt LIST_TYPES       # 在候选项中加上 `/`, `*`, `@` 等文件类型标志
+setopt EXTENDED_GLOB    # 启用更强大的通配符语法
 
 # History management
-setopt HIST_IGNORE_ALL_DUPS  # 忽略所有重复命令，只保留最后一次
-setopt HIST_REDUCE_BLANKS    # 去除命令中的多余空格
-setopt HIST_VERIFY           # 先显示历史命令，让你确认后再执行
-setopt SHARE_HISTORY         # 在多个终端间共享历史
+setopt HIST_IGNORE_ALL_DUPS # 忽略所有重复命令，只保留最后一次
+setopt HIST_REDUCE_BLANKS   # 去除命令中的多余空格
+setopt HIST_VERIFY          # 先显示历史命令，让你确认后再执行
+setopt SHARE_HISTORY        # 在多个终端间共享历史
 
 # Input and editing optimization
-setopt MAGIC_EQUAL_SUBST      # 允许 foo=bar somecmd $foo 等形式（适合脚本）
-setopt PROMPTSUBST            # 允许 prompt 中的变量实时更新（用于复杂 prompt）
-setopt NO_BEEP                # 禁用蜂鸣（大部分人会关）
-setopt NO_HUP                 # 退出 shell 不发送 HUP 信号，避免关闭后台作业
+setopt MAGIC_EQUAL_SUBST # 允许 foo=bar somecmd $foo 等形式（适合脚本）
+setopt PROMPTSUBST       # 允许 prompt 中的变量实时更新（用于复杂 prompt）
+setopt NO_BEEP           # 禁用蜂鸣（大部分人会关）
+setopt NO_HUP            # 退出 shell 不发送 HUP 信号，避免关闭后台作业
 
 # Path and command lookup
-setopt PATH_DIRS     # 输入目录中的命令名会自动搜索 PATH 中的目录
+setopt PATH_DIRS # 输入目录中的命令名会自动搜索 PATH 中的目录
 
 # Safety and error handling
-setopt NO_CASE_GLOB  # 文件名匹配大小写敏感（你设置的是“关闭大小写敏感”）
-setopt NONOMATCH     # 如果通配符找不到匹配项，不报错（而是原样输出）
+setopt NO_CASE_GLOB # 文件名匹配大小写敏感（你设置的是“关闭大小写敏感”）
+setopt NONOMATCH    # 如果通配符找不到匹配项，不报错（而是原样输出）
 
 # xhost access control
 xhost +local: &>/dev/null
@@ -99,18 +99,18 @@ fpath=(~/.zsh.d/completions $fpath)
 # install function
 function ins() {
   case "$OS" in
-    debian|ubuntu)
-      sudo nala install -y $@
-      ;;
-    fedora|centos|rocky|almalinux)
-      sudo dnf install -y $@
-      ;;
-    rhel)
-      sudo yum install -y $@
-      ;;
-    *)
-      echo "Unsupported OS: $OS"
-      ;;
+  debian | ubuntu)
+    sudo nala install -y $@
+    ;;
+  fedora | centos | rocky | almalinux)
+    sudo dnf install -y $@
+    ;;
+  rhel)
+    sudo yum install -y $@
+    ;;
+  *)
+    echo "Unsupported OS: $OS"
+    ;;
   esac
   return 1
 }
@@ -120,7 +120,7 @@ function ins() {
 #############
 # Order of execution of related Ice-mods:
 # atinit -> atpull! -> make'!!' -> mv -> cp -> make! ->
-# atclone/atpull -> make -> (plugin script loading) -> 
+# atclone/atpull -> make -> (plugin script loading) ->
 # src -> multisrc -> atload.
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 [ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
@@ -173,7 +173,7 @@ zinit ice lucid as"program" from"gh-r" id-as"starship" \
 zinit light starship/starship
 
 # settings & functions
-zinit ice wait"0" lucid as"program" id-as"autoload" \
+zinit ice wait"1" lucid as"program" id-as"autoload" \
   atinit"fpath+=~/.zsh.d/functions" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
@@ -233,7 +233,7 @@ zinit ice wait"0" lucid as"program" id-as'brew' \
     ' \
   atload"
     export HOMEBREW_NO_AUTO_UPDATE=true
-    export HOMEBREW_AUTO_UPDATE_SECS=$((60*60*24))
+    export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
     " \
   src"init.zsh" \
   atpull"%atclone"
@@ -556,4 +556,3 @@ zinit snippet https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/
 # you need add `zmodload zsh/zprof` to the top of .zshrc file
 # zprof | head -n 20; zmodload -u zsh/zprof
 # echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
-
