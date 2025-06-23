@@ -3,4 +3,9 @@ require "nvchad.options"
 -- add yours here!
 
 local o = vim.o
-o.cursorlineopt = "both" -- to enable cursorline!
+
+-- to enable cursorline!
+o.cursorlineopt = "both"
+
+-- remove unnamedplus
+o.clipboard = ""

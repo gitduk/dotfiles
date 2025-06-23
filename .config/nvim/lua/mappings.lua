@@ -1,20 +1,49 @@
 require "nvchad.mappings"
 
 -- add yours here
-
 local map = vim.keymap.set
 
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 
 -- buffer
-map("n", "L", ":bn<cr>", { desc = "buffer next" })
-map("n", "H", ":bp<cr>", { desc = "buffer previous" })
+map("n", "L", ":bn<cr>", { desc = "Next buffer" })
+map("n", "H", ":bp<cr>", { desc = "Prev buffer" })
 
--- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
+-- move lines
+map("n", "<S-j>", "<cmd>m .1<cr>==", { desc = "Move down" })
+map("n", "<S-k>", "<cmd>m .-2<cr>==", { desc = "Move up" })
+map("v", "<S-j>", ":m '>+1<cr>gv=gv", { desc = "Move down" })
+map("v", "<S-k>", ":m '<-2<cr>gv=gv", { desc = "Move up" })
+-- map("i", "<S-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move down" })
+-- map("i", "<S-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move up" })
+
+-- move to window using the <ctrl> hjkl keys
+map("n", "<C-h>", "<C-w>h", { desc = "Go to left window", remap = true })
+map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window", remap = true })
+map("n", "<C-k>", "<C-w>k", { desc = "Go to upper window", remap = true })
+map("n", "<C-l>", "<C-w>l", { desc = "Go to right window", remap = true })
+
+-- quick delete
+map("i", "<C-h>", "<BS>", { desc = "Backspace" })
+map("i", "<C-l>", "<DEL>", { desc = "Delete" })
+
+-- redo
+map("n", "U", ":redo<cr>", { desc = "Redo" })
+
+-- move cursor
+map("n", "H", "0", { desc = "Move to beginning of line" })
+map("n", "L", "$", { desc = "Move to end of line" })
+
+-- clear search with <esc>
+map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsearch" })
+
+-- better indenting
+map("v", "<", "<gv")
+map("v", ">", ">gv")
 
 -- quick header
-vim.keymap.set("n", "<C-k>", function()
+vim.keymap.set("n", "<leader>k", function()
   local line = vim.fn.getline "."
   local cs = vim.bo.commentstring or "# %s"
   local comment_sym = vim.trim(cs:match "^(.-)%%s" or "#")
@@ -35,4 +64,8 @@ vim.keymap.set("n", "<C-k>", function()
 
   -- 可选：是否调用注释命令
   -- vim.cmd(lnum .. "," .. (lnum + 2) .. "normal gcc")
-end, { desc = "Adaptive boxed comment header" })
+end, { desc = "boxed comment header" })
+
+-- Disable mappings
+-- local nomap = vim.keymap.del
+-- nomap("i", "<C-k>")
