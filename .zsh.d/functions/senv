@@ -5,18 +5,14 @@ function senv() {
   local dir=""
   local venv_names=(".venv" "venv")
 
-  # 如果用户传入了一个目录作为参数
   if [[ -n "$1" && -d "$1" ]]; then
     if [[ -f "$1/bin/activate" ]]; then
       venv_path="$1"
-    elif [[ -f "$1/pyvenv.cfg" && -f "$1/bin/activate" ]]; then
-      venv_path="$1"
     else
-      echo "❌ Provided directory does not appear to be a valid Python virtual environment: $1"
+      echo "🐍 Provided directory is not a valid Python virtual environment: $1"
       return 1
     fi
   else
-    # 没传参数，开始向上查找虚拟环境
     dir=$PWD
     while [[ "$dir" != "/" ]]; do
       for name in $venv_names; do
@@ -25,7 +21,7 @@ function senv() {
           break 2
         fi
       done
-      for candidate in "$dir"/*; do
+      for candidate in "$dir"/*(N); do
         if [[ -f "$candidate/pyvenv.cfg" && -f "$candidate/bin/activate" ]]; then
           venv_path="$candidate"
           break 2
@@ -35,15 +31,17 @@ function senv() {
     done
   fi
 
-  # 激活虚拟环境
   if [[ -n "$venv_path" ]]; then
-    echo "🔹 Activating virtual environment: $venv_path"
-    source "$venv_path/bin/activate"
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+      echo "🐍 Environment already active: $VIRTUAL_ENV"
+    else
+      source "$venv_path/bin/activate"
+      echo "🐍 Activated: $venv_path"
+    fi
   else
-    echo "❌ No virtual environment found."
+    echo "🐍 No virtual environment found."
     return 1
   fi
 }
 
 senv "$@"
-

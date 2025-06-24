@@ -1,0 +1,67 @@
+#!/usr/bin/env zsh
+
+# 默认值
+LENGTH=16
+USE_SPECIAL=0
+SPECIAL_CHARS='!@#$%^&*?:.,()[]{}<>_+-=~'
+
+# 使用说明
+usage() {
+  echo "Usage: $0 -n <length> [-s [special_chars]]"
+  echo "  -n, --length <length>          Specify password length (required)"
+  echo "  -s, --special [special_chars]  Include (or override) special characters (optional)"
+  return 1
+}
+
+# 解析参数
+zparseopts -D -E \
+  n:=LENGTH_OPT -length:=LENGTH_OPT \
+  s=SPECIAL_OPT -special=SPECIAL_OPT
+
+[[ $? -eq 0 ]] || return 1
+
+# 处理 LENGTH 参数
+if [[ ! $#LENGTH_OPT -eq 0 ]]; then
+  LENGTH="${LENGTH_OPT[2]}"
+fi
+
+# 处理 SPECIAL 参数
+if [[ $#SPECIAL_OPT -gt 0 ]]; then
+  USE_SPECIAL=1
+  # 如果用户提供了自定义特殊字符
+  if [[ -n "${SPECIAL_OPT[2]}" ]]; then
+    SPECIAL_CHARS="${SPECIAL_OPT[2]}"
+  fi
+fi
+
+# 检查长度是否合法
+if [[ ! "$LENGTH" =~ '^[0-9]+$' ]] || [[ "$LENGTH" -le 0 ]]; then
+  echo "Error: Password length must be a positive integer."
+  usage
+fi
+
+escape_for_tr() {
+  local raw="$1"
+  local safe="${raw//]/\\]}"
+  safe="${safe//-/\\-}"
+  echo "$safe"
+}
+
+# 构造字符集
+BASE_CHARS='A-Za-z0-9'
+if [[ $USE_SPECIAL -eq 1 ]]; then
+  ESCAPED_SPECIAL=$(escape_for_tr "$SPECIAL_CHARS")
+  CHARS="[$BASE_CHARS$ESCAPED_SPECIAL]"
+else
+  CHARS="[$BASE_CHARS]"
+fi
+
+# 生成密码
+PASSWORD=$(LC_ALL=C tr -dc "$CHARS" </dev/urandom | head -c "$LENGTH")
+
+# 输出结果
+if command -v wl-copy &>/dev/null; then
+  echo "$PASSWORD" | tee /dev/tty | tr -d '\n' | wl-copy
+else
+  echo "$PASSWORD"
+fi

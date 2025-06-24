@@ -42,6 +42,9 @@ map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsea
 map("v", "<", "<gv")
 map("v", ">", ">gv")
 
+-- copy
+map("v", "Y", '"+yy', { desc = "Copy to system clipboard" })
+
 -- quick header
 vim.keymap.set("n", "<leader>k", function()
   local line = vim.fn.getline "."

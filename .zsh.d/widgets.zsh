@@ -31,39 +31,42 @@ function cursor_mode() {
 
 # copy to system clipboard
 function vi-yank-copy {
-   zle vi-yank
-   echo -n "$CUTBUFFER" | wl-copy
+  zle vi-yank
+  echo -n "$CUTBUFFER" | wl-copy
 }
 
 function fzf-alias-widget {
-  cmd=$(grep -Ev '^#|^$' < $HOME/.alias.zsh | cut -b 7- | awk -F '=' '{printf "%-6s=%s\n",$1,$2}' | sed -e 's/=\"/¦ /' -e 's/"$//' | fzf --prompt="alias> " --query=$LBUFFER)
-  if [ -n "$cmd" ]; then
-    BUFFER="$(awk -F '¦ ' '{print $2" "}' <<< "$cmd")"
+  cmd=$(grep -Ev '^#|^$' <$HOME/.alias.zsh | cut -b 7- | awk -F '=' '{printf "%-6s=%s\n",$1,$2}' | sed -e 's/=\"/¦ /' -e 's/"$//' | fzf --prompt="alias> " --query=$LBUFFER)
+  if [[ -n "$cmd" ]]; then
+    BUFFER="$(awk -F '¦ ' '{print $2" "}' <<<"$cmd")"
   fi
   zle reset-prompt
   zle end-of-line
 }
 
 function fzf-apt-widget {
-  package=$(apt-cache search . | fzf --query=$LBUFFER --multi --prompt="pkgs> " \
-    --header="U:upgradable I:installed R:reload Enter:copy" \
-    --bind="U:reload(apt list --upgradable|sed '1d')" \
-    --bind="I:reload(apt list --installed|sed '1d')" \
-    --bind="R:reload(apt-cache search .)"
+  package=$(
+    apt-cache search . | fzf --query=$LBUFFER --multi --prompt="pkgs> " \
+      --header="U:upgradable I:installed R:reload Enter:copy" \
+      --bind="U:reload(apt list --upgradable|sed '1d')" \
+      --bind="I:reload(apt list --installed|sed '1d')" \
+      --bind="R:reload(apt-cache search .)"
   )
   selected=$(echo $package | awk '{printf $1}' | xargs echo -n)
-  echo -n $selected | wl-copy
-  if command -v nala &>/dev/null; then
-    BUFFER="sudo nala install -y $selected"
-  else
-    BUFFER="sudo apt install -y $selected"
+  if [[ -n "$selected" ]]; then
+    echo -n $selected | wl-copy
+    if command -v nala &>/dev/null; then
+      BUFFER="sudo nala install -y $selected"
+    else
+      BUFFER="sudo apt install -y $selected"
+    fi
   fi
   zle reset-prompt
   zle vi-add-eol
 }
 
 function fzf-bindkeys-widget {
-  fzf --prompt="bindkeys> " --query=$LBUFFER <<< "$(bindkey | tr -d '"' | awk '{printf "%-12s| %s\n",$1,$2}')"
+  fzf --prompt="bindkeys> " --query=$LBUFFER <<<"$(bindkey | tr -d '"' | awk '{printf "%-12s| %s\n",$1,$2}')"
   zle reset-prompt
   zle end-of-line
 }
@@ -78,14 +81,13 @@ function fzf-services-widget {
   selected_service=$({
     systemctl --user list-units --no-pager --type=service --no-legend --all
     systemctl --system list-units --no-pager --type=service --no-legend --all
-  } | while read -r raw
-  do
+  } | while read -r raw; do
     if [[ "$raw" = ●* ]]; then
       stat="✘"
-      read _ name load active run comment <<<  "$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+      read _ name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
     else
       stat="✔"
-      read name load active run comment <<<  "$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+      read name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
     fi
     [[ ${#name} -gt 30 ]] && name="${name:0:28}.."
     printf "%s %-30s %-10s %-10s %-10s %s\n" $stat $name $load $active $run $comment
@@ -93,13 +95,12 @@ function fzf-services-widget {
 }
 
 function fzf-crontab-widget {
-  crontab -l | grep -Ev "^#|^$|^[a-zA-Z]" | sort | fzf | while read -r raw
-  do
+  crontab -l | grep -Ev "^#|^$|^[a-zA-Z]" | sort | fzf | while read -r raw; do
     raw=${raw//\*/\\*}
     task="$(echo $raw | sed -n 's/\\\*/*/g;p')"
-    read _ _ _ _ _ command <<< $task
+    read _ _ _ _ _ command <<<$task
     [[ -z "$command" ]] && continue
-    zsh <<< $command
+    zsh <<<$command
   done
 }
 
@@ -133,4 +134,3 @@ zbindkey -M viins '^P' fzf-apt-widget
 zbindkey -M viins '^B' fzf-bindkeys-widget
 # zbindkey -M viins '' fzf-services-widget
 # zbindkey -M viins '' fzf-crontab-widget
-
