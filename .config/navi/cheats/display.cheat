@@ -97,41 +97,38 @@ wget "https://github.com/hyprwm/Hyprland/releases/download/v0.49.0/source-v0.49.
 export CC=gcc-14 CXX=g++-14 && make all && sudo make install
 cd /tmp && tar -xzvf source-v0.49.0.tar.gz && cd hyprland-source/
 
-# sdbus-cpp
-sudo nala install -y libsystemd-dev
-git clone https://github.com/Kistler-Group/sdbus-cpp.git /tmp/sdbus-cpp && cd /tmp/sdbus-cpp/
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . && sudo cmake --build . --target install
+# 16. hyprnotify
+sudo nala install -y libalsa-ocaml-dev
+git clone https://github.com/codelif/hyprnotify.git /tmp/hyprnotify && cd /tmp/hyprnotify/
+go build ./cmd/hyprnotify
+mv ./hyprnotify ~/.local/bin/hyprnotify
 
-# hyprpaper
+# 17. hyprpaper
 sudo nala install -y libmagic-dev
 git clone https://github.com/hyprwm/hyprpaper.git /tmp/hyprpaper && cd /tmp/hyprpaper/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target hyprpaper -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
-# hyprlock
+# 18. hyprlock
 sudo nala install -y libpam0g-dev libdrm-dev 
 git clone https://github.com/hyprwm/hyprlock.git /tmp/hyprlock && cd /tmp/hyprlock/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
-# hypridle
+# 19. hypridle
 git clone https://github.com/hyprwm/hypridle.git /tmp/hypridle && cd /tmp/hypridle/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
   && cmake --build ./build --config Release --target hypridle -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install build \
   && systemctl --user enable --now hypridle.service
 
-# hyprnotify
-sudo nala install -y libalsa-ocaml-dev
-git clone https://github.com/codelif/hyprnotify.git /tmp/hyprnotify && cd /tmp/hyprnotify/
-go build ./cmd/hyprnotify
-mv ./hyprnotify ~/.local/bin/hyprnotify
+# 20. qt6
+wget "https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run" -P /tmp
+chmod +x /tmp/qt-online-installer-linux-x64-online.run && /tmp/qt-online-installer-linux-x64-online.run
 
-# hyprland-qtutils
+# 21. hyprland-qtutils
 sudo nala install -y qt6-base-dev qt6-declarative-dev qt6-declarative-private-dev \
   qt6-wayland-dev qt6-wayland-private-dev qml6-module-qtwayland-compositor \
   qml6-module-qtcore qml6-module-qtqml-workerscript qml6-module-qtqml-models \
@@ -142,9 +139,12 @@ cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PRE
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install build
 
-# qt6
-wget "https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run" -P /tmp
-chmod +x /tmp/qt-online-installer-linux-x64-online.run && /tmp/qt-online-installer-linux-x64-online.run
+# sdbus-cpp
+sudo nala install -y libsystemd-dev
+git clone https://github.com/Kistler-Group/sdbus-cpp.git /tmp/sdbus-cpp && cd /tmp/sdbus-cpp/
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . && sudo cmake --build . --target install
 
 # uwsm - Universal Wayland Session Manager
 git clone https://github.com/Vladimir-csp/uwsm.git /tmp/uwsm && cd /tmp/uwsm

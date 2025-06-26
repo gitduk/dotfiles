@@ -7,9 +7,12 @@ SPECIAL_CHARS='!@#$%^&*?:.,()[]{}<>_+-=~'
 
 # 使用说明
 usage() {
-  echo "Usage: $0 -n <length> [-s [special_chars]]"
-  echo "  -n, --length <length>          Specify password length (required)"
-  echo "  -s, --special [special_chars]  Include (or override) special characters (optional)"
+  echo "Usage: $0 [-n <length>] [-s <special_chars>]\n"
+
+  cat <<'EOF'
+  -n, --length <length>          Specify password length
+  -s, --special <special_chars>  Override) special characters
+EOF
   return 1
 }
 
@@ -36,8 +39,9 @@ fi
 
 # 检查长度是否合法
 if [[ ! "$LENGTH" =~ '^[0-9]+$' ]] || [[ "$LENGTH" -le 0 ]]; then
-  echo "Error: Password length must be a positive integer."
+  echo "Error: Password length must be a positive integer.\n"
   usage
+  return 1
 fi
 
 escape_for_tr() {

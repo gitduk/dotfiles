@@ -31,10 +31,6 @@ map("i", "<C-l>", "<DEL>", { desc = "Delete" })
 -- redo
 map("n", "U", ":redo<cr>", { desc = "Redo" })
 
--- move cursor
-map("n", "H", "0", { desc = "Move to beginning of line" })
-map("n", "L", "$", { desc = "Move to end of line" })
-
 -- clear search with <esc>
 map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsearch" })
 

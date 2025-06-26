@@ -4,7 +4,9 @@
 #
 # A complete reference of available options can be found in `man 5 tofi`.
 
-# ###  Fonts  #################################################################
+#############
+### Fonts ###
+#############
 #
 # Font to use, either a path to a font file or a name.
 #
@@ -12,7 +14,7 @@
 # characters not in the chosen font will fail to render.
 #
 # Otherwise, fonts are interpreted in Pango format.
-font = "MesloLGS Nerd Font"
+font = "Maple Mono NF CN"
 
 # Point size of text.
 font-size = 10
@@ -43,7 +45,9 @@ font-variations = ""
 # sizes.
 hint-font = true
 
-# ###  Text theming  ##########################################################
+####################
+### Text theming ###
+####################
 
 # Default text color
 #
@@ -108,7 +112,9 @@ selection-background-corner-radius = 0
 # Matching portion of selection text
 selection-match-color = #00000000
 
-# ###  Text cursor theme  #####################################################
+#########################
+### Text cursor theme ###
+#########################
 
 # Style of the optional text cursor.
 #
@@ -134,7 +140,9 @@ text-cursor-corner-radius = 0
 # text-cursor-style = underscore, or to 2 otherwise.
 # text-cursor-thickness = 2
 
-# ###  Text layout  ###########################################################
+###################
+### Text layout ###
+###################
 
 # Prompt to display.
 prompt-text = "Run: "
@@ -158,7 +166,10 @@ horizontal = false
 # Minimum width of input in horizontal mode.
 min-input-width = 60
 
-# ###  Window theming  ########################################################
+######################
+### Window theming ###
+######################
+
 # Width and height of the window. Can be pixels or a percentage.
 width = 30%
 height = 20%
@@ -195,7 +206,9 @@ clip-to-padding = true
 # Whether to scale the window by the output's scale factor.
 scale = true
 
-# ###  Window positioning  ####################################################
+##########################
+### Window positioning ###
+##########################
 
 # The name of the output to appear on. An empty string will use the
 # default output chosen by the compositor.
@@ -224,7 +237,9 @@ margin-bottom = 0
 margin-left = 0
 margin-right = 0
 
-# ###  Behaviour  #############################################################
+#################
+### Behaviour ###
+#################
 
 # Hide the mouse cursor.
 hide-cursor = false
@@ -303,7 +318,9 @@ multi-instance = false
 # match "é".
 ascii-input = false
 
-# ###  Inclusion  #############################################################
+#################
+### Inclusion ###
+#################
 
 # Configs can be split between multiple files, and then included
 # within each other.

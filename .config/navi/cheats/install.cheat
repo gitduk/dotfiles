@@ -132,10 +132,15 @@ sudo dpkg -i /tmp/bruno.deb
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/suxin2017/lynx-server/releases/latest/download/lynx-cli-installer.sh | sh
 
 # postgresql-client-17
-sudo apt install wget gnupg2 lsb-release -y
+sudo nala install -y wget gnupg2 lsb-release
 wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/pgdg.gpg
 echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
   | sudo tee /etc/apt/sources.list.d/pgdg.list
 sudo apt update
 sudo apt install postgresql-client-17
+
+# tofi
+sudo nala install -y libfreetype-dev libcairo2-dev libpango1.0-dev libwayland-dev libxkbcommon-dev libharfbuzz-dev
+git clone --depth 1 https://github.com/philj56/tofi.git /tmp/tofi && cd /tmp/tofi
+meson setup build && sudo ninja -C build/ install
 
