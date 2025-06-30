@@ -16,6 +16,12 @@
     }
   },
   {
+    "context": "Editor && vim_mode == normal && !menu",
+    "bindings": {
+      "ctrl-h": "vim::StartOfLine"
+    }
+  },
+  {
     "context": "Terminal",
     "bindings": {
       "ctrl-cmd-space": "terminal::ShowCharacterPalette",

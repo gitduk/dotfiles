@@ -85,7 +85,9 @@ if [[ -d "$HOME/.local/share/Qt/$QT_VERSION" ]]; then
 fi
 
 # fpath
-fpath=(~/.zsh.d/completions $fpath)
+export ZSH_COMPLETIONS="$HOME/.zcompletions"
+[[ ! -d "$ZSH_COMPLETIONS" ]] && mkdir -p "$ZSH_COMPLETIONS"
+fpath=($ZSH_COMPLETIONS $fpath)
 
 #############
 ### TOOLS ###
@@ -123,11 +125,11 @@ function ins() {
 # atclone/atpull -> make -> (plugin script loading) ->
 # src -> multisrc -> atload.
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
-[ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
-[ ! -d $ZINIT_HOME/.git ] && git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+[[ ! -d "$ZINIT_HOME" ]] && mkdir -p "$(dirname $ZINIT_HOME)"
+[[ ! -d "$ZINIT_HOME/.git" ]] && git clone "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
 source "${ZINIT_HOME}/zinit.zsh"
 
-# ensure zbin dir
+# ensure dir
 export BPFX="$HOME/.local/bin"
 [[ ! -d "$BPFX" ]] && mkdir -p $BPFX
 
@@ -512,7 +514,9 @@ zinit ice wait'[[ ! -n "$commands[fscan]" ]]' lucid as"command" from"gh-r" id-as
 zinit light shadow1ng/fscan
 
 # sttr
-zinit ice wait'[[ ! -n "$commands[sttr]" ]]' lucid as"command" from"gh-r" id-as"sttr"
+zinit ice wait'[[ ! -n "$commands[sttr]" ]]' lucid as"command" from"gh-r" id-as"sttr" \
+  atclone"./sttr completion zsh > _sttr" \
+  atpull"%atclone"
 zinit light abhimanyu003/sttr
 
 # dysk - A linux utility to get information on filesystems, like df but better
@@ -533,22 +537,18 @@ zinit light achristmascarl/rainfrog
 ### COMPLETION ###
 ##################
 
-# completions
+# zsh-completions
 zinit ice wait"3" blockf lucid id-as"zsh-completions" \
   atpull"zinit creinstall -q ."
 zinit light zsh-users/zsh-completions
 
 # docker
 zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)docker]} ]]' lucid as"completion"
-zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
-
-# git
-zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)git]} ]]' lucid as"completion"
-zinit snippet OMZ::plugins/git/git.plugin.zsh
+zinit snippet "https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker"
 
 # fzf
 zinit ice wait'[[ -n ${ZLAST_COMMANDS[(r)fzf]} ]]' lucid as"completion"
-zinit snippet https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/zsh/completions/_fzf
+zinit snippet "https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/zsh/completions/_fzf"
 
 #############
 ### Zprof ###

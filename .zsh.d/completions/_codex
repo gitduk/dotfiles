@@ -1,7 +1,0 @@
-# zsh completion for codex
-#compdef codex
-
-_codex() {
-  _arguments '*:filename:_files'
-}
-_codex

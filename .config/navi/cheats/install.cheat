@@ -125,8 +125,8 @@ wget "https://assets.dataflare.app/release/linux/x86_64/Dataflare.AppImage" -O ~
 chmod +x ~/.local/bin/dataflare
 
 # bruno - Postman and Insomnia alternative
-wget "https://github.com/usebruno/bruno/releases/download/v2.3.0/bruno_2.3.0_amd64_linux.deb" -O /tmp/bruno.deb
-sudo dpkg -i /tmp/bruno.deb
+url="$(curl -Ssl https://api.github.com/repos/usebruno/bruno/releases/latest | jq -r '.assets[]|.browser_download_url' | grep -E '.*amd64.*deb$' | head -n 1)"
+wget $url -O /tmp/bruno.deb && sudo dpkg -i /tmp/bruno.deb
 
 # lynx - Lynx Proxy is a high-performance and flexible proxy tool developed in Rust
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/suxin2017/lynx-server/releases/latest/download/lynx-cli-installer.sh | sh
