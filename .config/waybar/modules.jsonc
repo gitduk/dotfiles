@@ -866,7 +866,6 @@
   },
   "custom/poetry": {
     "exec": "~/.config/waybar/scripts/poetry.sh --refresh",
-    "exec-if": "ping -c 1 jinrishici.com",
     "return-type": "json",
     "interval": 1800,
     "tooltip": true,
@@ -876,7 +875,6 @@
   },
   "custom/ipaddress": {
     "exec": "~/.config/waybar/scripts/ipaddress.sh",
-    "exec-if": "ping -c 1 jinrishici.com",
     "return-type": "json",
     "interval": 60,
     "tooltip": true,

@@ -31,11 +31,11 @@ get_ipaddress() {
 	local token="$1"
 	local response=$(curl -s -H "X-User-Token: $token" "https://v2.jinrishici.com/info")
 
-	if [[ $? -eq 0 ]]; then
-		echo "$response"
-	else
+  if [[ -z "$response" ]]; then
 		echo '{"status":"error","data":{"ip":"127.0.0.1","region":"","weatherData":{"weather":"","temperature":""}}}'
-	fi
+  else
+		echo "$response"
+  fi
 }
 
 format_weather() {
@@ -55,14 +55,15 @@ format_weather() {
 # 格式化输出
 format_output() {
 	local json_data="$1"
-	local format="$2"
 
 	# 提取数据
+  local class=$(echo "$json_data" | jq -r '.status')
 	local ip=$(echo "$json_data" | jq -r '.data.ip // "127.0.0.1"')
 	local region=$(echo "$json_data" | jq -r '.data.region // ""')
 	local weather=$(echo "$json_data" | jq -r '.data.weatherData.weather // ""')
 	local temperature=$(echo "$json_data" | jq -r '.data.weatherData.temperature // ""')
 	local time=$(echo "$json_data" | jq -r '.data.beijingTime // ""')
+
 	if [[ "$time" == "" ]]; then
 		time=$(date "+%H:%M:%S")
 	else
@@ -71,10 +72,16 @@ format_output() {
 		region="${region/|/-}"
 	fi
 
+  if [[ "$class" = "error" ]]; then
+    tooltip=""
+  else
+    tooltip="$region | $weather ${temperature}°C | $time"
+  fi
+
 	jq -n -c \
 		--arg text "$ip" \
-		--arg tooltip "$region | $weather ${temperature}°C | $time" \
-		--arg class "ip" \
+		--arg tooltip "$tooltip" \
+		--arg class "$class" \
 		'{text: $text, tooltip: $tooltip, class: $class}'
 }
 
@@ -83,21 +90,19 @@ main() {
 
 	# 检查依赖
 	if ! command -v jq &>/dev/null; then
-		echo "错误：需要安装 jq 工具" >&2
-		echo '{"text":"需要安装 jq", "class":"error"}'
+		echo '{"text":"jq not found", "class":"error"}'
 		exit 1
 	fi
 
 	if ! command -v curl &>/dev/null; then
-		echo "错误：需要安装 curl 工具" >&2
-		echo '{"text":"需要安装 curl", "class":"error"}'
+		echo '{"text":"curl not found", "class":"error"}'
 		exit 1
 	fi
 
 	# 获取 Token
 	local token="$(get_token)"
 	if [[ $? -ne 0 ]]; then
-		echo '{"text":"Token 获取失败", "class":"error"}'
+		echo '{"text":"get token failed", "class":"error"}'
 		exit 1
 	fi
 
