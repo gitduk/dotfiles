@@ -241,10 +241,12 @@ zinit ice wait"0" lucid as"program" id-as'brew' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# cargo
-zinit ice wait"0" lucid as"program" id-as'cargo' \
+# rustup
+zinit ice wait"0" lucid as"program" id-as'rustup' \
   atclone"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    $HOME/.cargo/bin/rustup completions zsh > _rustup
+    $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
     $HOME/.cargo/bin/cargo install --locked wallust \
       && $HOME/.cargo/bin/wallust theme base16-default-dark
     " \

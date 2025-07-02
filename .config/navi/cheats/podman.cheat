@@ -17,9 +17,9 @@ podman run -d --name postgres \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=changeme \
   -e PGDATA=/var/lib/postgresql/data/pgdata \
-  -v ~/.postgres:/var/lib/postgresql/data \
+  -v postgres:/var/lib/postgresql/data \
   -p 5432:5432 \
-  --restart unless-stopped \
+  --restart=unless-stopped \
   postgres:latest
 
 # stirling-pdf
@@ -32,7 +32,7 @@ podman run -d --name stirling-pdf \
   -v ./logs:/logs \
   -v ./customFiles:/customFiles \
   -p 7000:8080 \
-  --restart unless-stopped \
+  --restart=unless-stopped \
   frooodle/s-pdf:latest
 
 # pairdrop
@@ -45,7 +45,7 @@ podman run -d --name pairdrop \
   -e DEBUG_MODE=false \
   -e TZ=Etc/UTC \
   -p 0.0.0.0:3000:3000 \
-  --restart unless-stopped \
+  --restart=unless-stopped \
   lscr.io/linuxserver/pairdrop 
 
 # uptime-kuma
@@ -54,8 +54,8 @@ podman run -d --name uptime-kuma \
   -e HTTP_PROXY=http://127.0.0.1:7890 \
   -e HTTPS_PROXY=http://127.0.0.1:7890 \
   -v ~/.uptime-kuma:/app/data \
-  --network host \
-  --restart unless-stopped \
+  --network=host \
+  --restart=unless-stopped \
   louislam/uptime-kuma:1
 
 # beszel: a lightweight server monitoring
@@ -63,18 +63,26 @@ mkdir -p ~/.beszel_data
 podman run -d --name beszel \
   -v ~/.beszel_data:/beszel_data \
   -p 8090:8090 \
-  --restart unless-stopped \
+  --restart=unless-stopped \
   docker.io/henrygd/beszel
 
 # mazanoke: A self-hosted local image optimizer that runs in your browser.
 podman run -d --name mazanoke \
   -p 7374:80 \
-  --restart unless-stopped \
+  --restart=unless-stopped \
   ghcr.io/civilblur/mazanoke:latest
 
 # attu milvus webui
 podman run -d --name attu \
-  -p 5000:3000 \
   -e MILVUS_URL=<hosts>:19530 \
+  -p 5000:3000 \
+  --restart=always \
   zilliz/attu:latest
+
+# open-webui
+podman run -d --name open-webui \
+  -p 3000:8080 \
+  -v open-webui:/app/backend/data \
+  --restart=always \
+  ghcr.io/open-webui/open-webui:main
 

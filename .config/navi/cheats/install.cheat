@@ -144,3 +144,9 @@ sudo nala install -y libfreetype-dev libcairo2-dev libpango1.0-dev libwayland-de
 git clone --depth 1 https://github.com/philj56/tofi.git /tmp/tofi && cd /tmp/tofi
 meson setup build && sudo ninja -C build/ install
 
+# isd - a better way to work with systemd units
+uv tool install --python=3.11 isd-tui
+
+# somo - A friendly alternative to netstat for socket and port monitoring on Linux
+cargo install somo
+

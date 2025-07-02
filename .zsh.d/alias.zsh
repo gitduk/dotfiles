@@ -57,7 +57,7 @@ alias carm="cargo remove"
 alias cac="cargo clean"
 alias cas="cargo search --registry=crates-io"
 alias cau="cargo update"
-alias cais="cargo install"
+alias cais="cargo install --locked"
 alias caui="cargo uninstall"
 
 # change
@@ -137,6 +137,9 @@ alias ff="fzf"
 
 # gitui
 alias gu="gitui"
+
+# gemini
+alias gm="gemini"
 
 # git
 alias gad="git add ."
