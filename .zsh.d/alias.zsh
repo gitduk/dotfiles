@@ -30,6 +30,9 @@ alias bt="bluetoothctl"
 ### C ###
 #########
 
+# claude code
+alias cco="ccr code --dangerously-skip-permissions"
+
 # dotfiles
 ialias c="git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git"
 alias cs="c status"
@@ -81,20 +84,20 @@ alias dsk="dysk"
 alias di="direnv"
 
 # docker
-alias dcv="docker volume"
-alias dcpl="docker pull"
-alias dcr="docker run"
+alias dv="docker volume"
+alias dpl="docker pull"
+alias dr="docker run"
 
 alias dcc="docker container"
-alias dcls="docker container ls"
-alias dcla="docker container ls -a"
-alias dcs="docker container stats"
-alias dcst="docker container start"
-alias dcrst="docker container restart"
-alias dcstp="docker container stop"
-alias dcrm="docker container rm"
-alias dcat="docker container attach"
-alias dcpr="docker container prune"
+alias dls="docker container ls"
+alias dla="docker container ls -a"
+alias ds="docker container stats"
+alias dst="docker container start"
+alias drst="docker container restart"
+alias dstp="docker container stop"
+alias drm="docker container rm"
+alias dat="docker container attach"
+alias dpr="docker container prune"
 
 alias dils="docker image ls"
 alias dirm="docker image rm"
@@ -106,8 +109,8 @@ alias dcpud="docker compose up -d"
 alias dcplg="docker compose logs"
 alias dcpec="docker compose exec -it"
 
-alias dcisp="docker inspect"
-alias dcip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
+alias disp="docker inspect"
+alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
 
 # dpkg
 alias dis="sudo dpkg -i"
