@@ -239,7 +239,7 @@ zinit ice wait"0" lucid as"program" id-as'brew' \
     " \
   src"init.zsh" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light zdharma-continuum/null=s
 
 # rustup
 zinit ice wait"0" lucid as"program" id-as'rustup' \
@@ -247,12 +247,13 @@ zinit ice wait"0" lucid as"program" id-as'rustup' \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     $HOME/.cargo/bin/rustup completions zsh > _rustup
     $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
-    $HOME/.cargo/bin/cargo install --locked wallust \
-      && $HOME/.cargo/bin/wallust theme base16-default-dark
+    $HOME/.cargo/bin/cargo install --root $HOME/.local --locked wallust
+    command -v wallust &>/dev/null && wallust theme base16-default-dark -s
     " \
   atload'
     export PATH="$HOME/.cargo/bin:$PATH"
-    [[ -n "$commands[sccache]" ]] && export RUSTC_WRAPPER="$commands[sccache]"
+    export CARGO_INSTALL_ROOT="$HOME/.local"
+    command -v sccache &>/dev/null && export RUSTC_WRAPPER="$(command -v sccache)"
   ' \
   atpull"%atclone"
 zinit light zdharma-continuum/null

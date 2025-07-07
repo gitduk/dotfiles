@@ -41,6 +41,9 @@ map("v", ">", ">gv")
 -- copy
 map("v", "Y", '"+yy', { desc = "Copy to system clipboard" })
 
+-- colse all
+map("n", "<leader>q", "<cmd>wqa!<cr><esc>", { desc = "Copy to system clipboard" })
+
 -- quick header
 vim.keymap.set("n", "<leader>k", function()
   local line = vim.fn.getline "."

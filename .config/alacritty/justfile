@@ -1,2 +1,2 @@
 default:
-  theme=$(ls ~/.config/alacritty/themes/*.toml | awk -F/ '{gsub(/\.toml$/,"",$NF); print $NF}' | fzf --height 40% --reverse --header="选择 Alacritty 主题") && [ -n "$theme" ] && awk -v t="$theme" '/^import/{$0="import = [\"~/.config/alacritty/themes/" t ".toml\"]"}1' ~/.config/alacritty/alacritty.toml > tmp && mv tmp ~/.config/alacritty/alacritty.toml && echo "主题已切换至: $theme"
+  color=$(ls ~/.config/alacritty/colors/*.toml | awk -F/ '{gsub(/\.toml$/,"",$NF); print $NF}' | fzf --height 40% --reverse --header="选择 Alacritty 配色") && [ -n "$color" ] && awk -v t="$color" '/^import/{$0="import = [\"~/.config/alacritty/colors/" t ".toml\"]"}1' ~/.config/alacritty/alacritty.toml > tmp && mv tmp ~/.config/alacritty/alacritty.toml && echo "配色已切换至: $color"

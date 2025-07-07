@@ -398,12 +398,12 @@
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {
-      "activated": " ",
-      "deactivated": " "
-    }
+      "activated": "󱋙",
+      "deactivated": "󰌪"
+    },
+    "tooltip": false
   },
   "keyboard-state": {
-    //"numlock": true,
     "capslock": true,
     "format": {
       "numlock": "N {icon}",
@@ -628,10 +628,11 @@
     "format": " {}"
   },
   "custom/color_scheme": {
-    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark//; s/prefer-light//; t; s/.*/󰖨/'",
+    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark/󰖔/; s/prefer-light/󰃠/; t; s/.*/󰖨/'",
     "format": " {} ",
     "interval": "once",
     "signal": 1,
+    "tooltip": false,
     "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh"
   },
   "custom/lock": {

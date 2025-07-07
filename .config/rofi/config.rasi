@@ -198,5 +198,5 @@ configuration {
 
 }
 
-@theme "theme.rasi"
+@theme "themes.rasi"
 

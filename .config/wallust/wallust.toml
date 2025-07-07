@@ -29,17 +29,17 @@ threshold = 10
 
 [templates]
 hypr.template = 'hyprland.conf'
-hypr.target = '~/.config/wallust/target/hypr/colors.conf'
+hypr.target = '~/.config/hypr/colors.conf'
 
 waybar.template = 'waybar.css'
-waybar.target = '~/.config/wallust/target/waybar/colors.css'
+waybar.target = '~/.config/waybar/colors.css'
 
 rofi.template = 'rofi.rasi'
-rofi.target = '~/.config/wallust/target/rofi/colors.rasi'
+rofi.target = '~/.config/rofi/colors.rasi'
 
 kitty.template = 'kitty.conf'
 kitty.target = '~/.config/kitty/kitty.conf'
 
-swaync.template = 'swaync.css'
-swaync.target = '~/.config/wallust/target/swaync/colors.css'
+alacritty.template = 'alacritty.toml'
+alacritty.target = '~/.config/alacritty/colors.toml'
 

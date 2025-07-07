@@ -1,6 +1,6 @@
 [general]
 live_config_reload = true
-import = ["~/.config/alacritty/themes/github_dark_default.toml"]
+import = ["~/.config/alacritty/colors/github_dark_default.toml"]
 
 [env]
 TERM = "tmux-256color"

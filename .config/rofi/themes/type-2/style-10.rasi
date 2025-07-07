@@ -16,7 +16,7 @@ configuration {
 }
 
 /*****----- Global Properties -----*****/
-@import                          "color.rasi"
+@import                          "colors.rasi"
 
 * {
     /* For Screens with 1920x1080 resolution */

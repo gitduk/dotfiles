@@ -2,10 +2,10 @@
 
 OPTIONS="s:r:l:i:q"
 LONGOPTS="set:,random:,loop:,interval:,query,select:,remote:"
-ARGS=`getopt -a --options=$OPTIONS --longoptions=$LONGOPTS --name "${0##*/}" -- "$@"`
+ARGS=$(getopt -a --options=$OPTIONS --longoptions=$LONGOPTS --name "${0##*/}" -- "$@")
 if [[ $? -ne 0 || $# -eq 0 ]]; then
-  cat <<- EOF
-$0: -[`echo $OPTIONS|sed 's/,/|/g'`] --[`echo $LONGOPTS|sed 's/,/|/g'`]
+  cat <<-EOF
+$0: -[$(echo $OPTIONS | sed 's/,/|/g')] --[$(echo $LONGOPTS | sed 's/,/|/g')]
 EOF
 fi
 eval set -- "$ARGS"
@@ -16,6 +16,7 @@ INTERVAL=1800
 SCRIPT="$0"
 WALLPAPER_DIR="$HOME/Pictures/wallpapers"
 [[ -d "$WALLPAPER_DIR" ]] || mkdir -p "$WALLPAPER_DIR"
+wallust_cmd="$HOME/.cargo/bin/wallust"
 
 wallpaper_from() {
   find "$1" -type f -iname "*.jpg" \
@@ -27,20 +28,23 @@ wallpaper_from() {
 wallpaper_set() {
   local wallpaper="$1"
   if [[ -f "$wallpaper" ]]; then
-    wallust_waybar "$wallpaper"
+    # general colors
+    wallust run "$wallpaper" -s 2>/dev/null
+
+    # reload hyprland
+    hyprctl reload &>/dev/null
+
+    # reload waybar & hyprpaper
+    pidof waybar &>/dev/null && killall -SIGUSR2 waybar
+    pidof hyprpaper &>/dev/null || nohup hyprpaper >/dev/null 2>&1 &
+    disown
+    sleep 0.1
+
+    # set wallpaper
     hyprctl hyprpaper unload all &>/dev/null
     hyprctl hyprpaper preload "$wallpaper" &>/dev/null
     hyprctl hyprpaper wallpaper "$FOCUSED_MONITOR,$wallpaper" &>/dev/null
   fi
-}
-
-wallust_waybar() {
-  wallust run "$1" -s 2>/dev/null
-  sleep 0.3
-  pidof waybar &>/dev/null && killall -SIGUSR2 waybar
-  pidof hyprpaper &>/dev/null || nohup hyprpaper > /dev/null 2>&1 &
-  disown
-  sleep 0.2
 }
 
 wallpaper_loop() {
@@ -72,7 +76,7 @@ wallpaper_select() {
     fi
   '
   selected="$(
-    wallpaper_from $wallpaper_dir | shuf | \
+    wallpaper_from $wallpaper_dir | shuf |
       fzf --preview=$preview \
         --preview-window=$window \
         --bind "J:down,K:up" \
@@ -101,10 +105,10 @@ bing() {
   fi
 
   # Extract URL and copyright
-  url=$(jq .url <<< $resp)
-  name=$(jq .copyright <<< $resp)
+  url=$(jq .url <<<$resp)
+  name=$(jq .copyright <<<$resp)
 
-    # Handle cases where URL or copyright might be missing
+  # Handle cases where URL or copyright might be missing
   if [[ -z "$url" || -z "$name" ]]; then
     echo "Error: Missing data in response."
     return 1
@@ -124,49 +128,51 @@ bing() {
 
 while true; do
   case "$1" in
-    -s|--set)
-      wallpaper_set "$2"
-      shift
-      ;;
-    -r|--random)
-      listactive="$(hyprctl hyprpaper listactive)"
-      current_wallpaper="$(echo -n "$listactive" | awk -F' = ' "/$FOCUSED_MONITOR/{print \$2}")"
-      if [[ -f "$current_wallpaper" ]]; then
-        random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
-      else
-        random="$(wallpaper_from $2 | shuf -n 1)"
-      fi
-      wallpaper_set "$random"
-      shift
-      ;;
-    -l|--loop)
-      wallpaper_loop "$2"
-      shift
-      ;;
-    -i|--interval)
-      INTERVAL="$2"
-      shift
-      ;;
-    --select)
-      wallpaper_select "$2"
-      shift
-      ;;
-    --remote)
-      case "$2" in
-        bing) wallpaper="$(bing)" ;;
-        *) wallpaper="$(bing)" ;;
-      esac
-      notify-send "$2" "$wallpaper"
-      wallpaper_set "$wallpaper"
-      shift
-      ;;
-    -q|--query) ;;
-    --) shift; break ;;
-    *)
-      echo "Invalid option: $1"
-      exit 1
-      ;;
+  -s | --set)
+    wallpaper_set "$2"
+    shift
+    ;;
+  -r | --random)
+    listactive="$(hyprctl hyprpaper listactive)"
+    current_wallpaper="$(echo -n "$listactive" | awk -F' = ' "/$FOCUSED_MONITOR/{print \$2}")"
+    if [[ -f "$current_wallpaper" ]]; then
+      random="$(wallpaper_from $2 | grep -v "$current_wallpaper" | shuf -n 1)"
+    else
+      random="$(wallpaper_from $2 | shuf -n 1)"
+    fi
+    wallpaper_set "$random"
+    shift
+    ;;
+  -l | --loop)
+    wallpaper_loop "$2"
+    shift
+    ;;
+  -i | --interval)
+    INTERVAL="$2"
+    shift
+    ;;
+  --select)
+    wallpaper_select "$2"
+    shift
+    ;;
+  --remote)
+    case "$2" in
+    bing) wallpaper="$(bing)" ;;
+    *) wallpaper="$(bing)" ;;
+    esac
+    notify-send "$2" "$wallpaper"
+    wallpaper_set "$wallpaper"
+    shift
+    ;;
+  -q | --query) ;;
+  --)
+    shift
+    break
+    ;;
+  *)
+    echo "Invalid option: $1"
+    exit 1
+    ;;
   esac
   shift
 done
-
