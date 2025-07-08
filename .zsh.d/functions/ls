@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-
-if hash eza &>/dev/null; then
-  eza "$@"
-else
-  /usr/bin/ls "$@"
-fi
-

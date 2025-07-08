@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+icon="󰌠"
+
 function senv() {
   local venv_path=""
   local dir=""
@@ -9,7 +11,7 @@ function senv() {
     if [[ -f "$1/bin/activate" ]]; then
       venv_path="$1"
     else
-      echo "🐍 Provided directory is not a valid Python virtual environment: $1"
+      echo "$icon Provided directory is not a valid Python virtual environment: $1"
       return 1
     fi
   else
@@ -33,13 +35,13 @@ function senv() {
 
   if [[ -n "$venv_path" ]]; then
     if [[ -n "$VIRTUAL_ENV" ]]; then
-      echo "🐍 Environment already active: $VIRTUAL_ENV"
+      echo "$icon Environment already active: $VIRTUAL_ENV"
     else
       source "$venv_path/bin/activate"
-      echo "🐍 Activated: $venv_path"
+      echo "$icon Environment activated: $venv_path"
     fi
   else
-    echo "🐍 No virtual environment found."
+    echo "$icon No virtual environment found."
     return 1
   fi
 }

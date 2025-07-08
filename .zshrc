@@ -93,11 +93,6 @@ fpath=($ZSH_COMPLETIONS $fpath)
 ### TOOLS ###
 #############
 
-# pre-install
-[[ -n "$commands[nala]" ]] || sudo apt install -y nala
-[[ -n "$commands[git]" ]] || ins git
-[[ -n "$commands[curl]" ]] || ins curl
-
 # install function
 function ins() {
   case "$OS" in
@@ -116,6 +111,44 @@ function ins() {
   esac
   return 1
 }
+
+# nala
+if command -v nala &>/dev/null; then
+  alias nai="sudo nala install -y"
+  alias nar="sudo nala remove"
+  alias nap="sudo nala purge"
+  alias nau="sudo nala update"
+  alias naug="sudo nala upgrade"
+  alias naf="sudo nala fetch"
+  alias nafx="sudo nala --fix-broken"
+  alias nas="sudo nala show"
+  alias nasc="sudo nala search"
+  alias nah="sudo nala history"
+  alias nac="sudo nala clean"
+else
+  sudo apt install -y nala
+fi
+
+# git
+if command -v git &>/dev/null; then
+  alias gad="git add ."
+  alias gst="git status"
+  alias gsth="git stash"
+  alias gsp="git stash pop"
+  alias gcm="git commit -m"
+  alias gps="git push"
+  alias gpl="git pull --rebase"
+  alias gcl="git clone --depth 1"
+else
+  ins git
+fi
+
+# curl
+if command -v git &>/dev/null; then
+  alias cl="curl"
+else
+  ins curl
+fi
 
 #############
 ### ZINIT ###
@@ -180,6 +213,7 @@ zinit ice wait"1" lucid as"program" id-as"autoload" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
     for script (~/.zsh.d/*.zsh(N)) source $script
+    [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh
   '
 zinit light zdharma-continuum/null
 
@@ -216,6 +250,10 @@ zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
   "
 zinit light zsh-users/zsh-history-substring-search
 
+# Aloxaf/fzf-tab
+zinit ice wait"1" lucid id-as"fzf-tab"
+zinit light Aloxaf/fzf-tab
+
 # sudo
 zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
 
@@ -233,12 +271,13 @@ zinit ice wait"0" lucid as"program" id-as'brew' \
     /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
     brew install lnav
     ' \
+  atpull"%atclone" \
   atload"
     export HOMEBREW_NO_AUTO_UPDATE=true
     export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
+    alias br="brew"
     " \
-  src"init.zsh" \
-  atpull"%atclone"
+  src"init.zsh"
 zinit light zdharma-continuum/null=s
 
 # rustup
@@ -250,12 +289,12 @@ zinit ice wait"0" lucid as"program" id-as'rustup' \
     $HOME/.cargo/bin/cargo install --root $HOME/.local --locked wallust
     command -v wallust &>/dev/null && wallust theme base16-default-dark -s
     " \
+  atpull"%atclone" \
   atload'
     export PATH="$HOME/.cargo/bin:$PATH"
     export CARGO_INSTALL_ROOT="$HOME/.local"
     command -v sccache &>/dev/null && export RUSTC_WRAPPER="$(command -v sccache)"
-  ' \
-  atpull"%atclone"
+  '
 zinit light zdharma-continuum/null
 
 # golang
@@ -272,6 +311,9 @@ zinit ice wait'0' lucid as"program" id-as'golang' \
     export GOPRIVATE="*.corp.example.com,rsc.io/private"
     export GOSUMDB="sum.golang.org"
     export GO111MODULE=on
+    alias gomi="go mod init"
+    alias gomt="go mod tidy"
+    alias gor="go run ."
     ' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
@@ -281,7 +323,10 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"fzf" \
   atclone"./fzf --zsh > init.zsh" \
   atclone"mv ./fzf $BPFX/" \
   src"init.zsh" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias ff="fzf"
+  '
 zinit light junegunn/fzf
 
 # navi
@@ -320,6 +365,11 @@ zinit ice wait'[[ ! -n "$commands[bun]" ]]' lucid as"program" from"gh-r" id-as'b
   atload'
     export PATH="$HOME/.bun/bin:$PATH"
     export PATH="$HOME/.cache/.bun/bin:$PATH"
+    alias b="bun"
+    alias bx="bun x"
+    alias bad="bun add"
+    alias bis="bun install -g"
+    alias brm="bun remove -g"
   '
 zinit light oven-sh/bun
 
@@ -331,7 +381,21 @@ zinit ice wait'[[ -n $DISPLAY && ! -n "$commands[alacritty]" ]]' lucid as"progra
   atclone"sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg" \
   atclone"sudo desktop-file-install extra/linux/Alacritty.desktop" \
   atclone"sudo update-desktop-database" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias ca="cargo"
+    alias cai="cargo init"
+    alias caad="cargo add"
+    alias cab="cargo build"
+    alias car="cargo run"
+    alias caw="cargo watch -x run"
+    alias carm="cargo remove"
+    alias cac="cargo clean"
+    alias cas="cargo search --registry=crates-io"
+    alias cau="cargo update"
+    alias cais="cargo install --locked"
+    alias caui="cargo uninstall"
+  '
 zinit light alacritty/alacritty
 
 # fd
@@ -409,14 +473,23 @@ zinit light ajeetdsouza/zoxide
 zinit ice wait"2" lucid as"command" from"gh-r" id-as"direnv" \
   atclone"mv direnv* direnv" \
   atclone"./direnv hook zsh > init.zsh" \
-  src"init.zsh" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias di="direnv"
+  ' \
+  src"init.zsh"
 zinit light direnv/direnv
 
 # just
 zinit ice wait'[[ ! -n "$commands[just]" ]]' lucid as"command" from"gh-r" id-as"just" \
   atclone'./just --completions zsh > _just' \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atclone'
+    alias js="just"
+    alias jsi="just --init"
+    alias jse="just --edit"
+    alias jsl="just --list"
+  '
 zinit light casey/just
 
 # delta - A syntax-highlighting pager for git, diff, and grep output
@@ -427,7 +500,10 @@ zinit ice wait'[[ ! -n "$commands[delta]" ]]' lucid as"command" from"gh-r" id-as
 zinit light dandavison/delta
 
 # curlie
-zinit ice wait'[[ ! -n "$commands[curlie]" ]]' lucid as"command" from"gh-r" id-as"curlie"
+zinit ice wait'[[ ! -n "$commands[curlie]" ]]' lucid as"command" from"gh-r" id-as"curlie" \
+  atload'
+    alias curl="curlie"
+  '
 zinit light rs/curlie
 
 # hurl
@@ -436,23 +512,35 @@ zinit ice wait'[[ ! -n "$commands[hurl]" ]]' lucid as"command" from"gh-r" id-as"
   atclone"mv */completions/_hurl ." \
   atclone"mv */completions/_hurlfmt ." \
   atclone"rm -rf */" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias hr="hurl"
+  '
 zinit light Orange-OpenSource/hurl
 
 # dust
 zinit ice wait'[[ ! -n "$commands[dust]" ]]' lucid as"command" from"gh-r" id-as"dust" \
   atclone"sudo mv */dust /usr/bin/" \
   atclone"rm -rf */" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias du="dust"
+  '
 zinit light bootandy/dust
 
 # eza - eza is a modern replacement for ls
-zinit ice wait'[[ ! -n "$commands[eza]" ]]' lucid as"command" from"gh-r" id-as"eza"
+zinit ice wait'[[ ! -n "$commands[eza]" ]]' lucid as"command" from"gh-r" id-as"eza" \
+  atload'
+    alias ls="eza"
+  '
 zinit light eza-community/eza
 
 # fx - Command-line tool and terminal JSON viewer
 zinit ice wait'[[ ! -n "$commands[fx]" ]]' lucid as"command" from"gh-r" id-as"fx" \
-  atclone"mv fx* fx"
+  atclone"mv fx* fx" \
+  atload'
+    alias jq="fx"
+  '
 zinit light antonmedv/fx
 
 # gh
@@ -475,7 +563,10 @@ zinit ice wait'[[ ! -n "$commands[grex]" ]]' lucid as"command" from"gh-r" id-as"
 zinit light pemistahl/grex
 
 # procs - procs is a replacement for ps written in Rust
-zinit ice wait'[[ ! -n "$commands[procs]" ]]' lucid as"command" from"gh-r" id-as"procs"
+zinit ice wait'[[ ! -n "$commands[procs]" ]]' lucid as"command" from"gh-r" id-as"procs" \
+  atload'
+    alias ps="procs"
+  '
 zinit light dalance/procs
 
 # ripgrep - ripgrep recursively searches directories for a regex pattern while respecting your gitignore
@@ -501,7 +592,10 @@ zinit ice wait'[[ ! -n "$commands[yazi]" ]]' lucid as"command" from"gh-r" id-as"
   atclone"mv comp*/_ya ." \
   atclone"mv comp*/_yazi ." \
   atclone"rm -rf */" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias y="yazi"
+  '
 zinit light sxyazi/yazi
 
 # uv - python package manager
@@ -519,7 +613,10 @@ zinit light shadow1ng/fscan
 # sttr
 zinit ice wait'[[ ! -n "$commands[sttr]" ]]' lucid as"command" from"gh-r" id-as"sttr" \
   atclone"./sttr completion zsh > _sttr" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias st="sttr"
+  '
 zinit light abhimanyu003/sttr
 
 # dysk - A linux utility to get information on filesystems, like df but better
@@ -527,7 +624,10 @@ zinit ice wait'[[ ! -n "$commands[dysk]" ]]' lucid as"command" from"gh-r" id-as"
   atclone"mv */completion/_dysk ." \
   atclone"mv */x86_64-unknown-linux-musl/dysk ." \
   atclone"rm -rf */" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    alias dsk="dysk"
+  '
 zinit light Canop/dysk
 
 # rainfrog - a database management tui

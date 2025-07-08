@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-
-if hash procs &>/dev/null; then
-  procs "$@"
-else
-  /usr/bin/ps "$@"
-fi
-

@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-
-if hash curlie &>/dev/null; then
-  curlie "$@"
-else
-  /usr/bin/curl "$@"
-fi
-

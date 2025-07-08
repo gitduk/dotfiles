@@ -37,6 +37,8 @@ map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Escape and clear hlsea
 -- better indenting
 map("v", "<", "<gv")
 map("v", ">", ">gv")
+map("v", "H", "<gv")
+map("v", "L", ">gv")
 
 -- copy
 map("v", "Y", '"+yy', { desc = "Copy to system clipboard" })
