@@ -4,46 +4,30 @@
 # Guide: https://thevaluable.dev/zsh-line-editor-configuration-mouseless/
 # Manual: https://zsh.sourceforge.io/Doc/Release/Zsh-Line-Editor.html#Zle-Widgets
 
-function cursor_mode() {
-  # See https://ttssh2.osdn.jp/manual/4/en/usage/tips/vim.html for cursor shapes
-  cursor_block='\e[2 q'
-  cursor_beam='\e[6 q'
-
-  function zle-keymap-select {
-    if [[ ${KEYMAP} == vicmd ]] ||
-      [[ $1 = 'block' ]]; then
-      echo -ne $cursor_block
-    elif [[ ${KEYMAP} == main ]] ||
-      [[ ${KEYMAP} == viins ]] ||
-      [[ ${KEYMAP} = '' ]] ||
-      [[ $1 = 'beam' ]]; then
-      echo -ne $cursor_beam
-    fi
-  }
-
-  zle-line-init() {
-    echo -ne $cursor_beam
-  }
-
-  zle -N zle-keymap-select
-  zle -N zle-line-init
+# bindkey quickly
+function zbindkey {
+  eval wid_name=\$$#
+  zle -N $wid_name
+  bindkey $*
 }
+zbindkey -M vicmd 'e' edit-command-line
+
+####################
+### vi-yank-copy ###
+####################
 
 # copy to system clipboard
 function vi-yank-copy {
   zle vi-yank
   echo -n "$CUTBUFFER" | wl-copy
 }
+zbindkey -M vicmd 'Y' vi-yank-copy
 
-function fzf-alias-widget {
-  cmd=$(grep -Ev '^#|^$' <$HOME/.alias.zsh | cut -b 7- | awk -F '=' '{printf "%-6s=%s\n",$1,$2}' | sed -e 's/=\"/¦ /' -e 's/"$//' | fzf --prompt="alias> " --query=$LBUFFER)
-  if [[ -n "$cmd" ]]; then
-    BUFFER="$(awk -F '¦ ' '{print $2" "}' <<<"$cmd")"
-  fi
-  zle reset-prompt
-  zle end-of-line
-}
+######################
+### fzf-apt-widget ###
+######################
 
+# fzf pkgs
 function fzf-apt-widget {
   package=$(
     apt-cache search . | fzf --query=$LBUFFER --multi --prompt="pkgs> " \
@@ -64,18 +48,23 @@ function fzf-apt-widget {
   zle reset-prompt
   zle vi-add-eol
 }
+zbindkey -M viins '^P' fzf-apt-widget
 
+###########################
+### fzf-bindkeys-widget ###
+###########################
+
+# list Keybindings
 function fzf-bindkeys-widget {
   fzf --prompt="bindkeys> " --query=$LBUFFER <<<"$(bindkey | tr -d '"' | awk '{printf "%-12s| %s\n",$1,$2}')"
   zle reset-prompt
   zle end-of-line
 }
+zbindkey -M viins '^B' fzf-bindkeys-widget
 
-function space-widget {
-  BUFFER="$BUFFER "
-  zle reset-prompt
-  zle end-of-line
-}
+###########################
+### fzf-services-widget ###
+###########################
 
 function fzf-services-widget {
   selected_service=$({
@@ -94,6 +83,10 @@ function fzf-services-widget {
   done | fzf --exact --preview 'systemctl status $(cut -d " " -f2 <<< "{}") 2>/dev/null || systemctl --user status $(cut -d " " -f2 <<< "{}")')
 }
 
+##########################
+### fzf-crontab-widget ###
+##########################
+
 function fzf-crontab-widget {
   crontab -l | grep -Ev "^#|^$|^[a-zA-Z]" | sort | fzf | while read -r raw; do
     raw=${raw//\*/\\*}
@@ -104,33 +97,81 @@ function fzf-crontab-widget {
   done
 }
 
+##############################
+### backward-delete-widget ###
+##############################
+
 function backward-delete-widget() {
   local WORDCHARS=${WORDCHARS//[\/:=]/}
   zle backward-delete-word
 }
+zbindkey -M viins '^W' backward-delete-widget
 
-##################
-### Keybinding ###
-##################
+##########################
+### expand-alias-space ###
+##########################
 
-# bindkey quickly
-function zbindkey {
-  eval wid_name=\$$#
-  zle -N $wid_name
-  bindkey $*
+baliases=()
+function balias() {
+  alias $@
+  args="$@"
+  args=${args%%\=*}
+  baliases+=(${args##* })
 }
 
-# autoload
-autoload -U edit-command-line
+ialiases=()
+function ialias() {
+  alias $@
+  args="$@"
+  args=${args%%\=*}
+  ialiases+=(${args##* })
+}
 
-# zbindkey cmd
-zbindkey -M vicmd 'Y' vi-yank-copy
-zbindkey -M vicmd 'e' edit-command-line
+function expand-alias-space() {
+  [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
+  if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
+    zle _expand_alias
+  fi
+  zle self-insert
+  if [[ "$insertBlank" = "0" ]]; then
+    zle backward-delete-char
+  fi
+}
 
-# zbindkey ins
-zbindkey -M viins " " expand-alias-space
-zbindkey -M viins '^W' backward-delete-widget
-zbindkey -M viins '^P' fzf-apt-widget
-zbindkey -M viins '^B' fzf-bindkeys-widget
-# zbindkey -M viins '' fzf-services-widget
-# zbindkey -M viins '' fzf-crontab-widget
+#########################
+### lazy-space-widget ###
+#########################
+
+# lazy loader
+function lazy-space-widget() {
+  # check if lazy_map is empty
+  if [[ ${#lazy_map[@]} -gt 0 ]]; then
+    local buffer="$BUFFER"
+    local key; for key in ${(k)lazy_map}; do
+      if [[ "$buffer" == "$key" && -z "${__lazy_injected[$key]}" ]]; then
+        eval "${lazy_map[$key]}"
+        __lazy_injected[$key]=1
+        # zle -M "✨ Lazy alias loaded for: $key"
+        
+        # restore original space binding
+        if (( ${#__lazy_injected[@]} == ${#lazy_map[@]} )); then
+          bindkey ' ' self-insert
+          zle -D __lazy_space_handler
+          unfunction __lazy_space_handler
+        fi
+        break
+      fi
+    done
+  fi
+}
+
+####################
+### space-widget ###
+####################
+
+function space-widget() {
+  lazy-space-widget
+  expand-alias-space 
+}
+zbindkey ' ' space-widget
+
