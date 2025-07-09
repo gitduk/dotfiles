@@ -1,7 +1,6 @@
 #########
 ### C ###
 #########
-
 # change
 alias cmd="sudo chmod +x"
 alias cwn="sudo chown -Rv $USER:$USER"
@@ -12,36 +11,6 @@ alias cre="crontab -e"
 #########
 ### D ###
 #########
-
-# docker
-alias dv="docker volume"
-alias dpl="docker pull"
-alias dr="docker run"
-
-alias dcc="docker container"
-alias dls="docker container ls"
-alias dla="docker container ls -a"
-alias ds="docker container stats"
-alias dst="docker container start"
-alias drst="docker container restart"
-alias dstp="docker container stop"
-alias drm="docker container rm"
-alias dat="docker container attach"
-alias dpr="docker container prune"
-
-alias dils="docker image ls"
-alias dirm="docker image rm"
-alias dipr="docker image prune"
-
-alias dcp="docker compose"
-alias dcpu="docker compose up"
-alias dcpud="docker compose up -d"
-alias dcplg="docker compose logs"
-alias dcpec="docker compose exec -it"
-
-alias disp="docker inspect"
-alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
-
 # dpkg
 alias dis="sudo dpkg -i"
 
@@ -54,7 +23,6 @@ alias eas="v ~/.alias.zsh"
 #########
 ### F ###
 #########
-
 # fdisk
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 
@@ -70,6 +38,8 @@ alias jcuu="journalctl --user -u"
 #########
 ### L ###
 #########
+# ls
+ialias ls="ls --color=auto"
 
 # lsof
 balias li="sudo lsof -i:"
@@ -99,10 +69,10 @@ alias ncl="nmcli"
 #########
 
 # path line by line
-alias path="echo \$PATH | tr ':' '\n' | fzf"
+alias path='echo $PATH | tr ":" "\n" | fzf'
 
 # set proxy
-alias pre="export http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 HTTP_PROXY=http://127.0.0.1:7890 HTTPS_PROXY=http://127.0.0.1:7890"
+alias pre="setup_proxy"
 alias prd="unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY"
 
 #########
@@ -131,7 +101,6 @@ alias rsy="rsync -avP"
 # source
 alias sc="source"
 alias denv="deactivate"
-alias szs="source ~/.zshrc"
 
 # systemctl
 alias scs="sudo systemctl status"

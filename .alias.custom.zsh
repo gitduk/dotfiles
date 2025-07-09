@@ -14,7 +14,6 @@ alias am="alsamixer"
 #########
 ### B ###
 #########
-
 # bluetooth
 alias bt="bluetoothctl"
 
@@ -51,31 +50,15 @@ alias gu="gitui"
 alias gm="gemini"
 
 #########
+### J ###
+#########
+
+# just
+alias js="just"
+
+#########
 ### P ###
 #########
-# podmain
-alias pd="podman"
-alias pdc="podman container"
-alias pdr="podman run"
-alias pdls="podman container ls"
-alias pdla="podman container ls -a"
-alias pds="podman container stats"
-alias pdst="podman container start"
-alias pdrst="podman container restart"
-alias pdstp="podman container stop"
-alias pdrm="podman container rm"
-alias pdat="podman container attach"
-alias pdpr="podman container prune"
-alias pdps="podman ps"
-alias pdlg="podman logs --follow"
-alias pdec="podman exec -it"
-alias pdcp="podman cp"
-alias pdsc="podman search"
-alias pddf="podman diff"
-alias pdis="podman inspect"
-
-# podman-compose
-alias pc="podman-compose"
 
 # mitmproxy
 alias ptc="openssl x509 -outform der -in mitmproxy-ca-cert.pem -out mitmproxy-ca-cert.crt"
@@ -94,12 +77,3 @@ alias rcl="redis-cli"
 
 # unzip
 alias uz="unzip"
-
-#########
-### Z ###
-#########
-
-# zellij
-alias zl="zellij"
-alias zr="zellij run --floating --width 50% --height 100% -x 50% -y 0% --"
-alias zif="zipinfo"

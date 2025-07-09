@@ -2,6 +2,7 @@
 ### ZSH OPTIONS ###
 ###################
 # zsh boot time report
+# Uncomment to enable profiling
 # ZPROF=1
 if [[ -n "$ZPROF" ]]; then
   start=$(date +%s.%N)
@@ -67,24 +68,22 @@ typeset -A lazy_map
 
 export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -d '"')"
 
-# proxy
-PROXY_HOST="${PROXY_HOST:-127.0.0.1}"
-PROXY_PORT="${PROXY_PORT:-7890}"
-if nc -z -n "$PROXY_HOST" "$PROXY_PORT" &>/dev/null; then
-  # http
-  export http_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
-  export HTTP_PROXY="$http_proxy"
+# Proxy settings
+function setup_proxy() {
+  PROXY_HOST="${PROXY_HOST:-127.0.0.1}"
+  PROXY_PORT="${PROXY_PORT:-7890}"
+  if nc -z -n "$PROXY_HOST" "$PROXY_PORT" &>/dev/null; then
+    export http_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
+    export HTTP_PROXY="$http_proxy"
+    export https_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
+    export HTTPS_PROXY="$https_proxy"
+    export no_proxy="localhost,127.0.0.1"
+    export NO_PROXY="$no_proxy"
+  fi
+}
+setup_proxy
 
-  # https
-  export https_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
-  export HTTPS_PROXY="$https_proxy"
-
-  # no_proxy
-  export no_proxy="localhost,127.0.0.1"
-  export NO_PROXY="$no_proxy"
-fi
-
-# PATH
+# PATH management
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.npm/bin:$PATH"
 
@@ -110,19 +109,19 @@ fpath=($ZSH_COMPLETIONS $fpath)
 function ins() {
   case "$OS" in
   debian | ubuntu)
-    sudo nala install -y $@
+    sudo nala install -y $@ || { echo "Failed to install: $@"; return 1 }
     ;;
   fedora | centos | rocky | almalinux)
-    sudo dnf install -y $@
+    sudo dnf install -y $@ || { echo "Failed to install: $@"; return 1 }
     ;;
   rhel)
-    sudo yum install -y $@
+    sudo yum install -y $@ || { echo "Failed to install: $@"; return 1 }
     ;;
   *)
     echo "Unsupported OS: $OS"
+    return 1
     ;;
   esac
-  return 1
 }
 
 command -v nala &>/dev/null || sudo apt install -y nala
@@ -385,22 +384,6 @@ zinit ice wait'[[ ! -n "$commands[sing-box]" ]]' lucid as"program" from"gh-r" id
   atpull"%atclone"
 zinit light SagerNet/sing-box
 
-# zellij
-# zinit ice wait'[[ ! -n "$commands[zellij]" ]]' lucid as"program" from"gh-r" id-as"zellij" \
-#   bpick"zellij-x86_64-unknown-linux-musl.tar.gz" \
-#   atclone"sudo mv zellij /usr/bin/" \
-#   atpull"%atclone"
-# zinit light zellij-org/zellij
-
-# caddy
-# zinit ice wait'[[ ! -n "$commands[caddy]" ]]' lucid as"program" from"gh-r" id-as"caddy" \
-#   bpick"caddy_*_linux_amd64.deb" \
-#   atclone"sudo cp -rvf ./etc/caddy /etc/" \
-#   atclone"sudo cp -rvf ./usr/bin/caddy /usr/bin/" \
-#   atclone"rm -rf */" \
-#   atpull"%atclone"
-# zinit light caddyserver/caddy
-
 ###############
 ### COMMAND ###
 ###############
@@ -432,11 +415,9 @@ zinit ice wait"2" lucid as"command" from"gh-r" id-as"direnv" \
 zinit light direnv/direnv
 
 # just
-zinit ice wait'[[ -n "$commands[just]" ]]' lucid as"command" from"gh-r" id-as"just" \
+zinit ice wait'[[ ! -n "$commands[just]" ]]' lucid as"command" from"gh-r" id-as"just" \
   atclone'./just --completions zsh > _just' \
-  atpull"%atclone" \
-  atload'
-  '
+  atpull"%atclone"
 zinit light casey/just
 
 # delta - A syntax-highlighting pager for git, diff, and grep output
@@ -498,7 +479,7 @@ zinit light pemistahl/grex
 zinit ice wait'[[ ! -n "$commands[procs]" ]]' lucid as"command" from"gh-r" id-as"procs"
 zinit light dalance/procs
 
-# ripgrep - ripgrep recursively searches directories for a regex pattern while respecting your gitignore
+# ripgrep - ripgrep recursively searches directories for a regex pattern
 zinit ice wait'[[ ! -n "$commands[rg]" ]]' lucid as"command" from"gh-r" id-as"rg" \
   atclone"sudo mv */rg /usr/bin/" \
   atclone"mv */complete/_rg ." \
@@ -578,6 +559,7 @@ zinit snippet "https://raw.githubusercontent.com/lmburns/dotfiles/master/.config
 #############
 # you need add `zmodload zsh/zprof` to the top of .zshrc file
 if [[ -n "$ZPROF" ]]; then
-  zprof | head -n 20; zmodload -u zsh/zprof
+  zprof | head -n 20
+  zmodload -u zsh/zprof
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi

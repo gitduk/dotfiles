@@ -152,13 +152,6 @@ function lazy-space-widget() {
         eval "${lazy_map[$key]}"
         __lazy_injected[$key]=1
         # zle -M "✨ Lazy alias loaded for: $key"
-        
-        # restore original space binding
-        if (( ${#__lazy_injected[@]} == ${#lazy_map[@]} )); then
-          bindkey ' ' self-insert
-          zle -D __lazy_space_handler
-          unfunction __lazy_space_handler
-        fi
         break
       fi
     done
