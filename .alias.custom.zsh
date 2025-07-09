@@ -18,7 +18,7 @@ alias am="alsamixer"
 alias bt="bluetoothctl"
 
 #########
-### D ###
+### C ###
 #########
 # dotfiles
 ialias c="git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git"
@@ -35,6 +35,10 @@ alias cmm="c commit -m"
 alias cpl="c pull --rebase"
 alias cps="c push"
 alias cls="c ls-tree -r master --name-only"
+
+#########
+### D ###
+#########
 
 # tput: get terminal cols and lines
 alias dim="echo $(tput cols)x$(tput lines)"
