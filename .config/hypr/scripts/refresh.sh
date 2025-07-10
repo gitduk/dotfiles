@@ -5,4 +5,10 @@
 ##############
 
 killall waybar &>/dev/null
-sleep 0.2 && waybar &
+
+# wait waybar killed
+if [[ $? -eq 0 ]]; then
+  sleep 0.1
+fi
+
+waybar &

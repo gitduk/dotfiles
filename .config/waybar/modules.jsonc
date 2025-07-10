@@ -238,24 +238,6 @@
       "󰃟 ",
       "󰃠 "
     ],
-    // "format": "{icon}",
-    // "format-icons": [
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   ""
-    // ],
     "tooltip-format": "backlight {percent}%",
     "icon-size": 10,
     "on-click": "",
@@ -612,6 +594,158 @@
       "kitty"
     ]
   },
+  // Modules below are for vertical layout
+  "backlight#vertical": {
+    "interval": 2,
+    "align": 0.35,
+    "rotate": 1,
+    "format": "{icon}",
+    //"format-icons": ["󰃞", "󰃟", "󰃠"],
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "on-click": "",
+    "on-click-middle": "",
+    "on-click-right": "",
+    "on-update": "",
+    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --inc",
+    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --dec",
+    "smooth-scrolling-threshold": 1,
+    "tooltip-format": "{percent}%"
+  },
+  "clock#vertical": {
+    "format": "\n{:%H\n%M\n%S\n\n \n%d\n%m\n%y}",
+    "interval": 1,
+    //"format": "\n{:%I\n%M\n%p\n\n \n%d\n%m\n%y}",
+    "tooltip": true,
+    "tooltip-format": "{calendar}",
+    "calendar": {
+      "mode": "year",
+      "mode-mon-col": 3,
+      "format": {
+        "today": "<span color='#0dbc79'>{}</span>"
+      }
+    }
+  },
+  "cpu#vertical": {
+    "format": "󰍛\n{usage}%",
+    "interval": 1,
+    "on-click-right": "gnome-system-monitor"
+  },
+  "memory#vertical": {
+    "interval": 10,
+    "format": "󰾆\n{percentage}%",
+    "format-alt": "󰾆\n{used:0.1f}G",
+    "format-alt-click": "click",
+    "tooltip": true,
+    "tooltip-format": "{used:0.1f}GB/{total:0.1f}G",
+    "on-click-right": "kitty --title btop sh -c 'btop'"
+  },
+  "pulseaudio#vertical": {
+    "format": "{icon}",
+    "format-bluetooth": "󰂰",
+    "format-muted": "󰖁",
+    "format-icons": {
+      "headphone": "󰋋",
+      "hands-free": "󰋋",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": [
+        "",
+        "",
+        "󰕾",
+        ""
+      ],
+      "tooltip-format": "{icon} {desc} | {volume}%",
+      "ignored-sinks": [
+        "Easy Effects Sink"
+      ]
+    },
+    "scroll-step": 5.0,
+    "on-click": "~/.config/waybar/scripts/volume.sh --toggle",
+    "on-click-right": "pavucontrol -t 3",
+    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --inc",
+    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --dec",
+    "tooltip-format": "{icon} {desc} | {volume}%",
+    "smooth-scrolling-threshold": 1
+  },
+  "pulseaudio#microphone_vertical": {
+    "format": "{format_source}",
+    "format-source": "󰍬",
+    "format-source-muted": "󰍭",
+    "on-click-right": "pavucontrol",
+    "on-click": "~/.config/waybar/scripts/volume.sh --toggle-mic",
+    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --mic-inc",
+    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --mic-dec",
+    "max-volume": 100,
+    "tooltip": true,
+    "tooltip-format": "{source_desc} | {source_volume}%"
+  },
+  "temperature#vertical": {
+    "interval": 10,
+    "tooltip": true,
+    "hwmon-path": [
+      "/sys/class/hwmon/hwmon1/temp1_input",
+      "/sys/class/thermal/thermal_zone0/temp"
+    ],
+    // "thermal-zone": 0,
+    "critical-threshold": 80,
+    "format-critical": "{icon}\n{temperatureC}°C",
+    "format": " {icon}",
+    "format-icons": [
+      "󰈸"
+    ],
+    "on-click-right": "kitty --title nvtop sh -c 'nvtop'"
+  },
+  "mpd": {
+    "format": " {artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})",
+    "format-disconnected": " Disconnected 󰎇",
+    "format-stopped": " topped 󰎇",
+    "interval": 10,
+    "max-length": 50,
+    "consume-icons": {
+      "on": "  "
+    },
+    "random-icons": {
+      "on": "  "
+    },
+    "repeat-icons": {
+      "on": "  "
+    },
+    "single-icons": {
+      "on": "  "
+    },
+    "state-icons": {
+      "paused": "",
+      "playing": ""
+    },
+    "tooltip": true,
+    "tooltip-format": " {queueLength} | {repeatIcon}{randomIcon}{singleIcon}{consumeIcon}",
+    "tooltip-format-disconnected": "MPD (disconnected)",
+    "on-click": "mpc toggle",
+    "on-click-right": "foot -T mpd sh -c '~/.config/waybar/scripts/mpd.sh -r'",
+    "on-scroll-up": "mpc prev",
+    "on-scroll-down": "mpc next"
+  },
+  // ################
+  // ###   CUSTOM ###
+  // ################
   "custom/cycle_wall": {
     "format": " ",
     "tooltip": false
@@ -740,125 +874,6 @@
     "interval": "once",
     "tooltip": false
   },
-  // Modules below are for vertical layout
-  "backlight#vertical": {
-    "interval": 2,
-    "align": 0.35,
-    "rotate": 1,
-    "format": "{icon}",
-    //"format-icons": ["󰃞", "󰃟", "󰃠"],
-    "format-icons": [
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      ""
-    ],
-    "on-click": "",
-    "on-click-middle": "",
-    "on-click-right": "",
-    "on-update": "",
-    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --inc",
-    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --dec",
-    "smooth-scrolling-threshold": 1,
-    "tooltip-format": "{percent}%"
-  },
-  "clock#vertical": {
-    "format": "\n{:%H\n%M\n%S\n\n \n%d\n%m\n%y}",
-    "interval": 1,
-    //"format": "\n{:%I\n%M\n%p\n\n \n%d\n%m\n%y}",
-    "tooltip": true,
-    "tooltip-format": "{calendar}",
-    "calendar": {
-      "mode": "year",
-      "mode-mon-col": 3,
-      "format": {
-        "today": "<span color='#0dbc79'>{}</span>"
-      }
-    }
-  },
-  "cpu#vertical": {
-    "format": "󰍛\n{usage}%",
-    "interval": 1,
-    "on-click-right": "gnome-system-monitor"
-  },
-  "memory#vertical": {
-    "interval": 10,
-    "format": "󰾆\n{percentage}%",
-    "format-alt": "󰾆\n{used:0.1f}G",
-    "format-alt-click": "click",
-    "tooltip": true,
-    "tooltip-format": "{used:0.1f}GB/{total:0.1f}G",
-    "on-click-right": "kitty --title btop sh -c 'btop'"
-  },
-  "pulseaudio#vertical": {
-    "format": "{icon}",
-    "format-bluetooth": "󰂰",
-    "format-muted": "󰖁",
-    "format-icons": {
-      "headphone": "󰋋",
-      "hands-free": "󰋋",
-      "headset": "",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": [
-        "",
-        "",
-        "󰕾",
-        ""
-      ],
-      "tooltip-format": "{icon} {desc} | {volume}%",
-      "ignored-sinks": [
-        "Easy Effects Sink"
-      ]
-    },
-    "scroll-step": 5.0,
-    "on-click": "~/.config/waybar/scripts/volume.sh --toggle",
-    "on-click-right": "pavucontrol -t 3",
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --inc",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --dec",
-    "tooltip-format": "{icon} {desc} | {volume}%",
-    "smooth-scrolling-threshold": 1
-  },
-  "pulseaudio#microphone_vertical": {
-    "format": "{format_source}",
-    "format-source": "󰍬",
-    "format-source-muted": "󰍭",
-    "on-click-right": "pavucontrol",
-    "on-click": "~/.config/waybar/scripts/volume.sh --toggle-mic",
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --mic-inc",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --mic-dec",
-    "max-volume": 100,
-    "tooltip": true,
-    "tooltip-format": "{source_desc} | {source_volume}%"
-  },
-  "temperature#vertical": {
-    "interval": 10,
-    "tooltip": true,
-    "hwmon-path": [
-      "/sys/class/hwmon/hwmon1/temp1_input",
-      "/sys/class/thermal/thermal_zone0/temp"
-    ],
-    //"thermal-zone": 0,
-    "critical-threshold": 80,
-    "format-critical": "{icon}\n{temperatureC}°C",
-    "format": " {icon}",
-    "format-icons": [
-      "󰈸"
-    ],
-    "on-click-right": "kitty --title nvtop sh -c 'nvtop'"
-  },
   "custom/power_vertical": {
     "format": "⏻",
     "exec": "echo ; echo 󰟡 power // blur",
@@ -882,34 +897,11 @@
     "format": " {} ",
     "on-click": "~/.config/waybar/scripts/ipaddress.sh"
   },
-  "mpd": {
-    "format": " {artist} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S})",
-    "format-disconnected": " Disconnected 󰎇",
-    "format-stopped": " topped 󰎇",
-    "interval": 10,
-    "max-length": 50,
-    "consume-icons": {
-      "on": "  "
-    },
-    "random-icons": {
-      "on": "  "
-    },
-    "repeat-icons": {
-      "on": "  "
-    },
-    "single-icons": {
-      "on": "  "
-    },
-    "state-icons": {
-      "paused": "",
-      "playing": ""
-    },
-    "tooltip": true,
-    "tooltip-format": " {queueLength} | {repeatIcon}{randomIcon}{singleIcon}{consumeIcon}",
-    "tooltip-format-disconnected": "MPD (disconnected)",
-    "on-click": "mpc toggle",
-    "on-click-right": "foot -T mpd sh -c '~/.config/waybar/scripts/mpd.sh -r'",
-    "on-scroll-up": "mpc prev",
-    "on-scroll-down": "mpc next"
+  "custom/wallpaper": {
+    "format": " ",
+    "interval": "once",
+    "tooltip": false,
+    "on-click": "~/.config/waybar/scripts/wallpaper.sh --random ~/Pictures/wallpapers/",
+    "on-click-right": "rm -rf \"$(hyprctl hyprpaper listactive | awk -F' = ' '{print $2}')\" && ~/.config/waybar/scripts/wallpaper.sh --random ~/Pictures/wallpapers/"
   }
 }

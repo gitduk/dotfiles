@@ -250,6 +250,7 @@ when = ''' test -n "$http_proxy" '''
 format = "[$output](blue) "
 
 [custom.direnv]
+disabled = true
 command = '''
 allowed=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed // empty')
 case "$allowed" in

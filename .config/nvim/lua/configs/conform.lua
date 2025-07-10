@@ -1,8 +1,8 @@
 local options = {
   formatters_by_ft = {
     lua = { "stylua" },
-    -- python = { "prettier" },
-    -- rust = { "prettier" },
+    python = { "prettier" },
+    rust = { "prettier" },
   },
 
   format_on_save = {

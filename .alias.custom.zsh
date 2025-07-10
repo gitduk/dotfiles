@@ -1,27 +1,22 @@
-#########
-### A ###
-#########
-# claude code
+lazy_group claude <<EOF
 alias cco="ccr code --dangerously-skip-permissions"
+EOF
 
-# aria2
+lazy_group aria2 <<EOF
 alias arc="aria2c -c"
 alias arcs="aria2c -c -s"
+EOF
 
-# alsamixer
+lazy_group alsamixer <<EOF
 alias am="alsamixer"
+EOF
 
-#########
-### B ###
-#########
-# bluetooth
+lazy_group bluetooth <<EOF
 alias bt="bluetoothctl"
+EOF
 
-#########
-### C ###
-#########
-# dotfiles
 ialias c="git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git"
+lazy_group dotfiles <<EOF
 alias cs="c status"
 alias cdf="c diff"
 alias cds="c diff --staged"
@@ -35,49 +30,33 @@ alias cmm="c commit -m"
 alias cpl="c pull --rebase"
 alias cps="c push"
 alias cls="c ls-tree -r master --name-only"
+EOF
 
-#########
-### D ###
-#########
-
-# tput: get terminal cols and lines
+lazy_group terminal <<EOF
 alias dim="echo $(tput cols)x$(tput lines)"
+EOF
 
-#########
-### G ###
-#########
-
-# gitui
+lazy_group gitui <<EOF
 alias gu="gitui"
+EOF
 
-# gemini
+lazy_group gemini <<EOF
 alias gm="gemini"
+EOF
 
-#########
-### J ###
-#########
-
-# just
+lazy_group just <<EOF
 alias js="just"
+EOF
 
-#########
-### P ###
-#########
-
-# mitmproxy
+lazy_group mitmproxy <<EOF
 alias ptc="openssl x509 -outform der -in mitmproxy-ca-cert.pem -out mitmproxy-ca-cert.crt"
 alias ptv="openssl x509 -inform PEM -subject_hash_old -in mitmproxy-ca-cert.pem | head -1"
-
-#########
-### R ###
-#########
-
-# redis
+EOF
 alias rcl="redis-cli"
 
-#########
-### U ###
-#########
+lazy_group redis <<EOF
+EOF
 
-# unzip
+lazy_group unzip <<EOF
 alias uz="unzip"
+EOF

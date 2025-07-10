@@ -28,7 +28,8 @@
     "custom/separator#dot-line",
     "clock",
     "custom/separator#dot-line",
-    "custom/color_scheme"
+    "custom/color_scheme",
+    "custom/wallpaper"
   ],
 
   "modules-right": [

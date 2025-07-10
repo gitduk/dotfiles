@@ -1,6 +1,6 @@
 % envs
 
-$ hosts: cat /etc/hosts | grep -Ev '^(#|$)'| cut -d' ' -f 1
-$ dev: nmcli dev | grep -E "\sconnected" | cut -d' ' -f 1 | grep -v "DEVICE"
-$ con: nmcli con show | grep -Ev "\s--" | cut -d' ' -f 1 | grep -v "NAME"
+$ hosts: awk '!/^#/ && NF {print $1}' /etc/hosts
+$ dev: nmcli -t -f DEVICE,STATE dev | awk -F: '$2 ~ /connected/ {print $1}'
+$ con: nmcli -t -f NAME con show --active
 

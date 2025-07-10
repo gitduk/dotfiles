@@ -164,7 +164,6 @@ function lazy-space-widget() {
 
 function space-widget() {
   lazy-space-widget
-  expand-alias-space 
+  expand-alias-space
 }
 zbindkey ' ' space-widget
-
