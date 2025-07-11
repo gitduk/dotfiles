@@ -2,22 +2,24 @@
 ### OPTIONS ###
 ###############
 # Core completion system configuration
-zstyle ':completion:*' completer _extensions _complete _approximate
-zstyle ':completion:*' use-cache on
+zstyle ':completion:*' completer _complete _approximate _ignored
+zstyle ':completion:*' use-cache yes
 zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zcompcache"
 
 # File and directory completion
 zstyle ':completion:*' file-sort modification
-zstyle ':completion:*' file-patterns '*(.) *(/)'
+zstyle ':completion:*' file-patterns '*(@) *(.) *(/)'
 zstyle ':completion:*' special-dirs true
 zstyle ':completion:*' follow-links true
 zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' ignore-parents parent pwd
+zstyle ':completion:*' accept-exact-dirs true
+zstyle ':completion:*' accept-exact false
 
 # Interactive and display settings
-zstyle ':completion:*' menu select=2
+zstyle ':completion:*' menu select=1
 zstyle ':completion:*' verbose yes
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} 'ln=target' 'or=31' 'mi=31'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' keep-prefix true
 zstyle ':completion:*' complete-options true
@@ -27,12 +29,9 @@ zstyle ':completion:*' complete-options true
 ####################################
 # Smart case and fuzzy matching
 zstyle ':completion:*' matcher-list '' \
-    'm:{a-zA-Z}={A-Za-z}' \
-    'r:|[._-]=* r:|=*' \
-    'l:|=* r:|=*'
-
-# try to insert only the longest prefix that will complete to all completions shown
-zstyle ':completion:*:*' matcher-list 'm:{[:lower:]-}={[:upper:]_}' '+r:|[.]=**'
+  'm:{a-zA-Z}={A-Za-z}' \
+  'r:|[._-]=* r:|=*' \
+  'l:|=* r:|=*'
 
 # Error tolerance (allow up to 1/3 input errors)
 zstyle -e ':completion:*:approximate:*' max-errors 'reply=($((($#PREFIX+$#SUFFIX)/3))numeric)'
@@ -67,8 +66,7 @@ zstyle ':completion::*:(-command-|export):*' fake-parameters ${${${_comps[(I)-va
 #####################################
 ### Command Ordering and Priority ###
 #####################################
-zstyle ':completion:*:*:-command-:*:*' group-order \
-    aliases commands functions builtins
+zstyle ':completion:*:*:-command-:*:*' group-order aliases commands functions builtins
 
 # Command option sorting
 zstyle ':completion:complete:*:options' sort false
@@ -86,21 +84,27 @@ zstyle ':completion:*:*:kill:*' menu yes select
 zstyle ':completion:*:*:killall:*' menu yes select
 zstyle ':completion:*:killall:*' force-list always
 
-# SSH and remote completions
-zstyle ':completion:*:ssh:*' group-order users hosts-host hosts-ipaddr hosts-domain
-zstyle ':completion:*:ssh:*' tag-order 'users:-user:user hosts:-host:host hosts:-ipaddr:ip\ address hosts:-domain:domain *'
-zstyle ':completion:*:ssh:*' ignored-patterns '*[0-9a-fA-F]:*:*|::1'
+# SSH completions
+zstyle ':completion:*:ssh:*' group-order hosts-host hosts-ipaddr hosts-domain users
+zstyle ':completion:*:ssh:*' tag-order 'hosts:-host:host hosts:-ipaddr:ipaddr hosts:-domain:domain users:-user:user'
+zstyle ':completion:*:ssh:*' ignored-patterns '*:[0-9a-fA-F]*:*' '::1' 'ip6*'
 
 # SCP/RSYNC completions
-zstyle ':completion:*:(scp|rsync):*' group-order files all-files users hosts-host hosts-ipaddr hosts-domain
-zstyle ':completion:*:(scp|rsync):*' tag-order 'users:-user:user hosts:-host:host hosts:-ipaddr:ip\ address hosts:-domain:domain *'
+zstyle ':completion:*:(scp|rsync):*' group-order files all-files hosts-host hosts-ipaddr hosts-domain users
+zstyle ':completion:*:(scp|rsync):*' tag-order 'hosts:-host:host hosts:-ipaddr:ipaddr hosts:-domain:domain users:-user:user *'
+zstyle ':completion:*:(scp|rsync):*' ignored-patterns '*:[0-9a-fA-F]*:*' '::1' 'ip6*'
 
 # Docker
-zstyle ':completion:*:*:docker:*' option-stacking yes
-zstyle ':completion:*:*:docker-*:*' option-stacking yes
+zstyle ':completion:*:*:docker*:*' option-stacking yes
 
 # Directory navigation
 zstyle ':completion:*:cd:*' tag-order local-directories path-directories
+
+# Improved soft link and file type completion
+zstyle ':completion:*:*:ls:*' file-patterns \
+  '*(@):symbolic-links:symlink' \
+  '*(#q/):directories:directory' \
+  '*(#q.):files:file'
 
 ########################
 ### zsh-autocomplete ###
@@ -123,7 +127,7 @@ zstyle ':autocomplete:*:unambiguous' format \
   $'%{\e[0;2m%}%Bcommon substring:%b %0F%11K%d%f%k'
 
 # Wait for a minimum amount of input
-zstyle ':autocomplete:*' min-input 3
+zstyle ':autocomplete:*' min-input 2
 
 # Don't show completions if the current word matches a pattern
 # zstyle ':autocomplete:*' ignored-input ''
@@ -139,4 +143,28 @@ zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 8
 
 # Override for history menu only
 zstyle ':autocomplete:history-search-backward:*' list-lines 2000
+
+###############################################
+### Performance and experience optimization ###
+###############################################
+
+# Speed up completion in large directories
+zstyle ':completion:*' max-errors 2 not-numeric
+
+# Avoid blocking in large directories
+zstyle ':completion:*' insert-tab pending
+
+# Better sorting
+zstyle ':completion:*:*:*:*:*' menu select
+zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w -w"
+
+# Improved completion sorting
+zstyle ':completion:*:*:*:*:*' menu select=2
+
+# Set different completion behaviors for different file types
+zstyle ':completion:*:*:v:*:*files' ignored-patterns \
+  '*.o' '*.so' '*.a' '*.pyc' '*.pyo' '*.class' '*.jar' '*.war' '*.ear'
+
+# Better network completion
+zstyle ':completion:*:*:*:hosts' hosts-ports true
 

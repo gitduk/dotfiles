@@ -214,8 +214,9 @@ zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
 zinit light zsh-users/zsh-autosuggestions
 
 # zdharma-continuum/fast-syntax-highlighting
+# TODO: fix me
 zinit ice wait"0" lucid id-as"fast-syntax-highlighting" \
-  atinit"zicompinit; zicdreplay"
+  atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay"
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 # zsh-users/zsh-history-substring-search

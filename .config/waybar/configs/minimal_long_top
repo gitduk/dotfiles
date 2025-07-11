@@ -1,21 +1,18 @@
-
-// ### Minimal - Long ### //
-
 {
-"include": "~/.config/waybar/modules.jsonc",
-"layer": "top",
-//"mode": "dock",
-"exclusive": true,
-"passthrough": false,
-"position": "top",
-"spacing": 6,
-"fixed-center": true,
-"ipc": true,
-"margin-top": 3,
-"margin-left": 8,
-"margin-right": 8,
+  "include": "~/.config/waybar/modules.jsonc",
+  "layer": "top",
+  //"mode": "dock",
+  "exclusive": true,
+  "passthrough": false,
+  "position": "top",
+  "spacing": 6,
+  "fixed-center": true,
+  "ipc": true,
+  "margin-top": 3,
+  "margin-left": 8,
+  "margin-right": 8,
 
-"modules-left": [
+  "modules-left": [
     "custom/menu",
     "custom/separator#blank_2", 
     "hyprland/workspaces#pacman",
@@ -23,12 +20,14 @@
     "mpris",
     "custom/swaync",
     "tray",
-    ],
-"modules-center": [
+  ],
+
+  "modules-center": [
     "clock",
     "idle_inhibitor",
-    ],
-"modules-right": [
+  ],
+
+  "modules-right": [
     "group/motherboard",
     "custom/separator#blank_2",
     "group/laptop",
@@ -36,6 +35,5 @@
     "group/audio",
     "custom/separator#blank_2",
     "custom/power",
-    ],
-
+  ],
 }

@@ -5,8 +5,8 @@
 
 # 配置文件路径
 CACHE_DIR="$XDG_CACHE_HOME/waybar"
-TOKEN_FILE="$CACHE_DIR/poetry_token"
-CACHE_FILE="$CACHE_DIR/poetry_cache"
+TOKEN_FILE="$CACHE_DIR/poetry.token"
+CACHE_FILE="$CACHE_DIR/poetry.json"
 
 # 创建配置目录
 mkdir -p "$CACHE_DIR"

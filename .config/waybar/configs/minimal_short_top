@@ -1,23 +1,20 @@
-
-// ### Minimal -SHORT ### //
-
 {
-"include": "~/.config/waybar/modules.jsonc",
-"layer": "top",
-"position": "top",
-"width": 1050,
-"margin-top": 3,
+  "include": "~/.config/waybar/modules.jsonc",
+  "layer": "top",
+  "position": "top",
+  "width": 1050,
+  "margin-top": 3,
 
-"modules-left": [
+  "modules-left": [
     "clock",
     "custom/weather",
-    ],
+  ],
 
-"modules-center": [
+  "modules-center": [
     "hyprland/workspaces#roman"
-    ],
+  ],
 
-"modules-right": [
+  "modules-right": [
     "custom/menu", 
     "tray",
     "custom/swaync",
@@ -27,5 +24,6 @@
     "backlight", 
     "pulseaudio", 
     "battery", 
-    "custom/power"],
+    "custom/power"
+  ],
 }

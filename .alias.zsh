@@ -85,15 +85,15 @@ alias dpl="docker pull"
 alias dr="docker run"
 
 alias dcc="docker container"
-alias dls="docker container ls"
-alias dla="docker container ls -a"
-alias ds="docker container stats"
-alias dst="docker container start"
-alias drst="docker container restart"
-alias dstp="docker container stop"
-alias drm="docker container rm"
-alias dat="docker container attach"
-alias dpr="docker container prune"
+alias dcls="docker container ls"
+alias dcla="docker container ls -a"
+alias dcs="docker container stats"
+alias dcst="docker container start"
+alias dcrst="docker container restart"
+alias dcstp="docker container stop"
+alias dcrm="docker container rm"
+alias dcat="docker container attach"
+alias dcpr="docker container prune"
 
 alias dils="docker image ls"
 alias dirm="docker image rm"
@@ -204,10 +204,7 @@ EOF
 ### L ###
 #########
 
-lazy_group ls <<EOF
-alias ls="eza"
-ialias ls="ls --color=auto"
-EOF
+ialias ls="eza"
 
 lazy_group lsof <<EOF
 balias li="sudo lsof -i:"

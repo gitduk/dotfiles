@@ -1,5 +1,3 @@
-
-// ### DEFAULT BOTTOM ### //
 {
   "include": "~/.config/waybar/modules.jsonc",
   "layer": "bottom",

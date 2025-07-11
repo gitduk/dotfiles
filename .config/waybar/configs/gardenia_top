@@ -1,35 +1,30 @@
-//* ............................................*/
-//* .............GARDENIA.......................*/
-//* ............................................*/
-
 {
- 
-"include": "~/.config/waybar/modules.jsonc",
-"layer": "top",
-//"mode": "dock",
-"exclusive": true,
-"passthrough": false,
-"position": "top",
-"spacing": 5,
-"fixed-center": false,
-"ipc": true,
-"margin-top": 5,
-//"margin-bottom": 5,
-"width": 1000,
-    
-"modules-left": [
+  "include": "~/.config/waybar/modules.jsonc",
+  "layer": "top",
+  //"mode": "dock",
+  "exclusive": true,
+  "passthrough": false,
+  "position": "top",
+  "spacing": 5,
+  "fixed-center": false,
+  "ipc": true,
+  "margin-top": 5,
+  //"margin-bottom": 5,
+  "width": 1000,
+      
+  "modules-left": [
     "clock#5", 
     "mpris", 
     "tray", 
     "custom/swaync"
-    ],
+  ],
+        
+  "modules-center": ["hyprland/workspaces#kanji"], 
       
-"modules-center": ["hyprland/workspaces#kanji"], 
-    
-"modules-right": [
+  "modules-right": [
     "pulseaudio#1",
     "backlight#2", 
     "battery"
-    ],
+  ],
 
 }

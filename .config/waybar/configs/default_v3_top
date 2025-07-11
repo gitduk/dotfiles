@@ -1,5 +1,3 @@
-
-// ### DEFAULT v3  - Top ### //
 {
   "include": "~/.config/waybar/modules.jsonc",
   "layer": "top",
@@ -23,7 +21,7 @@
     "custom/separator#blank",
     "custom/separator#line",
     "custom/weather",
-    ],
+  ],
   
   "modules-center": [
     "custom/swaync",
@@ -49,5 +47,5 @@
     "custom/keyboard",
     "custom/lock",
     "custom/power",
-    ],
+  ],
 }
