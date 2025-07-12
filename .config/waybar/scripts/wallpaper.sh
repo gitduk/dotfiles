@@ -34,13 +34,13 @@ wallpaper_set() {
     hyprctl hyprpaper wallpaper "$FOCUSED_MONITOR,$wallpaper" &>/dev/null
 
     # general colors
-    wallust run "$wallpaper" -s 2>/dev/null
-
-    # reload hyprland
-    hyprctl reload &>/dev/null
+    ${wallust_cmd:-wallust} run "$wallpaper" -s 2>/dev/null
 
     # reload waybar
     pidof waybar &>/dev/null && killall -SIGUSR2 waybar
+
+    # reload hyprland
+    hyprctl reload &>/dev/null
   fi
 }
 

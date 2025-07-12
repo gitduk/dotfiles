@@ -378,7 +378,7 @@
     }
   },
   "idle_inhibitor": {
-    "format": "{icon}",
+    "format": " {icon} ",
     "format-icons": {
       "activated": "󱋙",
       "deactivated": "󰌪"
@@ -761,14 +761,6 @@
     "interval": 1,
     "format": " {}"
   },
-  "custom/color_scheme": {
-    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark/󰖔/; s/prefer-light/󰃠/; t; s/.*/󰖨/'",
-    "format": " {} ",
-    "interval": "once",
-    "signal": 1,
-    "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh"
-  },
   "custom/lock": {
     "format": "󰌾",
     "on-click": "hyprlock -q",
@@ -835,14 +827,6 @@
     "tooltip": true,
     "tooltip-format": "Left Click: Update System\nArch Linux Only"
   },
-  "custom/backlight": {
-    "format": " 󰃠 {} ",
-    "interval": 2,
-    "exec": "~/.config/waybar/scripts/brightness.sh --get",
-    "exec-if": "hash ddcutil",
-    "on-click": "~/.config/waybar/scripts/brightness.sh --set $(echo -n '10\n20\n30\n40\n50' | rofi -dmenu -i -p 'backlight:')",
-    "tooltip": false
-  },
   // Separators
   "custom/separator#dot": {
     "format": "",
@@ -880,6 +864,22 @@
     "interval": 86400,
     "tooltip": true
   },
+  "custom/backlight": {
+    "format": " 󰃠 {} ",
+    "interval": 2,
+    "exec": "~/.config/waybar/scripts/brightness.sh --get",
+    "exec-if": "hash ddcutil",
+    "on-click": "~/.config/waybar/scripts/brightness.sh --set $(echo -n '10\n20\n30\n40\n50' | rofi -dmenu -i -p 'backlight:')",
+    "tooltip": false
+  },
+  "custom/color_scheme": {
+    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark/󰖔/; s/prefer-light/󰃠/; t; s/.*/󰖨/'",
+    "format": " {} ",
+    "interval": "once",
+    "signal": 1,
+    "tooltip": false,
+    "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh"
+  },
   "custom/poetry": {
     "exec": "~/.config/waybar/scripts/poetry.sh --refresh",
     "return-type": "json",
@@ -891,14 +891,15 @@
   },
   "custom/ipaddress": {
     "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",
+    "format": " {} ",
     "return-type": "json",
     "interval": 60,
     "tooltip": true,
-    "format": " {} ",
     "on-click": "~/.config/waybar/scripts/ipaddress.sh"
   },
   "custom/wallpaper": {
-    "format": " ",
+    "exec": "cat ~/.config/waybar/colors.css | grep foreground | sed -nE 's/.*(#[0-9A-Fa-f]{6}).*/\\1/p'",
+    "format": "  {} ",
     "interval": "once",
     "tooltip": false,
     "on-click": "~/.config/waybar/scripts/wallpaper.sh --random ~/Pictures/wallpapers/",
