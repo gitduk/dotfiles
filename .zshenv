@@ -100,4 +100,3 @@ export LD_LIBRARY_PATH="/usr/local/lib:\
 if [[ -d "$XDG_RUNTIME_DIR/hypr" ]]; then
   export HYPRLAND_INSTANCE_SIGNATURE="$(ls $XDG_RUNTIME_DIR/hypr | tail -n 1)"
 fi
-

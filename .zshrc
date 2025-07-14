@@ -97,7 +97,7 @@ if [[ -d "$HOME/.local/share/Qt/$QT_VERSION" ]]; then
 fi
 
 # fpath
-export ZSH_COMPLETIONS="$HOME/.zcompletions"
+export ZSH_COMPLETIONS="$HOME/.zsh.d/completions"
 [[ ! -d "$ZSH_COMPLETIONS" ]] && mkdir -p "$ZSH_COMPLETIONS"
 fpath=($ZSH_COMPLETIONS $fpath)
 

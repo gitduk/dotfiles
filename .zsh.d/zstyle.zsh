@@ -106,44 +106,6 @@ zstyle ':completion:*:*:ls:*' file-patterns \
   '*(#q/):directories:directory' \
   '*(#q.):files:file'
 
-########################
-### zsh-autocomplete ###
-########################
-
-# Pass arguments to compinit
-zstyle '*:compinit' arguments -D -i -u -C -w
-
-# all Tab widgets
-zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
-
-# all history widgets
-zstyle ':autocomplete:*history*:*' insert-unambiguous yes
-
-# ^S
-zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
-
-# Customize common substring message
-zstyle ':autocomplete:*:unambiguous' format \
-  $'%{\e[0;2m%}%Bcommon substring:%b %0F%11K%d%f%k'
-
-# Wait for a minimum amount of input
-zstyle ':autocomplete:*' min-input 2
-
-# Don't show completions if the current word matches a pattern
-# zstyle ':autocomplete:*' ignored-input ''
-
-# $LINES is the number of lines that fit on screen.
-zstyle -e ':autocomplete:*:*' list-lines 'reply=( $(( LINES / 3 )) )'
-
-# Override for recent path search only
-zstyle ':autocomplete:recent-paths:*' list-lines 10
-
-# Override for history search only
-zstyle ':autocomplete:history-incremental-search-backward:*' list-lines 8
-
-# Override for history menu only
-zstyle ':autocomplete:history-search-backward:*' list-lines 2000
-
 ###############################################
 ### Performance and experience optimization ###
 ###############################################

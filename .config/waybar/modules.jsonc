@@ -895,14 +895,14 @@
     "return-type": "json",
     "interval": 60,
     "tooltip": true,
-    "on-click": "~/.config/waybar/scripts/ipaddress.sh"
+    "on-click": "~/.config/waybar/scripts/ipaddress.sh && killall -SIGUSR2 waybar"
   },
   "custom/wallpaper": {
     "exec": "cat ~/.config/waybar/colors.css | grep foreground | sed -nE 's/.*(#[0-9A-Fa-f]{6}).*/\\1/p'",
     "format": "  {} ",
     "interval": "once",
     "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/wallpaper.sh --random ~/Pictures/wallpapers/",
-    "on-click-right": "rm -rf \"$(hyprctl hyprpaper listactive | awk -F' = ' '{print $2}')\" && ~/.config/waybar/scripts/wallpaper.sh --random ~/Pictures/wallpapers/"
+    "on-click": "~/.config/waybar/scripts/wallpaper.sh random ~/Pictures/wallpapers/",
+    "on-click-right": "rm -rf \"$(hyprctl hyprpaper listactive | awk -F' = ' '{print $2}')\" && ~/.config/waybar/scripts/wallpaper.sh random ~/Pictures/wallpapers/"
   }
 }

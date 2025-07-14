@@ -33,15 +33,15 @@ get_poetry() {
   local token="$1"
   local response=$(curl -s -H "X-User-Token: $token" "https://v2.jinrishici.com/sentence")
 
-  if [[ $? -eq 0 ]]; then
-    echo "$response" | tee "$CACHE_FILE"
-  else
+  if [[ $response == "" ]]; then
     # 如果网络请求失败，尝试使用缓存
     if [[ -f "$CACHE_FILE" ]]; then
       cat "$CACHE_FILE"
     else
       echo '{"status":"error","data":{"content":"醉后不知天在水，满船清梦压星河。","origin":{"author":"","title":"","dynasty":""}}}'
     fi
+  else
+    echo "$response" | tee "$CACHE_FILE"
   fi
 }
 
@@ -66,12 +66,8 @@ format_output() {
     # 为 waybar 准备的 JSON 格式
     local tooltip=""
     if [[ "$author" != "" && "$title" != "" ]]; then
-      tooltip="${title} -- ${dynasty}·${author}"
-    else
-      tooltip="今日诗词"
+      tooltip="${title} -- ${dynasty}·${author}"$'\n'"${full}"
     fi
-
-    tooltip="${tooltip}"$'\n'"${full}"
 
     # 添加 warning 信息
     if [[ "$warning" != "" ]]; then
@@ -116,13 +112,6 @@ main() {
 
   # 获取诗词
   local poetry_data=$(get_poetry "$token")
-
-  # 检查 API 响应状态
-  local status=$(echo "$poetry_data" | jq -r '.status // "error"')
-  if [[ "$status" != "success" ]]; then
-    echo '{"text":"诗词获取失败", "class":"error"}'
-    exit 1
-  fi
 
   # 格式化并输出
   format_output "$poetry_data" "$format"
