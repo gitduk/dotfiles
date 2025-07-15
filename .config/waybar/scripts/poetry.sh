@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Waybar 诗词模块
 # 用于显示今日诗词的 waybar 自定义模块
 
 # 配置文件路径
-CACHE_DIR="$XDG_CACHE_HOME/waybar"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
 TOKEN_FILE="$CACHE_DIR/poetry.token"
 CACHE_FILE="$CACHE_DIR/poetry.json"
 

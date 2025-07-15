@@ -1,32 +1,35 @@
-@import 'colors.css';
+@import "colors.css";
 
+/* 全局样式 */
 * {
   font-family: "Maple Mono NF CN";
   font-weight: bold;
-  min-height: 0;
-  /* set font-size to 100% if font scaling is set to 1.00 using nwg-look */
   font-size: 97%;
-  color: @foreground;
   font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
+  min-height: 0;
 }
 
+/* Waybar 窗口 */
 window#waybar {
-  background: transparent;
   border-radius: 1px;
-  color: whitesmoke;
+  background: transparent;
+  color: @foreground;
 }
 
 window#waybar.hidden {
   opacity: 0.5;
 }
 
-window#waybar.empty window#waybar.empty #window {
-  padding: 0px;
-  border: 0px;
+window#waybar.empty,
+window#waybar.empty #window {
+  padding: 0;
+  border: 0;
   background-color: transparent;
 }
 
+/* 工作区按钮 */
 #workspaces button {
+  color: @foreground;
   box-shadow: none;
   text-shadow: none;
   padding: 4px 6px;
@@ -38,8 +41,7 @@ window#waybar.empty window#waybar.empty #window {
 }
 
 #workspaces button.active {
-  color: @color12;
-  border-bottom: 1px solid @foreground;
+  border-bottom: 1px solid @cursor;
 }
 
 #workspaces button.urgent {
@@ -47,6 +49,7 @@ window#waybar.empty window#waybar.empty #window {
   border-radius: 9px;
 }
 
+/* 模块通用样式 */
 #backlight,
 #battery,
 #bluetooth,
@@ -83,83 +86,52 @@ window#waybar.empty window#waybar.empty #window {
 #custom-weather.clearNight,
 #custom-weather.cloudyFoggyDay,
 #custom-weather.cloudyFoggyNight,
-#custom-weather.default #custom-weather.rainyDay,
+#custom-weather.default,
+#custom-weather.rainyDay,
 #custom-weather.rainyNight,
 #custom-weather.severe,
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.sunnyDay {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-right: 6px;
-  padding-left: 6px;
+  padding: 4px 6px;
 }
 
+/* 特殊状态样式 */
 #temperature.critical {
   background-color: #ff0000;
 }
 
-@keyframes blink {
-  to {
-    color: #000000;
-  }
+#battery.critical:not(.charging) {
+  color: #f53c3c;
+  animation: blink 0.5s linear infinite alternate;
 }
 
+/* 任务栏按钮 */
 #taskbar button:hover {
-  padding-left: 3px;
-  padding-right: 3px;
+  padding: 0 3px;
   animation: gradient_f 20s ease-in infinite;
   transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
 #taskbar button.active {
   background-color: #7f849c;
-  padding-left: 12px;
-  padding-right: 12px;
+  padding: 0 12px;
   animation: gradient_f 20s ease-in infinite;
   transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
-#battery.critical:not(.charging) {
-  color: #f53c3c;
-  animation-name: blink;
-  animation-duration: 0.5s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-}
-
-#pulseaudio-slider slider {
-  min-width: 0px;
-  min-height: 0px;
-  opacity: 0;
-  background-image: none;
-  border: none;
-  box-shadow: none;
-}
-
-#pulseaudio-slider trough {
-  min-width: 80px;
-  min-height: 10px;
-  border-radius: 5px;
-  background-color: black;
-}
-
-#pulseaudio-slider highlight {
-  min-height: 10px;
-  border-radius: 5px;
-  background-color: wheat;
-}
-
+/* 滑块样式 */
+#pulseaudio-slider slider,
 #backlight-slider slider {
-  min-width: 0px;
-  min-height: 0px;
+  min-width: 0;
+  min-height: 0;
   opacity: 0;
   background-image: none;
   border: none;
   box-shadow: none;
 }
 
+#pulseaudio-slider trough,
 #backlight-slider trough {
   min-width: 80px;
   min-height: 10px;
@@ -167,10 +139,22 @@ window#waybar.empty window#waybar.empty #window {
   background-color: black;
 }
 
+#pulseaudio-slider highlight,
 #backlight-slider highlight {
-  min-width: 10px;
+  min-height: 10px;
   border-radius: 5px;
   background-color: wheat;
+}
+
+#backlight-slider highlight {
+  min-width: 10px;
+}
+
+/* 动画定义 */
+@keyframes blink {
+  to {
+    color: #000000;
+  }
 }
 
 /* 诗词模块样式 */

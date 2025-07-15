@@ -3,7 +3,7 @@
 # ipaddress 模块
 
 # 配置文件路径
-CACHE_DIR="$XDG_CACHE_HOME/waybar"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
 TOKEN_FILE="$CACHE_DIR/ip.token"
 
 # 创建配置目录

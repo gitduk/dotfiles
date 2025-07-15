@@ -865,20 +865,12 @@
     "tooltip": true
   },
   "custom/backlight": {
+    "exec": "~/.config/waybar/scripts/brightness.sh --get",
     "format": " 󰃠 {} ",
     "interval": 2,
-    "exec": "~/.config/waybar/scripts/brightness.sh --get",
     "exec-if": "hash ddcutil",
     "on-click": "~/.config/waybar/scripts/brightness.sh --set $(echo -n '10\n20\n30\n40\n50' | rofi -dmenu -i -p 'backlight:')",
     "tooltip": false
-  },
-  "custom/color_scheme": {
-    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark/󰖔/; s/prefer-light/󰃠/; t; s/.*/󰖨/'",
-    "format": " {} ",
-    "interval": "once",
-    "signal": 1,
-    "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh"
   },
   "custom/poetry": {
     "exec": "~/.config/waybar/scripts/poetry.sh --refresh",
@@ -896,6 +888,19 @@
     "interval": 60,
     "tooltip": true,
     "on-click": "~/.config/waybar/scripts/ipaddress.sh && killall -SIGUSR2 waybar"
+  },
+  "custom/color_scheme": {
+    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark/󰖔/; s/prefer-light/󰃠/; t; s/.*/󰖨/'",
+    "format": " {} ",
+    "interval": "once",
+    "tooltip": false,
+    "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh"
+  },
+  "custom/dark_light": {
+    "format": " 󰌁 ",
+    "interval": "once",
+    "tooltip": false,
+    "on-click": "sed -i -e 's/foreground/__TMP__/g' -e 's/background/foreground/g' -e 's/__TMP__/background/g' ~/.config/waybar/colors.css && killall -SIGUSR2 waybar"
   },
   "custom/wallpaper": {
     "exec": "cat ~/.config/waybar/colors.css | grep foreground | sed -nE 's/.*(#[0-9A-Fa-f]{6}).*/\\1/p'",
