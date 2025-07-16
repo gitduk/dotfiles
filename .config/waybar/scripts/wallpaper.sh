@@ -16,6 +16,8 @@ typeset -A CONFIG=(
     [resolution]="3840"
     [user_agent]="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     [bing_api]="https://bing.biturl.top/?resolution=%s&format=json&index=random&mkt=random"
+    [waybar_toggle_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/dark-light"
+    [waybar_css_file]="$HOME/.config/waybar/colors.css"
 )
 
 # 支持的图片格式
@@ -64,60 +66,63 @@ get_focused_monitor() {
 
 # 查找壁纸文件
 find_wallpapers() {
-    local dir=${1:-${CONFIG[wallpaper_dir]}}
-    [[ -d $dir ]] || error "目录不存在: $dir"
-    
-    local -a patterns
-    for ext in $IMAGE_EXTS; do
-      # 大小写不敏感 ((#i))
-      patterns+=($dir/**/*.$ext(#i))
-    done
-    
-    print -l ${^patterns} | sort -u
+  local dir=${1:-${CONFIG[wallpaper_dir]}}
+  [[ -d $dir ]] || error "目录不存在: $dir"
+  
+  local -a patterns
+  for ext in $IMAGE_EXTS; do
+    # 大小写不敏感 ((#i))
+    patterns+=($dir/**/*.$ext(#i))
+  done
+  
+  print -l ${^patterns} | sort -u
 }
 
 # 设置壁纸
 set_wallpaper() {
-    local wallpaper=$1
-    local monitor=$(get_focused_monitor)
-    
-    [[ -f $wallpaper ]] || error "文件不存在: $wallpaper"
-    
-    info "设置壁纸: ${wallpaper:t}"
-    
-    # 设置壁纸
-    {
-      hyprctl hyprpaper unload all
-      hyprctl hyprpaper preload "$wallpaper"
-      hyprctl hyprpaper wallpaper "$monitor,$wallpaper"
-    } &>/dev/null
-    
-    # 更新颜色主题
-    (( ${+commands[wallust]} )) && wallust run "$wallpaper" -s 2>/dev/null \
-      || warn "wallust 命令未找到"
-    
-    # 重新加载相关服务
-    (( ${+commands[waybar]} )) && pidof waybar &>/dev/null && killall -SIGUSR2 waybar
-    (( ${+commands[hyprctl]} )) && hyprctl reload &>/dev/null
+  local wallpaper=$1
+  local monitor=$(get_focused_monitor)
+  
+  [[ -f $wallpaper ]] || error "文件不存在: $wallpaper"
+  
+  info "设置壁纸: ${wallpaper:t}"
+  
+  # 设置壁纸
+  {
+    hyprctl hyprpaper unload all
+    hyprctl hyprpaper preload "$wallpaper"
+    hyprctl hyprpaper wallpaper "$monitor,$wallpaper"
+  } &>/dev/null
+  
+  # 更新颜色主题
+  (( ${+commands[wallust]} )) && wallust run "$wallpaper" -s 2>/dev/null \
+    || warn "wallust 命令未找到"
+
+  # 颜色反转
+  toggle=$(cat ${CONFIG[waybar_toggle_file]})
+  (( $toggle )) && sed -i -e 's/foreground/__TMP__/g' -e 's/background/foreground/g' -e 's/__TMP__/background/g' ${CONFIG[waybar_css_file]}
+
+  # 重新加载相关服务
+  (( ${+commands[hyprctl]} )) && hyprctl reload &>/dev/null
 }
 
 # 随机选择壁纸
 random_wallpaper() {
-    local dir=${1:-${CONFIG[wallpaper_dir]}}
-    # (f) 标志：按行分割
-    local -a wallpapers=(${(f)"$(find_wallpapers $dir)"})
-    
-    (( ${#wallpapers} )) || error "没有找到壁纸文件"
-    
-    # 排除当前壁纸
-    local current=$(hyprctl hyprpaper listactive | awk -F' = ' "/$(get_focused_monitor)/{print \$2}")
-    if [[ -f $current ]]; then
-      # 排除特定元素 (# 表示匹配并删除)
-      wallpapers=(${wallpapers:#$current})
-    fi
-    
-    local selected=${wallpapers[$RANDOM % ${#wallpapers} + 1]}
-    set_wallpaper "$selected"
+  local dir=${1:-${CONFIG[wallpaper_dir]}}
+  # (f) 标志：按行分割
+  local -a wallpapers=(${(f)"$(find_wallpapers $dir)"})
+  
+  (( ${#wallpapers} )) || error "没有找到壁纸文件"
+  
+  # 排除当前壁纸
+  local current=$(hyprctl hyprpaper listactive | awk -F' = ' "/$(get_focused_monitor)/{print \$2}")
+  if [[ -f $current ]]; then
+    # 排除特定元素 (# 表示匹配并删除)
+    wallpapers=(${wallpapers:#$current})
+  fi
+  
+  local selected=${wallpapers[$RANDOM % ${#wallpapers} + 1]}
+  set_wallpaper "$selected"
 }
 
 # 循环播放壁纸
@@ -219,41 +224,41 @@ download_bing() {
 
 # 下载 Unsplash 壁纸
 download_unsplash() {
-    local download_dir="${CONFIG[wallpaper_dir]}/unsplash"
-    local api_url="https://source.unsplash.com/${CONFIG[resolution]}x$((CONFIG[resolution] * 9 / 16))/?nature,landscape"
-    
-    [[ -d $download_dir ]] || mkdir -p "$download_dir"
-    
-    info "正在下载 Unsplash 壁纸..."
-    
-    local timestamp=$(date +%Y%m%d_%H%M%S)
-    local img_path="$download_dir/unsplash_${timestamp}.jpg"
-    
-    if wget -q "$api_url" -O "$img_path"; then
-      info "下载完成: ${img_path:t}"
-      notify-send "Unsplash 壁纸" "已下载: ${img_path:t}" 2>/dev/null
-      set_wallpaper "$img_path"
-    else
-      error "下载失败"
-    fi
+  local download_dir="${CONFIG[wallpaper_dir]}/unsplash"
+  local api_url="https://source.unsplash.com/${CONFIG[resolution]}x$((CONFIG[resolution] * 9 / 16))/?nature,landscape"
+  
+  [[ -d $download_dir ]] || mkdir -p "$download_dir"
+  
+  info "正在下载 Unsplash 壁纸..."
+  
+  local timestamp=$(date +%Y%m%d_%H%M%S)
+  local img_path="$download_dir/unsplash_${timestamp}.jpg"
+  
+  if wget -q "$api_url" -O "$img_path"; then
+    info "下载完成: ${img_path:t}"
+    notify-send "Unsplash 壁纸" "已下载: ${img_path:t}" 2>/dev/null
+    set_wallpaper "$img_path"
+  else
+    error "下载失败"
+  fi
 }
 
 # 下载 Pixabay 壁纸
 download_pixabay() {
-    local download_dir="${CONFIG[wallpaper_dir]}/pixabay"
-    
-    [[ -d $download_dir ]] || mkdir -p "$download_dir"
-    
-    info "正在下载 Pixabay 壁纸..."
-    
-    # 需要 API key，这里只是示例
-    warn "Pixabay 需要 API key，请在 CONFIG 中配置"
-    
-    local timestamp=$(date +%Y%m%d_%H%M%S)
-    local img_path="$download_dir/pixabay_${timestamp}.jpg"
-    
-    # 示例实现
-    echo "https://pixabay.com/api/?key=YOUR_API_KEY&q=nature&image_type=photo&orientation=horizontal&min_width=${CONFIG[resolution]}"
+  local download_dir="${CONFIG[wallpaper_dir]}/pixabay"
+  
+  [[ -d $download_dir ]] || mkdir -p "$download_dir"
+  
+  info "正在下载 Pixabay 壁纸..."
+  
+  # 需要 API key，这里只是示例
+  warn "Pixabay 需要 API key，请在 CONFIG 中配置"
+  
+  local timestamp=$(date +%Y%m%d_%H%M%S)
+  local img_path="$download_dir/pixabay_${timestamp}.jpg"
+  
+  # 示例实现
+  echo "https://pixabay.com/api/?key=YOUR_API_KEY&q=nature&image_type=photo&orientation=horizontal&min_width=${CONFIG[resolution]}"
 }
 
 # 下载 Pexels 壁纸

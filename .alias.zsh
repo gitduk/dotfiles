@@ -80,9 +80,9 @@ alias di="direnv"
 EOF
 
 lazy_group docker <<EOF
-alias dv="docker volume"
-alias dpl="docker pull"
-alias dr="docker run"
+alias dcv="docker volume"
+alias dcpl="docker pull"
+alias dcr="docker run"
 
 alias dcc="docker container"
 alias dcls="docker container ls"

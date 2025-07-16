@@ -1,181 +1,10 @@
 {
-  "hyprland/workspaces": {
-    "active-only": false,
-    "all-outputs": true,
-    "format": "{icon}",
-    "show-special": false,
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-    "persistent-workspaces": {
-      "1": [],
-      "2": [],
-      "3": []
-    },
-    "format-icons": {
-      "active": "",
-      "default": ""
-    }
-  },
-  "hyprland/workspaces#roman": {
-    "active-only": false,
-    "all-outputs": true,
-    "format": "{icon}",
-    "show-special": false,
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-    "persistent-workspaces": {
-      "1": [],
-      "2": [],
-      "3": []
-    },
-    "format-icons": {
-      "1": "I",
-      "2": "II",
-      "3": "III",
-      "4": "IV",
-      "5": "V",
-      "6": "VI",
-      "7": "VII",
-      "8": "VIII",
-      "9": "IX",
-      "10": "X"
-    }
-  },
-  "hyprland/workspaces#pacman": {
-    "active-only": false,
-    "all-outputs": true,
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-    "show-special": false,
-    "persistent-workspaces": {
-      "1": [],
-      "2": [],
-      "3": []
-    },
-    "format": "{icon}",
-    "format-icons": {
-      "active": "<span font='12'>󰮯</span>",
-      "empty": "<span font='8'></span>",
-      "default": "󰊠"
-    }
-  },
-  "hyprland/workspaces#kanji": {
-    "disable-scroll": true,
-    "show-special": false,
-    "all-outputs": true,
-    "format": "{icon}",
-    "persistent-workspaces": {
-      "1": [],
-      "2": [],
-      "3": []
-    },
-    "format-icons": {
-      "1": "一",
-      "2": "二",
-      "3": "三",
-      "4": "四",
-      "5": "五",
-      "6": "六",
-      "7": "七",
-      "8": "八",
-      "9": "九",
-      "10": "十"
-    }
-  },
-  "hyprland/workspaces#4": {
-    "format": " {name} {icon} ",
-    "show-special": false,
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-    "all-outputs": true,
-    "sort-by-number": true,
-    "format-icons": {
-      "1": " ",
-      "2": " ",
-      "3": " ",
-      "4": " ",
-      "5": " ",
-      "6": " ",
-      "7": "",
-      "8": " ",
-      "9": "",
-      "10": "10",
-      "focused": "",
-      "default": ""
-    }
-  },
-  "hyprland/workspaces#rw": {
-    "disable-scroll": true,
-    "all-outputs": true,
-    "warp-on-scroll": false,
-    "sort-by-number": true,
-    "show-special": false,
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-    "format": "{icon} {windows}",
-    "format-window-separator": " ",
-    "window-rewrite-default": " ",
-    "window-rewrite": {
-      "title<.*youtube.*>": " ",
-      "title<.*amazon.*>": " ",
-      "title<.*reddit.*>": " ",
-      "title<.*Picture-in-Picture.*>": " ",
-      "class<firefox>": " ",
-      "class<kitty>": " ",
-      "class<konsole>": " ",
-      "class<thunar>": "󰝰 ",
-      "class<discord>": " ",
-      "class<WebCord>": " ",
-      "class<subl>": "󰅳 ",
-      "class<celluloid>": " ",
-      "class<Cider>": "󰎆 ",
-      "class<code-oss>": "󰨞 ",
-      "class<codium|codium-url-handler|VSCodium>": "󰨞 ",
-      "class<codeblocks>": "󰅩 ",
-      "class<mousepad>": " ",
-      "class<libreoffice-writer>": " ",
-      "class<libreoffice-startcenter>": "󰏆 ",
-      "class<com.obsproject.Studio>": " "
-    }
-  },
-  "hyprland/workspaces#cam": {
-    "active-only": false,
-    "all-outputs": true,
-    "format": "{icon}",
-    "show-special": false,
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-    "persistent-workspaces": {
-      "1": [],
-      "2": [],
-      "3": []
-    },
-    "format-icons": {
-      "1": "Uno",
-      "2": "Due",
-      "3": "Tre",
-      "4": "Quattro",
-      "5": "Cinque",
-      "6": "Sei",
-      "7": "Sette",
-      "8": "Otto",
-      "9": "Nove",
-      "10": "Dieci"
-    }
-  },
   "group/motherboard": {
     "orientation": "horizontal",
     "modules": [
       "cpu",
       "memory",
-      "temperature",
-      "disk"
+      "temperature"
     ]
   },
   "group/mobo_drawer": {
@@ -188,8 +17,27 @@
     "modules": [
       "temperature",
       "cpu",
-      "memory",
-      "disk"
+      "memory"
+    ]
+  },
+  "group/connections": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 500,
+      "children-class": "network",
+      "transition-left-to-right": true
+    },
+    "modules": [
+      "network#speed",
+      "custom/ipaddress"
+    ]
+  },
+  "group/color": {
+    "orientation": "horizontal",
+    "modules": [
+      "custom/wallpaper",
+      "custom/dark_light",
+      "custom/color_scheme"
     ]
   },
   "group/laptop": {
@@ -209,18 +57,6 @@
     "modules": [
       "pulseaudio",
       "pulseaudio#microphone"
-    ]
-  },
-  "group/connections": {
-    "orientation": "inherit",
-    "drawer": {
-      "transition-duration": 500,
-      "children-class": "bluetooth",
-      "transition-left-to-right": true
-    },
-    "modules": [
-      "network",
-      "bluetooth"
     ]
   },
   "backlight": {
@@ -353,30 +189,6 @@
     "path": "/",
     "tooltip-format": "{used} used out of {total} on {path} ({percentage_used}%)"
   },
-  "hyprland/language": {
-    "format": "Lang: {}",
-    "format-en": "US",
-    "format-tr": "Korea",
-    "keyboard-name": "at-translated-set-2-keyboard",
-    "on-click": "hyprctl switchxkblayout $SET_KB next"
-  },
-  "hyprland/submap": {
-    "format": "  {} ",
-    "tooltip": false
-  },
-  "hyprland/window": {
-    "format": "{}",
-    "max-length": 20,
-    "separate-outputs": true,
-    "offscreen-css": true,
-    "offscreen-css-text": "(inactive)",
-    "rewrite": {
-      "(.*) — Mozilla Firefox": " $1",
-      "(.*) - fish": "> [$1]",
-      "(.*) - zsh": "> [$1]",
-      "(.*) - $term": "> [$1]"
-    }
-  },
   "idle_inhibitor": {
     "format": " {icon} ",
     "format-icons": {
@@ -398,7 +210,7 @@
   },
   "memory": {
     "interval": 10,
-    "format": "{used:0.1f}G 󰾆",
+    "format": "{used:0.1f}G 󰾆 ",
     "format-alt": "{percentage}% 󰾆",
     "format-alt-click": "click",
     "tooltip": true,
@@ -742,172 +554,5 @@
     "on-click-right": "foot -T mpd sh -c '~/.config/waybar/scripts/mpd.sh -r'",
     "on-scroll-up": "mpc prev",
     "on-scroll-down": "mpc next"
-  },
-  // ################
-  // ###   CUSTOM ###
-  // ################
-  "custom/cycle_wall": {
-    "format": " ",
-    "tooltip": false
-  },
-  "custom/hint": {
-    "format": "󰺁 HINT!",
-    "on-click": "~/.config/waybar/scripts/keyhints.sh",
-    "tooltip": true,
-    "tooltip-format": "󱧣 Quick Tips"
-  },
-  "custom/keyboard": {
-    "exec": "cat ~/.cache/kb_layout",
-    "interval": 1,
-    "format": " {}"
-  },
-  "custom/lock": {
-    "format": "󰌾",
-    "on-click": "hyprlock -q",
-    "tooltip": true,
-    "tooltip-format": "󰷛 Screen Lock"
-  },
-  "custom/menu": {
-    "format": "",
-    "on-click": "foot -T menu sh -c '~/.config/waybar/scripts/waybar.sh -l ~/.config/waybar/configs'",
-    "on-click-right": "foot -T menu sh -c '~/.config/waybar/scripts/waybar.sh -s ~/.config/waybar/style'",
-    "tooltip": true,
-    "tooltip-format": "Left Click: Waybar Layout Menu\nRight Click: Waybar Style Menu"
-  },
-  "custom/cava": {
-    "exec": "~/.config/waybar/scripts/waybar_cava.sh",
-    "tooltip": false,
-    "format": "{}"
-  },
-  "custom/playerctl": {
-    "format": "<span>{}</span>",
-    "return-type": "json",
-    "max-length": 35,
-    "exec": "playerctl -a metadata --format \"{'text': '{{artist}} ~ {{markup_escape(title)}}', 'tooltip':   '{{playerName}} : {{markup_escape(title)}}', 'alt': '{{status}}', 'class': '{{status}}'}\" -F",
-    "on-click-middle": "playerctl play-pause",
-    "on-click": "playerctl previous",
-    "on-click-right": "playerctl next",
-    "scroll-step": 5.0,
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --inc",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --dec",
-    "smooth-scrolling-threshold": 1
-  },
-  "custom/power": {
-    "format": "⏻ ",
-    "on-click": "hyprctl dispatch dpms off"
-  },
-  "custom/swaync": {
-    "tooltip": true,
-    "tooltip-format": "Left Click: Launch Notification Center\nRight Click: Do not Disturb",
-    "format": "{icon} {}",
-    "format-icons": {
-      "notification": "<span foreground='red'><sup></sup></span>",
-      "none": "",
-      "dnd-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-none": "",
-      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
-      "inhibited-none": "",
-      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-inhibited-none": ""
-    },
-    "return-type": "json",
-    "exec-if": "which swaync-client",
-    "exec": "swaync-client -swb",
-    "on-click": "sleep 0.1 && swaync-client -t -sw",
-    "on-click-right": "swaync-client -d -sw",
-    "escape": true
-  },
-  // NOTE:! This is only for Arch and Arch Based Distros  depend: pacman-contrib
-  "custom/updater": {
-    "format": " {}",
-    "exec": "checkupdates | wc -l",
-    "exec-if": "[[ $(checkupdates | wc -l) ]]",
-    "interval": 15,
-    "on-click": "kitty -T update paru -Syu || yay -Syu && notify-send 'The system has been updated'",
-    "tooltip": true,
-    "tooltip-format": "Left Click: Update System\nArch Linux Only"
-  },
-  // Separators
-  "custom/separator#dot": {
-    "format": "",
-    "interval": "once",
-    "tooltip": false
-  },
-  "custom/separator#dot-line": {
-    "format": "",
-    "interval": "once",
-    "tooltip": false
-  },
-  "custom/separator#line": {
-    "format": "|",
-    "interval": "once",
-    "tooltip": false
-  },
-  "custom/separator#blank": {
-    "format": " ",
-    "interval": "once",
-    "tooltip": false
-  },
-  "custom/separator#blank_2": {
-    "format": "  ",
-    "interval": "once",
-    "tooltip": false
-  },
-  "custom/separator#blank_3": {
-    "format": "   ",
-    "interval": "once",
-    "tooltip": false
-  },
-  "custom/power_vertical": {
-    "format": "⏻",
-    "exec": "echo ; echo 󰟡 power // blur",
-    "interval": 86400,
-    "tooltip": true
-  },
-  "custom/backlight": {
-    "exec": "~/.config/waybar/scripts/brightness.sh --get",
-    "format": " 󰃠 {} ",
-    "interval": 2,
-    "exec-if": "hash ddcutil",
-    "on-click": "~/.config/waybar/scripts/brightness.sh --set $(echo -n '10\n20\n30\n40\n50' | rofi -dmenu -i -p 'backlight:')",
-    "tooltip": false
-  },
-  "custom/poetry": {
-    "exec": "~/.config/waybar/scripts/poetry.sh --refresh",
-    "return-type": "json",
-    "interval": 1800,
-    "tooltip": true,
-    "format": "{}",
-    "max-length": 50,
-    "on-click": "~/.config/waybar/scripts/poetry.sh"
-  },
-  "custom/ipaddress": {
-    "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",
-    "format": " {} ",
-    "return-type": "json",
-    "interval": 60,
-    "tooltip": true,
-    "on-click": "~/.config/waybar/scripts/ipaddress.sh && killall -SIGUSR2 waybar"
-  },
-  "custom/color_scheme": {
-    "exec": "sleep 0.1 && gsettings get org.gnome.desktop.interface color-scheme | tr -d \"'\" | sed 's/prefer-dark/󰖔/; s/prefer-light/󰃠/; t; s/.*/󰖨/'",
-    "format": " {} ",
-    "interval": "once",
-    "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh"
-  },
-  "custom/dark_light": {
-    "format": " 󰌁 ",
-    "interval": "once",
-    "tooltip": false,
-    "on-click": "sed -i -e 's/foreground/__TMP__/g' -e 's/background/foreground/g' -e 's/__TMP__/background/g' ~/.config/waybar/colors.css && killall -SIGUSR2 waybar"
-  },
-  "custom/wallpaper": {
-    "exec": "cat ~/.config/waybar/colors.css | grep foreground | sed -nE 's/.*(#[0-9A-Fa-f]{6}).*/\\1/p'",
-    "format": "  {} ",
-    "interval": "once",
-    "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/wallpaper.sh random ~/Pictures/wallpapers/",
-    "on-click-right": "rm -rf \"$(hyprctl hyprpaper listactive | awk -F' = ' '{print $2}')\" && ~/.config/waybar/scripts/wallpaper.sh random ~/Pictures/wallpapers/"
   }
 }
