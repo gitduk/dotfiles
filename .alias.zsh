@@ -44,6 +44,10 @@ lazy_group curl <<EOF
 alias cl="curl"
 EOF
 
+lazy_group claude <<EOF
+alias cld="claude"
+EOF
+
 lazy_group cargo <<EOF
 alias ca="cargo"
 alias cai="cargo init"
@@ -263,7 +267,7 @@ lazy_group podman <<EOF
 alias pd="podman"
 alias pdc="podman container"
 alias pdr="podman run"
-alias pdls="podman container ls"
+alias pdls="podman container ls --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.RunningFor}}'"
 alias pdla="podman container ls -a"
 alias pds="podman container stats"
 alias pdst="podman container start"
@@ -275,12 +279,14 @@ alias pdpr="podman container prune"
 alias pdps="podman ps"
 alias pdlg="podman logs --follow"
 alias pdec="podman exec -it"
-alias pdcp="podman cp"
+alias pdc="podman cp"
 alias pdsc="podman search"
 alias pddf="podman diff"
 alias pdis="podman inspect"
 
-alias pc="podman-compose"
+alias pdcp="podman compose"
+alias pdcpu="podman compose up"
+alias pdcpud="podman compose up -d"
 EOF
 
 lazy_group path <<EOF

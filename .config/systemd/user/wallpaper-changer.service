@@ -3,7 +3,7 @@ Description=Randomly change wallpaper
 
 [Service]
 Type=oneshot
-ExecStart=%h/.config/hypr/scripts/wallpaper.sh --random %h/Pictures/wallpapers
+ExecStart=%h/.config/waybar/scripts/wallpaper.sh random %h/Pictures/wallpapers
 
 [Install]
 WantedBy=default.target

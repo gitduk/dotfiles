@@ -1,7 +1,0 @@
-services:
-  transfer.sh:
-    ports:
-      - 8000:8080
-    image: dutchcoders/transfer.sh:latest
-    command: --provider local --basedir /transfer/
-networks: {}

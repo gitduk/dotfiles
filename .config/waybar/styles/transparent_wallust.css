@@ -45,7 +45,7 @@ window#waybar.empty #window {
 }
 
 #workspaces button.urgent {
-  color: #11111b;
+  color: @color13;
   border-radius: 9px;
 }
 

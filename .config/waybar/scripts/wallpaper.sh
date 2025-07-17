@@ -331,7 +331,7 @@ list_sources() {
 main() {
   # 创建壁纸目录
   [[ -d ${CONFIG[wallpaper_dir]} ]] || mkdir -p "${CONFIG[wallpaper_dir]}"
-  
+
   # 解析全局选项
   local -A opts
   zparseopts -D -A opts \

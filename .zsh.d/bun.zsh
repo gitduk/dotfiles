@@ -1,9 +1,11 @@
+#!/usr/bin/env zsh
+
 if ! command -v bun &>/dev/null; then
   return 0
 fi
 
 pkgs=(
-  "nb:nb.sh"
+  "claude:@anthropic-ai/claude-code"
 )
 
 for item in "${pkgs[@]}"; do
