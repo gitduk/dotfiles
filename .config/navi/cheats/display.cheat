@@ -29,19 +29,19 @@ cmake -DCMAKE_INSTALL_PREFIX=/usr -B build \
   && cmake --build build -j `nproc` \
   && sudo cmake --install ./build
 
-# 6. hyprutils
-sudo nala install -y libpixman-1-dev
-git clone https://github.com/hyprwm/hyprutils.git /tmp/hyprutils && cd /tmp/hyprutils/
-cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
-  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
-  && sudo cmake --install ./build
-
-# 7. aquamarine
+# 6. aquamarine
 sudo nala install -y libseat-dev libdrm-dev libgbm-dev
 git clone https://github.com/hyprwm/aquamarine.git /tmp/aquamarine && cd /tmp/aquamarine/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
   && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
   && sudo cmake --install build
+
+# 7. hyprutils
+sudo nala install -y libpixman-1-dev
+git clone https://github.com/hyprwm/hyprutils.git /tmp/hyprutils && cd /tmp/hyprutils/
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
+  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` \
+  && sudo cmake --install ./build
 
 # 8. hyprlang
 git clone https://github.com/hyprwm/hyprlang.git /tmp/hyprlang && cd /tmp/hyprlang/
@@ -93,34 +93,35 @@ git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd /tm
 export CC=gcc-14 CXX=g++-14 && make all && sudo make install
 
 # 15. Hyprland -- from release
-wget "https://github.com/hyprwm/Hyprland/releases/download/v0.49.0/source-v0.49.0.tar.gz" -P /tmp
+HYPRLAND_VERSION="v0.50.0"
+wget "https://github.com/hyprwm/Hyprland/releases/download/$HYPRLAND_VERSION/source-$HYPRLAND_VERSION.tar.gz" -P /tmp
+cd /tmp && tar -xzvf source-$HYPRLAND_VERSION.tar.gz && cd hyprland-source/
 export CC=gcc-14 CXX=g++-14 && make all && sudo make install
-cd /tmp && tar -xzvf source-v0.49.0.tar.gz && cd hyprland-source/
 
 # 16. hyprnotify
 sudo nala install -y libalsa-ocaml-dev
 git clone https://github.com/codelif/hyprnotify.git /tmp/hyprnotify && cd /tmp/hyprnotify/
 go build ./cmd/hyprnotify
-mv ./hyprnotify ~/.local/bin/hyprnotify
+sudo mv ./hyprnotify /usr/bin/hyprnotify
 
 # 17. hyprpaper
 sudo nala install -y libmagic-dev
 git clone https://github.com/hyprwm/hyprpaper.git /tmp/hyprpaper && cd /tmp/hyprpaper/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
-  && cmake --build ./build --config Release --target hyprpaper -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && cmake -DCMAKE_INSTALL_PREFIX=/usr --build ./build --config Release --target hyprpaper -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
 # 18. hyprlock
 sudo nala install -y libpam0g-dev libdrm-dev 
 git clone https://github.com/hyprwm/hyprlock.git /tmp/hyprlock && cd /tmp/hyprlock/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
-  && cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && cmake -DCMAKE_INSTALL_PREFIX=/usr --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install ./build
 
 # 19. hypridle
 git clone https://github.com/hyprwm/hypridle.git /tmp/hypridle && cd /tmp/hypridle/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build \
-  && cmake --build ./build --config Release --target hypridle -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
+  && cmake -DCMAKE_INSTALL_PREFIX=/usr --build ./build --config Release --target hypridle -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
   && sudo cmake --install build \
   && systemctl --user enable --now hypridle.service
 
@@ -148,6 +149,6 @@ cmake --build . && sudo cmake --build . --target install
 
 # uwsm - Universal Wayland Session Manager
 git clone https://github.com/Vladimir-csp/uwsm.git /tmp/uwsm && cd /tmp/uwsm
-meson setup --prefix=/usr/local -Duuctl=enabled -Dfumon=enabled -Duwsm-app=enabled build \
+meson setup --prefix=/usr -Duuctl=enabled -Dfumon=enabled -Duwsm-app=enabled build \
   && sudo meson install -C build
 

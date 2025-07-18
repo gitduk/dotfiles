@@ -22,16 +22,17 @@ curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
 
 # waybar
 sudo nala install libspdlog-dev libgtkmm-3.0-dev libjsoncpp-dev libnl-genl-3-dev libupower-glib-dev \
-  libpipewire-0.3-dev libplayerctl-dev libpulse-dev libxkbregistry-dev scdoc
-git clone --depth 1 https://github.com/Alexays/Waybar /tmp/Waybar && cd /tmp/Waybar/
-meson setup build && sudo ninja -C build install
+  libpipewire-0.3-dev libplayerctl-dev libpulse-dev libxkbregistry-dev scdoc liburfkill-glib-dev \
+  libdbusmenu-gtk3-dev libjack-dev libgps-dev libiniparser-dev libfftw3-dev portaudio19-dev libsdl2-dev
+git clone --depth 1 https://github.com/Alexays/Waybar.git /tmp/Waybar && cd /tmp/Waybar/
+meson setup build --wipe -Drfkill=enabled --prefix=/usr && sudo ninja -C build install
 
 # rofi - wayland support
 sudo nala install librust-xkbcommon-dev libgdk-pixbuf-2.0-dev libxcb-util-dev libxcb-ewmh-dev libxcb-icccm4-dev libmpdclient-dev libnl-3-dev \
   libalsa-ocaml-dev libxcb-randr0-dev libxcb-cursor-dev libxcb-xinerama0-dev libxcb-keysyms1-dev libstartup-notification0-dev flex bison \
   pandoc doxygen cppcheck ohcount
 git clone --depth=1 https://github.com/lbonn/rofi.git /tmp/rofi && cd /tmp/rofi/
-meson setup build && ninja -C build && sudo ninja -C build install
+meson setup build --prefix=/usr && ninja -C build && sudo ninja -C build install
 
 # chsrc
 curl -L https://gitee.com/RubyMetric/chsrc/releases/download/pre/chsrc-x64-linux -o ~/.local/bin/chsrc

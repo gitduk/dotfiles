@@ -1,13 +1,12 @@
 [Unit]
-Description=Waybar
-After=graphical-session.target
+Description=Waybar for Wayland
 
 [Service]
 Type=simple
-ExecStart=waybar
+ExecStart=/usr/bin/waybar
 Restart=always
 RestartSec=2
-Environment=WAYLAND_DISPLAY=wayland-1
+Environment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=default.target

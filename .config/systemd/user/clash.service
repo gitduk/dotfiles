@@ -1,12 +1,12 @@
 [Unit]
-Description = A rule based proxy in Go.
-After = network.target
+Description=A rule based proxy in Go.
+After=network.target
 
 [Service]
-Type = simple
-ExecStart = %h/.local/bin/mihomo -f %h/.config/mihomo/config.yaml
-Restart = on-failure
-RestartSec = 5s
+Type=simple
+ExecStart=%h/.local/bin/mihomo -f %h/.config/mihomo/config.yaml
+Restart=on-failure
+RestartSec=5s
 
 [Install]
-WantedBy = default.target
+WantedBy=default.target

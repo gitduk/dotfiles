@@ -1,14 +1,14 @@
 [Unit]
-Description = Frpc Service
-After = network.target syslog.target
-Wants = network.target
+Description=Frpc Service
+After=network.target syslog.target
+Wants=network.target
 
 [Service]
-Type = simple
-ExecStart = %h/.local/bin/frpc -c %h/.frpc.toml
-Restart = always
-RestartSec = 5s
+Type=simple
+ExecStart=%h/.local/bin/frpc -c %h/.frpc.toml
+Restart=always
+RestartSec=5s
 
 [Install]
-WantedBy = default.target
+WantedBy=default.target
 

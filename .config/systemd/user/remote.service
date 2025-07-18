@@ -1,14 +1,14 @@
 [Unit]
-Description = Remote Service
-After = network.target syslog.target
-Wants = network.target
+Description=Remote Service
+After=network.target syslog.target
+Wants=network.target
 
 [Service]
-Type = simple
-ExecStart = %h/.sh.d/remote.sh
-Restart = on-failure
-RestartSec = 5s
+Type=simple
+ExecStart=%h/.sh.d/remote.sh
+Restart=on-failure
+RestartSec=5s
 
 [Install]
-WantedBy = default.target
+WantedBy=default.target
 

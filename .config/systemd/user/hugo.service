@@ -1,14 +1,14 @@
 [Unit]
-Description = Hugo Service
-After = network.target syslog.target
+Description=Hugo Service
+After=network.target syslog.target
 
 [Service]
-Type = simple
-WorkingDirectory = %h/.hugo/
-ExecStart = /usr/local/bin/hugo server
-Restart = on-failure
-RestartSec = 5s
+Type=simple
+WorkingDirectory=%h/.hugo/
+ExecStart=/usr/local/bin/hugo server
+Restart=on-failure
+RestartSec=5s
 
 [Install]
-WantedBy = default.target
+WantedBy=default.target
 
