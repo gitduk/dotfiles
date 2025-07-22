@@ -117,7 +117,7 @@ zinit ice wait"1" lucid as"command" from"gh-r" id-as"zoxide" \
 zinit light ajeetdsouza/zoxide
 
 # direnv
-zinit ice wait"2" lucid as"command" from"gh-r" id-as"direnv" \
+zinit ice wait"1" lucid as"command" from"gh-r" id-as"direnv" \
   atclone"mv direnv* direnv" \
   atclone"./direnv hook zsh > init.zsh" \
   atpull"%atclone" \
@@ -125,7 +125,9 @@ zinit ice wait"2" lucid as"command" from"gh-r" id-as"direnv" \
 zinit light direnv/direnv
 
 # nb
-zinit ice wait"1" lucid as"command" from"gh-r" id-as"nb"
+zinit ice if'(( ! $+commands[nb] ))' lucid as"command" from"gh-r" id-as"nb" \
+  atclone"sudo mv nb /usr/bin/nb" \
+  atpull"%atclone"
 zinit light xwmx/nb
 
 # just
