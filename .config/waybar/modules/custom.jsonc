@@ -105,13 +105,13 @@
     "tooltip": false
   },
   "custom/poetry": {
-    "exec": "~/.config/waybar/scripts/poetry.sh --refresh",
+    "exec": "~/.config/waybar/scripts/poetry.sh",
     "return-type": "json",
     "interval": 1800,
     "tooltip": true,
     "format": "{}",
     "max-length": 50,
-    "on-click": "~/.config/waybar/scripts/poetry.sh"
+    "on-click": "~/.config/waybar/scripts/poetry.sh --refresh"
   },
   "custom/ipaddress": {
     "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",

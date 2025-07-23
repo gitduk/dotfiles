@@ -9,8 +9,8 @@ current=$(gsettings get org.gnome.desktop.interface color-scheme | tr -d "'")
 
 if [[ "$current" == "prefer-dark" ]]; then
   gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
-  echo "󰖔" | tee $cache_file
+  echo "󰖨" | tee $cache_file
 else
   gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
-  echo "󰖨" | tee $cache_file
+  echo "󰖔" | tee $cache_file
 fi
