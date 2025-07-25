@@ -189,7 +189,6 @@ EOF
 
 lazy_group just <<EOF
 alias js="just"
-alias jsi="just --init"
 alias jse="just --edit"
 alias jsl="just --list"
 EOF
@@ -229,10 +228,6 @@ EOF
 #########
 ### N ###
 #########
-
-lazy_group n <<EOF
-alias n="nb"
-EOF
 
 lazy_group nala <<EOF
 alias nai="sudo nala install -y"

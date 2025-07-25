@@ -124,12 +124,6 @@ zinit ice wait"1" lucid as"command" from"gh-r" id-as"direnv" \
   src"init.zsh"
 zinit light direnv/direnv
 
-# nb
-zinit ice if'(( ! $+commands[nb] ))' lucid as"command" from"gh-r" id-as"nb" \
-  atclone"sudo mv nb /usr/bin/nb" \
-  atpull"%atclone"
-zinit light xwmx/nb
-
 # just
 zinit ice if'(( ! $+commands[just] ))' lucid as"command" from"gh-r" id-as"just" \
   atclone'./just --completions zsh > _just' \
@@ -252,3 +246,9 @@ zinit ice if'[[ -n $DISPLAY ]]' lucid as"command" from"gh-r" id-as"rain" \
   atclone"mv rainfrog rain" \
   atpull"%atclone"
 zinit light achristmascarl/rainfrog
+
+# easytier
+zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-as"easytier" \
+  atclone"mv */* . && rm -rf */" \
+  atpull"%atclone"
+zinit light EasyTier/EasyTier

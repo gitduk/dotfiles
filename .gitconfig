@@ -84,7 +84,7 @@
   autocrlf = input
   trustctime = false
   attributesfile = ~/.attributes_global
-  editor = hx
+  editor = nvim
   sparsecheckout = true
   pager = delta
 
