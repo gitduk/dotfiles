@@ -219,6 +219,7 @@ zinit light sxyazi/yazi
 zinit ice if'(( ! $+commands[uv] ))' lucid as"command" from"gh-r" id-as"uv" \
   atclone"mv */* . && ./uv generate-shell-completion zsh > _uv" \
   atclone"rm -rf */" \
+  atclone"sudo mv uv* /usr/bin/" \
   atpull"%atclone"
 zinit light astral-sh/uv
 
