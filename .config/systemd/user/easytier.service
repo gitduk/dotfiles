@@ -1,0 +1,13 @@
+[Unit]
+Description=EasyTier Core Service
+After=network.target
+
+[Service]
+ExecStart=easytier-core -d --network-name sharednode --network-secret changeme -p tcp://sharednode:11010
+Restart=always
+RestartSec=3
+Environment=PATH=/usr/bin:/usr/local/bin
+
+[Install]
+WantedBy=default.target
+

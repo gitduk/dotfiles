@@ -250,6 +250,6 @@ zinit light achristmascarl/rainfrog
 
 # easytier
 zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-as"easytier" \
-  atclone"mv */* . && rm -rf */" \
+  atclone"mv */* . && rm -rf */ && sudo mv * /usr/bin/" \
   atpull"%atclone"
 zinit light EasyTier/EasyTier
