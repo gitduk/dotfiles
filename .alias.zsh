@@ -133,6 +133,11 @@ lazy_group eidt <<EOF
 alias eas="v ~/.alias.zsh"
 EOF
 
+lazy_group easytier <<EOF
+alias eco="easytier-core"
+alias ecl="easytier-cli"
+EOF
+
 #########
 ### F ###
 #########

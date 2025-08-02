@@ -34,21 +34,15 @@ get_poetry() {
   local response=$(curl -s -H "X-User-Token: $token" "https://v2.jinrishici.com/sentence")
 
   if [[ $response == "" ]]; then
-    # 如果网络请求失败，尝试使用缓存
-    if [[ -f "$CACHE_FILE" ]]; then
-      cat "$CACHE_FILE"
-    else
-      echo '{"status":"error","data":{"content":"醉后不知天在水，满船清梦压星河。","origin":{"author":"","title":"","dynasty":""}}}'
-    fi
+    echo '{"status":"error","data":{"content":"醉后不知天在水，满船清梦压星河。","origin":{"author":"","title":"","dynasty":""}}}'
   else
-    echo "$response" | tee "$CACHE_FILE"
+    echo "$response"
   fi
 }
 
 # 格式化输出
 format_output() {
   local json_data="$1"
-  local format="$2"
 
   # 提取数据
   local content=$(echo "$json_data" | jq -r '.data.content // "暂无诗词"')
@@ -58,38 +52,26 @@ format_output() {
   local full=$(echo "$json_data" | jq -r '.data.origin.content // [] | join("\n")')
   local warning=$(echo "$json_data" | jq -r '.warning // ""')
 
-  case "$format" in
-  "content")
-    echo "$content"
-    ;;
-  "json")
-    # 为 waybar 准备的 JSON 格式
-    local tooltip=""
-    if [[ "$author" != "" && "$title" != "" ]]; then
-      tooltip="${title} -- ${dynasty}·${author}"$'\n'"${full}"
-    fi
+  # 为 waybar 准备的 JSON 格式
+  local tooltip=""
+  if [[ "$author" != "" && "$title" != "" ]]; then
+    tooltip="${title} -- ${dynasty}·${author}"$'\n'"${full}"
+  fi
 
-    # 添加 warning 信息
-    if [[ "$warning" != "" ]]; then
-      tooltip="${tooltip}"$'\n\n'"!!! WARNING !!!"
-    fi
+  # 添加 warning 信息
+  if [[ "$warning" != "" ]]; then
+    tooltip="${tooltip}"$'\n\n'"!!! WARNING !!!"
+  fi
 
-    jq -n -c \
-      --arg text "$content" \
-      --arg tooltip "$tooltip" \
-      --arg class "poetry" \
-      '{text: $text, tooltip: $tooltip, class: $class}'
-    ;;
-  *)
-    echo "$content"
-    ;;
-  esac
+  jq -n -c \
+    --arg text "$content" \
+    --arg tooltip "$tooltip" \
+    --arg class "poetry" \
+    '{text: $text, tooltip: $tooltip, class: $class}'
 }
 
 # 主函数
 main() {
-  local format="${1:-json}"
-
   # 检查依赖
   if ! command -v jq &>/dev/null; then
     echo "错误：需要安装 jq 工具" >&2
@@ -114,30 +96,8 @@ main() {
   local poetry_data=$(get_poetry "$token")
 
   # 格式化并输出
-  format_output "$poetry_data" "$format"
+  format_output "$poetry_data" | tee "$CACHE_FILE"
 }
 
-# 处理命令行参数
-case "$1" in
-"--refresh" | "-r")
-  main json
-  ;;
-"--content" | "-c")
-  main content
-  ;;
-"--help" | "-h")
-  echo "用法: $0 [选项]"
-  echo "选项:"
-  echo "  -r, --refresh    刷新缓存并获取新诗词"
-  echo "  -c, --content    只显示诗句内容"
-  echo "  -h, --help       显示此帮助信息"
-  echo "  无参数           输出 waybar JSON 格式"
-  ;;
-*)
-  if [[ -f "$CACHE_FILE" ]]; then
-    format_output "$(cat $CACHE_FILE)" json
-  else
-    main json
-  fi
-  ;;
-esac
+main
+

@@ -105,13 +105,13 @@
     "tooltip": false
   },
   "custom/poetry": {
-    "exec": "~/.config/waybar/scripts/poetry.sh",
+    "exec": "cat ~/.cache/waybar/poetry.json",
     "return-type": "json",
-    "interval": 1800,
+    "interval": 1,
     "tooltip": true,
     "format": "{}",
     "max-length": 50,
-    "on-click": "~/.config/waybar/scripts/poetry.sh --refresh"
+    "on-click": "~/.config/waybar/scripts/poetry.sh"
   },
   "custom/ipaddress": {
     "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",
@@ -122,11 +122,11 @@
     "on-click": "~/.config/waybar/scripts/ipaddress.sh"
   },
   "custom/color_scheme": {
-    "exec": "cat ~/.cache/waybar/color-scheme.icon",
+    "exec": "sleep 0.1 && ~/.config/waybar/scripts/color-scheme.sh",
     "format": " {} ",
     "interval": "once",
     "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/toggle-color-scheme.sh"
+    "on-click": "~/.config/waybar/scripts/color-scheme.sh --toggle"
   },
   "custom/dark_light": {
     "format": " 󰌁 ",
