@@ -37,7 +37,8 @@ podman run -d --name stirling-pdf \
 
 # pairdrop
 podman run -d --name pairdrop \
-  -e PUID=1000 \ -e PGID=1000 \
+  -e PUID=1000 \
+  -e PGID=1000 \
   -e WS_SERVER=false \
   -e WS_FALLBACK=false \
   -e RTC_CONFIG=false \

@@ -105,7 +105,7 @@
     "tooltip": false
   },
   "custom/poetry": {
-    "exec": "cat ~/.cache/waybar/poetry.json",
+    "exec": "cat ~/.cache/waybar/poetry.json || ~/.config/waybar/scripts/poetry.sh",
     "return-type": "json",
     "interval": 1,
     "tooltip": true,
