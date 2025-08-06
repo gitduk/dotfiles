@@ -279,11 +279,11 @@
     "tooltip-format-disconnected": "Disconnected",
     "max-length": 20,
     "format-icons": [
-      "󰤯",
-      "󰤟",
-      "󰤢",
-      "󰤥",
-      "󰤨"
+      "󰤯 ",
+      "󰤟 ",
+      "󰤢 ",
+      "󰤥 ",
+      "󰤨 "
     ]
   },
   "power-profiles-daemon": {
