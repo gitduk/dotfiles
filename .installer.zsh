@@ -38,13 +38,11 @@ zinit light zdharma-continuum/null
 # bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps.
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
   bpick"bun-linux-x64.zip" \
-  atclone"mkdir -p ~/.bun/bin && mv */bun ~/.bun/bin/" \
-  atclone"SHELL=zsh ~/.bun/bin/bun completions" \
-  atclone"mv ~/.bun/_bun _bun" \
+  atclone"sudo mv */bun /usr/bin/" \
+  atclone"SHELL=zsh bun completions > _bun" \
   atclone"rm -rf */" \
   atpull"%atclone" \
   atload'
-    export PATH="$HOME/.bun/bin:$PATH"
     export PATH="$HOME/.cache/.bun/bin:$PATH"
   '
 zinit light oven-sh/bun
@@ -253,3 +251,10 @@ zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-a
   atclone"mv */* . && rm -rf */ && sudo mv * /usr/bin/" \
   atpull"%atclone"
 zinit light EasyTier/EasyTier
+
+# claude-code
+zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
+  atclone"bun install -g @anthropic-ai/claude-code" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+

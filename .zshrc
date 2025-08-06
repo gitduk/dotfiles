@@ -326,3 +326,6 @@ if [[ -n "$ZPROF" ]]; then
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
 
+
+# bun completions
+[ -s "/home/wukaige/.bun/_bun" ] && source "/home/wukaige/.bun/_bun"
