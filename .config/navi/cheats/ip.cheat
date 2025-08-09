@@ -1,13 +1,21 @@
 % network, ip
 @ envs
 
-# add ip address
-sudo ip addr add <ip> dev <dev>
+# add ip
+sudo ip addr add <new_ip> dev <dev>
 
-# del ip address
-sudo ip addr del <ip> dev <dev>
+# del ip
+$ ip: ip -o addr show | awk '$3 == "inet" && $2 != "lo" {print $4, "dev", $2}'
+sudo ip addr del <ip>
 
-# change gateway
+# add route
+sudo ip route add <gateway> dev <dev>
+
+# del route
+$ route: ip route | grep -v default | cut -d' ' -f-3
+sudo ip route del <route>
+
+# change default gateway
 sudo ip route del default
 sudo ip route add default via <gateway> dev <dev>
 
