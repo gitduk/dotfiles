@@ -151,3 +151,6 @@ uv tool install --python=3.11 isd-tui
 # somo - A friendly alternative to netstat for socket and port monitoring on Linux
 cargo install somo
 
+# CCPlugins
+curl -sSL https://raw.githubusercontent.com/brennercruvinel/CCPlugins/main/install.sh | bash
+
