@@ -17,8 +17,8 @@ podman run -d --name postgres \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=changeme \
   -e PGDATA=/var/lib/postgresql/data/pgdata \
-  -v postgres:/var/lib/postgresql/data \
   -p 5432:5432 \
+  -v postgres:/var/lib/postgresql/data \
   --restart=unless-stopped \
   postgres:latest
 
@@ -27,11 +27,11 @@ podman run -d --name stirling-pdf \
   -e DOCKER_ENABLE_SECURITY=false \
   -e INSTALL_BOOK_AND_ADVANCED_HTML_OPS=false \
   -e LANGS=en_GB \
+  -p 7000:8080 \
   -v ./trainingData:/usr/share/tessdata \
   -v ./extraConfigs:/configs \
   -v ./logs:/logs \
   -v ./customFiles:/customFiles \
-  -p 7000:8080 \
   --restart=unless-stopped \
   frooodle/s-pdf:latest
 
@@ -62,8 +62,8 @@ podman run -d --name uptime-kuma \
 # beszel: a lightweight server monitoring
 mkdir -p ~/.beszel_data
 podman run -d --name beszel \
-  -v ~/.beszel_data:/beszel_data \
   -p 8090:8090 \
+  -v ~/.beszel_data:/beszel_data \
   --restart=unless-stopped \
   docker.io/henrygd/beszel
 
@@ -90,5 +90,19 @@ podman run -d --name open-webui \
 # prometheus
 podman run -d --name prometheus \
   -p 127.0.0.1:9090:9090 \
+  --restart=always \
   prom/prometheus
+
+# redis
+podman run -d --name redis \
+  -p 6379:6379 \
+  redis:latest
+
+# new-api
+podman run -d --name new-api \
+  -e TZ=Asia/Shanghai \
+  -v ./data:/data \
+  --network=host \
+  --restart=always \
+  calciumion/new-api:latest
 

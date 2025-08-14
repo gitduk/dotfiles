@@ -208,6 +208,10 @@ alias jcu="journalctl -u"
 alias jcuu="journalctl --user -u"
 EOF
 
+lazy_group notebook <<EOF
+alias jn="jupyter-notebook"
+EOF
+
 #########
 ### L ###
 #########
