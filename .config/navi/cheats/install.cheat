@@ -154,3 +154,6 @@ cargo install somo
 # CCPlugins
 curl -sSL https://raw.githubusercontent.com/brennercruvinel/CCPlugins/main/install.sh | bash
 
+# ipfs
+brew install ipfs
+

@@ -189,6 +189,14 @@ alias hr="hurl"
 EOF
 
 #########
+### I ###
+#########
+
+lazy_group ipfs <<EOF
+alias ifs="ipfs"
+EOF
+
+#########
 ### J ###
 #########
 
