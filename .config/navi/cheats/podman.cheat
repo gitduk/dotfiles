@@ -106,3 +106,10 @@ podman run -d --name new-api \
   --restart=always \
   calciumion/new-api:latest
 
+# gemini-balance
+podman run -d --name gemini-balance \
+  -p 8000:8000 \
+  -v ./data:/app/data \
+  --env-file .env \
+  ghcr.io/snailyp/gemini-balance:latest
+
