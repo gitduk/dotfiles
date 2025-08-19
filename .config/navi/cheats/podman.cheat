@@ -98,7 +98,7 @@ podman run -d --name redis \
   -p 6379:6379 \
   redis:latest
 
-# new-api
+# new-api:3000
 podman run -d --name new-api \
   -e TZ=Asia/Shanghai \
   -v ./data:/data \
@@ -106,10 +106,16 @@ podman run -d --name new-api \
   --restart=always \
   calciumion/new-api:latest
 
-# gemini-balance
+# gemini-balance:8000
 podman run -d --name gemini-balance \
-  -p 8000:8000 \
   -v ./data:/app/data \
   --env-file .env \
+  --network=host \
   ghcr.io/snailyp/gemini-balance:latest
+
+# mysql
+podman run -d --name mysql \
+  -e MYSQL_ROOT_PASSWORD=changeme \
+  -p 3306:3306 \
+  mysql:latest
 

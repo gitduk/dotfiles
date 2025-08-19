@@ -1,3 +1,4 @@
 [[index]]
-url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+name = "pypi"
+url = "https://pypi.org/simple"
 default = true
