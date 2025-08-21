@@ -223,7 +223,8 @@ zinit light astral-sh/uv
 
 # fscan
 zinit ice if'(( ! $+commands[fscan] ))' lucid as"command" from"gh-r" id-as"fscan" \
-  bpick"fscan"
+  bpick"fscan_*_linux_x64" \
+  atclone"mv fscan_* fscan"
 zinit light shadow1ng/fscan
 
 # sttr
@@ -257,4 +258,3 @@ zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
   atclone"bun install -g @anthropic-ai/claude-code" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
-

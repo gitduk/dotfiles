@@ -207,7 +207,7 @@ alias jsl="just --list"
 EOF
 
 lazy_group jq <<EOF
-alias jq="fx"
+alias jx="fx"
 EOF
 
 lazy_group journalctl <<EOF

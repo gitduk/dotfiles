@@ -108,23 +108,30 @@ fpath=($ZSH_COMPLETIONS $fpath)
 # installer
 function ins() {
   case "$OS" in
-  debian | ubuntu)
-    sudo nala install -y $@ || { echo "Failed to install: $@"; return 1 }
-    ;;
-  fedora | centos | rocky | almalinux)
-    sudo dnf install -y $@ || { echo "Failed to install: $@"; return 1 }
-    ;;
-  rhel)
-    sudo yum install -y $@ || { echo "Failed to install: $@"; return 1 }
-    ;;
-  *)
-    echo "Unsupported OS: $OS"
-    return 1
-    ;;
+    debian | ubuntu)
+      sudo nala install -y $@ || { echo "Failed to install: $@"; return 1 }
+      ;;
+    fedora | centos | rocky | almalinux)
+      sudo dnf install -y $@ || { echo "Failed to install: $@"; return 1 }
+      ;;
+    rhel)
+      sudo yum install -y $@ || { echo "Failed to install: $@"; return 1 }
+      ;;
+    *)
+      echo "Unsupported OS: $OS"
+      return 1
+      ;;
   esac
 }
 
-command -v nala &>/dev/null || sudo apt install -y nala
+if ! command -v nala &>/dev/null; then
+  case "$OS" in
+    debian | ubuntu)
+      sudo apt install -y nala
+      ;;
+  esac
+fi
+
 command -v git &>/dev/null || ins git
 command -v git &>/dev/null || ins curl
 
@@ -194,7 +201,7 @@ zinit ice wait"1" lucid as"program" id-as"brew" \
   atclone'
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
-    brew install lnav
+    /home/linuxbrew/.linuxbrew/bin/brew install lnav
     ' \
   atpull"%atclone" \
   atload'
@@ -202,7 +209,7 @@ zinit ice wait"1" lucid as"program" id-as"brew" \
     export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
     ' \
   src"init.zsh"
-zinit light zdharma-continuum/null=s
+zinit light zdharma-continuum/null
 
 #################
 ### Languages ###

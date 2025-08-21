@@ -49,11 +49,11 @@ podman run -d --name pairdrop \
   --restart=unless-stopped \
   lscr.io/linuxserver/pairdrop 
 
-# uptime-kuma
+# uptime-kuma:3001
 mkdir -p ~/.uptime-kuma
 podman run -d --name uptime-kuma \
-  -e HTTP_PROXY=http://127.0.0.1:7890 \
-  -e HTTPS_PROXY=http://127.0.0.1:7890 \
+  -e HTTP_PROXY=$HTTP_PROXY \
+  -e HTTPS_PROXY=$HTTPS_PROXY \
   -v ~/.uptime-kuma:/app/data \
   --network=host \
   --restart=unless-stopped \
@@ -100,8 +100,11 @@ podman run -d --name redis \
 
 # new-api:3000
 podman run -d --name new-api \
+  -e HTTP_PROXY=$HTTP_PROXY \
+  -e HTTPS_PROXY=$HTTPS_PROXY \
   -e TZ=Asia/Shanghai \
   -v ./data:/data \
+  --env-file .env \
   --network=host \
   --restart=always \
   calciumion/new-api:latest
