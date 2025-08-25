@@ -27,7 +27,7 @@ podman run -d --name stirling-pdf \
   -e DOCKER_ENABLE_SECURITY=false \
   -e INSTALL_BOOK_AND_ADVANCED_HTML_OPS=false \
   -e LANGS=en_GB \
-  -p 7000:8080 \
+  -p 8080:8080 \
   -v ./trainingData:/usr/share/tessdata \
   -v ./extraConfigs:/configs \
   -v ./logs:/logs \
@@ -50,11 +50,10 @@ podman run -d --name pairdrop \
   lscr.io/linuxserver/pairdrop 
 
 # uptime-kuma:3001
-mkdir -p ~/.uptime-kuma
 podman run -d --name uptime-kuma \
   -e HTTP_PROXY=$HTTP_PROXY \
   -e HTTPS_PROXY=$HTTPS_PROXY \
-  -v ~/.uptime-kuma:/app/data \
+  -v uptime-kuma:/app/data \
   --network=host \
   --restart=unless-stopped \
   louislam/uptime-kuma:1
@@ -63,26 +62,26 @@ podman run -d --name uptime-kuma \
 mkdir -p ~/.beszel_data
 podman run -d --name beszel \
   -p 8090:8090 \
-  -v ~/.beszel_data:/beszel_data \
+  -v beszel_data:/beszel_data \
   --restart=unless-stopped \
   docker.io/henrygd/beszel
 
 # mazanoke: A self-hosted local image optimizer that runs in your browser.
 podman run -d --name mazanoke \
-  -p 7374:80 \
+  -p 80:80 \
   --restart=unless-stopped \
   ghcr.io/civilblur/mazanoke:latest
 
 # attu milvus webui
 podman run -d --name attu \
   -e MILVUS_URL=<hosts>:19530 \
-  -p 5000:3000 \
+  -p 3000:3000 \
   --restart=always \
   zilliz/attu:latest
 
 # open-webui
 podman run -d --name open-webui \
-  -p 3000:8080 \
+  -p 8080:8080 \
   -v open-webui:/app/backend/data \
   --restart=always \
   ghcr.io/open-webui/open-webui:main
@@ -96,14 +95,23 @@ podman run -d --name prometheus \
 # redis
 podman run -d --name redis \
   -p 6379:6379 \
+  -v redis:/data \
+  --network=redis_net \
   redis:latest
+
+# redisinsight - redis gui
+podman run -d --name redisinsight \
+  -p 5540:5540 \
+  -v redisinsight:/data \
+  --network=redis_net \
+  redis/redisinsight:latest
 
 # new-api:3000
 podman run -d --name new-api \
   -e HTTP_PROXY=$HTTP_PROXY \
   -e HTTPS_PROXY=$HTTPS_PROXY \
   -e TZ=Asia/Shanghai \
-  -v ./data:/data \
+  -v new-api:/data \
   --env-file .env \
   --network=host \
   --restart=always \
@@ -111,7 +119,7 @@ podman run -d --name new-api \
 
 # gemini-balance:8000
 podman run -d --name gemini-balance \
-  -v ./data:/app/data \
+  -v gemini-balance:/app/data \
   --env-file .env \
   --network=host \
   ghcr.io/snailyp/gemini-balance:latest
