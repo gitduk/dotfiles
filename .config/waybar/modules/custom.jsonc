@@ -105,13 +105,13 @@
     "tooltip": false
   },
   "custom/poetry": {
-    "exec": "cat ~/.cache/waybar/poetry.json || ~/.config/waybar/scripts/poetry.sh",
+    "exec": "cat ~/.cache/waybar/poetry.json || echo '{\"text\": \"📜 加载中\"}'",
     "return-type": "json",
     "interval": 1,
     "tooltip": true,
     "format": "{}",
-    "max-length": 50,
-    "on-click": "~/.config/waybar/scripts/poetry.sh"
+    "max-length": 60,
+    "on-click": "~/.config/waybar/scripts/poetry.sh --click"
   },
   "custom/ipaddress": {
     "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",
@@ -119,7 +119,7 @@
     "return-type": "json",
     "interval": 1,
     "tooltip": true,
-    "on-click": "~/.config/waybar/scripts/ipaddress.sh"
+    "on-click": "~/.config/waybar/scripts/ipaddress.sh --click"
   },
   "custom/color_scheme": {
     "exec": "sleep 0.1 && ~/.config/waybar/scripts/color-scheme.sh",

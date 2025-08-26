@@ -16,7 +16,6 @@ typeset -A CONFIG=(
     [resolution]="3840"
     [user_agent]="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     [bing_api]="https://bing.biturl.top/?resolution=%s&format=json&index=random&mkt=random"
-    [waybar_toggle_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/dark-light"
     [waybar_css_file]="$HOME/.config/waybar/colors.css"
 )
 
@@ -64,6 +63,45 @@ get_focused_monitor() {
     hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}'
 }
 
+# 切换前景色
+toggle_foreground() {
+  sed -i -e 's/foreground/__TMP__/g' -e 's/background/foreground/g' -e 's/__TMP__/background/g' ${CONFIG[waybar_css_file]}
+}
+
+# 判断顶部颜色
+check_top_color() {
+  local wallpaper="$1"
+
+  # 判断命令是否存在
+  if (( ! ${+commands[identify]} )); then
+    warn "identify 命令未找到"
+    echo 0
+    return
+  fi
+
+  # 获取图像宽度
+  width=$(identify -format "%w" "$wallpaper")
+
+  # 取上方100px的中间一半区域，避免两侧影响
+  start_x=$((width / 4))
+  crop_width=$((width / 2))
+  crop_area="${crop_width}x100+${start_x}+0"
+
+  # 转灰度，缩小方便统计
+  # 输出像素灰度值 (0-255)
+  pixels=$(convert "$wallpaper" -crop "$crop_area" +repage -colorspace Gray -resize 200x100 -depth 8 txt:- |
+    grep -o "gray([0-9]*)" | grep -o "[0-9]*")
+
+  # 统计总像素数
+  total=$(echo "$pixels" | wc -l)
+
+  # 统计亮像素数 (灰度>127)
+  bright=$(echo "$pixels" | awk '$1 > 127' | wc -l)
+
+  # 计算比例
+  echo $((bright * 100 / total))
+}
+
 # 查找壁纸文件
 find_wallpapers() {
   local dir=${1:-${CONFIG[wallpaper_dir]}}
@@ -88,19 +126,24 @@ set_wallpaper() {
   info "设置壁纸: ${wallpaper:t}"
   
   # 设置壁纸
+  local loaded=$(hyprctl hyprpaper listloaded | wc -l)
   {
-    hyprctl hyprpaper unload all
+    [[ $loaded -gt 100 ]] && hyprctl hyprpaper unload all
     hyprctl hyprpaper preload "$wallpaper"
     hyprctl hyprpaper wallpaper "$monitor,$wallpaper"
   } &>/dev/null
   
   # 更新颜色主题
-  (( ${+commands[wallust]} )) && wallust run "$wallpaper" -s 2>/dev/null \
-    || warn "wallust 命令未找到"
+  if (( ${+commands[wallust]} )); then
+    wallust run "$wallpaper" -s || warn "wallust 运行失败"
+  else
+    warn "wallust 命令未找到"
+    return
+  fi
 
   # 颜色反转
-  toggle=$(cat ${CONFIG[waybar_toggle_file]})
-  (( $toggle )) && sed -i -e 's/foreground/__TMP__/g' -e 's/background/foreground/g' -e 's/__TMP__/background/g' ${CONFIG[waybar_css_file]}
+  percent=$(check_top_color $wallpaper)
+  [[ $percent -gt 50 ]] && toggle_foreground
 
   # 重新加载相关服务
   (( ${+commands[hyprctl]} )) && hyprctl reload &>/dev/null

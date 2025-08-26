@@ -131,6 +131,7 @@ EOF
 
 lazy_group eidt <<EOF
 alias eas="v ~/.alias.zsh"
+alias ejs="v .justfile"
 EOF
 
 lazy_group easytier <<EOF
