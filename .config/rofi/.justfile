@@ -1,3 +1,2 @@
 default:
   find themes/ -type f | fzf --prompt="themes: " | xargs -I {} ln -sf {} ./themes.rasi
-

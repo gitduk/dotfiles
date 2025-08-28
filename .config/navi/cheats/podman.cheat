@@ -51,8 +51,6 @@ podman run -d --name pairdrop \
 
 # uptime-kuma:3001
 podman run -d --name uptime-kuma \
-  -e HTTP_PROXY=$HTTP_PROXY \
-  -e HTTPS_PROXY=$HTTPS_PROXY \
   -v uptime-kuma:/app/data \
   --network=host \
   --restart=unless-stopped \
@@ -108,8 +106,6 @@ podman run -d --name redisinsight \
 
 # new-api:3000
 podman run -d --name new-api \
-  -e HTTP_PROXY=$HTTP_PROXY \
-  -e HTTPS_PROXY=$HTTPS_PROXY \
   -e TZ=Asia/Shanghai \
   -v new-api:/data \
   --env-file .env \

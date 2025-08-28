@@ -35,10 +35,10 @@ zinit ice wait"1" lucid as"program" id-as"fnm" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps.
+# bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
   bpick"bun-linux-x64.zip" \
-  atclone"sudo mv */bun /usr/bin/" \
+  atclone"sudo mv */bun /usr/bin" \
   atclone"SHELL=zsh bun completions > _bun" \
   atclone"rm -rf */" \
   atpull"%atclone" \
@@ -65,11 +65,20 @@ zinit light alacritty/alacritty
 
 # fd
 zinit ice if'(( ! $+commands[fd] ))' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"mv */fd $BPFX/" \
+  atclone"sudo mv */fd /usr/bin" \
   atclone"mv */autocomplete/_fd ." \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light sharkdp/fd
+
+# bat
+zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh-r" id-as"bat" \
+  bpick"bat_*_amd64.deb" \
+  atclone"usr/bin/bat --completion zsh > _bat" \
+  atclone"sudo mv usr/bin/bat /usr/bin" \
+  atclone"rm -rf */" \
+  atpull"%atclone"
+zinit light sharkdp/bat
 
 # nvim
 zinit ice if'(( ! $+commands[nvim] ))' lucid as"program" from"gh-r" id-as"nvim" \
@@ -80,7 +89,7 @@ zinit light neovim/neovim
 
 # hx
 zinit ice if'(( ! $+commands[hx] ))' lucid as"program" from"gh-r" id-as"hx" \
-  atclone"sudo mv */hx /usr/bin/" \
+  atclone"sudo mv */hx /usr/bin" \
   atclone"mv */runtime ~/.config/helix/" \
   atclone"mv */contrib/completion/hx.zsh _hx" \
   atclone"rm -rf */" \
@@ -150,13 +159,15 @@ zinit light Orange-OpenSource/hurl
 
 # dust
 zinit ice if'(( ! $+commands[dust] ))' lucid as"command" from"gh-r" id-as"dust" \
-  atclone"sudo mv */dust /usr/bin/" \
+  atclone"sudo mv */dust /usr/bin" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light bootandy/dust
 
 # eza - eza is a modern replacement for ls
-zinit ice if'(( ! $+commands[eza] ))' lucid as"command" from"gh-r" id-as"eza"
+zinit ice if'(( ! $+commands[eza] ))' lucid as"command" from"gh-r" id-as"eza" \
+  atclone"sudo mv eza /usr/bin" \
+  atpull"%atclone"
 zinit light eza-community/eza
 
 # fx - Command-line tool and terminal JSON viewer
@@ -166,7 +177,7 @@ zinit light antonmedv/fx
 
 # gh
 zinit ice if'(( ! $+commands[gh] ))' lucid as"command" from"gh-r" id-as"gh" \
-  atclone"sudo mv */bin/gh /usr/bin/" \
+  atclone"sudo mv */bin/gh /usr/bin" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light cli/cli
@@ -189,7 +200,7 @@ zinit light dalance/procs
 
 # ripgrep - ripgrep recursively searches directories for a regex pattern
 zinit ice if'(( ! $+commands[rg] ))' lucid as"command" from"gh-r" id-as"rg" \
-  atclone"sudo mv */rg /usr/bin/" \
+  atclone"sudo mv */rg /usr/bin" \
   atclone"mv */complete/_rg ." \
   atclone"rm -rf */" \
   atpull"%atclone"
@@ -217,7 +228,7 @@ zinit light sxyazi/yazi
 zinit ice if'(( ! $+commands[uv] ))' lucid as"command" from"gh-r" id-as"uv" \
   atclone"mv */* . && ./uv generate-shell-completion zsh > _uv" \
   atclone"rm -rf */" \
-  atclone"sudo mv uv* /usr/bin/" \
+  atclone"sudo mv uv* /usr/bin" \
   atpull"%atclone"
 zinit light astral-sh/uv
 
@@ -249,7 +260,7 @@ zinit light achristmascarl/rainfrog
 
 # easytier
 zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-as"easytier" \
-  atclone"mv */* . && rm -rf */ && sudo mv * /usr/bin/" \
+  atclone"mv */* . && rm -rf */ && sudo mv * /usr/bin" \
   atpull"%atclone"
 zinit light EasyTier/EasyTier
 

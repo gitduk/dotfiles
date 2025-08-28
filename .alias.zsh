@@ -310,7 +310,7 @@ EOF
 
 lazy_group proxy <<EOF
 alias pre="setup_proxy"
-alias prd="unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY"
+alias prd="unset_proxy"
 EOF
 
 #########

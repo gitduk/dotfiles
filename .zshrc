@@ -81,6 +81,10 @@ function setup_proxy() {
     export NO_PROXY="$no_proxy"
   fi
 }
+function unset_proxy() {
+  unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+  unset no_proxy NO_PROXY
+}
 setup_proxy
 
 # PATH management
@@ -302,7 +306,10 @@ zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
 zinit light zsh-users/zsh-history-substring-search
 
 # Aloxaf/fzf-tab
-zinit ice wait"1" lucid id-as"fzf-tab"
+zinit ice wait"1" lucid id-as"fzf-tab" \
+  atload"
+    zstyle ':fzf-tab:*' fzf-flags --ansi
+  "
 zinit light Aloxaf/fzf-tab
 
 # sudo
@@ -332,7 +339,3 @@ if [[ -n "$ZPROF" ]]; then
   zmodload -u zsh/zprof
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
-
-
-# bun completions
-[ -s "/home/wukaige/.bun/_bun" ] && source "/home/wukaige/.bun/_bun"
