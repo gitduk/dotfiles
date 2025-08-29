@@ -135,8 +135,8 @@ alias ejs="v .justfile"
 EOF
 
 lazy_group easytier <<EOF
-alias eco="easytier-core"
-alias ecl="easytier-cli"
+alias eo="easytier-core"
+alias el="easytier-cli"
 EOF
 
 #########
