@@ -22,6 +22,7 @@ personas: []
 ## Behavioral Flow
 
 1. **Analyze Changes**: 
+   - Run `git --work-tree=~ --git-dir=~/.dotfiles.git diff` to get changes
    - Run `git --work-tree=~ --git-dir=~/.dotfiles.git diff --staged` to get staged changes
    - Parse the diff output to understand what changed
    - Categorize changes by type (feat, fix, docs, style, refactor, etc.)
@@ -36,6 +37,10 @@ personas: []
    - Show generated message for review
    - Execute `git --work-tree=~ --git-dir=~/.dotfiles.git commit -m "generated message"`
    - Provide commit hash and summary
+
+4. Push commit:
+   - Execute `git --work-tree=~ --git-dir=~/.dotfiles.git push`
+
 
 ## Implementation
 
