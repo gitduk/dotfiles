@@ -74,7 +74,7 @@ check_top_color() {
 
   # 判断命令是否存在
   if (( ! ${+commands[identify]} )); then
-    warn "identify 命令未找到"
+    warn "imagemagick 未安装"
     echo 0
     return
   fi
@@ -138,7 +138,6 @@ set_wallpaper() {
     wallust run "$wallpaper" -s || warn "wallust 运行失败"
   else
     warn "wallust 命令未找到"
-    return
   fi
 
   # 颜色反转
