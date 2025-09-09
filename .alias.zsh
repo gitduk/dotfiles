@@ -41,7 +41,7 @@ EOF
 #########
 
 lazy_group curl <<EOF
-alias cl="curl"
+alias cl="curlie -sk"
 EOF
 
 lazy_group claude <<EOF
@@ -63,9 +63,6 @@ alias cais="cargo install --locked"
 alias caui="cargo uninstall"
 EOF
 
-lazy_group curl <<EOF
-alias curl="curlie"
-EOF
 lazy_group chmod <<EOF
 alias cmd="sudo chmod +x"
 alias cwn="sudo chown -Rv $USER:$USER"

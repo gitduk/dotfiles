@@ -85,7 +85,9 @@ function unset_proxy() {
   unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
   unset no_proxy NO_PROXY
 }
-setup_proxy
+
+# Proxy settings
+[[ -n "$DISPLAY" ]] && setup_proxy
 
 # PATH management
 export PATH="$HOME/.local/bin:$PATH"
