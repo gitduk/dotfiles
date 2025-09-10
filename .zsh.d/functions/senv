@@ -5,13 +5,49 @@ icon="󰌠"
 function senv() {
   local venv_path=""
   local dir=""
+  local current_real=""
+  local target_real=""
   local venv_names=(".venv" "venv")
+
+  # Colors and messaging helpers (ANSI, not prompt escapes)
+  local use_color="0"
+  if [[ -t 1 && -z "$NO_COLOR" ]]; then
+    use_color="1"
+  fi
+  local c_reset="" c_green="" c_yellow="" c_red="" c_blue="" c_bold="" c_bold_off=""
+  if [[ "$use_color" == "1" ]]; then
+    c_reset=$'\e[0m'
+    c_green=$'\e[32m'
+    c_yellow=$'\e[33m'
+    c_red=$'\e[31m'
+    c_blue=$'\e[34m'
+    c_bold=$'\e[1m'
+    c_bold_off=$'\e[22m'
+  fi
+  _senv_info()  { print -r -- "${c_blue}${icon} $*${c_reset}"; }
+  _senv_ok()    { print -r -- "${c_green}${icon} $*${c_reset}"; }
+  _senv_warn()  { print -r -- "${c_yellow}${icon} $*${c_reset}"; }
+  _senv_err()   { print -r -- "${c_red}${icon} $*${c_reset}"; }
+
+  # Derive a display name from venv path.
+  # If the venv directory is named .venv/venv, use its parent as project name;
+  # otherwise use the venv directory name itself.
+  _senv_name_from_path() {
+    local p="$1"
+    local base="${p:t}"
+    if [[ "$base" == ".venv" || "$base" == "venv" ]]; then
+      print -r -- "${p:h:t}"
+    else
+      print -r -- "$base"
+    fi
+  }
 
   if [[ -n "$1" && -d "$1" ]]; then
     if [[ -f "$1/bin/activate" ]]; then
       venv_path="$1"
     else
-      echo "$icon Provided directory is not a valid Python virtual environment: $1"
+      local arg_name=${1:t}
+      _senv_err "Not a valid Python virtual environment: $arg_name"
       return 1
     fi
   else
@@ -34,14 +70,41 @@ function senv() {
   fi
 
   if [[ -n "$venv_path" ]]; then
+    # Resolve real paths for reliable comparison
+    target_real=$(cd "$venv_path" 2>/dev/null && pwd -P)
+
     if [[ -n "$VIRTUAL_ENV" ]]; then
-      echo "$icon Environment already active: $VIRTUAL_ENV"
+      current_real=$(cd "$VIRTUAL_ENV" 2>/dev/null && pwd -P)
+
+      if [[ "$current_real" == "$target_real" ]]; then
+        local env_name
+        env_name=$(_senv_name_from_path "$target_real")
+        _senv_info "Already in environment: ${c_bold}$env_name${c_bold_off}"
+        return 0
+      fi
+
+      # Deactivate current environment if possible before switching
+      if typeset -f deactivate >/dev/null 2>&1; then
+        deactivate
+      else
+        _senv_warn "Could not auto-deactivate current environment; switching anyway."
+      fi
+    fi
+
+    # Activate target environment
+    source "$venv_path/bin/activate"
+    if [[ -n "$current_real" ]]; then
+      local old_name new_name
+      old_name=$(_senv_name_from_path "$current_real")
+      new_name=$(_senv_name_from_path "$target_real")
+      _senv_ok "Switched environment: ${c_bold}${old_name:-unknown}${c_bold_off} -> ${c_bold}$new_name${c_bold_off}"
     else
-      source "$venv_path/bin/activate"
-      echo "$icon Environment activated: $venv_path"
+      local name
+      name=$(_senv_name_from_path "$target_real")
+      _senv_ok "Activated environment: ${c_bold}$name${c_bold_off}"
     fi
   else
-    echo "$icon No virtual environment found."
+    _senv_err "No virtual environment found. Create .venv in project or pass a path: senv /path/to/venv"
     return 1
   fi
 }

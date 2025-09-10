@@ -1,18 +1,16 @@
 [Unit]
 Description=Waybar - Status bar for Wayland
 Documentation=https://github.com/Alexays/Waybar
-Wants=graphical-session.target
 After=graphical-session.target
+Wants=graphical-session.target
+PartOf=graphical-session.target
 
 [Service]
 Type=simple
-ExecStartPre=/bin/sh -lc 'for i in $(seq 1 100); do [ -n "$WAYLAND_DISPLAY" ] && [ -e "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ] && exit 0; sleep 0.2; done; echo "Wayland not ready" >&2; exit 1'
 ExecStart=waybar
-Restart=on-failure
+Restart=always
 RestartSec=1
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
-Environment=XDG_CURRENT_DESKTOP=Hyprland
-Environment=XDG_SESSION_TYPE=wayland
 
 [Install]
 WantedBy=graphical-session.target
