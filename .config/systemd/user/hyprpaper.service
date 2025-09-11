@@ -1,0 +1,11 @@
+[Unit]
+Description=Hyprpaper wallpaper daemon
+After=graphical.target
+
+[Service]
+ExecStart=/usr/bin/hyprpaper
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
