@@ -21,6 +21,19 @@ function lazy_group() {
 }
 
 #########
+### A ###
+#########
+
+lazy_group aria2 <<EOF
+alias arc="aria2c -c"
+alias arcs="aria2c -c -s"
+EOF
+
+lazy_group alsamixer <<EOF
+alias am="alsamixer"
+EOF
+
+#########
 ### B ###
 #########
 
@@ -34,6 +47,10 @@ EOF
 
 lazy_group br <<EOF
 alias br="brew"
+EOF
+
+lazy_group bluetooth <<EOF
+alias bt="bluetoothctl"
 EOF
 
 #########
@@ -57,6 +74,7 @@ alias car="cargo run"
 alias caw="cargo watch -x run"
 alias carm="cargo remove"
 alias cac="cargo clean"
+alias cack="cargo check"
 alias cas="cargo search --registry=crates-io"
 alias cau="cargo update"
 alias cais="cargo install --locked"
@@ -70,6 +88,25 @@ EOF
 
 lazy_group crontab <<EOF
 alias cre="crontab -e"
+EOF
+
+ialias c="git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git"
+lazy_group dotfiles <<EOF
+alias cs="c status"
+alias cdf="c diff"
+alias cds="c diff --staged"
+alias cad="cadd"
+alias crs="c restore"
+alias cst="c stash"
+alias csp="c stash pop"
+alias clg="c log"
+alias cme="c commit --edit"
+alias cma="c commit --amend"
+alias cman="c commit --amend --no-edit"
+alias cmm="c commit -m"
+alias cpl="c pull --rebase"
+alias cps="c push"
+alias cls="c ls-tree -r master --name-only"
 EOF
 
 #########
@@ -128,17 +165,20 @@ EOF
 
 lazy_group eidt <<EOF
 alias eas="v ~/.alias.zsh"
+alias eis="v ~/.installer.zsh"
 alias ejs="v .justfile"
 EOF
 
 lazy_group easytier <<EOF
 alias eo="easytier-core"
 alias el="easytier-cli"
+alias elp="easytier-cli peer"
 EOF
 
 #########
 ### F ###
 #########
+
 lazy_group fdisk <<EOF
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 EOF
@@ -176,6 +216,14 @@ lazy_group git <<EOF
 alias gst="git status"
 alias gco="git checkout"
 alias gd="git diff"
+EOF
+
+lazy_group gitui <<EOF
+alias gu="gitui"
+EOF
+
+lazy_group gemini <<EOF
+alias gm="gemini"
 EOF
 
 #########
@@ -216,6 +264,10 @@ EOF
 
 lazy_group notebook <<EOF
 alias jn="jupyter-notebook"
+EOF
+
+lazy_group just <<EOF
+alias js="just"
 EOF
 
 #########
@@ -334,6 +386,10 @@ lazy_group rsync <<EOF
 alias rsy="rsync -avP"
 EOF
 
+lazy_group redis <<EOF
+alias rcl="redis-cli"
+EOF
+
 #########
 ### S ###
 #########
@@ -368,11 +424,23 @@ alias suef="systemctl --user edit --force --full"
 EOF
 
 #########
+### T ###
+#########
+
+lazy_group terminal <<EOF
+alias dim="echo $(tput cols)x$(tput lines)"
+EOF
+
+#########
 ### U ###
 #########
 
 lazy_group umount <<EOF
 alias umt="sudo umount"
+EOF
+
+lazy_group unzip <<EOF
+alias uz="unzip"
 EOF
 
 #########
