@@ -1,114 +1,138 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# pamixer warning
-hash pamixer &>/dev/null || notify-send "volume.sh" "pamixer is not installed."
+SCRIPT_NAME=$(basename "$0")
+VERSION="1.0.0"
 
-# options
-OPTIONS=""
-LONGOPTS="get,inc,dec,toggle,toggle-mic,mic-inc,mic-dec"
-ARGS=$(getopt -a --options=$OPTIONS --longoptions=$LONGOPTS --name "${0##*/}" -- "$@")
-if [[ $? -ne 0 || $# -eq 0 ]]; then
-	cat <<-EOF
-		$0: -[$(echo $OPTIONS | sed 's/,/|/g')] --[$(echo $LONGOPTS | sed 's/,/|/g')]
-	EOF
+# pamixer 检查
+if ! command -v pamixer &>/dev/null; then
+  notify-send "$SCRIPT_NAME" "pamixer is not installed."
+  exit 1
 fi
-eval set -- "$ARGS"
 
-# settings
-STEP=2
-LIMIT=60
+##############
+### config ###
+##############
 
-# Get Volume
+declare -A CONFIG=(
+  [step]=2
+  [limit]=60
+)
+
+usage() {
+  cat <<EOF
+Usage: $SCRIPT_NAME [OPTIONS]
+
+Options:
+  --get           Get current volume
+  --inc           Increase volume
+  --dec           Decrease volume
+  --toggle        Toggle mute
+  --toggle-mic    Toggle microphone mute
+  --mic-inc       Increase microphone volume
+  --mic-dec       Decrease microphone volume
+  -h, --help      Show this help
+  -v, --version   Show version
+
+Examples:
+  $SCRIPT_NAME --get
+  $SCRIPT_NAME --inc
+  $SCRIPT_NAME --toggle-mic
+EOF
+}
+
+############
+### main ###
+############
+
 get_volume() {
-	volume=$(pamixer --get-volume)
-	if [[ "$volume" -eq "0" ]]; then
-		echo "Muted"
-	else
-		echo "$volume%"
-	fi
+  local volume
+  volume=$(pamixer --get-volume)
+  if [[ "$volume" -eq 0 ]]; then
+    echo "Muted"
+  else
+    echo "${volume}%"
+  fi
 }
 
-# Increase Volume
 inc_volume() {
-	if [ "$(pamixer --get-mute)" == "true" ]; then
-		toggle_mute
-	else
-		pamixer -i $STEP --allow-boost --set-limit $LIMIT
-	fi
+  if [[ "$(pamixer --get-mute)" == "true" ]]; then
+    toggle_mute
+  else
+    pamixer -i "${CONFIG[step]}" --allow-boost --set-limit "${CONFIG[limit]}"
+  fi
 }
 
-# Decrease Volume
 dec_volume() {
-	if [ "$(pamixer --get-mute)" == "true" ]; then
-		toggle_mute
-	else
-		pamixer -d $STEP
-	fi
+  if [[ "$(pamixer --get-mute)" == "true" ]]; then
+    toggle_mute
+  else
+    pamixer -d "${CONFIG[step]}"
+  fi
 }
 
-# Toggle Mute
 toggle_mute() {
-	if [ "$(pamixer --get-mute)" == "false" ]; then
-		pamixer -m
-	elif [ "$(pamixer --get-mute)" == "true" ]; then
-		pamixer -u
-	fi
+  if [[ "$(pamixer --get-mute)" == "false" ]]; then
+    pamixer -m
+  else
+    pamixer -u
+  fi
 }
 
-# Toggle Mic
 toggle_mic() {
-	if [ "$(pamixer --default-source --get-mute)" == "false" ]; then
-		pamixer --default-source -m
-	elif [ "$(pamixer --default-source --get-mute)" == "true" ]; then
-		pamixer -u --default-source u
-	fi
+  if [[ "$(pamixer --default-source --get-mute)" == "false" ]]; then
+    pamixer --default-source -m
+  else
+    pamixer --default-source -u
+  fi
 }
 
-# Get Microphone Volume
 get_mic_volume() {
-	volume=$(pamixer --default-source --get-volume)
-	if [[ "$volume" -eq "0" ]]; then
-		echo "Muted"
-	else
-		echo "$volume%"
-	fi
+  local volume
+  volume=$(pamixer --default-source --get-volume)
+  if [[ "$volume" -eq 0 ]]; then
+    echo "Muted"
+  else
+    echo "${volume}%"
+  fi
 }
 
-# Increase MIC Volume
 inc_mic_volume() {
-	if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
-		toggle_mic
-	else
-		pamixer --default-source -i $STEP
-	fi
+  if [[ "$(pamixer --default-source --get-mute)" == "true" ]]; then
+    toggle_mic
+  else
+    pamixer --default-source -i "${CONFIG[step]}"
+  fi
 }
 
-# Decrease MIC Volume
 dec_mic_volume() {
-	if [ "$(pamixer --default-source --get-mute)" == "true" ]; then
-		toggle-mic
-	else
-		pamixer --default-source -d $STEP
-	fi
+  if [[ "$(pamixer --default-source --get-mute)" == "true" ]]; then
+    toggle_mic
+  else
+    pamixer --default-source -d "${CONFIG[step]}"
+  fi
 }
 
-while true; do
-	case "$1" in
-	--get) get_volume ;;
-	--inc) inc_volume ;;
-	--dec) dec_volume ;;
-	--toggle) toggle_mute ;;
-	--toggle-mic) toggle_mic ;;
-	--mic-inc) inc_mic_volume ;;
-	--mic-dec) dec_mic_volume ;;
-	--)
-		shift
-		break
-		;;
-	*)
-		echo "Invalid option: $1"
-		exit 1
-		;;
-	esac
-	shift
-done
+main() {
+  [[ $# -eq 0 ]] && { usage; exit 1; }
+
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --get)        get_volume; shift ;;
+      --inc)        inc_volume; shift ;;
+      --dec)        dec_volume; shift ;;
+      --toggle)     toggle_mute; shift ;;
+      --toggle-mic) toggle_mic; shift ;;
+      --mic-inc)    inc_mic_volume; shift ;;
+      --mic-dec)    dec_mic_volume; shift ;;
+      -h|--help)    usage; exit 0 ;;
+      -v|--version) echo "$VERSION"; exit 0 ;;
+      *)
+        echo "Invalid option: $1"
+        usage
+        exit 1
+        ;;
+    esac
+  done
+}
+
+main "$@"

@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Set a default editor if $EDITOR is not set
 set_default_editor() {
@@ -67,7 +67,7 @@ main() {
   set_default_editor
   verify_editor
 
-  if (( $# > 1 )); then
+  if (($# > 1)); then
     echo "Error: Too many arguments. Usage: ${0:t} [FILE]" >&2
     return 2
   fi

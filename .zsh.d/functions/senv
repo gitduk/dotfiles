@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 icon="󰌠"
 
@@ -24,89 +24,76 @@ function senv() {
     c_bold=$'\e[1m'
     c_bold_off=$'\e[22m'
   fi
-  _senv_info()  { print -r -- "${c_blue}${icon} $*${c_reset}"; }
-  _senv_ok()    { print -r -- "${c_green}${icon} $*${c_reset}"; }
-  _senv_warn()  { print -r -- "${c_yellow}${icon} $*${c_reset}"; }
-  _senv_err()   { print -r -- "${c_red}${icon} $*${c_reset}"; }
+  _senv_info() { print -r -- "${c_blue}${icon} $*${c_reset}"; }
+  _senv_ok() { print -r -- "${c_green}${icon} $*${c_reset}"; }
+  _senv_warn() { print -r -- "${c_yellow}${icon} $*${c_reset}"; }
+  _senv_err() { print -r -- "${c_red}${icon} $*${c_reset}"; }
 
-  # Derive a display name from venv path.
-  # If the venv directory is named .venv/venv, use its parent as project name;
-  # otherwise use the venv directory name itself.
-  _senv_name_from_path() {
-    local p="$1"
-    local base="${p:t}"
-    if [[ "$base" == ".venv" || "$base" == "venv" ]]; then
-      print -r -- "${p:h:t}"
-    else
-      print -r -- "$base"
-    fi
-  }
-
+main() {
   if [[ -n "$1" && -d "$1" ]]; then
     if [[ -f "$1/bin/activate" ]]; then
-      venv_path="$1"
+      CONFIG[venv_path]="$1"
     else
-      local arg_name=${1:t}
-      _senv_err "Not a valid Python virtual environment: $arg_name"
+      local arg_name
+      arg_name=$(basename "$1")
+      logger ERROR "${CONFIG[icon]} Not a valid Python virtual environment: $arg_name"
       return 1
     fi
   else
-    dir=$PWD
-    while [[ "$dir" != "/" ]]; do
-      for name in $venv_names; do
-        if [[ -f "$dir/$name/bin/activate" ]]; then
-          venv_path="$dir/$name"
+    CONFIG[dir]=$PWD
+    while [[ "${CONFIG[dir]}" != "/" ]]; do
+      for name in "${VENV_NAMES[@]}"; do
+        if [[ -f "${CONFIG[dir]}/$name/bin/activate" ]]; then
+          CONFIG[venv_path]="${CONFIG[dir]}/$name"
           break 2
         fi
       done
-      for candidate in "$dir"/*(N); do
+      for candidate in "${CONFIG[dir]}"/*; do
         if [[ -f "$candidate/pyvenv.cfg" && -f "$candidate/bin/activate" ]]; then
-          venv_path="$candidate"
+          CONFIG[venv_path]="$candidate"
           break 2
         fi
       done
-      dir=$(dirname "$dir")
+      CONFIG[dir]=$(dirname "${CONFIG[dir]}")
     done
   fi
-
-  if [[ -n "$venv_path" ]]; then
+  
+  if [[ -n "${CONFIG[venv_path]}" ]]; then
     # Resolve real paths for reliable comparison
-    target_real=$(cd "$venv_path" 2>/dev/null && pwd -P)
-
+    target_real=$(cd "${CONFIG[venv_path]}" 2>/dev/null && pwd -P)
+  
     if [[ -n "$VIRTUAL_ENV" ]]; then
       current_real=$(cd "$VIRTUAL_ENV" 2>/dev/null && pwd -P)
-
+  
       if [[ "$current_real" == "$target_real" ]]; then
-        local env_name
         env_name=$(_senv_name_from_path "$target_real")
-        _senv_info "Already in environment: ${c_bold}$env_name${c_bold_off}"
+        logger INFO "${CONFIG[icon]} Already in environment: ${COLOR[bold]}$env_name${COLOR[bold_off]}"
         return 0
       fi
-
+  
       # Deactivate current environment if possible before switching
       if typeset -f deactivate >/dev/null 2>&1; then
         deactivate
       else
-        _senv_warn "Could not auto-deactivate current environment; switching anyway."
+        logger WARN "${CONFIG[icon]} Could not auto-deactivate current environment; switching anyway."
       fi
     fi
-
+  
     # Activate target environment
-    source "$venv_path/bin/activate"
+    # shellcheck disable=SC1090
+    source "${CONFIG[venv_path]}/bin/activate"
     if [[ -n "$current_real" ]]; then
-      local old_name new_name
       old_name=$(_senv_name_from_path "$current_real")
       new_name=$(_senv_name_from_path "$target_real")
-      _senv_ok "Switched environment: ${c_bold}${old_name:-unknown}${c_bold_off} -> ${c_bold}$new_name${c_bold_off}"
+      logger OK "${CONFIG[icon]} Switched environment: ${COLOR[bold]}${old_name:-unknown}${COLOR[bold_off]} -> ${COLOR[bold]}$new_name${COLOR[bold_off]}"
     else
-      local name
       name=$(_senv_name_from_path "$target_real")
-      _senv_ok "Activated environment: ${c_bold}$name${c_bold_off}"
+      logger OK "${CONFIG[icon]} Activated environment: ${COLOR[bold]}$name${COLOR[bold_off]}"
     fi
   else
-    _senv_err "No virtual environment found. Create .venv in project or pass a path: senv /path/to/venv"
+    logger ERROR "${CONFIG[icon]} No virtual environment found. Create .venv in project or pass a path: senv /path/to/venv"
     return 1
   fi
 }
 
-senv "$@"
+main "$@"

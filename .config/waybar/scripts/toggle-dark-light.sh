@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 css_file="$HOME/.config/waybar/colors.css"
 

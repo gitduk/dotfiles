@@ -1,14 +1,44 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
-# 显示使用说明
+##############
+### config ###
+##############
+
+declare -A COLOR=(
+  [reset]=""
+  [green]=""
+  [yellow]=""
+  [red]=""
+  [blue]=""
+  [bold]=""
+  [bold_off]=""
+)
+
+if [[ -t 1 && -z "$NO_COLOR" ]]; then
+  COLOR[reset]=$'\e[0m'
+  COLOR[green]=$'\e[32m'
+  COLOR[yellow]=$'\e[33m'
+  COLOR[red]=$'\e[31m'
+  COLOR[blue]=$'\e[34m'
+  COLOR[bold]=$'\e[1m'
+  COLOR[bold_off]=$'\e[22m'
+fi
+
+#############
+### usage ###
+#############
+
+SCRIPT_NAME=$(basename "$0")
+
 usage() {
-  echo "Usage: $0 [OPTIONS] [NAME]\n"
-  cat <<'EOF'
+  cat << EOF
+Usage: $SCRIPT_NAME [OPTIONS] [NAME]
+
 Set or manage tmux pane names:
   tsp "my-name"     Set current pane name
   tsp PANE_ID NAME  Set specific pane name (shorthand)
-  tsp -u            Unset current pane name  
-  tsp -U            Unset all pane names
+  tsp -d            Delete current pane name  
+  tsp -D            Delete all pane names
   tsp -t ID NAME    Set specific pane name
   tsp -l            List all panes with names
   tsp -h|--help     Show this help
@@ -20,7 +50,32 @@ Examples:
 EOF
 }
 
-# 检查是否在 tmux 会话中
+#############
+### tools ###
+#############
+
+logger() {
+  local level="$1"
+  shift
+
+  local color_reset="${COLOR[reset]}"
+  local color_level=""
+
+  case "$level" in
+  INFO) color_level="${COLOR[blue]}" ;;
+  OK) color_level="${COLOR[green]}" ;;
+  WARN) color_level="${COLOR[yellow]}" ;;
+  ERROR) color_level="${COLOR[red]}" ;;
+  *) color_level="" ;;
+  esac
+
+  printf '[%s%s%s] %s\n' "$color_level" "$level" "$color_reset" "$*"
+}
+
+############
+### main ###
+############
+
 check_tmux() {
   if [[ -z "$TMUX" ]]; then
     echo "Error: Not in a tmux session" >&2
@@ -34,49 +89,39 @@ list_panes() {
   tmux list-panes -F "#{pane_index}: #{pane_current_command} #{?@pane_name,(#{@pane_name}),}"
 }
 
-# 验证 pane ID 是否存在
-validate_pane() {
-  local pane_id="$1"
-  if ! tmux list-panes -F "#{pane_index}" | grep -q "^${pane_id}$"; then
-    echo "Error: Pane $pane_id does not exist" >&2
-    return 1
-  fi
-}
-
-# 主要逻辑
 main() {
-  check_tmux
-
+  check_tmux || return 1
+  
   case "$1" in
-  -h | --help)
+  -h)
     usage
     ;;
-  -u)
-    local current_name=$(tmux show -p @pane_name 2>/dev/null | cut -d' ' -f2-)
+  -d)
+    local current_name
+    current_name=$(tmux show -p @pane_name 2>/dev/null | cut -d' ' -f2-)
     if [[ -n "$current_name" ]]; then
       tmux set -u -p @pane_name
-      echo "✓ Unset current pane [$current_name]"
+      logger OK "Unset current pane [$current_name]"
     else
-      echo "Current pane has no name set"
+      logger WARN "Current pane has no name set"
     fi
     ;;
-  -U)
-    local count=0
-    local unset_names=()
+  -D)
+    local count=0 unset_names=()
     for pane_id in $(tmux list-panes -F "#{pane_index}"); do
-      local pane_name=$(tmux show -p -t "$pane_id" @pane_name 2>/dev/null | cut -d' ' -f2-)
+      local pane_name
+      pane_name=$(tmux show -p -t "$pane_id" @pane_name 2>/dev/null | cut -d' ' -f2-)
       if [[ -n "$pane_name" ]]; then
         tmux set -u -p -t "$pane_id" @pane_name
         unset_names+=("pane $pane_id: $pane_name")
         ((count++))
       fi
     done
-
     if [[ $count -gt 0 ]]; then
-      echo "✓ Unset $count pane:"
+      logger OK "Unset $count pane(s):"
       printf "  %s\n" "${unset_names[@]}"
     else
-      echo "No pane names to unset"
+      logger INFO "No pane names to unset"
     fi
     ;;
   -l | --list)
@@ -84,51 +129,42 @@ main() {
     ;;
   -t)
     if [[ $# -lt 3 ]]; then
-      echo "Error: -t requires pane ID and name" >&2
-      echo "Usage: $0 -t PANE_ID NAME" >&2
+      logger ERROR "-t requires pane ID and name"
+      echo "Usage: $SCRIPT_NAME -t PANE_ID NAME" >&2
       return 1
     fi
-
-    local pane_id="$2"
-    local name="$3"
-
+    local pane_id="$2" name="$3"
     if validate_pane "$pane_id"; then
       tmux set -p -t "$pane_id" @pane_name "$name"
       echo "✓ Set pane $pane_id to [$name]"
     fi
     ;;
   "")
-    echo "Error: Name is required" >&2
+    logger ERROR "Name is required"
     usage
     return 1
     ;;
   -*)
-    echo "Error: Unknown option '$1'" >&2
+    logger ERROR "Unknown option '$1'"
     usage
     return 1
     ;;
   *)
-    # 检查第一个参数是否是数字 (pane ID)
     if [[ "$1" =~ ^[0-9]+$ && $# -ge 2 ]]; then
-      # 格式: tsp PANE_ID NAME
-      local pane_id="$1"
-      local name="$2"
-
+      local pane_id="$1" name="$2"
       if validate_pane "$pane_id"; then
         tmux set -p -t "$pane_id" @pane_name "$name"
-        echo "✓ Set pane $pane_id to [$name]"
+        logger OK "Set pane $pane_id to [$name]"
       fi
     elif [[ -n "$1" ]]; then
-      # 格式: tsp NAME (设置当前 pane)
       tmux set -p @pane_name "$1"
-      echo "✓ Set current pane to [$1]"
+      logger OK "Set current pane to [$1]"
     else
-      echo "Error: Empty name not allowed" >&2
+      logger ERROR "Empty name not allowed"
       return 1
     fi
     ;;
   esac
 }
 
-# 执行主函数
 main "$@"

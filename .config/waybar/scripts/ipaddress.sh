@@ -1,84 +1,101 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# 配置文件路径
-CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
-TOKEN_FILE="$CACHE_DIR/ip.token"
-CACHE_FILE="$CACHE_DIR/ipaddress.json"
+SCRIPT_NAME=$(basename "$0")
+VERSION="1.0.0"
 
-# 创建配置目录
-mkdir -p "$CACHE_DIR"
+##############
+### config ###
+##############
 
-# 显示加载状态
+# 配置
+declare -A CONFIG=(
+  [cache_dir]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
+  [token_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/ip.token"
+  [cache_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/ipaddress.json"
+  [token_api]="https://v2.jinrishici.com/token"
+  [ip_api]="https://v2.jinrishici.com/info"
+)
+
+# 创建缓存目录
+mkdir -p "${CONFIG[cache_dir]}"
+
+usage() {
+  cat <<EOF
+Usage: $SCRIPT_NAME [OPTIONS]
+
+Options:
+  --click       Show loading state and update in background
+  -h, --help    Show this help
+  -v, --version Show version
+  (no args)     Update IP info immediately
+
+Waybar config example:
+"custom/ipaddress": {
+    "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",
+    "format": " {} ",
+    "return-type": "json",
+    "interval": 1,
+    "tooltip": true,
+    "on-click": "$SCRIPT_NAME --click"
+}
+EOF
+}
+
+############
+### main ###
+############
+
+error() { echo -e "\e[31mERROR:\e[0m $*" >&2; }
+warn()  { echo -e "\e[33mWARN:\e[0m  $*" >&2; }
+info()  { echo -e "\e[34mINFO:\e[0m  $*"; }
+
 show_loading() {
-  local current_ip=""
-  if [[ -f "$CACHE_FILE" ]]; then
-    current_ip=$(cat "$CACHE_FILE" | jq -r '.text // "127.0.0.1"' 2>/dev/null)
+  local current_ip="127.0.0.1"
+  if [[ -f "${CONFIG[cache_file]}" ]]; then
+    current_ip=$(jq -r '.text // "127.0.0.1"' "${CONFIG[cache_file]}" 2>/dev/null)
   fi
-  [[ -z "$current_ip" ]] && current_ip="127.0.0.1"
 
   jq -n -c \
     --arg text "${current_ip}..." \
     --arg tooltip "正在刷新 IP 地址信息..." \
     --arg class "loading" \
-    '{text: $text, tooltip: $tooltip, class: $class}' >"$CACHE_FILE"
+    '{text: $text, tooltip: $tooltip, class: $class}' >"${CONFIG[cache_file]}"
 }
 
-# 获取或读取 Token
 get_token() {
-  if [[ -f "$TOKEN_FILE" ]]; then
-    cat "$TOKEN_FILE"
+  if [[ -f "${CONFIG[token_file]}" ]]; then
+    cat "${CONFIG[token_file]}"
   else
-    echo "正在获取 Token..." >&2
-    token=$(curl -s "https://v2.jinrishici.com/token" | jq -r '.data')
-    if [[ "$token" != "null" && "$token" != "" ]]; then
-      echo "$token" >"$TOKEN_FILE"
+    info "正在获取 Token..."
+    local token
+    token=$(curl -s "${CONFIG[token_api]}" | jq -r '.data')
+    if [[ -n "$token" && "$token" != "null" ]]; then
+      echo "$token" >"${CONFIG[token_file]}"
       echo "$token"
     else
-      echo "获取 Token 失败" >&2
+      error "获取 Token 失败"
       return 1
     fi
   fi
 }
 
-# 获取 IP 地址
 get_ipaddress() {
   local token="$1"
-  local response=$(curl -s -H "X-User-Token: $token" "https://v2.jinrishici.com/info")
-
-  if [[ -z "$response" ]]; then
-    echo '{"status":"error","data":{"ip":"127.0.0.1","region":"","weatherData":{"weather":"","temperature":""}}}'
-  else
-    echo "$response"
-  fi
+  curl -s -H "X-User-Token: $token" "${CONFIG[ip_api]}"
 }
 
-format_weather() {
-  local weather="$1"
-  case "$weather" in
-  "晴") echo "" ;;
-  "阴") echo "" ;;
-  "云") echo "" ;;
-  "雨") echo "" ;;
-  "小雨") echo "" ;;
-  "大雨") echo "" ;;
-  "雪") echo "" ;;
-  *) echo "" ;;
-  esac
-}
-
-# 格式化输出
 format_output() {
   local json_data="$1"
 
-  # 提取数据
-  local class=$(echo "$json_data" | jq -r '.status')
-  local ip=$(echo "$json_data" | jq -r '.data.ip // "127.0.0.1"')
-  local region=$(echo "$json_data" | jq -r '.data.region // ""')
-  local weather=$(echo "$json_data" | jq -r '.data.weatherData.weather // ""')
-  local temperature=$(echo "$json_data" | jq -r '.data.weatherData.temperature // ""')
-  local time=$(echo "$json_data" | jq -r '.data.beijingTime // ""')
+  local class ip region weather temperature time tooltip
+  class=$(jq -r '.status' <<<"$json_data")
+  ip=$(jq -r '.data.ip // "127.0.0.1"' <<<"$json_data")
+  region=$(jq -r '.data.region // ""' <<<"$json_data")
+  weather=$(jq -r '.data.weatherData.weather // ""' <<<"$json_data")
+  temperature=$(jq -r '.data.weatherData.temperature // ""' <<<"$json_data")
+  time=$(jq -r '.data.beijingTime // ""' <<<"$json_data")
 
-  if [[ "$time" == "" ]]; then
+  if [[ -z "$time" ]]; then
     time=$(date "+%H:%M:%S")
   else
     time="${time#*T}"
@@ -86,7 +103,7 @@ format_output() {
     region="${region/|/-}"
   fi
 
-  if [[ "$class" = "error" ]]; then
+  if [[ "$class" == "error" ]]; then
     tooltip="请求失败 | $time"
   else
     tooltip="$region | $weather ${temperature}°C | $time"
@@ -99,86 +116,40 @@ format_output() {
     '{text: $text, tooltip: $tooltip, class: $class}'
 }
 
-# 点击处理函数
-handle_click() {
-  # 显示加载状态
-  show_loading
+update_ip() {
+  # 检查依赖
+  command -v jq    >/dev/null || { echo '{"text":"jq not found","class":"error"}' >"${CONFIG[cache_file]}"; return 1; }
+  command -v curl  >/dev/null || { echo '{"text":"curl not found","class":"error"}' >"${CONFIG[cache_file]}"; return 1; }
 
-  # 在后台更新 IP 信息
+  local token
+  token=$(get_token) || { echo '{"text":"get token failed","class":"error"}' >"${CONFIG[cache_file]}"; return 1; }
+
+  local ip_data
+  ip_data=$(get_ipaddress "$token")
+  [[ -z "$ip_data" ]] && ip_data='{"status":"error"}'
+
+  format_output "$ip_data" >"${CONFIG[cache_file]}"
+}
+
+handle_click() {
+  show_loading
   {
-    sleep 0.1 # 让加载状态先显示
+    sleep 0.1
     update_ip
   } &
 }
 
-# 更新 IP 信息
-update_ip() {
-  # 检查依赖
-  if ! command -v jq &>/dev/null; then
-    echo '{"text":"jq not found", "class":"error"}' >"$CACHE_FILE"
-    return 1
-  fi
-
-  if ! command -v curl &>/dev/null; then
-    echo '{"text":"curl not found", "class":"error"}' >"$CACHE_FILE"
-    return 1
-  fi
-
-  # 获取 Token
-  local token="$(get_token)"
-  if [[ $? -ne 0 ]]; then
-    echo '{"text":"get token failed", "class":"error"}' >"$CACHE_FILE"
-    return 1
-  fi
-
-  # 获取 IP
-  local ip_data=$(get_ipaddress "$token")
-
-  # 格式化并保存
-  format_output "$ip_data" >"$CACHE_FILE"
-}
-
-# 显示帮助信息
-show_help() {
-  cat <<EOF
-用法: $0 [选项]
-
-选项:
-  无参数     - 更新 IP 信息（初始化时使用）
-  --click    - 处理点击事件（显示加载状态并后台更新）
-  --help     - 显示此帮助信息
-
-waybar 配置示例:
-"custom/ipaddress": {
-    "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",
-    "format": " {} ",
-    "return-type": "json",
-    "interval": 1,
-    "tooltip": true,
-    "on-click": "$0 --click"
-}
-EOF
-}
-
-# 主函数
 main() {
-  case "$1" in
-  "--click")
-    handle_click
-    ;;
-  "--help" | "-h")
-    show_help
-    ;;
-  "")
-    # 默认行为：更新 IP 信息
-    update_ip
-    ;;
-  *)
-    echo "未知参数: $1"
-    echo "使用 --help 查看帮助信息"
-    exit 1
-    ;;
-  esac
+  [[ $# -eq 0 ]] && { update_ip; exit 0; }
+
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --click)   handle_click; shift ;;
+      -h|--help) usage; exit 0 ;;
+      -v|--version) echo "$VERSION"; exit 0 ;;
+      *) error "未知参数: $1"; usage; exit 1 ;;
+    esac
+  done
 }
 
 main "$@"
