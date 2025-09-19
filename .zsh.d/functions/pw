@@ -1,25 +1,28 @@
-#!/usr/bin/env zsh
-
-# set zsh modern features
-emulate -L zsh
-setopt extended_glob null_glob
+#!/usr/bin/env bash
 
 # default config
-typeset -A CONFIG=(
+declare -A CONFIG=(
   [length]="16"
   [use_special]="false"
   [special_chars]="!@#$%^&*?:.,()[]{}<>_+-=~"
+  [pwfile]="$HOME/.pw.json"
 )
 
 # usage
 usage() {
-  echo "Usage: $0 [-n <length>] [-s]\n"
-
+  echo "Usage: $0 [-n <length>] [-s]"
   cat <<'EOF'
   -n, --length <length>          Specify password length
   -s, --special                  Use special characters
 EOF
   return 1
+}
+
+# log
+logger() {
+  local level="$1"
+  shift
+  printf '[%s] [%s] %s\n' "$(date +'%F %T')" "$level" "$*"
 }
 
 escape_for_tr() {
@@ -29,39 +32,45 @@ escape_for_tr() {
   echo "$safe"
 }
 
-main() {
-  # parse args
-  zparseopts -D -A opts \
-    n: -length: \
-    s -special
-  [[ $? -eq 0 ]] || return 1
+############
+### main ###
+############
 
-  # parse length
-  [[ -n "${opts[-n]}" ]] && CONFIG[length]="${opts[-n]}"
-  [[ -n "${opts[--length]}" ]] && CONFIG[length]="${opts[--length]}"
+# parse args
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -n | --length)
+    CONFIG[length]="$2"
+    shift 2
+    ;;
+  -s | --special)
+    CONFIG[use_special]="true"
+    shift
+    ;;
+  -f | --fzf)
+    jq -r 'to_entries[] | "\(.key)\t\(.value)"' ${CONFIG[pwfile]} | fzf --with-nth=1 --preview="" | cut -f2 | tr -d '\n' | wl-copy
+    shift
+    exit 0
+    ;;
+  esac
+done
 
-  # parse special opt
-  [[ -n "${opts[(i)-s]}" || -n "${opts[(i)--special]}" ]] && CONFIG[use_special]="true"
+# check length
+if [[ ! ${CONFIG[length]} =~ ^[0-9]+$ ]] || [[ "${CONFIG[length]}" -le 0 ]]; then
+  logger error "Password length must be a positive integer."
+  usage
+  exit 1
+fi
 
-  # check length
-  if [[ ! "${CONFIG[length]}" =~ '^[0-9]+$' ]] || [[ "${CONFIG[length]}" -le 0 ]]; then
-    echo "Error: Password length must be a positive integer.\n"
-    usage
-    return 1
-  fi
+# build chars
+BASE_CHARS='A-Za-z0-9'
+if [[ ${CONFIG[use_special]} == "true" ]]; then
+  ESCAPED_SPECIAL=$(escape_for_tr "${CONFIG[special_chars]}")
+  CHARS="$BASE_CHARS$ESCAPED_SPECIAL"
+else
+  CHARS="$BASE_CHARS"
+fi
 
-  # build chars
-  BASE_CHARS='A-Za-z0-9'
-  if [[ ${CONFIG[use_special]} == "true" ]]; then
-    ESCAPED_SPECIAL=$(escape_for_tr "${CONFIG[special_chars]}")
-    CHARS="$BASE_CHARS$ESCAPED_SPECIAL"
-  else
-    CHARS="$BASE_CHARS"
-  fi
-
-  # general password
-  PASSWORD=$(LC_ALL=C tr -dc "$CHARS" </dev/urandom | head -c "${CONFIG[length]}")
-  echo "$PASSWORD"
-}
-
-main "$@"
+# general password
+PASSWORD=$(LC_ALL=C tr -dc "$CHARS" </dev/urandom | head -c "${CONFIG[length]}")
+echo "$PASSWORD"

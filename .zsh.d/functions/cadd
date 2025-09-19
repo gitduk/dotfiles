@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Save original IFS and set new one for handling filenames with spaces
 original_ifs=$IFS
@@ -8,7 +8,7 @@ git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME status --short | cut -b 2- |
   stats=${line:0:1}
   # Trim leading and trailing whitespace and get the file path
   file_path=$(echo ${line:1} | xargs | awk '{print $NF}')
-  
+
   if [[ "$stats" = "D" ]]; then
     # Safely remove the file, checking for errors
     git --git-dir=$HOME/.dotfiles.git --work-tree=$HOME rm -- "${file_path}" || echo "Failed to remove ${file_path}"
@@ -21,4 +21,3 @@ done
 
 # Restore original IFS
 IFS=$original_ifs
-

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+usage() {
+  exit 0
+}
+
+log() {
+  print "[$(date +'%F %T')] $*"
+}
+
+main() {
+  local path="/usr/bin"
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    esac
+  done
+}
+
+main "$@"

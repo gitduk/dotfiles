@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 icon="󰌠"
 
@@ -24,10 +24,10 @@ function senv() {
     c_bold=$'\e[1m'
     c_bold_off=$'\e[22m'
   fi
-  _senv_info()  { print -r -- "${c_blue}${icon} $*${c_reset}"; }
-  _senv_ok()    { print -r -- "${c_green}${icon} $*${c_reset}"; }
-  _senv_warn()  { print -r -- "${c_yellow}${icon} $*${c_reset}"; }
-  _senv_err()   { print -r -- "${c_red}${icon} $*${c_reset}"; }
+  _senv_info() { print -r -- "${c_blue}${icon} $*${c_reset}"; }
+  _senv_ok() { print -r -- "${c_green}${icon} $*${c_reset}"; }
+  _senv_warn() { print -r -- "${c_yellow}${icon} $*${c_reset}"; }
+  _senv_err() { print -r -- "${c_red}${icon} $*${c_reset}"; }
 
   # Derive a display name from venv path.
   # If the venv directory is named .venv/venv, use its parent as project name;
