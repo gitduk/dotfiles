@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+SCRIPT_NAME=$(basename "$0")
+
 ##############
 ### config ###
 ##############
@@ -24,12 +26,6 @@ if [[ -t 1 && -z "$NO_COLOR" ]]; then
   COLOR[bold_off]=$'\e[22m'
 fi
 
-#############
-### usage ###
-#############
-
-SCRIPT_NAME=$(basename "$0")
-
 usage() {
   cat << EOF
 Usage: $SCRIPT_NAME [OPTIONS] [NAME]
@@ -49,10 +45,6 @@ Examples:
   tsp -u
 EOF
 }
-
-#############
-### tools ###
-#############
 
 logger() {
   local level="$1"
@@ -78,7 +70,7 @@ logger() {
 
 check_tmux() {
   if [[ -z "$TMUX" ]]; then
-    echo "Error: Not in a tmux session" >&2
+    logger ERROR "Not in a tmux session"
     return 1
   fi
 }

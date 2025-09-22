@@ -12,10 +12,6 @@ declare -A CONFIG=(
   [pwfile]="$HOME/.pw.json"
 )
 
-#############
-### usage ###
-#############
-
 usage() {
   echo "Usage: $0 [-n <length>] [-s]"
   cat <<'EOF'
@@ -25,15 +21,11 @@ EOF
   return 1
 }
 
-#############
-### tools ###
-#############
-
 # log
 logger() {
   local level="$1"
   shift
-  printf '[%s] [%s] %s\n' "$(date +'%F %T')" "$level" "$*"
+  printf "[%s] %s\n" "$level" "$*"
 }
 
 escape_for_tr() {
