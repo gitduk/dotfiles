@@ -1,10 +1,22 @@
 % hyprland, ubuntu 24.04
 
 # 1. building tools
-sudo nala update && sudo nala upgrade
-sudo nala install -y cmake pkg-config build-essential meson ninja-build gcc-14 g++-14
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
+sudo nala update && sudo nala upgrade -y
+sudo nala install -y cmake pkg-config build-essential meson ninja-build
+sudo nala install -y build-essential git make gawk flex \
+  bison libgmp-dev libmpfr-dev libmpc-dev python3 binutils \
+  perl libisl-dev libzstd-dev tar gzip bzip2
+export CONFIG_SHELL=/bin/bash
+mkdir -p /tmp/gcc-15 && cd /tmp/gcc-15
+git clone https://gcc.gnu.org/git/gcc.git gcc-15-source
+cd gcc-15-source
+git checkout releases/gcc-15.1.0 && ./contrib/download_prerequisites
+cd /tmp/gcc-15 && mkdir gcc-15-build && cd gcc-15-build
+../gcc-15-source/configure --prefix=/opt/gcc-15 --disable-multilib --enable-languages=c,c++
+sudo make install
+sudo update-alternatives --install /usr/bin/gcc gcc /opt/gcc-15/bin/gcc 100
+sudo update-alternatives --install /usr/bin/g++ g++ /opt/gcc-15/bin/g++ 100
+sudo ln -sf /opt/gcc-15/lib64/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
 
 # 2. cmake
 sudo nala install -y libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev
@@ -90,13 +102,13 @@ meson setup build && sudo meson install -C build
 sudo nala install -y libxcursor-dev libre2-dev libxcb-xfixes0-dev \
   libxcb-icccm4-dev libxcb-composite0-dev libxcb-res0-dev libnotify-dev
 git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd /tmp/Hyprland/
-export CC=gcc-14 CXX=g++-14 && make all && sudo make install
+make all && sudo make install
 
 # 15. Hyprland -- from release
-HYPRLAND_VERSION="v0.50.0"
+HYPRLAND_VERSION=$(curl -s https://api.github.com/repos/hyprwm/Hyprland/releases/latest | jq -r .tag_name)
 wget "https://github.com/hyprwm/Hyprland/releases/download/$HYPRLAND_VERSION/source-$HYPRLAND_VERSION.tar.gz" -P /tmp
 cd /tmp && tar -xzvf source-$HYPRLAND_VERSION.tar.gz && cd hyprland-source/
-export CC=gcc-14 CXX=g++-14 && make all && sudo make install
+make all && sudo make install
 
 # 16. hyprnotify
 sudo nala install -y libalsa-ocaml-dev

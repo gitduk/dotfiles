@@ -329,7 +329,7 @@ lazy_group podman <<EOF
 alias pd="podman"
 alias pdc="podman container"
 alias pdr="podman run"
-balias pdls="podman container ls --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}\t{{.RunningFor}}'"
+balias pdls="podman container ls"
 alias pdla="podman container ls -a"
 alias pds="podman container stats"
 alias pdst="podman container start"

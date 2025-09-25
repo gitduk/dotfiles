@@ -5,7 +5,7 @@ After=graphical.target
 [Service]
 ExecStart=/usr/bin/hyprpaper
 Restart=always
-RestartSec=5s
+RestartSec=5
 
 [Install]
 WantedBy=default.target

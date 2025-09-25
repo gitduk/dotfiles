@@ -62,18 +62,19 @@ edit_file() {
   fi
 }
 
-# Main execution
-main() {
+############
+### main ###
+############
+
+if [[ -z "$EDITOR" ]]; then
   set_default_editor
   verify_editor
+fi
 
-  if (($# > 1)); then
-    echo "Error: Too many arguments. Usage: ${0:t} [FILE]" >&2
-    return 2
-  fi
+if (($# > 1)); then
+  echo "Error: Too many arguments. Usage: ${0:t} [FILE]" >&2
+  return 2
+fi
 
-  edit_file "${@}"
-}
+edit_file "${@}"
 
-# Run main function
-main "$@"

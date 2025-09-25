@@ -9,7 +9,7 @@ PartOf=graphical-session.target
 Type=simple
 ExecStart=waybar
 Restart=always
-RestartSec=1
+RestartSec=5
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
 
 [Install]

@@ -234,8 +234,7 @@ zinit light astral-sh/uv
 
 # fscan
 zinit ice if'(( ! $+commands[fscan] ))' lucid as"command" from"gh-r" id-as"fscan" \
-  bpick"fscan_*_linux_x64" \
-  atclone"mv fscan_* fscan"
+  bpick"fscan"
 zinit light shadow1ng/fscan
 
 # sttr
