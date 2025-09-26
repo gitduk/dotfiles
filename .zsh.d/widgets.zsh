@@ -107,9 +107,9 @@ function backward-delete-widget() {
 }
 zbindkey -M viins '^W' backward-delete-widget
 
-##########################
-### expand-alias-space ###
-##########################
+###########################
+### alias-expand-widget ###
+###########################
 
 baliases=()
 function balias() {
@@ -127,7 +127,7 @@ function ialias() {
   ialiases+=(${args##* })
 }
 
-function expand-alias-space() {
+function alias-expand-widget() {
   [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
   if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
     zle _expand_alias
@@ -138,32 +138,11 @@ function expand-alias-space() {
   fi
 }
 
-#########################
-### lazy-space-widget ###
-#########################
-
-# lazy loader
-function lazy-space-widget() {
-  # check if lazy_map is empty
-  if [[ ${#lazy_map[@]} -gt 0 ]]; then
-    local buffer="$BUFFER"
-    local key; for key in ${(k)lazy_map}; do
-      if [[ "$buffer" == "$key" && -z "${__lazy_injected[$key]}" ]]; then
-        eval "${lazy_map[$key]}"
-        __lazy_injected[$key]=1
-        # zle -M "✨ Lazy alias loaded for: $key"
-        break
-      fi
-    done
-  fi
-}
-
 ####################
 ### space-widget ###
 ####################
 
 function space-widget() {
-  lazy-space-widget
-  expand-alias-space
+  alias-expand-widget
 }
 zbindkey ' ' space-widget

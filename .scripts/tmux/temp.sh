@@ -1,21 +1,21 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Temperature - using /sys/class/thermal
 cpu_temp=0
 for temp_file in /sys/class/thermal/thermal_zone*/temp; do
   current_temp=$(cat "$temp_file")
   current_temp=$((current_temp / 1000)) # Convert from millidegree to degree
-  if [[ $current_temp -gt $cpu_temp ]]; then
+  if [ "$current_temp" -gt "$cpu_temp" ]; then
     cpu_temp=$current_temp
   fi
 done
-[[ $cpu_temp = 0 ]] && cpu_temp="N/A"
+[ "$cpu_temp" = 0 ] && cpu_temp="N/A"
 
 # color
-local red="#ff0000"
-local yellow="#ffff00"
-local green="#00ff00"
-local blue="#61afef"
+red="#ff0000"
+yellow="#ffff00"
+green="#00ff00"
+blue="#61afef"
 
 style="${1:-none}"
 
@@ -27,4 +27,3 @@ case $cpu_temp in
 esac
 
 printf "%s" "$fgcolor$cpu_temp"
-

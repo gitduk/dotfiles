@@ -88,12 +88,12 @@ format_output() {
   local json_data="$1"
 
   local class ip region weather temperature time tooltip
-  class=$(jq -r '.status' <<<"$json_data")
-  ip=$(jq -r '.data.ip // "127.0.0.1"' <<<"$json_data")
-  region=$(jq -r '.data.region // ""' <<<"$json_data")
-  weather=$(jq -r '.data.weatherData.weather // ""' <<<"$json_data")
-  temperature=$(jq -r '.data.weatherData.temperature // ""' <<<"$json_data")
-  time=$(jq -r '.data.beijingTime // ""' <<<"$json_data")
+  class=$(jq -r '.status' <<< "$json_data")
+  ip=$(jq -r '.data.ip // "127.0.0.1"' <<< "$json_data")
+  region=$(jq -r '.data.region // ""' <<< "$json_data")
+  weather=$(jq -r '.data.weatherData.weather // ""' <<< "$json_data")
+  temperature=$(jq -r '.data.weatherData.temperature // ""' <<< "$json_data")
+  time=$(jq -r '.data.beijingTime // ""' <<< "$json_data")
 
   if [[ -z "$time" ]]; then
     time=$(date "+%H:%M:%S")
@@ -118,11 +118,11 @@ format_output() {
 
 update_ip() {
   # 检查依赖
-  command -v jq    >/dev/null || { echo '{"text":"jq not found","class":"error"}' >"${CONFIG[cache_file]}"; return 1; }
-  command -v curl  >/dev/null || { echo '{"text":"curl not found","class":"error"}' >"${CONFIG[cache_file]}"; return 1; }
+  command -v jq    >/dev/null || { echo '{"text":"jq not found","class":"error"}' > "${CONFIG[cache_file]}"; return 1; }
+  command -v curl  >/dev/null || { echo '{"text":"curl not found","class":"error"}' > "${CONFIG[cache_file]}"; return 1; }
 
   local token
-  token=$(get_token) || { echo '{"text":"get token failed","class":"error"}' >"${CONFIG[cache_file]}"; return 1; }
+  token=$(get_token) || { echo '{"text":"get token failed","class":"error"}' > "${CONFIG[cache_file]}"; return 1; }
 
   local ip_data
   ip_data=$(get_ipaddress "$token")

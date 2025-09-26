@@ -1,10 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # style
-local red="#ff0000"
-local yellow="#ffff00"
-local green="#00ff00"
-local blue="#61afef"
+red="#ff0000"
+yellow="#ffff00"
+green="#00ff00"
+blue="#61afef"
 
 style="${1:-none}"
 

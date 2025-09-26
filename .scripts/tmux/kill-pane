@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 window_name="$(tmux display-message -p '#W')"
 pane_nums="$(tmux list-panes | wc -l)"
@@ -8,4 +8,3 @@ window_nums="$(tmux list-windows | wc -l)"
 [[ $window_nums -eq 1 ]] && [[ $pane_nums -eq 1 ]] && exit 0
 
 tmux kill-pane
-

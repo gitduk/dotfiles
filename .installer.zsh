@@ -263,6 +263,12 @@ zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-a
   atpull"%atclone"
 zinit light EasyTier/EasyTier
 
+# codex
+zinit ice if'(( ! $+commands[codex] ))' lucid as"program" id-as"codex" \
+  atclone"bun install -g @openai/codex" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
 # claude-code
 zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
   atclone"bun install -g @anthropic-ai/claude-code" \

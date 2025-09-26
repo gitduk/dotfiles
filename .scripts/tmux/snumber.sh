@@ -1,6 +1,5 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
-local snumber
 snumber=$(tmux list-sessions | wc -l)
 
 if [[ $snumber -gt 1 ]];then
@@ -8,4 +7,3 @@ if [[ $snumber -gt 1 ]];then
 else
   echo -n ""
 fi
-

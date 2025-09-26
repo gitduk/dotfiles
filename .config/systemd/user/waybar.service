@@ -11,6 +11,7 @@ ExecStart=waybar
 Restart=always
 RestartSec=5
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+Environment=LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH
 
 [Install]
 WantedBy=graphical-session.target

@@ -56,12 +56,6 @@ zmodload zsh/zle
 autoload -Uz add-zsh-hook
 autoload -Uz edit-command-line
 
-# typeset
-typeset -a baliases
-typeset -a ialiases
-typeset -A __lazy_injected
-typeset -A lazy_map
-
 ############
 ### ENVS ###
 ############

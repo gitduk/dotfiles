@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 hv=0
 windows=$(tmux list-windows -F '#{window_index}' | wc -l)

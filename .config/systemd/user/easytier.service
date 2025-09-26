@@ -1,0 +1,12 @@
+[Unit]
+Description=EasyTier Service
+After=network.target
+
+[Service]
+ExecStart=easytier-core --private-mode true --network-name easynet --network-secret changeme
+Restart=always
+RestartSec=5
+Environment=PATH=/usr/bin:/usr/local/bin
+
+[Install]
+WantedBy=default.target

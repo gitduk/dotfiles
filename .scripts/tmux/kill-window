@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 window_name="$(tmux display-message -p '#W')"
 window_nums="$(tmux list-windows | wc -l)"
@@ -7,4 +7,3 @@ window_nums="$(tmux list-windows | wc -l)"
 [[ "$window_name" = *\* ]] && exit 0
 
 tmux kill-window
-

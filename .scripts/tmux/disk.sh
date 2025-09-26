@@ -1,13 +1,13 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Disk usage
 disk_usage=$(df -h --output=source,pcent | awk '/^\/dev/{print $2}' | sed 's/%//g' | sort -nr | head -1)
 
 # color
-local red="#ff0000"
-local yellow="#ffff00"
-local green="#00ff00"
-local blue="#61afef"
+red="#ff0000"
+yellow="#ffff00"
+green="#00ff00"
+blue="#61afef"
 
 style="${1:-none}"
 
@@ -18,4 +18,3 @@ case $disk_usage in
 esac
 
 printf "%s" "$fgcolor$disk_usage"
-

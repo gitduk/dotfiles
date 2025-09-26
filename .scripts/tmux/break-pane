@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 tmux swap-pane -d -t 1
 panes=($(tmux list-panes -F '#{pane_index}' | wc -l)-1)

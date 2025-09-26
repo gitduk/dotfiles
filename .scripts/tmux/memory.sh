@@ -1,10 +1,10 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # color
-local red="#ff0000"
-local yellow="#ffff00"
-local green="#00ff00"
-local blue="#61afef"
+red="#ff0000"
+yellow="#ffff00"
+green="#00ff00"
+blue="#61afef"
 
 sytle="${1:-none}"
 
@@ -17,5 +17,4 @@ case $mem in
   *) fgcolor="#[fg=$red $sytle]" ;;
 esac
 
-printf "%s%02.0f" $fgcolor $mem
-
+printf "%s%02.0f" "$fgcolor" "$mem"

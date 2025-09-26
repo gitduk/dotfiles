@@ -1,0 +1,12 @@
+[Unit]
+Description=EasyTier Client Service
+After=network.target
+
+[Service]
+ExecStart=easytier-core -d --network-name easynet --network-secret changeme -p tcp://aliyun:11010
+Restart=always
+RestartSec=5
+Environment=PATH=/usr/bin:/usr/local/bin
+
+[Install]
+WantedBy=default.target
