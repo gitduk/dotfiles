@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 barcolor="#[fg=colour8,bold]"
 barsymb="|"

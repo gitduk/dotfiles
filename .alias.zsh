@@ -102,7 +102,7 @@ alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{
 
 alias du="dust"
 
-alias dsk="dysk"
+alias ds="dysk"
 
 alias dis="sudo dpkg -i"
 
@@ -110,8 +110,12 @@ alias dis="sudo dpkg -i"
 ### E ###
 #########
 
+alias e="extract"
+
+alias ezs="v ~/.zshrc"
 alias eas="v ~/.alias.zsh"
 alias eis="v ~/.installer.zsh"
+alias epw="v ~/.pw.json"
 alias ejs="v .justfile"
 
 alias eo="easytier-core"
@@ -123,7 +127,9 @@ alias el="easytier-cli"
 
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 
-alias ff="fzf"
+alias f="fzf"
+
+alias ff="fastfetch"
 
 #########
 ### G ###
@@ -194,6 +200,8 @@ balias mt="sudo mount /dev/sd"
 
 alias mk="mkdir -p"
 
+alias ms="mise"
+
 #########
 ### N ###
 #########
@@ -214,6 +222,16 @@ alias nc="netcat -v"
 alias nsl="nslookup"
 alias nst="netstat"
 alias ncl="nmcli"
+
+alias np="nping"
+
+#########
+### O ###
+#########
+
+alias ox="sudo oryx"
+
+alias oa="oha"
 
 #########
 ### P ###
@@ -295,6 +313,9 @@ alias sud="systemctl --user disable"
 alias sued="systemctl --user edit"
 alias suef="systemctl --user edit --force --full"
 
+alias sm="somo"
+alias sml="somo -tl"
+
 #########
 ### T ###
 #########
@@ -316,6 +337,12 @@ alias uz="unzip"
 alias wch="watch -c -n 1"
 alias wis="whereis"
 alias wic="which"
+
+#########
+### X ###
+#########
+
+alias x="xh"
 
 #########
 ### Y ###

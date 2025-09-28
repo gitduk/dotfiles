@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-session_name="$(tmux display-message -p '#S')"
-[[ "$session_name" = *\* ]] && exit 0
-tmux kill-session -t "$session"
-

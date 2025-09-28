@@ -1,4 +1,4 @@
-#/usr/bin/env zsh
+#/usr/bin/env bash
 
 number=$(tmux display-message -p "#I")
 

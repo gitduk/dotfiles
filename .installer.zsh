@@ -19,8 +19,7 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
     [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
     eval "$(navi widget zsh)"
     bindkey "^N" _navi_widget
-    ' \
-  atpull"%atclone"
+    '
 zinit light denisidoro/navi
 
 # fnm - node version manager
@@ -274,3 +273,68 @@ zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
   atclone"bun install -g @anthropic-ai/claude-code" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
+
+# fastfetch
+zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh-r" id-as"fastfetch" \
+  bpick"fastfetch-linux-amd64.deb" \
+  atclone"mv usr/bin/* ." \
+  atclone"mv usr/share/zsh/*/* ." \
+  atclone"rm -rf */" \
+  atpull"%atclone"
+zinit light fastfetch-cli/fastfetch
+
+# gonzo
+zinit ice if'(( ! $+commands[gonzo] ))' lucid as"program" id-as"gonzo" \
+  atclone"/usr/local/go/bin/go install github.com/control-theory/gonzo/cmd/gonzo@latest" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
+# xh
+zinit ice if'(( ! $+commands[xh] ))' lucid as"program" id-as"xh" \
+  atclone"curl -sfL https://raw.githubusercontent.com/ducaale/xh/master/install.sh | sh" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
+# somo
+zinit ice if'(( ! $+commands[somo] ))' lucid as"program" from"gh-r" id-as"somo" \
+  atclone"mv usr/bin/* ." \
+  atclone"./somo generate-completions zsh > _somo" \
+  atclone"rm -rf */" \
+  atpull"%atclone"
+zinit light theopfr/somo
+
+# tw - view and query tabular data files, such as CSV, TSV, and parquet
+zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh-r" id-as"tw" \
+  bpick"tabiew-x86_64-unknown-linux-gnu.deb" \
+  atclone"mv usr/bin/* ." \
+  atclone"mv usr/share/zsh/*/* ." \
+  atclone"rm -rf */" \
+  atpull"%atclone"
+zinit light shshemi/tabiew
+
+# nping
+zinit ice if'(( ! $+commands[nping] ))' lucid as"program" from"gh-r" id-as"nping" \
+  bpick"nping-x86_64-unknown-linux-gnu.tar.gz"
+zinit light hanshuaikang/Nping
+
+# mise - dev tools, env vars, task runner
+zinit ice if'(( ! $+commands[mise] ))' lucid as"program" id-as"mise" \
+  atclone"curl https://mise.run | sh" \
+  atpull"%atclone" \
+  atload'eval "$(mise activate zsh)"'
+zinit light zdharma-continuum/null
+
+# oryx - sniffing network traffic using eBPF on Linux
+zinit ice if'(( ! $+commands[oryx] ))' lucid as"program" from"gh-r" id-as"oryx" \
+  bpick"oryx-x86_64-unknown-linux-musl" \
+  atclone"sudo mv oryx-x86_64-unknown-linux-musl /usr/bin/oryx" \
+  atpull"%atclone"
+zinit light pythops/oryx
+
+# oha - HTTP load generator, inspired by rakyll/hey with tui animation
+zinit ice if'(( ! $+commands[oha] ))' lucid as"program" from"gh-r" id-as"oha" \
+  bpick"oha-linux-amd64" \
+  atclone"mv oha-linux-amd64 oha" \
+  atpull"%atclone"
+zinit light hatoo/oha
+
