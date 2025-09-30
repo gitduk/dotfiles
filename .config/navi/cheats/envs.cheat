@@ -1,6 +1,5 @@
 % envs
 
 $ hosts: awk '!/^#/ && NF {print $1}' /etc/hosts
-$ dev: nmcli -t -f DEVICE,STATE dev | awk -F: '$2 ~ /connected/ {print $1}'
-$ con: nmcli -t -f NAME con show --active
+$ dev: networkctl list | awk '/ether/ && /configured/ {print $2}'
 

@@ -154,6 +154,8 @@ alias gu="gitui"
 
 alias gm="gemini"
 
+alias gn="gonzo"
+
 #########
 ### H ###
 #########
@@ -222,6 +224,12 @@ alias nc="netcat -v"
 alias nsl="nslookup"
 alias nst="netstat"
 alias ncl="nmcli"
+
+alias nw="networkctl"
+alias nwl="networkctl list"
+alias nws="networkctl status"
+alias nwr="networkctl reload"
+alias nwrc="networkctl reconfigure"
 
 alias np="nping"
 

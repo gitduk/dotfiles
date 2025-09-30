@@ -92,6 +92,7 @@ podman run -d --name prometheus \
 
 # redis
 podman run -d --name redis \
+  -e REDIS_PASSWORD=changeme \
   -p 6379:6379 \
   -v redis:/data \
   --network=redis_net \
@@ -125,4 +126,15 @@ podman run -d --name mysql \
   -e MYSQL_ROOT_PASSWORD=changeme \
   -p 3306:3306 \
   mysql:latest
+
+# rustfs
+podman run -d --name rustfs \
+  -e RUSTFS_ACCESS_KEY=admin \
+  -e RUSTFS_SECRET_KEY=changeme \
+  -e RUSTFS_CONSOLE_ENABLE=true \
+  -e RUSTFS_SERVER_DOMAINS=example.com \
+  -p 9000:9000 \
+  -v rustfs:/data \
+  -v ./logs:/logs \
+  rustfs/rustfs:alpha
 

@@ -1,6 +1,10 @@
 % network, common
 @ envs
 
+# run networkctl without sudo
+sudo usermod -aG systemd-network $USER
+newgrp systemd-network
+
 # show dns
 resolvectl status
 

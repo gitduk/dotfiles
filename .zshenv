@@ -86,3 +86,9 @@ export XDG_CURRENT_DESKTOP=hyprland
 if [[ -d "$XDG_RUNTIME_DIR/hypr" ]]; then
   export HYPRLAND_INSTANCE_SIGNATURE="$(ls -t "$XDG_RUNTIME_DIR/hypr" | head -n1)"
 fi
+
+# ensure display
+if [[ -z "$DISPLAY" ]]; then
+  export DISPLAY=$(ps -ef | awk '/Xwayland/ && !/grep/ {for(i=1;i<=NF;i++) if ($i ~ /^:[0-9]+$/) print $i; exit}')
+fi
+
