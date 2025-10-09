@@ -64,9 +64,9 @@ export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -
 
 # Proxy settings
 function setup_proxy() {
-  PROXY_HOST="${PROXY_HOST:-127.0.0.1}"
-  PROXY_PORT="${PROXY_PORT:-7890}"
-  if nc -z -n "$PROXY_HOST" "$PROXY_PORT" &>/dev/null; then
+  local PROXY_HOST="${1:-${PROXY_HOST:-127.0.0.1}}"
+  local PROXY_PORT="${2:-${PROXY_PORT:-7890}}"
+  if timeout 0.5 bash -c "echo >/dev/tcp/${PROXY_HOST}/${PROXY_PORT}" 2>/dev/null; then
     export http_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
     export HTTP_PROXY="$http_proxy"
     export https_proxy="http://${PROXY_HOST}:${PROXY_PORT}"

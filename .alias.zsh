@@ -329,6 +329,7 @@ alias sml="somo -tl"
 #########
 
 alias dim="echo $(tput cols)x$(tput lines)"
+alias tn="telnet"
 
 #########
 ### U ###

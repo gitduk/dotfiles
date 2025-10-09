@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-ROFI_ERROR_FILE="/tmp/rofi_error"
+ROFI_ERROR_FILE="/tmp/.rofi_error"
 
 if [[ -f "$ROFI_ERROR_FILE" ]]; then
   tofi-drun | xargs hyprctl dispatch exec --

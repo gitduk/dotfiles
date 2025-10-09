@@ -119,7 +119,8 @@
     "return-type": "json",
     "interval": 1,
     "tooltip": true,
-    "on-click": "~/.config/waybar/scripts/ipaddress.sh --click"
+    "on-click": "~/.config/waybar/scripts/ipaddress.sh --click",
+    "on-click-right": "ip=$(jq -r .text ~/.cache/waybar/ipaddress.json 2>/dev/null || echo '127.0.0.1'); echo -n $ip | wl-copy; notify-send '📋 IP 已复制' $ip"
   },
   "custom/color_scheme": {
     "exec": "sleep 0.1 && ~/.config/waybar/scripts/color-scheme.sh",
