@@ -1,6 +1,0 @@
-default:
-  sing-box run -c ./config.json
-
-update url:
-  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O config.json
-

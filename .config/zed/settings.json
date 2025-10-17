@@ -1,0 +1,55 @@
+{
+  "context_servers": {
+    "es-mcp": {
+      "env": {},
+      "source": "custom",
+      "enabled": true,
+      "command": "/home/wukaige/es-mcp/.venv/bin/python",
+      "args": [
+        "/home/wukaige/es-mcp/ws_client.py",
+        "--host",
+        "localhost",
+        "--port",
+        "8765"
+      ]
+    },
+    "mcp-server-context7": {
+      "source": "extension",
+      "enabled": true,
+      "settings": {
+        "context7_api_key": "${CONTEXT7_API_KEY}"
+      }
+    }
+  },
+  "icon_theme": "Zed (Default)",
+  "ssh_connections": [
+    {
+      "host": "wk",
+      "args": [],
+      "projects": [
+        {
+          "paths": ["/home/wukaige/project/ai"]
+        }
+      ],
+      "upload_binary_over_ssh": true
+    }
+  ],
+  "agent": {
+    "always_allow_tool_actions": true,
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-sonnet-4-5"
+    },
+    "model_parameters": []
+  },
+  "vim_mode": true,
+  "base_keymap": "VSCode",
+  "ui_font_size": 16,
+  "ui_font_family": "Maple Mono NF CN",
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "system",
+    "light": "One Dark Pro",
+    "dark": "One Dark"
+  }
+}

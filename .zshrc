@@ -75,6 +75,7 @@ function setup_proxy() {
     export NO_PROXY="$no_proxy"
   fi
 }
+
 function unset_proxy() {
   unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
   unset no_proxy NO_PROXY
@@ -82,10 +83,6 @@ function unset_proxy() {
 
 # Proxy settings
 [[ -n "$DISPLAY" ]] && setup_proxy
-
-# PATH management
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.npm/bin:$PATH"
 
 # Qt
 QT_VERSION="6.9.1"
@@ -96,10 +93,10 @@ if [[ -d "$HOME/.local/share/Qt/$QT_VERSION" ]]; then
   export LD_LIBRARY_PATH="$QT_ROOT/gcc_64/lib:$LD_LIBRARY_PATH"
 fi
 
-# fpath
+# completion
 export ZSH_COMPLETIONS="$HOME/.zsh.d/completions"
 [[ ! -d "$ZSH_COMPLETIONS" ]] && mkdir -p "$ZSH_COMPLETIONS"
-fpath=($ZSH_COMPLETIONS $fpath)
+fpath+=$ZSH_COMPLETIONS
 
 ############
 ### MUST ###
@@ -224,12 +221,7 @@ zinit ice wait"1" lucid as"program" id-as"rustup" \
     $HOME/.cargo/bin/cargo install --root $HOME/.local --locked wallust
     command -v wallust &>/dev/null && wallust theme base16-default-dark -s
     " \
-  atpull"%atclone" \
-  atload'
-    export PATH="$HOME/.cargo/bin:$PATH"
-    export CARGO_INSTALL_ROOT="$HOME/.local"
-    command -v sccache &>/dev/null && export RUSTC_WRAPPER="$(command -v sccache)"
-  '
+  atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # golang
@@ -251,7 +243,6 @@ zinit ice wait"1" lucid as"program" id-as"golang" \
     ' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
-
 
 ##############################
 ### Custom Config & Script ###

@@ -34,6 +34,8 @@ alias cai="cargo init"
 alias caad="cargo add"
 alias cab="cargo build"
 alias car="cargo run"
+alias carb="cargo run --bin"
+alias caf="cargo fetch"
 alias caw="cargo watch -x run"
 alias carm="cargo remove"
 alias cac="cargo clean"
@@ -268,6 +270,7 @@ alias pddf="podman diff"
 alias pdis="podman inspect"
 alias pdv="podman volume"
 alias pdvl="podman volume ls"
+alias pdgs="podman generate systemd --name"
 
 alias pdcp="podman compose"
 alias pdcpu="podman compose up"
@@ -298,7 +301,7 @@ alias rcl="redis-cli"
 ### S ###
 #########
 
-alias st="sttr"
+alias sr="sttr"
 
 alias sc="source"
 alias denv="deactivate"

@@ -84,5 +84,28 @@
     "bindings": {
       "tab": "channel_modal::ToggleMode"
     }
+  },
+  {
+    "context": "(Editor && edit_prediction)",
+    "bindings": {
+      "ctrl-f": "editor::AcceptEditPrediction",
+      "alt-l": null,
+      "alt-tab": null
+    }
+  },
+  {
+    "context": "(Editor && edit_prediction_conflict)",
+    "bindings": {
+      "ctrl-f": "editor::AcceptEditPrediction",
+      "alt-l": null,
+      "alt-tab": null
+    }
+  },
+  {
+    "context": "((os != macos && Editor) && edit_prediction_conflict)",
+    "bindings": {
+      "ctrl-f": "editor::AcceptEditPrediction",
+      "alt-l": null
+    }
   }
 ]
