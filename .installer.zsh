@@ -295,14 +295,6 @@ zinit ice if'(( ! $+commands[xh] ))' lucid as"program" id-as"xh" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# somo
-zinit ice if'(( ! $+commands[somo] ))' lucid as"program" from"gh-r" id-as"somo" \
-  atclone"mv usr/bin/* ." \
-  atclone"./somo generate-completions zsh > _somo" \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light theopfr/somo
-
 # tw - view and query tabular data files, such as CSV, TSV, and parquet
 zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh-r" id-as"tw" \
   bpick"tabiew-x86_64-unknown-linux-gnu.deb" \

@@ -19,6 +19,5 @@
     "deny": [],
     "ask": [],
     "defaultMode": "bypassPermissions"
-  },
-  "apiKeyHelper": ". ~/.env && echo $ANTHROPIC_API_KEY"
+  }
 }

@@ -1,18 +1,5 @@
 {
   "context_servers": {
-    "es-mcp": {
-      "env": {},
-      "source": "custom",
-      "enabled": true,
-      "command": "/home/wukaige/es-mcp/.venv/bin/python",
-      "args": [
-        "/home/wukaige/es-mcp/ws_client.py",
-        "--host",
-        "localhost",
-        "--port",
-        "8765"
-      ]
-    },
     "mcp-server-context7": {
       "source": "extension",
       "enabled": true,
@@ -21,7 +8,6 @@
       }
     }
   },
-  "icon_theme": "Zed (Default)",
   "ssh_connections": [
     {
       "host": "wk",

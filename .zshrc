@@ -62,27 +62,44 @@ autoload -Uz edit-command-line
 
 export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -d '"')"
 
-# Proxy settings
-function setup_proxy() {
-  local PROXY_HOST="${1:-${PROXY_HOST:-127.0.0.1}}"
-  local PROXY_PORT="${2:-${PROXY_PORT:-7890}}"
-  if timeout 0.5 bash -c "echo >/dev/tcp/${PROXY_HOST}/${PROXY_PORT}" 2>/dev/null; then
-    export http_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
+# proxy settings
+function proxy() {
+
+  local proxy_host="127.0.0.1"
+  local proxy_port="7890"
+  local slient="false"
+  local action="set"
+
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -h|--host) proxy_port="$2"; shift 2 ;;
+      -p|--port) proxy_port="$2"; shift 2 ;;
+      -s|--slient) slient="true"; shift ;;
+      -u|--unset) action="unset"; shift ;;
+      *) break ;;
+    esac
+  done
+
+  if [[ "$action" == "unset" ]]; then
+    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+    unset no_proxy NO_PROXY
+    return 0
+  fi
+
+  if timeout 0.5 bash -c "echo >/dev/tcp/${proxy_host}/${proxy_port}" 2>/dev/null; then
+    export http_proxy="http://${proxy_host}:${proxy_port}"
     export HTTP_PROXY="$http_proxy"
-    export https_proxy="http://${PROXY_HOST}:${PROXY_PORT}"
+    export https_proxy="http://${proxy_host}:${proxy_port}"
     export HTTPS_PROXY="$https_proxy"
     export no_proxy="localhost,127.0.0.1"
     export NO_PROXY="$no_proxy"
+    [[ "$slient" == "false" ]] && echo "Proxy enabled: ${proxy_host}:${proxy_port}"
+  else
+    [[ "$slient" == "false" ]] && echo "Proxy not available on ${proxy_host}:${proxy_port}"
   fi
 }
 
-function unset_proxy() {
-  unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
-  unset no_proxy NO_PROXY
-}
-
-# Proxy settings
-[[ -n "$DISPLAY" ]] && setup_proxy
+[[ -n "$DISPLAY" ]] && proxy -s
 
 # Qt
 QT_VERSION="6.9.1"
@@ -254,9 +271,10 @@ zinit ice wait"0" lucid as"program" id-as"autoload" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
     for script (~/.zsh.d/*.zsh(N)) source $script
-    [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh
-    [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh
-    [[ -f ~/.installer.zsh ]] && source ~/.installer.zsh
+    [[ -f ~/.env.zsh ]] && source ~/.env.zsh || touch ~/.env.zsh
+    [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh || touch ~/.alias.zsh
+    [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh || touch ~/.alias.zsh
+    [[ -f ~/.installer.zsh ]] && source ~/.installer.zsh || touch ~/.installer.zsh
   '
 zinit light zdharma-continuum/null
 

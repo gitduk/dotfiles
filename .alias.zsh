@@ -117,6 +117,7 @@ alias e="extract"
 alias ezs="v ~/.zshrc"
 alias eas="v ~/.alias.zsh"
 alias eis="v ~/.installer.zsh"
+alias eenv="v ~/.env.zsh"
 alias epw="v ~/.pw.json"
 alias ejs="v .justfile"
 
@@ -252,34 +253,25 @@ alias ps="procs"
 alias pd="podman"
 alias pdc="podman container"
 alias pdr="podman run"
-balias pdls="podman container ls"
-alias pdla="podman container ls -a"
-alias pds="podman container stats"
-alias pdst="podman container start"
-alias pdrst="podman container restart"
-alias pdstp="podman container stop"
-alias pdrm="podman container rm"
-alias pdat="podman container attach"
-alias pdpr="podman container prune"
+alias pds="podman start"
+alias pdst="podman stop"
+alias pdsts="podman stats"
 alias pdps="podman ps"
 alias pdlg="podman logs --tail 100 --follow"
 alias pdec="podman exec -it"
-alias pdc="podman cp"
+alias pdcp="podman cp"
+alias pdrm="podman rm"
+alias pdri="podman rmi"
 alias pdsc="podman search"
 alias pddf="podman diff"
 alias pdis="podman inspect"
 alias pdv="podman volume"
-alias pdvl="podman volume ls"
-alias pdgs="podman generate systemd --name"
-
-alias pdcp="podman compose"
-alias pdcpu="podman compose up"
-alias pdcpud="podman compose up -d"
+alias pdn="podman network"
 
 alias path='echo $PATH | tr ":" "\n" | fzf'
 
-alias pre="setup_proxy"
-alias prd="unset_proxy"
+alias pre="proxy"
+alias prd="proxy -u"
 
 #########
 ### R ###
@@ -324,8 +316,7 @@ alias sud="systemctl --user disable"
 alias sued="systemctl --user edit"
 alias suef="systemctl --user edit --force --full"
 
-alias sm="somo"
-alias sml="somo -tl"
+alias sl="ss -tnlp"
 
 #########
 ### T ###

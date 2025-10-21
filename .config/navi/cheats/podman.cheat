@@ -1,12 +1,13 @@
-% podman, generate
+% podman
 
 # regist server
-$ name: podman container list --all --format json | jq ".[] | .Names[]"
-$ policy: echo "always|unless-stopped|on-failure" | tr "|" "\n"
 podman generate systemd \
   --name <name> \
   --restart-policy <policy> \
   --files
+
+$ name: podman container list --all --format json | jq ".[] | .Names[]"
+$ policy: echo "always|unless-stopped|on-failure" | tr "|" "\n"
 
 % podman, run
 @ envs

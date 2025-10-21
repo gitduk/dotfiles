@@ -2,8 +2,8 @@
 @ envs
 
 # local port forwarding: local → remote server 
-ssh -NL <local_port>:<remote_host>:<remote_port> <remote_host>
+ssh -NL <port>:<host>:<port> <host>
 
 # remote port forwarding: remote server → local
-ssh -NR <remote_port>:<local_host>:<local_port> <remote_host>
+ssh -NR <port>:localhost:<port> <host>
 
