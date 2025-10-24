@@ -14,7 +14,7 @@ get_stat() {
 }
 
 read prev_total prev_idle < <(get_stat)
-sleep 1
+sleep 0.2
 read total idle < <(get_stat)
 
 time_delta=$((total - prev_total))

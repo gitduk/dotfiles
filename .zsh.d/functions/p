@@ -31,18 +31,17 @@ usage() {
 Usage: $SCRIPT_NAME [OPTIONS] [NAME]
 
 Set or manage tmux pane names:
-  tsp "my-name"     Set current pane name
-  tsp PANE_ID NAME  Set specific pane name (shorthand)
-  tsp -d            Delete current pane name  
-  tsp -D            Delete all pane names
-  tsp -t ID NAME    Set specific pane name
-  tsp -l            List all panes with names
-  tsp -h|--help     Show this help
+  $SCRIPT_NAME "my-name"     Set current pane name
+  $SCRIPT_NAME PANE_ID NAME  Set specific pane name (shorthand)
+  $SCRIPT_NAME -d            Delete current pane name  
+  $SCRIPT_NAME -D            Delete all pane names
+  $SCRIPT_NAME -l            List all panes with names
+  $SCRIPT_NAME -h|--help     Show this help
 
 Examples:
-  tsp "web-server"
-  tsp -t 1 "database" 
-  tsp -u
+  $SCRIPT_NAME "web-server"
+  $SCRIPT_NAME -t 1 "database" 
+  $SCRIPT_NAME -u
 EOF
 }
 
@@ -81,6 +80,23 @@ list_panes() {
   tmux list-panes -F "#{pane_index}: #{pane_current_command} #{?@pane_name,(#{@pane_name}),}"
 }
 
+# 验证给定的 pane ID 是否存在于当前 tmux 窗口
+validate_pane() {
+  local pane_id="$1"
+  
+  if [[ ! "$pane_id" =~ ^[0-9]+$ ]]; then
+    logger ERROR "Invalid pane ID: '$pane_id' (must be a number)"
+    return 1
+  fi
+  
+  if ! tmux list-panes -F "#{pane_index}" | grep -q "^${pane_id}$"; then
+    logger ERROR "Pane $pane_id does not exist"
+    return 1
+  fi
+  
+  return 0
+}
+
 main() {
   check_tmux || return 1
   
@@ -89,13 +105,29 @@ main() {
     usage
     ;;
   -d)
-    local current_name
-    current_name=$(tmux show -p @pane_name 2>/dev/null | cut -d' ' -f2-)
-    if [[ -n "$current_name" ]]; then
-      tmux set -u -p @pane_name
-      logger OK "Unset current pane [$current_name]"
+    if [[ -n "$2" ]]; then
+      # 删除指定 pane 的 name
+      local pane_id="$2"
+      if validate_pane "$pane_id"; then
+        local pane_name
+        pane_name=$(tmux show -p -t "$pane_id" @pane_name 2>/dev/null | cut -d' ' -f2-)
+        if [[ -n "$pane_name" ]]; then
+          tmux set -u -p -t "$pane_id" @pane_name
+          logger OK "Unset pane $pane_id \"$pane_name\""
+        else
+          logger WARN "Pane $pane_id has no name set"
+        fi
+      fi
     else
-      logger WARN "Current pane has no name set"
+      # 删除当前 pane 的 name
+      local current_name
+      current_name=$(tmux show -p @pane_name 2>/dev/null | cut -d' ' -f2-)
+      if [[ -n "$current_name" ]]; then
+        tmux set -u -p @pane_name
+        logger OK "Unset current pane \"$current_name\""
+      else
+        logger WARN "Current pane has no name set"
+      fi
     fi
     ;;
   -D)
@@ -119,18 +151,6 @@ main() {
   -l | --list)
     list_panes
     ;;
-  -t)
-    if [[ $# -lt 3 ]]; then
-      logger ERROR "-t requires pane ID and name"
-      echo "Usage: $SCRIPT_NAME -t PANE_ID NAME" >&2
-      return 1
-    fi
-    local pane_id="$2" name="$3"
-    if validate_pane "$pane_id"; then
-      tmux set -p -t "$pane_id" @pane_name "$name"
-      echo "✓ Set pane $pane_id to [$name]"
-    fi
-    ;;
   "")
     logger ERROR "Name is required"
     usage
@@ -146,11 +166,11 @@ main() {
       local pane_id="$1" name="$2"
       if validate_pane "$pane_id"; then
         tmux set -p -t "$pane_id" @pane_name "$name"
-        logger OK "Set pane $pane_id to [$name]"
+        logger OK "Set pane $pane_id to \"$name\""
       fi
     elif [[ -n "$1" ]]; then
       tmux set -p @pane_name "$1"
-      logger OK "Set current pane to [$1]"
+      logger OK "Set current pane to \"$1\""
     else
       logger ERROR "Empty name not allowed"
       return 1

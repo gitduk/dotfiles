@@ -240,8 +240,8 @@ alias np="nping"
 ### O ###
 #########
 
+alias o="open"
 alias ox="sudo oryx"
-
 alias oa="oha"
 
 #########

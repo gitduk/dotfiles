@@ -1,9 +1,0 @@
-[Unit]
-Description=Randomly change wallpaper
-
-[Service]
-Type=oneshot
-ExecStart=%h/.config/waybar/scripts/wallpaper.sh random %h/Pictures/wallpapers
-
-[Install]
-WantedBy=default.target
