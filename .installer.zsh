@@ -5,7 +5,7 @@
 # fzf
 zinit ice wait"0" lucid as"program" from"gh-r" id-as"fzf" \
   atclone"./fzf --zsh > init.zsh" \
-  atclone"mv ./fzf $BPFX/" \
+  atclone"mv ./fzf $BPFX/fzf" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light junegunn/fzf
@@ -207,8 +207,8 @@ zinit light burntSushi/ripgrep
 
 # frp - A fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet
 zinit ice if'(( ! $+commands[frpc] ))' lucid as"command" from"gh-r" id-as"frp" \
-  atclone"mv */frpc $BPFX/" \
-  atclone"mv */frps $BPFX/" \
+  atclone"mv */frpc $BPFX/frpc" \
+  atclone"mv */frps $BPFX/frps" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light fatedier/frp
@@ -329,4 +329,18 @@ zinit ice if'(( ! $+commands[oha] ))' lucid as"program" from"gh-r" id-as"oha" \
   atclone"mv oha-linux-amd64 oha" \
   atpull"%atclone"
 zinit light hatoo/oha
+
+# heynote - A dedicated scratchpad for power users
+zinit ice if'(( ! $+commands[heynote] ))' lucid as"program" from"gh-r" id-as"heynote" \
+  bpick"Heynote_*_x86_64.AppImage" \
+  atclone"mv heynote_*_x86_64.appimage $BPFX/heynote" \
+  atpull"%atclone"
+zinit light heyman/heynote
+
+# yaak - The most intuitive desktop API client
+zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh-r" id-as"yaak" \
+  bpick"yaak_*_amd64.AppImage" \
+  atclone"mv yaak_*_amd64.appimage $BPFX/yaak" \
+  atpull"%atclone"
+zinit light mountain-loop/yaak
 

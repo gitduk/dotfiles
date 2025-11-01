@@ -67,25 +67,33 @@ zbindkey -M viins '^B' fzf-bindkeys-widget
 ###########################
 
 function fzf-services-widget {
-  # Helper function to format services - includes both loaded and unit files
+  # Helper function to format services and timers - includes both loaded and unit files
   function _format_services() {
     local scope="$1"
 
     {
-      # Get all loaded services
-      systemctl $scope list-units --no-pager --type=service --no-legend --all
+      # Get all loaded services and timers
+      systemctl $scope list-units --no-pager --type=service,timer --no-legend --all
 
-      # Get unloaded services (unit files that are not currently loaded)
+      # Get unloaded service files
       systemctl $scope list-unit-files --no-pager --type=service --no-legend | while read -r name state preset; do
         [[ -z "$name" ]] && continue
-        # Only show if not already in the loaded list
-        if ! systemctl $scope list-units --no-pager --type=service --no-legend --all 2>/dev/null | grep -q "^[●○*]\? *$name"; then
+        if ! systemctl $scope list-units --no-pager --type=service,timer --no-legend --all 2>/dev/null | grep -q "^[●○*]\? *$name"; then
+          printf "○ %s not-loaded inactive dead %s\n" "$name" "$state"
+        fi
+      done
+
+      # Get unloaded timer files
+      systemctl $scope list-unit-files --no-pager --type=timer --no-legend | while read -r name state preset; do
+        [[ -z "$name" ]] && continue
+        if ! systemctl $scope list-units --no-pager --type=service,timer --no-legend --all 2>/dev/null | grep -q "^[●○*]\? *$name"; then
           printf "○ %s not-loaded inactive dead %s\n" "$name" "$state"
         fi
       done
     } | while read -r raw; do
       [[ -z "$raw" ]] && continue
 
+      # Determine unit type and status icon
       if [[ "$raw" = ●* ]]; then
         stat="✘"
         read _ name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
@@ -97,64 +105,98 @@ function fzf-services-widget {
         read name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
       fi
 
-      [[ ${#name} -gt 30 ]] && name="${name:0:28}.."
-      printf "%s %-30s %-10s %-10s %-10s %s\n" $stat $name $load $active $run $comment
+      [[ ${#name} -gt 28 ]] && name="${name:0:26}.."
+      printf "%s %-28s %-10s %-10s %-10s %s\n" $stat $name $load $active $run $comment
     done
   }
 
+  # Create temporary scripts for S/U key bindings
+  local tmpdir=$(mktemp -d)
+  local user_script="$tmpdir/user_services.sh"
+  local system_script="$tmpdir/system_services.sh"
+
+  # Create user services reload script
+  cat > "$user_script" << 'EOF'
+#!/bin/bash
+{
+  systemctl --user list-units --no-pager --type=service,timer --no-legend --all
+  systemctl --user list-unit-files --no-pager --type=service --no-legend | while read -r name state preset; do
+    [[ -z "$name" ]] && continue
+    if ! systemctl --user list-units --no-pager --type=service,timer --no-legend --all 2>/dev/null | grep -q "^[●○*]\? *$name"; then
+      printf "○ %s not-loaded inactive dead %s\n" "$name" "$state"
+    fi
+  done
+  systemctl --user list-unit-files --no-pager --type=timer --no-legend | while read -r name state preset; do
+    [[ -z "$name" ]] && continue
+    if ! systemctl --user list-units --no-pager --type=service,timer --no-legend --all 2>/dev/null | grep -q "^[●○*]\? *$name"; then
+      printf "○ %s not-loaded inactive dead %s\n" "$name" "$state"
+    fi
+  done
+} | while read -r raw; do
+  [[ -z "$raw" ]] && continue
+  if [[ "$raw" = ●* ]]; then
+    stat="✘"
+    read _ name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+  elif [[ "$raw" = ○* ]]; then
+    stat="○"
+    read _ name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+  else
+    stat="✔"
+    read name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+  fi
+  [[ ${#name} -gt 28 ]] && name="${name:0:26}.."
+  printf "%s %-28s %-10s %-10s %-10s %s\n" $stat $name $load $active $run $comment
+done
+EOF
+
+  # Create system services reload script
+  cat > "$system_script" << 'EOF'
+#!/bin/bash
+{
+  systemctl --system list-units --no-pager --type=service,timer --no-legend --all
+  systemctl --system list-unit-files --no-pager --type=service --no-legend | while read -r name state preset; do
+    [[ -z "$name" ]] && continue
+    if ! systemctl --system list-units --no-pager --type=service,timer --no-legend --all 2>/dev/null | grep -q "^[●○*]\? *$name"; then
+      printf "○ %s not-loaded inactive dead %s\n" "$name" "$state"
+    fi
+  done
+  systemctl --system list-unit-files --no-pager --type=timer --no-legend | while read -r name state preset; do
+    [[ -z "$name" ]] && continue
+    if ! systemctl --system list-units --no-pager --type=service,timer --no-legend --all 2>/dev/null | grep -q "^[●○*]\? *$name"; then
+      printf "○ %s not-loaded inactive dead %s\n" "$name" "$state"
+    fi
+  done
+} | while read -r raw; do
+  [[ -z "$raw" ]] && continue
+  if [[ "$raw" = ●* ]]; then
+    stat="✘"
+    read _ name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+  elif [[ "$raw" = ○* ]]; then
+    stat="○"
+    read _ name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+  else
+    stat="✔"
+    read name load active run comment <<<"$(echo "$raw" | awk '{print $1, $2, $3, $4, $5}')"
+  fi
+  [[ ${#name} -gt 28 ]] && name="${name:0:26}.."
+  printf "%s %-28s %-10s %-10s %-10s %s\n" $stat $name $load $active $run $comment
+done
+EOF
+
+  chmod +x "$user_script" "$system_script"
+
   selected_service=$(_format_services "--user" | fzf \
     --exact \
-    --header="📊 User Services | S:System U:User Ctrl-R:Refresh" \
-    --preview 'systemctl --user status $(cut -d " " -f2 <<< "{}") 2>/dev/null || echo "Service not available"' \
+    --header="📊 User Services & Timers | S:System U:User Ctrl-R:Refresh" \
+    --preview 'unit_name=$(echo {} | awk "{print \$2}"); systemctl --user status "$unit_name" 2>/dev/null || echo "Unit not available"' \
     --preview-window=up:60%:wrap \
-    --bind="S:reload({
-        systemctl --system list-units --no-pager --type=service --no-legend --all
-        systemctl --system list-unit-files --no-pager --type=service --no-legend | while read -r name state preset; do
-          [[ -z \"\$name\" ]] && continue
-          if ! systemctl --system list-units --no-pager --type=service --no-legend --all 2>/dev/null | grep -q \"^[●○*]\\? *\$name\"; then
-            printf \"○ %s not-loaded inactive dead %s\\n\" \"\$name\" \"\$state\"
-          fi
-        done
-      } | while read -r raw; do
-        [[ -z \"\$raw\" ]] && continue
-        if [[ \"\$raw\" = ●* ]]; then
-          stat=\"✘\"
-          read _ name load active run comment <<<\"\$(echo \"\$raw\" | awk '{print \$1, \$2, \$3, \$4, \$5}')\"
-        elif [[ \"\$raw\" = ○* ]]; then
-          stat=\"○\"
-          read _ name load active run comment <<<\"\$(echo \"\$raw\" | awk '{print \$1, \$2, \$3, \$4, \$5}')\"
-        else
-          stat=\"✔\"
-          read name load active run comment <<<\"\$(echo \"\$raw\" | awk '{print \$1, \$2, \$3, \$4, \$5}')\"
-        fi
-        [[ \${#name} -gt 30 ]] && name=\"\${name:0:28}..\"
-        printf \"%s %-30s %-10s %-10s %-10s %s\\n\" \$stat \$name \$load \$active \$run \$comment
-      done)+change-header(📊 System Services | S:System U:User Ctrl-R:Refresh)+change-preview(systemctl --system status \$(cut -d \" \" -f2 <<< \"{}\") 2>/dev/null || echo \"Service not available\")" \
-    --bind="U:reload({
-        systemctl --user list-units --no-pager --type=service --no-legend --all
-        systemctl --user list-unit-files --no-pager --type=service --no-legend | while read -r name state preset; do
-          [[ -z \"\$name\" ]] && continue
-          if ! systemctl --user list-units --no-pager --type=service --no-legend --all 2>/dev/null | grep -q \"^[●○*]\\? *\$name\"; then
-            printf \"○ %s not-loaded inactive dead %s\\n\" \"\$name\" \"\$state\"
-          fi
-        done
-      } | while read -r raw; do
-        [[ -z \"\$raw\" ]] && continue
-        if [[ \"\$raw\" = ●* ]]; then
-          stat=\"✘\"
-          read _ name load active run comment <<<\"\$(echo \"\$raw\" | awk '{print \$1, \$2, \$3, \$4, \$5}')\"
-        elif [[ \"\$raw\" = ○* ]]; then
-          stat=\"○\"
-          read _ name load active run comment <<<\"\$(echo \"\$raw\" | awk '{print \$1, \$2, \$3, \$4, \$5}')\"
-        else
-          stat=\"✔\"
-          read name load active run comment <<<\"\$(echo \"\$raw\" | awk '{print \$1, \$2, \$3, \$4, \$5}')\"
-        fi
-        [[ \${#name} -gt 30 ]] && name=\"\${name:0:28}..\"
-        printf \"%s %-30s %-10s %-10s %-10s %s\\n\" \$stat \$name \$load \$active \$run \$comment
-      done)+change-header(📊 User Services | S:System U:User Ctrl-R:Refresh)+change-preview(systemctl --user status \$(cut -d \" \" -f2 <<< \"{}\") 2>/dev/null || echo \"Service not available\")" \
+    --bind="S:reload($system_script)+change-header(📊 System Services & Timers | S:System U:User Ctrl-R:Refresh)+change-preview(unit_name=\$(echo {} | awk \"{print \\\$2}\"); systemctl --system status \"\$unit_name\" 2>/dev/null || echo \"Unit not available\")" \
+    --bind="U:reload($user_script)+change-header(📊 User Services & Timers | S:System U:User Ctrl-R:Refresh)+change-preview(unit_name=\$(echo {} | awk \"{print \\\$2}\"); systemctl --user status \"\$unit_name\" 2>/dev/null || echo \"Unit not available\")" \
     --bind="ctrl-r:refresh-preview"
   )
+
+  # Clean up temporary files
+  rm -rf "$tmpdir"
 }
 zbindkey -M viins '^O' fzf-services-widget
 

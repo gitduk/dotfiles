@@ -1,8 +1,7 @@
 [Desktop Entry]
 Name=heynote
 Comment=Heynote is a dedicated scratchpad for developers.
-Exec=heynote
+Exec=heynote --no-sandbox
 Icon=heynote
 Type=Application
 Categories=Utility;
-

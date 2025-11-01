@@ -143,3 +143,10 @@ curl -sSL https://raw.githubusercontent.com/brennercruvinel/CCPlugins/main/insta
 # ipfs
 brew install ipfs
 
+# espanso
+sudo nala update && sudo nala install build-essential git libx11-dev libxtst-dev libxkbcommon-dev libdbus-1-dev libssl-dev libwxgtk3.*-dev
+sudo apt --fix-broken install
+wget https://github.com/espanso/espanso/releases/latest/download/espanso-debian-wayland-amd64.deb -P /tmp/
+sudo dpkg -i /tmp/espanso-debian-wayland-amd64.deb
+sudo setcap "cap_dac_override+p" $(which espanso)
+

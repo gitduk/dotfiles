@@ -290,8 +290,8 @@ zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
     export ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
     export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
     bindkey -M viins '^q' autosuggest-clear
-    bindkey -M viins '^@' autosuggest-execute
-    bindkey -M vicmd '^@' autosuggest-execute
+    bindkey -M viins '^e' autosuggest-execute
+    bindkey -M vicmd '^e' autosuggest-execute
   "
 zinit light zsh-users/zsh-autosuggestions
 

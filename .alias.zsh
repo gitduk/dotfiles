@@ -40,7 +40,7 @@ alias caw="cargo watch -x run"
 alias carm="cargo remove"
 alias cac="cargo clean"
 alias cack="cargo check"
-alias cas="cargo search --registry=crates-io"
+alias cas="cargo sync"
 alias cau="cargo update"
 alias cais="cargo install --locked"
 alias caui="cargo uninstall"
@@ -315,8 +315,6 @@ alias sue="systemctl --user enable"
 alias sud="systemctl --user disable"
 alias sued="systemctl --user edit"
 alias suef="systemctl --user edit --force --full"
-
-alias sl="ss -tnlp"
 
 #########
 ### T ###

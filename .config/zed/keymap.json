@@ -1,5 +1,11 @@
 [
   {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-`": null
+    }
+  },
+  {
     "context": "Editor",
     "bindings": {
       "alt-enter": "editor::OpenExcerpts",
@@ -8,7 +14,7 @@
     }
   },
   {
-    "context": "Editor && vim_mode == insert && !menu",
+    "context": "Editor && vim_mode == insert",
     "bindings": {
       "j k": "vim::NormalBefore",
       "ctrl-h": "editor::Backspace",
@@ -106,6 +112,12 @@
     "bindings": {
       "ctrl-f": "editor::AcceptEditPrediction",
       "alt-l": null
+    }
+  },
+  {
+    "context": "(Editor || Workspace)",
+    "bindings": {
+      "ctrl-space": "terminal_panel::Toggle"
     }
   }
 ]

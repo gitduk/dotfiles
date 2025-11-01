@@ -1,10 +1,10 @@
 % ssh
 @ envs
 
-# local port forwarding: local → remote server 
-ssh -NL <port>:<host>:<port> <host>
+# local → remote server 
+ssh -NL <port>:localhost:<port> <host>
 
-# remote port forwarding: remote server → local
+# remote server → local
 ssh -NR <port>:localhost:<port> <host>
 
 # fix ssh dir permission

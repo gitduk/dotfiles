@@ -73,7 +73,7 @@ podman run -d --name mazanoke \
 
 # attu milvus webui
 podman run -d --name attu \
-  -e MILVUS_URL=<hosts>:19530 \
+  -e MILVUS_URL=<host>:19530 \
   -p 3000:3000 \
   --restart=always \
   zilliz/attu:latest
