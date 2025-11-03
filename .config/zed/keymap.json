@@ -1,11 +1,5 @@
 [
   {
-    "context": "Workspace",
-    "bindings": {
-      "ctrl-`": null
-    }
-  },
-  {
     "context": "Editor",
     "bindings": {
       "alt-enter": "editor::OpenExcerpts",
@@ -28,25 +22,19 @@
     }
   },
   {
-    "context": "Terminal",
+    "context": "Editor && edit_prediction",
     "bindings": {
-      "ctrl-cmd-space": "terminal::ShowCharacterPalette",
-      "cmd-c": "terminal::Copy",
-      "cmd-v": "terminal::Paste",
-      "cmd-k": "terminal::Clear",
-      "cmd-backspace": ["terminal::SendText", "\u0015"],
-      "cmd-right": ["terminal::SendText", "\u0005"],
-      "cmd-left": ["terminal::SendText", "\u0001"],
-      "alt-left": ["terminal::SendText", "\u001bb"],
-      "alt-right": ["terminal::SendText", "\u001bf"],
-      "up": ["terminal::SendKeystroke", "up"],
-      "pageup": ["terminal::SendKeystroke", "pageup"],
-      "down": ["terminal::SendKeystroke", "down"],
-      "pagedown": ["terminal::SendKeystroke", "pagedown"],
-      "escape": ["terminal::SendKeystroke", "escape"],
-      "enter": ["terminal::SendKeystroke", "enter"],
-      "ctrl-c": ["terminal::SendKeystroke", "ctrl-c"],
-      "ctrl-w": ["terminal::SendKeystroke", "ctrl-w"]
+      "ctrl-f": "editor::AcceptEditPrediction",
+      "alt-l": null,
+      "alt-tab": null
+    }
+  },
+  {
+    "context": "Editor && edit_prediction_conflict",
+    "bindings": {
+      "ctrl-f": "editor::AcceptEditPrediction",
+      "alt-l": null,
+      "alt-tab": null
     }
   },
   {
@@ -73,51 +61,83 @@
     }
   },
   {
-    "context": "CollabPanel",
+    "context": "Terminal",
     "bindings": {
-      "ctrl-backspace": "collab_panel::Remove",
-      "space": "menu::Confirm"
+      "ctrl-cmd-space": "terminal::ShowCharacterPalette",
+      "cmd-c": "terminal::Copy",
+      "cmd-v": "terminal::Paste",
+      "cmd-k": "terminal::Clear",
+      "cmd-backspace": ["terminal::SendText", "\u0015"],
+      "cmd-right": ["terminal::SendText", "\u0005"],
+      "cmd-left": ["terminal::SendText", "\u0001"],
+      "alt-left": ["terminal::SendText", "\u001bb"],
+      "alt-right": ["terminal::SendText", "\u001bf"],
+      "up": ["terminal::SendKeystroke", "up"],
+      "pageup": ["terminal::SendKeystroke", "pageup"],
+      "down": ["terminal::SendKeystroke", "down"],
+      "pagedown": ["terminal::SendKeystroke", "pagedown"],
+      "escape": ["terminal::SendKeystroke", "escape"],
+      "enter": ["terminal::SendKeystroke", "enter"],
+      "ctrl-c": ["terminal::SendKeystroke", "ctrl-c"],
+      "ctrl-w": ["terminal::SendKeystroke", "ctrl-w"],
+      "ctrl-j": ["terminal::SendKeystroke", "ctrl-j"]
     }
   },
   {
-    "context": "ChannelModal",
     "bindings": {
-      "tab": "channel_modal::ToggleMode"
-    }
-  },
-  {
-    "context": "ChannelModal > Picker > Editor",
-    "bindings": {
-      "tab": "channel_modal::ToggleMode"
-    }
-  },
-  {
-    "context": "(Editor && edit_prediction)",
-    "bindings": {
-      "ctrl-f": "editor::AcceptEditPrediction",
-      "alt-l": null,
-      "alt-tab": null
-    }
-  },
-  {
-    "context": "(Editor && edit_prediction_conflict)",
-    "bindings": {
-      "ctrl-f": "editor::AcceptEditPrediction",
-      "alt-l": null,
-      "alt-tab": null
-    }
-  },
-  {
-    "context": "((os != macos && Editor) && edit_prediction_conflict)",
-    "bindings": {
-      "ctrl-f": "editor::AcceptEditPrediction",
-      "alt-l": null
-    }
-  },
-  {
-    "context": "(Editor || Workspace)",
-    "bindings": {
-      "ctrl-space": "terminal_panel::Toggle"
+      "ctrl-`": null,
+      "ctrl-k ctrl-t": null,
+      "ctrl-k ctrl-m": null,
+      "ctrl-k ctrl-down": null,
+      "ctrl-k ctrl-left": null,
+      "ctrl-k ctrl-right": null,
+      "ctrl-k ctrl-up": null,
+      "ctrl-k s": null,
+      "ctrl-k shift-down": null,
+      "ctrl-k shift-left": null,
+      "ctrl-k shift-right": null,
+      "ctrl-k shift-up": null,
+      "ctrl-k ctrl-s": null,
+      "ctrl-k m": null,
+      "ctrl-k ctrl-0": null,
+      "ctrl-k ctrl-1": null,
+      "ctrl-k ctrl-2": null,
+      "ctrl-k ctrl-3": null,
+      "ctrl-k ctrl-4": null,
+      "ctrl-k ctrl-5": null,
+      "ctrl-k ctrl-6": null,
+      "ctrl-k ctrl-7": null,
+      "ctrl-k ctrl-8": null,
+      "ctrl-k ctrl-9": null,
+      "ctrl-k ctrl-b": null,
+      "ctrl-k ctrl-[": null,
+      "ctrl-k ctrl-i": null,
+      "ctrl-k r": null,
+      "ctrl-k ctrl-q": null,
+      "ctrl-k q": null,
+      "ctrl-k ctrl-d": null,
+      "ctrl-k ctrl-shift-d": null,
+      "ctrl-k ctrl-l": null,
+      "ctrl-k ctrl-j": null,
+      "ctrl-k ctrl-]": null,
+      "ctrl-k p": null,
+      "ctrl-k l": null,
+      "ctrl-k c": null,
+      "ctrl-k ctrl-z": null,
+      "ctrl-k z": null,
+      "ctrl-k ctrl-r": null,
+      "ctrl-k v": null,
+      "ctrl-k v": null,
+      "ctrl-k w": null,
+      "ctrl-k u": null,
+      "ctrl-k e": null,
+      "ctrl-k t": null,
+      "ctrl-k down": null,
+      "ctrl-k left": null,
+      "ctrl-k right": null,
+      "ctrl-k up": null,
+      "ctrl-k shift-enter": null,
+      "ctrl-k ctrl-w": null
     }
   }
 ]

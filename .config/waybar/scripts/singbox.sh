@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+CONFIG_ROOT="$HOME/.config/sing-box"
+
+# 获取所有 json 配置文件（不含 .json 后缀）
+ls_config() {
+  find "$CONFIG_ROOT" -maxdepth 1 -type f -name "*.json" -exec basename {} \; | sort | sed 's/\.json$//'
+}
+
+# 切换配置
+set_config() {
+  local name="$1"
+  ln -sf "$CONFIG_ROOT/$name.json" "$CONFIG_ROOT/config.json"
+  systemctl --user restart sing-box.service
+}
+
+# 获取当前配置文件名（不含 .json）
+current_config() {
+  basename "$(readlink "$CONFIG_ROOT/config.json")" .json 2>/dev/null
+}
+
+# 切换到下一个/上一个
+switch_config() {
+  local direction="$1"
+  local configs=($(ls_config))
+  local current="$(current_config)"
+  local index=-1
+
+  for i in "${!configs[@]}"; do
+    [[ "${configs[$i]}" == "$current" ]] && index=$i && break
+  done
+
+  [[ $index -eq -1 ]] && index=0
+
+  local total=${#configs[@]}
+  if [[ "$direction" == "next" ]]; then
+    index=$(( (index + 1) % total ))
+  elif [[ "$direction" == "prev" ]]; then
+    index=$(( (index - 1 + total) % total ))
+  fi
+
+  set_config "${configs[$index]}"
+}
+
+# 输出严格 JSON 给 Waybar，tooltip 用 \n 分隔
+output_json() {
+  local current="$(current_config)"
+  # 用 \n 替代真实换行，并转义双引号
+  local tooltip=$(ls_config | sed 's/"/\\"/g' | paste -sd ' ' -)
+  echo "{\"text\":\"$current\",\"tooltip\":\"$tooltip\"}"
+}
+
+main() {
+  case "$1" in
+    --next) switch_config next ;;
+    --prev) switch_config prev ;;
+    *) output_json ;;
+  esac
+}
+
+main "$@"

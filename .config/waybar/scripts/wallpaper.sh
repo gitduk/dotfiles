@@ -208,4 +208,9 @@ main() {
   esac
 }
 
+# waiting hyprpaper loaded
+while ! pgrep -x hyprpaper &>/dev/null; do
+  sleep 0.1
+done
+
 main "$@"

@@ -34,6 +34,7 @@
 
   "modules-right": [
     "hyprland/submap",
+    "custom/singbox",
     "group/connections",
     "custom/separator#dot-line",
     "pulseaudio",

@@ -35,16 +35,10 @@ git clone --depth=1 https://github.com/lbonn/rofi.git /tmp/rofi && cd /tmp/rofi/
 meson setup build --prefix=/usr && ninja -C build && sudo ninja -C build install
 
 # chsrc
-curl -L https://gitee.com/RubyMetric/chsrc/releases/download/pre/chsrc-x64-linux -o ~/.local/bin/chsrc
-chmod +x ~/.local/bin/chsrc
+curl https://chsrc.run/posix | sudo bash
 
 # wallust
 cargo install --locked wallust && wallust theme Tokyo-Night
-
-# Spotube - Spotify music open source client
-sudo nala install -y gir1.2-appindicator3-0.1
-wget "https://github.com/KRTirtho/spotube/releases/download/v3.8.1/Spotube-linux-x86_64.deb"
-sudo dpkg -i ./Spotube-linux-x86_64.deb
 
 # clipboard - wl-clipboard + cliphist
 git clone --depth 1 https://github.com/bugaevc/wl-clipboard.git /tmp/wl-clipboard && cd /tmp/wl-clipboard/
@@ -110,10 +104,6 @@ rm -rf ~/.config/nvim/.git
 # dataflare
 wget "https://assets.dataflare.app/release/linux/x86_64/Dataflare.AppImage" -O ~/.local/bin/dataflare
 chmod +x ~/.local/bin/dataflare
-
-# bruno - Postman and Insomnia alternative
-url="$(curl -Ssl https://api.github.com/repos/usebruno/bruno/releases/latest | jq -r '.assets[]|.browser_download_url' | grep -E '.*amd64.*deb$' | head -n 1)"
-wget $url -O /tmp/bruno.deb && sudo dpkg -i /tmp/bruno.deb
 
 # lynx - Lynx Proxy is a high-performance and flexible proxy tool developed in Rust
 curl --proto '=https' --tlsv1.2 -LsSf https://github.com/suxin2017/lynx-server/releases/latest/download/lynx-cli-installer.sh | sh

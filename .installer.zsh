@@ -74,7 +74,7 @@ zinit light sharkdp/fd
 zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh-r" id-as"bat" \
   bpick"bat_*_amd64.deb" \
   atclone"usr/bin/bat --completion zsh > _bat" \
-  atclone"sudo mv usr/bin/bat /usr/bin" \
+  atclone"sudo mv usr/bin/bat /usr/bin/bat" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light sharkdp/bat
@@ -338,9 +338,10 @@ zinit ice if'(( ! $+commands[heynote] ))' lucid as"program" from"gh-r" id-as"hey
 zinit light heyman/heynote
 
 # yaak - The most intuitive desktop API client
-zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh-r" id-as"yaak" \
-  bpick"yaak_*_amd64.AppImage" \
-  atclone"mv yaak_*_amd64.appimage $BPFX/yaak" \
+zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh" id-as"yaak" \
+  atclone"curl -s https://api.github.com/repos/mountain-loop/yaak/releases/latest | jq -r '.assets[]|.browser_download_url' | grep -w 'deb' | xargs -n 1 wget" \
+  atclone"sudo dpkg -i *.deb" \
+  atclone"rm -rf *.deb" \
   atpull"%atclone"
-zinit light mountain-loop/yaak
+zinit light zdharma-continuum/null
 
