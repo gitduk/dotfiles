@@ -2,6 +2,46 @@
 ### Installer ###
 #################
 
+# uget - download release from repo
+uget() {
+  local repo="$1" pattern="$2" output="${3:-/tmp/$(basename "$1").deb}"
+  local url="https://api.github.com/repos/$repo/releases/latest"
+  local urls=() download_url line
+
+  while IFS= read -r line; do
+    urls+=("$line")
+  done < <(
+    curl -s -H "User-Agent: uget-script" "$url" |
+      jq -r '.assets[]?.browser_download_url' |
+      grep -E "$pattern"
+  )
+
+  if [[ ${#urls[@]} -eq 0 ]]; then
+    echo "$repo: No file found for pattern: $pattern" >&2
+    return 1
+  fi
+
+  if [[ ${#urls[@]} -gt 1 ]]; then
+    if command -v fzf >/dev/null 2>&1; then
+      download_url=$(printf '%s\n' "${urls[@]}" | fzf --header="Select a file to download" --preview="")
+    else
+      echo "Multiple matches found:"
+      select download_url in "${urls[@]}"; do
+        [ -n "$download_url" ] && break
+      done
+    fi
+  else
+    download_url="${urls[0]}${urls[1]}"
+  fi
+
+  [[ -z "$download_url" ]] && {
+    echo "$repo: No selection made."
+    return 1
+  }
+
+  wget -q --show-progress "$download_url" -O "$output"
+}
+
 # fzf
 zinit ice wait"0" lucid as"program" from"gh-r" id-as"fzf" \
   atclone"./fzf --zsh > init.zsh" \
@@ -64,20 +104,19 @@ zinit light alacritty/alacritty
 
 # fd
 zinit ice if'(( ! $+commands[fd] ))' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"sudo mv */fd /usr/bin" \
+  atclone"sudo mv */fd /usr/bin/fd" \
   atclone"mv */autocomplete/_fd ." \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light sharkdp/fd
 
 # bat
-zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh-r" id-as"bat" \
-  bpick"bat_*_amd64.deb" \
-  atclone"usr/bin/bat --completion zsh > _bat" \
-  atclone"sudo mv usr/bin/bat /usr/bin/bat" \
-  atclone"rm -rf */" \
+zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh" id-as"bat" \
+  atclone"uget sharkdp/bat bat_.\*_amd64.deb" \
+  atclone"sudo dpkg -i /tmp/bat.deb" \
+  atclone"bat --completion zsh > _bat" \
   atpull"%atclone"
-zinit light sharkdp/bat
+zinit light zdharma-continuum/null
 
 # nvim
 zinit ice if'(( ! $+commands[nvim] ))' lucid as"program" from"gh-r" id-as"nvim" \
@@ -275,13 +314,11 @@ zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
 zinit light zdharma-continuum/null
 
 # fastfetch
-zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh-r" id-as"fastfetch" \
-  bpick"fastfetch-linux-amd64.deb" \
-  atclone"mv usr/bin/* ." \
-  atclone"mv usr/share/zsh/*/* ." \
-  atclone"rm -rf */" \
+zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh" id-as"fastfetch" \
+  atclone"uget fastfetch-cli/fastfetch amd64.deb" \
+  atclone"sudo dpkg -i /tmp/fastfetch.deb" \
   atpull"%atclone"
-zinit light fastfetch-cli/fastfetch
+zinit light zdharma-continuum/null
 
 # gonzo
 zinit ice if'(( ! $+commands[gonzo] ))' lucid as"program" id-as"gonzo" \
@@ -296,13 +333,11 @@ zinit ice if'(( ! $+commands[xh] ))' lucid as"program" id-as"xh" \
 zinit light zdharma-continuum/null
 
 # tw - view and query tabular data files, such as CSV, TSV, and parquet
-zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh-r" id-as"tw" \
-  bpick"tabiew-x86_64-unknown-linux-gnu.deb" \
-  atclone"mv usr/bin/* ." \
-  atclone"mv usr/share/zsh/*/* ." \
-  atclone"rm -rf */" \
+zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh" id-as"tw" \
+  atclone"uget shshemi/tabiew tabiew-x86_64-unknown-linux-gnu.deb" \
+  atclone"sudo dpkg -i /tmp/tabiew.deb" \
   atpull"%atclone"
-zinit light shshemi/tabiew
+zinit light zdharma-continuum/null
 
 # nping
 zinit ice if'(( ! $+commands[nping] ))' lucid as"program" from"gh-r" id-as"nping" \
@@ -339,9 +374,8 @@ zinit light heyman/heynote
 
 # yaak - The most intuitive desktop API client
 zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh" id-as"yaak" \
-  atclone"curl -s https://api.github.com/repos/mountain-loop/yaak/releases/latest | jq -r '.assets[]|.browser_download_url' | grep -w 'deb' | xargs -n 1 wget" \
-  atclone"sudo dpkg -i *.deb" \
-  atclone"rm -rf *.deb" \
+  atclone"uget mountain-loop/yaak deb" \
+  atclone"sudo dpkg -i /tmp/yaak.deb" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 

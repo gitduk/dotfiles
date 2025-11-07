@@ -3,8 +3,8 @@
     "context": "Editor",
     "bindings": {
       "alt-enter": "editor::OpenExcerpts",
-      "cmd-f8": "editor::GoToHunk",
-      "ctrl-enter": "assistant::InlineAssist"
+      "ctrl-enter": "assistant::InlineAssist",
+      "ctrl-space": "terminal_panel::Toggle"
     }
   },
   {
@@ -38,21 +38,10 @@
     }
   },
   {
-    "context": "ProjectSearchBar",
-    "bindings": {
-      "cmd-enter": "project_search::SearchInNew"
-    }
-  },
-  {
     "context": "ProjectPanel",
     "bindings": {
       "left": "project_panel::CollapseSelectedEntry",
       "right": "project_panel::ExpandSelectedEntry",
-      "cmd-n": "project_panel::NewFile",
-      "alt-cmd-n": "project_panel::NewDirectory",
-      "cmd-x": "project_panel::Cut",
-      "cmd-c": "project_panel::Copy",
-      "cmd-v": "project_panel::Paste",
       "f2": "project_panel::Rename",
       "enter": "project_panel::Rename",
       "space": "project_panel::Open",
@@ -63,13 +52,7 @@
   {
     "context": "Terminal",
     "bindings": {
-      "ctrl-cmd-space": "terminal::ShowCharacterPalette",
-      "cmd-c": "terminal::Copy",
-      "cmd-v": "terminal::Paste",
-      "cmd-k": "terminal::Clear",
-      "cmd-backspace": ["terminal::SendText", "\u0015"],
-      "cmd-right": ["terminal::SendText", "\u0005"],
-      "cmd-left": ["terminal::SendText", "\u0001"],
+      "ctrl-space": "terminal_panel::Toggle",
       "alt-left": ["terminal::SendText", "\u001bb"],
       "alt-right": ["terminal::SendText", "\u001bf"],
       "up": ["terminal::SendKeystroke", "up"],
@@ -126,7 +109,6 @@
       "ctrl-k ctrl-z": null,
       "ctrl-k z": null,
       "ctrl-k ctrl-r": null,
-      "ctrl-k v": null,
       "ctrl-k v": null,
       "ctrl-k w": null,
       "ctrl-k u": null,

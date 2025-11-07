@@ -45,8 +45,10 @@ switch_config() {
 # 输出严格 JSON 给 Waybar，tooltip 用 \n 分隔
 output_json() {
   local current="$(current_config)"
-  # 用 \n 替代真实换行，并转义双引号
   local tooltip=$(ls_config | sed 's/"/\\"/g' | paste -sd ' ' -)
+  if ! pidof -q sing-box; then
+    current="﹗${current}"
+  fi
   echo "{\"text\":\"$current\",\"tooltip\":\"$tooltip\"}"
 }
 

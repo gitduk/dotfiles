@@ -252,6 +252,7 @@ alias ps="procs"
 
 alias pd="podman"
 alias pdc="podman container"
+alias pdls="podman container ls"
 alias pdr="podman run"
 alias pds="podman start"
 alias pdst="podman stop"

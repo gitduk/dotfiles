@@ -311,6 +311,11 @@ zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
   "
 zinit light zsh-users/zsh-history-substring-search
 
+# zsh-completions
+zinit ice wait"2" blockf lucid id-as"zsh-completions" \
+  atpull"zinit creinstall -q ."
+zinit light zsh-users/zsh-completions
+
 # Aloxaf/fzf-tab
 zinit ice wait"1" lucid id-as"fzf-tab" \
   atload"

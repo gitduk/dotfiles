@@ -17,7 +17,7 @@ declare -A CONFIG=(
   [curl_timeout]=10
   [token_expire_hours]=24
   [max_content_length]=50
-  [min_request_interval]=10
+  [min_request_interval]=3
   [retry_delay]=3600
   [max_history_size]=100
 )
@@ -266,6 +266,7 @@ format_output() {
     author=$(jq -r '.data.origin.author // ""' <<<"$json_data")
     title=$(jq -r '.data.origin.title // ""' <<<"$json_data")
     dynasty=$(jq -r '.data.origin.dynasty // ""' <<<"$json_data")
+    ipaddress=$(jq -r '.ipAddress // "127.0.0.1"' <<<"$json_data")
     warning=$(jq -r '.warning // ""' <<<"$json_data")
     full=$(jq -r '.data.origin.content // [] | if type=="array" then join("\n") else . end' <<<"$json_data")
   else
@@ -288,7 +289,8 @@ format_output() {
     [[ -n "$full" ]] && tooltip="$tooltip"$'\n\n'"$full"
     [[ "$content" != "$display_text" ]] && tooltip="$tooltip"$'\n\n'"$content"
     [[ -n "$warning" ]] && tooltip="$tooltip"$'\n\n'" $warning"
-    tooltip="$tooltip"$'\n\n'" 更新于 $(date '+%H:%M:%S')"
+    [[ -n "$ipaddress" ]] && ipaddress="- $ipaddress"
+    tooltip="$tooltip"$'\n\n'" 更新于 $(date '+%H:%M:%S') $ipaddress"
   else
     tooltip="❌ 获取诗词失败 |  $(date '+%H:%M:%S')"
     display_text="❌ 获取失败"
