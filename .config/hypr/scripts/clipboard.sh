@@ -5,6 +5,7 @@ selection=$(cliphist list \
   | fzf --no-sort \
     --bind "D:execute-silent(echo {+} | cliphist delete)+reload(cliphist list)" \
     --bind "C:execute-silent(cliphist wipe)+reload(cliphist list)" \
+    --prompt "󱘟 " \
     --print-query \
     --expect=ctrl-y)
 

@@ -3,9 +3,10 @@ default:
 
 update url:
   wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O config.json
+  systemctl --user restart sing-box.service
 
-add url name:
-  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O {{name}}
+add name url:
+  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O {{name}}.json
 
 use name:
   ln -sf {{name}}.json config.json

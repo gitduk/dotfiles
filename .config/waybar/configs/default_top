@@ -34,8 +34,8 @@
 
   "modules-right": [
     "hyprland/submap",
-    "custom/singbox",
     "network#speed",
+    "custom/singbox",
     "custom/separator#dot-line",
     "pulseaudio",
     "custom/separator#dot-line",

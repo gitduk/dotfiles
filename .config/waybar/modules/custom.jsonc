@@ -146,7 +146,7 @@
   "custom/singbox": {
     "exec": "~/.config/waybar/scripts/singbox.sh",
     "return-type": "json",
-    "format": "▣ {}",
+    "format": "{}",
     "interval": 1,
     "tooltip": true,
     "on-click": "~/.config/waybar/scripts/singbox.sh --next",
