@@ -146,10 +146,18 @@
   "custom/singbox": {
     "exec": "~/.config/waybar/scripts/singbox.sh",
     "return-type": "json",
-    "format": "{}",
+    "format": "{} ",
     "interval": 1,
     "tooltip": true,
-    "on-click": "~/.config/waybar/scripts/singbox.sh --next",
-    "on-click-right": "~/.config/waybar/scripts/singbox.sh --prev"
+    "on-click": "systemctl --user restart sing-box.service",
+    "on-click-right": "systemctl --user stop sing-box.service",
+    "on-scroll-down": "~/.config/waybar/scripts/singbox.sh --next",
+    "on-scroll-up": "~/.config/waybar/scripts/singbox.sh --prev"
+  },
+  "custom/breath": {
+    "exec": "~/.config/waybar/scripts/breath.sh",
+    "format": "{}",
+    "interval": 1,
+    "tooltip": false
   }
 }

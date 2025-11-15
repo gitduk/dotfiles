@@ -134,6 +134,8 @@ alias f="fzf"
 
 alias ff="fastfetch"
 
+alias fn="fnm"
+
 #########
 ### G ###
 #########
@@ -295,6 +297,7 @@ alias rcl="redis-cli"
 #########
 
 alias sr="sttr"
+alias sas="source ~/.alias.zsh"
 
 alias sc="source"
 alias denv="deactivate"

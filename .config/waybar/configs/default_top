@@ -25,6 +25,7 @@
   ],
 
   "modules-center": [
+    "custom/breath",
     "idle_inhibitor",
     "custom/separator#dot-line",
     "clock",
