@@ -274,7 +274,7 @@
     "format-disconnected": "󰣻",
     "tooltip-format": "{ipaddr}",
     "format-linked": "󰈁 {ifname} (No IP)",
-    "tooltip-format-wifi": "{icon} {signalStrength}% {essid} \t{ipaddr} \nnGateway {gwaddr}",
+    "tooltip-format-wifi": "{icon} {signalStrength}% {essid} \n\nIP {ipaddr} \nGateway {gwaddr}",
     "tooltip-format-ethernet": "{ifname} {ipaddr} \nGateway {gwaddr}",
     "tooltip-format-disconnected": "Disconnected",
     "max-length": 20,

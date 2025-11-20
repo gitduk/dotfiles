@@ -2,11 +2,11 @@ default:
   sing-box run -c ./config.json
 
 update url:
-  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O config.json
+  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json" -O config.json
   systemctl --user restart sing-box.service
 
 add name url:
-  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json?token=changeme" -O {{name}}.json
+  wget "https://subc.wukaige.com/config/{{url}}&file=https://raw.wukaige.com/sing-box/config.json" -O {{name}}.json
 
 use name:
   ln -sf {{name}}.json config.json

@@ -47,9 +47,9 @@ output_json() {
   local current="$(current_config)"
   local tooltip=$(ls_config | sed 's/"/\\"/g' | paste -sd ' ' -)
   if pidof -q sing-box; then
-    current="󰗹 ${current}"
+    current="󰮤 ${current}"
   else
-    current="󰁵 ${current}"
+    current=" ${current}"
   fi
   echo "{\"text\":\"$current\",\"tooltip\":\"$tooltip\"}"
 }

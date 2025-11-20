@@ -10,7 +10,7 @@ frames=(
   "󰪞 |INHALE"
   "󰪠 |INHALE"
   "󰪢 |INHALE"
-  "󰪤 |INHALE"
+  "󰪥 |INHALE"
 
   # --- Hold 7s (4~10)
   "󰪥 |HOLDON"
