@@ -140,3 +140,11 @@ wget https://github.com/espanso/espanso/releases/latest/download/espanso-debian-
 sudo dpkg -i /tmp/espanso-debian-wayland-amd64.deb
 sudo setcap "cap_dac_override+p" $(which espanso)
 
+# nvidia-smi
+sudo nala remove -y --purge nvidia-*
+sudo nala update && sudo nala upgrade -y
+sudo nala install -y build-essential linux-headers-$(uname -r)
+sudo add-apt-repository ppa:graphics-drivers/ppa -y
+sudo nala update
+sudo nala install -y $(ubuntu-drivers devices 2>/dev/null | awk '/recommended/{print $3}')
+
