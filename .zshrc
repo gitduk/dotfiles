@@ -43,7 +43,7 @@ setopt PATH_DIRS # 输入目录中的命令名会自动搜索 PATH 中的目录
 
 # Safety and error handling
 setopt NO_CASE_GLOB # 文件名匹配大小写敏感（你设置的是“关闭大小写敏感”）
-setopt NONOMATCH    # 如果通配符找不到匹配项，不报错（而是原样输出）
+setopt NO_NOMATCH    # 如果通配符找不到匹配项，不报错（而是原样输出）
 
 # xhost access control
 xhost +local: &>/dev/null
@@ -273,7 +273,7 @@ zinit ice wait"0" lucid as"program" id-as"autoload" \
     for script (~/.zsh.d/*.zsh(N)) source $script
     [[ -f ~/.env.zsh ]] && source ~/.env.zsh || touch ~/.env.zsh
     [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh || touch ~/.alias.zsh
-    [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh || touch ~/.alias.zsh
+    [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh || touch ~/.alias.custom.zsh
     [[ -f ~/.installer.zsh ]] && source ~/.installer.zsh || touch ~/.installer.zsh
   '
 zinit light zdharma-continuum/null
