@@ -8,7 +8,12 @@ ChatGPT|https://chatgpt.com
 Claude|https://claude.ai
 EOF
 fi
+
 SITES=($(cat $HOME/.sites.txt))
+
+# Configuration
+MAX_RETRIES=3
+TIMEOUT=3
 
 # Temp dir for parallel results
 TMP_DIR=$(mktemp -d)
@@ -19,26 +24,45 @@ check_site() {
   local name=$2
   local url=$3
   
-  # Check latency
-  # --max-time 3: Total operation timeout in seconds
-  # -o /dev/null: Discard body
-  # -s: Silent mode
-  # -w: Custom output format (status code and total time)
-  # -L: Follow redirects (optional, remove if you want to catch 302 as failure)
-  local response
-  response=$(curl -o /dev/null -s -w '%{time_total}' --max-time 3 "$url")
-  local exit_code=$?
+  local attempt=1
+  local success=false
+  local response=""
+  local exit_code=0
   
-  if [ $exit_code -eq 0 ]; then
-    # Parse response
-    local ms=$(echo "$response" | awk '{printf "%.0f", $1 * 1000}')
-    echo -n "${ms}ms" > "$TMP_DIR/$index.out"
-    printf "%-8s: %s" "$name" "${ms}ms" > "$TMP_DIR/$index.tip"
-    echo "up" > "$TMP_DIR/$index.status"
-  else
-    # curl command failed (timeout, connection error, etc.)
+  # Retry loop
+  while [ $attempt -le $MAX_RETRIES ]; do
+    # Check latency with curl
+    response=$(curl -o /dev/null -s -w '%{time_total}' --max-time $TIMEOUT "$url" 2>/dev/null)
+    exit_code=$?
+    
+    if [ $exit_code -eq 0 ]; then
+      # Success - calculate milliseconds
+      local ms=$(echo "$response" | awk '{printf "%.0f", $1 * 1000}')
+      
+      # Save results
+      echo -n "${ms}ms" > "$TMP_DIR/$index.out"
+      if [ $attempt -gt 1 ]; then
+        printf "%-8s: %s (attempt %d/%d)" "$name" "${ms}ms" "$attempt" "$MAX_RETRIES" > "$TMP_DIR/$index.tip"
+      else
+        printf "%-8s: %s" "$name" "${ms}ms" > "$TMP_DIR/$index.tip"
+      fi
+      echo "up" > "$TMP_DIR/$index.status"
+      success=true
+      break
+    else
+      # Failed - check if we should retry
+      if [ $attempt -lt $MAX_RETRIES ]; then
+        # Wait a bit before retrying (exponential backoff)
+        sleep $(echo "0.5 * $attempt" | bc 2>/dev/null || echo "0.5")
+      fi
+      ((attempt++))
+    fi
+  done
+  
+  # All retries failed
+  if [ "$success" = false ]; then
     echo -n "-1ms" > "$TMP_DIR/$index.out"
-    printf "%-8s: %s" "$name" "-1ms" > "$TMP_DIR/$index.tip"
+    printf "%-8s: %s (failed after %d attempts)" "$name" "DOWN" "$MAX_RETRIES" > "$TMP_DIR/$index.tip"
     echo "down" > "$TMP_DIR/$index.status"
   fi
 }
@@ -61,9 +85,8 @@ UP_COUNT=0
 TOTAL_COUNT=${#SITES[@]}
 
 for i in "${!SITES[@]}"; do
-  # Append tooltip with JSON-safe newline
+  # Append tooltip
   if [ -f "$TMP_DIR/$i.tip" ]; then
-    # Add separator if not empty
     [ -n "$TOOLTIP_TEXT" ] && TOOLTIP_TEXT+="\r" 
     TOOLTIP_TEXT+="$(cat "$TMP_DIR/$i.tip")"
   fi
@@ -89,5 +112,7 @@ if [ "$ALL_UP" = false ]; then
 fi
 
 # Output JSON for Waybar
-printf '{"text": "󰭩 %s", "tooltip": "%s", "class": "%s"}\n' "$OUTPUT_TEXT$1" "$TOOLTIP_TEXT\n\nUpdate Time: $(date +%T)" "$CLASS"
-
+printf '{"text": "󰭩 %s", "tooltip": "%s", "class": "%s"}\n' \
+  "$OUTPUT_TEXT$1" \
+  "$TOOLTIP_TEXT\r\rUpdate Time: $(date +%T)" \
+  "$CLASS"

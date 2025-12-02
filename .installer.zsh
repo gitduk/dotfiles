@@ -2,95 +2,6 @@
 ### Installer ###
 #################
 
-# uget - download release from repo
-uget() {
-  local repo="$1" pattern="$2" output="${3:-/tmp/$(basename "$1").deb}"
-  local url="https://api.github.com/repos/$repo/releases/latest"
-  local urls=() download_url line
-
-  while IFS= read -r line; do
-    urls+=("$line")
-  done < <(
-    curl -s -H "User-Agent: uget-script" "$url" |
-      jq -r '.assets[]?.browser_download_url' |
-      grep -E "$pattern"
-  )
-
-  if [[ ${#urls[@]} -eq 0 ]]; then
-    echo "$repo: No file found for pattern: $pattern" >&2
-    return 1
-  fi
-
-  if [[ ${#urls[@]} -gt 1 ]]; then
-    if command -v fzf >/dev/null 2>&1; then
-      download_url=$(printf '%s\n' "${urls[@]}" | fzf --header="Select a file to download" --preview="")
-    else
-      echo "Multiple matches found:"
-      select download_url in "${urls[@]}"; do
-        [ -n "$download_url" ] && break
-      done
-    fi
-  else
-    download_url="${urls[0]}${urls[1]}"
-  fi
-
-  [[ -z "$download_url" ]] && {
-    echo "$repo: No selection made."
-    return 1
-  }
-
-  wget -q --show-progress "$download_url" -O "$output"
-}
-
-# fzf
-zinit ice wait"0" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh" \
-  atclone"mv ./fzf $BPFX/fzf" \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light junegunn/fzf
-
-# navi
-zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
-  atload'
-    export NAVI_PATH="$HOME/.config/navi/cheats"
-    export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
-    [[ ! -d "$NAVI_PATH" ]] && mkdir -p $NAVI_PATH
-    [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
-    eval "$(navi widget zsh)"
-    bindkey "^N" _navi_widget
-    '
-zinit light denisidoro/navi
-
-# fnm - node version manager
-zinit ice wait"1" lucid as"program" id-as"fnm" \
-  atclone"
-    curl -fsSL https://fnm.vercel.app/install | bash
-    ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
-    ~/.local/share/fnm/fnm completions --shell zsh > _fnm
-    ln -fs ~/.local/share/fnm/fnm $BPFX/fnm
-    " \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light zdharma-continuum/null
-
-# bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
-  bpick"bun-linux-x64.zip" \
-  atclone"sudo mv */bun /usr/bin" \
-  atclone"SHELL=zsh bun completions > _bun" \
-  atclone"rm -rf */" \
-  atpull"%atclone" \
-  atload'
-    export PATH="$HOME/.cache/.bun/bin:$PATH"
-  '
-zinit light oven-sh/bun
-
-# zsh-completions
-zinit ice wait"2" blockf lucid id-as"zsh-completions" \
-  atpull"zinit creinstall -q ."
-zinit light zsh-users/zsh-completions
-
 # alacritty
 zinit ice if'[[ -n $DISPLAY ]]' lucid as"program" id-as"alacritty" \
   atclone'export PATH="$HOME/.cargo/bin:$PATH"' \
@@ -102,38 +13,6 @@ zinit ice if'[[ -n $DISPLAY ]]' lucid as"program" id-as"alacritty" \
   atpull"%atclone"
 zinit light alacritty/alacritty
 
-# fd
-zinit ice if'(( ! $+commands[fd] ))' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"sudo mv */fd /usr/bin/fd" \
-  atclone"mv */autocomplete/_fd ." \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light sharkdp/fd
-
-# bat
-zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh" id-as"bat" \
-  atclone"uget sharkdp/bat bat_.\*_amd64.deb" \
-  atclone"sudo dpkg -i /tmp/bat.deb" \
-  atclone"bat --completion zsh > _bat" \
-  atpull"%atclone"
-zinit light zdharma-continuum/null
-
-# nvim
-zinit ice if'(( ! $+commands[nvim] ))' lucid as"program" from"gh-r" id-as"nvim" \
-  bpick"nvim-linux-x86_64.appimage" \
-  atclone"sudo mv nvim-linux-x86_64.appimage /usr/bin/nvim" \
-  atpull"%atclone"
-zinit light neovim/neovim
-
-# hx
-zinit ice if'(( ! $+commands[hx] ))' lucid as"program" from"gh-r" id-as"hx" \
-  atclone"sudo mv */hx /usr/bin" \
-  atclone"mv */runtime ~/.config/helix/" \
-  atclone"mv */contrib/completion/hx.zsh _hx" \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light helix-editor/helix
-
 # sing-box
 zinit ice if'(( ! $+commands[sing-box] ))' lucid as"program" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" \
@@ -142,45 +21,6 @@ zinit ice if'(( ! $+commands[sing-box] ))' lucid as"program" from"gh-r" id-as"si
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
-
-# atuin
-zinit ice wait"0" lucid as"command" from"gh-r" id-as"atuin" \
-  bpick"atuin-*.tar.gz" \
-  atclone"mv */atuin atuin" \
-  atclone"./atuin init zsh > init.zsh" \
-  atclone"./atuin gen-completions --shell zsh > _atuin" \
-  atclone"rm -rf */" \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light atuinsh/atuin
-
-# zoxide
-zinit ice wait"1" lucid as"command" from"gh-r" id-as"zoxide" \
-  atclone"./zoxide init zsh --cmd j > init.zsh" \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light ajeetdsouza/zoxide
-
-# direnv
-zinit ice wait"1" lucid as"command" from"gh-r" id-as"direnv" \
-  atclone"mv direnv* direnv" \
-  atclone"./direnv hook zsh > init.zsh" \
-  atpull"%atclone" \
-  src"init.zsh"
-zinit light direnv/direnv
-
-# just
-zinit ice if'(( ! $+commands[just] ))' lucid as"command" from"gh-r" id-as"just" \
-  atclone'./just --completions zsh > _just' \
-  atpull"%atclone"
-zinit light casey/just
-
-# delta - A syntax-highlighting pager for git, diff, and grep output
-zinit ice if'(( ! $+commands[delta] ))' lucid as"command" from"gh-r" id-as"delta" \
-  atclone"mv */delta ." \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light dandavison/delta
 
 # curlie
 zinit ice if'(( ! $+commands[curlie] ))' lucid as"command" from"gh-r" id-as"curlie"
@@ -194,19 +34,6 @@ zinit ice if'(( ! $+commands[hurl] ))' lucid as"command" from"gh-r" id-as"hurl" 
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light Orange-OpenSource/hurl
-
-# dust
-zinit ice if'(( ! $+commands[dust] ))' lucid as"command" from"gh-r" id-as"dust" \
-  atclone"sudo mv */dust /usr/bin" \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light bootandy/dust
-
-# eza - eza is a modern replacement for ls
-zinit ice if'(( ! $+commands[eza] ))' lucid as"command" from"gh-r" id-as"eza" \
-  atclone"sudo mv eza /usr/bin" \
-  atpull"%atclone"
-zinit light eza-community/eza
 
 # fx - Command-line tool and terminal JSON viewer
 zinit ice if'(( ! $+commands[fx] ))' lucid as"command" from"gh-r" id-as"fx" \
@@ -244,14 +71,6 @@ zinit ice if'(( ! $+commands[rg] ))' lucid as"command" from"gh-r" id-as"rg" \
   atpull"%atclone"
 zinit light burntSushi/ripgrep
 
-# frp - A fast reverse proxy to help you expose a local server behind a NAT or firewall to the internet
-zinit ice if'(( ! $+commands[frpc] ))' lucid as"command" from"gh-r" id-as"frp" \
-  atclone"mv */frpc $BPFX/frpc" \
-  atclone"mv */frps $BPFX/frps" \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light fatedier/frp
-
 # yazi - file browser
 zinit ice if'(( ! $+commands[yazi] ))' lucid as"command" from"gh-r" id-as"yazi" \
   bpick"yazi-x86_64-unknown-linux-musl.zip" \
@@ -261,14 +80,6 @@ zinit ice if'(( ! $+commands[yazi] ))' lucid as"command" from"gh-r" id-as"yazi" 
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light sxyazi/yazi
-
-# uv - python package manager
-zinit ice if'(( ! $+commands[uv] ))' lucid as"command" from"gh-r" id-as"uv" \
-  atclone"mv */* . && ./uv generate-shell-completion zsh > _uv" \
-  atclone"rm -rf */" \
-  atclone"sudo mv uv* /usr/bin" \
-  atpull"%atclone"
-zinit light astral-sh/uv
 
 # fscan
 zinit ice if'(( ! $+commands[fscan] ))' lucid as"command" from"gh-r" id-as"fscan" \
@@ -295,12 +106,6 @@ zinit ice if'[[ -n $DISPLAY ]]' lucid as"command" from"gh-r" id-as"rain" \
   atpull"%atclone"
 zinit light achristmascarl/rainfrog
 
-# easytier
-zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-as"easytier" \
-  atclone"mv */* . && rm -rf */ && sudo mv * /usr/bin" \
-  atpull"%atclone"
-zinit light EasyTier/EasyTier
-
 # codex
 zinit ice if'(( ! $+commands[codex] ))' lucid as"program" id-as"codex" \
   atclone"bun install -g @openai/codex" \
@@ -313,14 +118,7 @@ zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# fastfetch
-zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh" id-as"fastfetch" \
-  atclone"uget fastfetch-cli/fastfetch amd64.deb" \
-  atclone"sudo dpkg -i /tmp/fastfetch.deb" \
-  atpull"%atclone"
-zinit light zdharma-continuum/null
-
-# gonzo
+# gonzo - The Go based TUI for log analysis
 zinit ice if'(( ! $+commands[gonzo] ))' lucid as"program" id-as"gonzo" \
   atclone"/usr/local/go/bin/go install github.com/control-theory/gonzo/cmd/gonzo@latest" \
   atpull"%atclone"
@@ -378,4 +176,8 @@ zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh" id-as"yaak" \
   atclone"sudo dpkg -i /tmp/yaak.deb" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
+
+# xan - The CSV magician
+zinit ice if'(( ! $+commands[xan] ))' lucid as"program" from"gh-r" id-as"xan"
+zinit light medialab/xan
 

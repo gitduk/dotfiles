@@ -14,33 +14,29 @@ print_error()  { echo -e "${RED}[ERROR]${NC} $1"; }
 print_warning(){ echo -e "${YELLOW}[WARNING]${NC} $1"; }
 
 REMOTE_HOST=""
-SSH_PORT="22"
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -h|--help) usage; exit 0 ;;
-    -p|--port) SSH_PORT="$2"; shift 2 ;;
+    -h|--help) usage; return 0 ;;
     -c|--config) CONFIG_FILE="$2"; shift 2 ;;
     -n|--dry-run) DRY_RUN=true; shift ;;
-    *) [[ -z "$REMOTE_HOST" ]] && REMOTE_HOST="$1" || { print_error "多余参数"; exit 1; }; shift ;;
+    *) [[ -z "$REMOTE_HOST" ]] && REMOTE_HOST="$1" || { print_error "多余参数"; return 1; }; shift ;;
   esac
 done
 
-[[ -z "$REMOTE_HOST" ]] && print_error "缺少远程主机" && exit 1
-[[ ! -f "$CONFIG_FILE" ]] && print_error "配置文件不存在" && exit 1
+[[ -z "$REMOTE_HOST" ]] && print_error "缺少远程主机" && return 1
+[[ ! -f "$CONFIG_FILE" ]] && print_error "配置文件不存在" && return 1
 
 SUCCESS=0
 FAIL=0
 SKIP=0
 
-print_info "开始同步配置文件到 $REMOTE_HOST ..."
+print_info "开始同步文件到 $REMOTE_HOST ..."
 echo "----------------------------------------"
 
-while IFS= read -r raw || [[ -n "$raw" ]]; do
+while IFS= read -r raw; do
   [[ -z "$raw" || "$raw" =~ ^[[:space:]]*# ]] && continue
-
-  print_info "处理: $raw"
 
   # 展开 ~
   pattern="${raw/#\~/$HOME}"
@@ -49,53 +45,44 @@ while IFS= read -r raw || [[ -n "$raw" ]]; do
   dir=$(dirname "$pattern")
   base=$(basename "$pattern")
 
-  # 使用 find 查找匹配
-  matches=()
-  while IFS= read -r f; do
-    matches+=("$f")
-  done < <(find "$dir" -maxdepth 1 -name "$base" 2>/dev/null)
+  if [[ $raw = *\** ]]; then
+    find "$dir" -maxdepth 1 -name "$base" 2>/dev/null
+  else
+    echo $pattern
+  fi
 
-  if [ ${#matches[@]} -eq 0 ]; then
-    print_warning "无匹配项: $raw"
-    ((SKIP++))
+done < "$CONFIG_FILE" | while read -r f; do
+  if [[ "$f" == "$HOME"* ]]; then
+    rel="${f#$HOME/}"
+    dest="~/$rel"
+  else
+    dest="$f"
+  fi
+
+  print_info "同步: $f → $REMOTE_HOST:$dest"
+  
+  if $DRY_RUN; then
+    echo "[模拟] scp -r $f $REMOTE_HOST:$dest"
+    ((SUCCESS++))
     continue
   fi
 
-  # 循环同步
-  for f in "${matches[@]}"; do
-    if [[ "$f" == "$HOME"* ]]; then
-      rel="${f#$HOME/}"
-      dest="~/$rel"
-    else
-      dest="$f"
-    fi
+  remote_parent=$(dirname "$dest")
+  if [[ ! "$remote_parent" = "~" ]]; then
+    ssh "$REMOTE_HOST" "mkdir -p $remote_parent" </dev/null
+  fi
 
-    print_info "同步: $f → $REMOTE_HOST:$dest"
+  if scp -r "$f" "$REMOTE_HOST:$remote_parent"; then
+    ((SUCCESS++))
+  else
+    print_error "同步失败: $f"
+    ((FAIL++))
+  fi
+  
+  echo ""
 
-    if $DRY_RUN; then
-      echo "[模拟] scp -P $SSH_PORT -r \"$f\" \"$REMOTE_HOST:$dest\""
-      ((SUCCESS++))
-      continue
-    fi
-
-    # 目录 → 创建父目录
-    if [[ -d "$f" ]]; then
-      parent="${dest%/*}"
-      ssh -p "$SSH_PORT" "$REMOTE_HOST" "mkdir -p \"$parent\"" 2>/dev/null
-    fi
-
-    if scp -P "$SSH_PORT" -r "$f" "$REMOTE_HOST:$dest"; then
-      ((SUCCESS++))
-    else
-      print_error "同步失败: $f"
-      ((FAIL++))
-    fi
-
-    echo ""
-  done
-
-done < "$CONFIG_FILE"
+done
 
 echo "----------------------------------------"
-print_info "同步结束"
-echo "成功: $SUCCESS | 失败: $FAIL | 跳过: $SKIP"
+print_info "成功: $SUCCESS | 失败: $FAIL | 跳过: $SKIP"
+

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# 如果参数数量大于 1，则直接作为 scp 调用，不做任何处理
+if [[ $# -gt 1 ]]; then
+  /usr/bin/scp "$@"
+  return $?
+fi
+
+# 参数数量为 1，进入自动解析模式
+url="$1"
+
+# 按冒号分割 "host:path"
+IFS=: read -r _ pth <<< "$url"
+
+# 没有 path 部分则报错
+if [[ -z "$pth" ]]; then
+  echo -e "\033[1;31mError: invalid format. Expected host:path\033[0m"
+  return 1
+fi
+
+# 构建目标路径（相对路径 → 放到 $HOME 下）
+if [[ "$pth" = /* ]]; then
+  dst="$pth"
+else
+  dst="$HOME/$pth"
+fi
+
+# 创建父目录
+parent="${dst%/*}"
+mkdir -p "$parent"
+
+# 显示最终命令
+echo -e "\033[1;32m→ scp "$url" "$parent"\033[0m"
+
+# 执行复制
+/usr/bin/scp -r "$url" "$parent"
+
