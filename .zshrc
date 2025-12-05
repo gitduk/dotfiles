@@ -277,6 +277,7 @@ zinit ice wait"1" lucid as"program" id-as"rustup" \
     $HOME/.cargo/bin/rustup completions zsh > _rustup
     $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
     $HOME/.cargo/bin/cargo install --root $HOME/.local --locked wallust
+    $HOME/.cargo/bin/cargo install --root $HOME/.local --locked feedr
     command -v wallust &>/dev/null && wallust theme base16-default-dark -s
     " \
   atpull"%atclone"
@@ -315,6 +316,7 @@ zinit ice wait"0" lucid as"program" id-as"autoload" \
     [[ -f ~/.env.zsh ]] && source ~/.env.zsh || touch ~/.env.zsh
     [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh || touch ~/.alias.zsh
     [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh || touch ~/.alias.custom.zsh
+    [[ -n $DISPLAY && -f ~/.installer.zsh ]] && source ~/.installer.zsh || touch ~/.installer.zsh
   '
 zinit light zdharma-continuum/null
 

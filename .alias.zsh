@@ -130,10 +130,8 @@ alias el="easytier-cli"
 
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 
-alias f="fzf"
-
+alias f="feedr"
 alias ff="fastfetch"
-
 alias fn="fnm"
 
 #########

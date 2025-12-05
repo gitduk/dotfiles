@@ -17,9 +17,9 @@ declare -A CONFIG=(
   [curl_timeout]=10
   [token_expire_hours]=24
   [max_content_length]=50
-  [min_request_interval]=3
+  [min_request_interval]=60
   [retry_delay]=3600
-  [max_history_size]=100
+  [max_history_size]=1000
 )
 
 mkdir -p "${CONFIG[cache_dir]}"
@@ -107,7 +107,6 @@ can_make_request() {
 
   if [[ $elapsed -lt ${CONFIG[min_request_interval]} ]]; then
     local wait_time=$((CONFIG[min_request_interval] - elapsed))
-    warn "请求过于频繁，请等待 ${wait_time} 秒后再试"
     return 1
   fi
 
@@ -315,6 +314,16 @@ format_output() {
 
 create_fallback_poetry() {
   local content author title dynasty tooltip display_text class
+  local wait_time_info=""
+  if [[ -f "${CONFIG[last_request_file]}" ]]; then
+    local last_req now elapsed wait
+    last_req=$(cat "${CONFIG[last_request_file]}" 2>/dev/null || echo 0)
+    now=$(date +%s)
+    elapsed=$((now - last_req))
+    wait=$(( CONFIG[min_request_interval] - elapsed ))
+    [[ $wait -lt 0 ]] && wait=0
+    wait_time_info=" 请 ${wait} 秒后重试"
+  fi
 
   # 首先尝试从历史记录中随机选择
   if [[ -f "${CONFIG[history_file]}" ]] && command -v jq >/dev/null 2>&1; then
@@ -337,8 +346,7 @@ create_fallback_poetry() {
           display_text=$(truncate_text "$content" "${CONFIG[max_content_length]}")
           tooltip=""
           [[ -n "$title" && -n "$author" ]] && tooltip="󱉟 ${dynasty:+$dynasty·}$author·$title"
-          [[ "$content" != "$display_text" ]] && tooltip="$tooltip"$'\n\n'"$content"
-          tooltip="$tooltip"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"
+          tooltip="$tooltip"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"$'\n'"$wait_time_info"
           class="history"
 
           jq -n -c --arg text "$display_text" --arg tooltip "$tooltip" --arg class "$class" \
@@ -370,7 +378,7 @@ create_fallback_poetry() {
   local idx=$(( ( $(date +%s) + RANDOM ) % ${#poems[@]} ))
   content="${poems[$idx]%%|*}"
   local info="${poems[$idx]##*|}"
-  tooltip="󱉟 $info"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"
+  tooltip="󱉟 $info"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"$'\n'"$wait_time_info"
 
   class="offline"
   if command -v jq >/dev/null 2>&1; then
@@ -452,7 +460,7 @@ handle_click() {
     jq -n -c --arg text "$current_text ..." --arg tooltip "正在刷新诗词..." --arg class "loading" \
       '{text:$text, tooltip:$tooltip, class:$class}' >"${CONFIG[cache_file]}"
   else
-    printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' "📜 ..." "正在刷新诗词..." "loading" >"${CONFIG[cache_file]}"
+    printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' "$current_text ..." "正在刷新诗词..." "loading" >"${CONFIG[cache_file]}"
   fi
 
   # 后台更新（非阻塞）
