@@ -16,6 +16,7 @@ alias bx="bun x"
 alias bad="bun add"
 alias bis="bun install -g"
 alias brm="bun remove -g"
+alias brs="bun run serve"
 
 alias br="brew"
 

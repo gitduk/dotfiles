@@ -312,8 +312,8 @@ zinit ice wait"0" lucid as"program" id-as"autoload" \
   atinit"fpath+=~/.zsh.d/functions" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
-    for script (~/.zsh.d/*.zsh(N)) source $script
     [[ -f ~/.env.zsh ]] && source ~/.env.zsh || touch ~/.env.zsh
+    for script (~/.zsh.d/*.zsh(N)) source $script
     [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh || touch ~/.alias.zsh
     [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh || touch ~/.alias.custom.zsh
     [[ -n $DISPLAY && -f ~/.installer.zsh ]] && source ~/.installer.zsh || touch ~/.installer.zsh
@@ -494,10 +494,7 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
   atclone"sudo mv */bun /usr/bin" \
   atclone"SHELL=zsh bun completions > _bun" \
   atclone"rm -rf */" \
-  atpull"%atclone" \
-  atload'
-    export PATH="$HOME/.cache/.bun/bin:$PATH"
-  '
+  atpull"%atclone"
 zinit light oven-sh/bun
 
 # uv - python package manager

@@ -19,5 +19,11 @@
     "deny": [],
     "ask": [],
     "defaultMode": "bypassPermissions"
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "ccstatusline",
+    "padding": 0
+  },
+  "apiKeyHelper": "echo $AI_API_KEY"
 }

@@ -118,6 +118,12 @@ zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
+# ccstatusline
+zinit ice if'(( ! $+commands[ccstatusline] ))' lucid as"program" id-as"ccstatusline" \
+  atclone"bun install -g ccstatusline@latest" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
 # gonzo - The Go based TUI for log analysis
 zinit ice if'(( ! $+commands[gonzo] ))' lucid as"program" id-as"gonzo" \
   atclone"/usr/local/go/bin/go install github.com/control-theory/gonzo/cmd/gonzo@latest" \
