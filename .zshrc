@@ -203,8 +203,8 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
 
 # ensure dir
-export BPFX="$HOME/.local/bin"
-[[ ! -d "$BPFX" ]] && mkdir -p $BPFX
+export LPFX="$HOME/.local/bin"
+[[ ! -d "$LPFX" ]] && mkdir -p $LPFX
 
 # Add the following snippet as the first plugin in your configuration
 zinit light-mode for zdharma-continuum/zinit-annex-bin-gem-node
@@ -252,40 +252,39 @@ zinit light zdharma-continuum/null
 ############
 
 # brew
-zinit ice wait"1" lucid as"program" id-as"brew" \
+zinit ice wait"0" lucid as"program" run-atpull id-as"brew" \
   atclone'
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
-    /home/linuxbrew/.linuxbrew/bin/brew install lnav
   ' \
   atpull"%atclone" \
   atload'
     export HOMEBREW_NO_AUTO_UPDATE=true
     export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
-    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
   ' \
   src"init.zsh"
 zinit light zdharma-continuum/null
+export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
 #################
 ### Languages ###
 #################
 
 # rustup
-zinit ice wait"1" lucid as"program" id-as"rustup" \
+zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
   atclone'
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     $HOME/.cargo/bin/rustup completions zsh > _rustup
     $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
   ' \
-  atinit'export PATH=$HOME/.cargo/bin:$PATH' \
-  atinit'export CARGO_INSTALL_ROOT=$HOME/.local' \
-  atinit'command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)' \
+  atload'export CARGO_INSTALL_ROOT=$HOME/.local' \
+  atload'command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
+export PATH=$HOME/.cargo/bin:$PATH
 
 # golang
-zinit ice wait"1" lucid as"program" id-as"golang" \
+zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
   atclone'
     version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
     wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
@@ -293,9 +292,6 @@ zinit ice wait"1" lucid as"program" id-as"golang" \
     sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
   ' \
   atload'
-    export GOPATH="$HOME/go"
-    export GOBIN="$GOPATH/bin"
-    export PATH="/usr/local/go/bin:$GOBIN:$PATH"
     export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
     export GOPRIVATE="*.corp.example.com,rsc.io/private"
     export GOSUMDB="sum.golang.org"
@@ -303,6 +299,7 @@ zinit ice wait"1" lucid as"program" id-as"golang" \
   ' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
+export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
 
 ##############################
 ### Custom Config & Script ###
@@ -377,12 +374,13 @@ zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 #############
 
 # bat
-zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh" id-as"bat" \
+zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh-r" id-as"bat" \
   atclone"uget sharkdp/bat bat_.\*_amd64.deb" \
   atclone"sudo dpkg -i /tmp/bat.deb" \
+  atclone"rm -rf ./*" \
   atclone"bat --completion zsh > _bat" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light sharkdp/bat
 
 # eza - eza is a modern replacement for ls
 zinit ice if'(( ! $+commands[eza] ))' lucid as"command" from"gh-r" id-as"eza" \
@@ -438,7 +436,7 @@ zinit light denisidoro/navi
 # fzf
 zinit ice wait"0a" lucid as"program" from"gh-r" id-as"fzf" \
   atclone"./fzf --zsh > init.zsh" \
-  atclone"mv ./fzf $BPFX/fzf" \
+  atclone"mv ./fzf $LPFX/fzf" \
   src"init.zsh" \
   atpull"%atclone"
 zinit light junegunn/fzf
@@ -478,12 +476,20 @@ zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-a
   atpull"%atclone"
 zinit light EasyTier/EasyTier
 
+# lnav
+zinit ice if'(( ! $+commands[lnav] ))' lucid as"program" from"gh-r" id-as"lnav" \
+  atclone"brew install lnav" \
+  atclone"rm -rf ./*" \
+  atpull"%atclone"
+zinit light tstack/lnav
+
 # fastfetch
-zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh" id-as"fastfetch" \
+zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh-r" id-as"fastfetch" \
   atclone"uget fastfetch-cli/fastfetch amd64.deb" \
   atclone"sudo dpkg -i /tmp/fastfetch.deb" \
+  atclone"rm -rf ./*" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light fastfetch-cli/fastfetch
 
 #######################
 ### package manager ###
@@ -510,36 +516,34 @@ zinit ice if'(( ! $+commands[uv] ))' lucid as"command" from"gh-r" id-as"uv" \
 zinit light astral-sh/uv
 
 # fnm - node version manager
-zinit ice wait"1" lucid as"program" id-as"fnm" \
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"fnm" \
   atclone"
-    curl -fsSL https://fnm.vercel.app/install | bash
-    ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
-    ~/.local/share/fnm/fnm completions --shell zsh > _fnm
-    ln -fs ~/.local/share/fnm/fnm $BPFX/fnm
+    ./fnm env --use-on-cd --shell zsh > init.zsh
+    ./fnm completions --shell zsh > _fnm
   " \
   src"init.zsh" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light Schniz/fnm
 
 # wallust
-zinit ice wait"1" lucid as"program" id-as"wallust" \
+zinit ice wait"1" lucid as"program" run-atpull id-as"wallust" \
   atclone"cargo install --locked wallust" \
   atclone"command -v wallust &>/dev/null && wallust theme base16-default-dark -s" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # feedr
-zinit ice wait"1" lucid as"program" id-as"feedr" \
-  atclone"cargo install --locked feedr" \
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"feedr" \
+  atclone"mv feedr* feedr" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light bahdotsh/feedr
 
 # pueue
-zinit ice wait"1" lucid as"program" id-as"pueue" \
-  atclone"cargo install --locked pueue" \
-  atclone"pueue completions zsh > _pueue" \
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"pueue" \
+  atclone"chmod +x pueue*" \
+  atclone"mv pueue* $LPFX/pueue" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light Nukesor/pueue
 
 ###################
 ### Completions ###

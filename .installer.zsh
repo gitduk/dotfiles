@@ -16,8 +16,8 @@ zinit light alacritty/alacritty
 # sing-box
 zinit ice if'(( ! $+commands[sing-box] ))' lucid as"program" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" \
-  atclone"mv */sing-box $BPFX/sing-box" \
-  atclone"sudo setcap cap_net_admin=+ep $BPFX/sing-box" \
+  atclone"mv */sing-box $LPFX/sing-box" \
+  atclone"sudo setcap cap_net_admin=+ep $LPFX/sing-box" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
@@ -107,41 +107,38 @@ zinit ice if'[[ -n $DISPLAY ]]' lucid as"command" from"gh-r" id-as"rain" \
 zinit light achristmascarl/rainfrog
 
 # codex
-zinit ice if'(( ! $+commands[codex] ))' lucid as"program" id-as"codex" \
-  atclone"bun install -g @openai/codex" \
+zinit ice if'(( ! $+commands[codex] ))' lucid as"program" from"gh-r" id-as"codex" \
+  bpick"codex-x86_64-unknown-linux-musl.tar.gz" \
+  atclone"mv codex* codex" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light openai/codex
 
 # claude-code
-zinit ice if'(( ! $+commands[claude] ))' lucid as"program" id-as"claude" \
+zinit ice if'(( ! $+commands[claude] ))' lucid as"program" run-atpull id-as"claude" \
   atclone"bun install -g @anthropic-ai/claude-code" \
-  atpull"%atclone"
-zinit light zdharma-continuum/null
-
-# ccstatusline
-zinit ice if'(( ! $+commands[ccstatusline] ))' lucid as"program" id-as"ccstatusline" \
   atclone"bun install -g ccstatusline@latest" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # gonzo - The Go based TUI for log analysis
-zinit ice if'(( ! $+commands[gonzo] ))' lucid as"program" id-as"gonzo" \
-  atclone"/usr/local/go/bin/go install github.com/control-theory/gonzo/cmd/gonzo@latest" \
-  atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit ice if'(( ! $+commands[gonzo] ))' lucid as"program" from"gh-r" id-as"gonzo"
+zinit light control-theory/gonzo
 
 # xh
-zinit ice if'(( ! $+commands[xh] ))' lucid as"program" id-as"xh" \
-  atclone"curl -sfL https://raw.githubusercontent.com/ducaale/xh/master/install.sh | sh" \
+zinit ice if'(( ! $+commands[xh] ))' lucid as"program" from"gh-r" id-as"xh" \
+  extract"!" \
+  atclone"mv completions/_xh ./" \
+  atclone"rm -rf */" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light ducaale/xh
 
 # tw - view and query tabular data files, such as CSV, TSV, and parquet
-zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh" id-as"tw" \
+zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh-r" id-as"tw" \
   atclone"uget shshemi/tabiew tabiew-x86_64-unknown-linux-gnu.deb" \
   atclone"sudo dpkg -i /tmp/tabiew.deb" \
+  atclone"rm -rf ./*" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light shshemi/tabiew
 
 # nping
 zinit ice if'(( ! $+commands[nping] ))' lucid as"program" from"gh-r" id-as"nping" \
@@ -149,11 +146,10 @@ zinit ice if'(( ! $+commands[nping] ))' lucid as"program" from"gh-r" id-as"nping
 zinit light hanshuaikang/Nping
 
 # mise - dev tools, env vars, task runner
-zinit ice if'(( ! $+commands[mise] ))' lucid as"program" id-as"mise" \
-  atclone"curl https://mise.run | sh" \
-  atpull"%atclone" \
-  atload'eval "$(mise activate zsh)"'
-zinit light zdharma-continuum/null
+zinit ice if'(( ! $+commands[mise] ))' lucid as"program" from"gh-r" id-as"mise" \
+  atclone"mv mise* mise" \
+  atpull"%atclone"
+zinit light jdx/mise
 
 # oryx - sniffing network traffic using eBPF on Linux
 zinit ice if'(( ! $+commands[oryx] ))' lucid as"program" from"gh-r" id-as"oryx" \
@@ -172,16 +168,17 @@ zinit light hatoo/oha
 # heynote - A dedicated scratchpad for power users
 zinit ice if'(( ! $+commands[heynote] ))' lucid as"program" from"gh-r" id-as"heynote" \
   bpick"Heynote_*_x86_64.AppImage" \
-  atclone"mv heynote_*_x86_64.appimage $BPFX/heynote" \
+  atclone"mv heynote_*_x86_64.appimage $LPFX/heynote" \
   atpull"%atclone"
 zinit light heyman/heynote
 
 # yaak - The most intuitive desktop API client
-zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh" id-as"yaak" \
+zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh-r" id-as"yaak" \
   atclone"uget mountain-loop/yaak deb" \
   atclone"sudo dpkg -i /tmp/yaak.deb" \
+  atclone"rm -rf ./*" \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light mountain-loop/yaak
 
 # xan - The CSV magician
 zinit ice if'(( ! $+commands[xan] ))' lucid as"program" from"gh-r" id-as"xan"
