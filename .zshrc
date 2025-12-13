@@ -262,6 +262,7 @@ zinit ice wait"1" lucid as"program" id-as"brew" \
   atload'
     export HOMEBREW_NO_AUTO_UPDATE=true
     export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
+    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
   ' \
   src"init.zsh"
 zinit light zdharma-continuum/null
@@ -494,7 +495,10 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
   atclone"sudo mv */bun /usr/bin" \
   atclone"SHELL=zsh bun completions > _bun" \
   atclone"rm -rf */" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    export BUN_INSTALL="$HOME/.local"
+  '
 zinit light oven-sh/bun
 
 # uv - python package manager

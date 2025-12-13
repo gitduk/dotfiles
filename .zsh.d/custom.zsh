@@ -1,9 +1,3 @@
-##############
-### gcc-15 ###
-##############
-
-export LD_LIBRARY_PATH="/opt/gcc-15/lib64:$LD_LIBRARY_PATH"
-
 ############
 ### pnpm ###
 ############
@@ -13,12 +7,6 @@ case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-
-###########
-### bun ###
-###########
-
-export BUN_INSTALL="$HOME/.local"
 
 ###########
 ### fzf ###
