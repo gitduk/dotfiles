@@ -30,11 +30,15 @@
     }
   },
   {
+    "context": "Editor && showing_completions",
+    "bindings": {
+      "tab": "editor::ComposeCompletion"
+    }
+  },
+  {
     "context": "Editor && edit_prediction_conflict",
     "bindings": {
-      "ctrl-f": "editor::AcceptEditPrediction",
-      "alt-l": null,
-      "alt-tab": null
+      "ctrl-f": "editor::AcceptEditPrediction"
     }
   },
   {

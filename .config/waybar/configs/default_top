@@ -19,7 +19,7 @@
   "modules-left": [
     "hyprland/workspaces#roman",
     "custom/separator#dot-line",
-    "group/mobo_drawer",
+    "group/motherboard",
     "custom/separator#dot-line",
     "custom/poetry"
   ],

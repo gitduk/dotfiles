@@ -92,14 +92,6 @@ if [[ -z "$DISPLAY" ]]; then
   export DISPLAY=$(ps -ef | awk '/Xwayland/ && !/grep/ {for(i=1;i<=NF;i++) if ($i ~ /^:[0-9]+$/) print $i; exit}')
 fi
 
-# path
+# local path
 export PATH="$HOME/.local/bin:$PATH"
-
-# cargo
-export PATH="$HOME/.cargo/bin:$PATH"
-export CARGO_INSTALL_ROOT="$HOME/.local"
-command -v sccache &>/dev/null && export RUSTC_WRAPPER="$(command -v sccache)"
-
-# node
-export PATH="$HOME/.npm/bin:$PATH"
 

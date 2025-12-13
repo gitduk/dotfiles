@@ -1,0 +1,29 @@
+{
+  "client": {
+    "allow_direct_keys": true
+  },
+  "mcp": {
+    "client_configs": [
+      {
+        "name": "context7",
+        "connection_type": "http", 
+        "connection_string": "https://mcp.context7.com/mcp",
+        "tools_to_execute": ["*"]
+      }
+    ]
+  },
+  "config_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "./config.db"
+    }
+  },
+  "logs_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "./logs.db"
+    }
+  }
+}

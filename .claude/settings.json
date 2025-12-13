@@ -1,4 +1,5 @@
 {
+  "apiKeyHelper": "echo $AI_GATEWAY_API_KEY",
   "permissions": {
     "allow": [
       "Bash",
@@ -25,5 +26,5 @@
     "command": "ccstatusline",
     "padding": 0
   },
-  "apiKeyHelper": "echo $AI_API_KEY"
+  "alwaysThinkingEnabled": false
 }

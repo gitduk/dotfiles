@@ -149,10 +149,10 @@
     "format": " {} ",
     "interval": 1,
     "tooltip": true,
-    "on-click": "systemctl --user restart sing-box.service",
-    "on-click-right": "systemctl --user stop sing-box.service",
-    "on-scroll-down": "~/.config/waybar/scripts/singbox.sh --next",
-    "on-scroll-up": "~/.config/waybar/scripts/singbox.sh --prev"
+    "on-click": "~/.config/waybar/scripts/singbox.sh --prev",
+    "on-click-right": "~/.config/waybar/scripts/singbox.sh --next",
+    "on-scroll-down": "systemctl --user stop sing-box.service",
+    "on-scroll-up": "systemctl --user restart sing-box.service"
   },
   "custom/breath": {
     "exec": "~/.config/waybar/scripts/breath.sh",

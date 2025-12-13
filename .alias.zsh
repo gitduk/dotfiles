@@ -115,15 +115,14 @@ alias dis="sudo dpkg -i"
 
 alias e="extract"
 
-alias ezs="v ~/.zshrc"
-alias eas="v ~/.alias.zsh"
-alias eis="v ~/.installer.zsh"
+alias ezs="v ~/.zshrc && source ~/.zshrc"
+alias eas="v ~/.alias.zsh && source ~/.alias.zsh"
+alias eis="v ~/.installer.zsh && source ~/.installer.zsh"
 alias eenv="v ~/.env.zsh && source ~/.env.zsh"
 alias epw="v ~/.pw.json"
 alias ejs="v .justfile"
 
-alias eo="easytier-core"
-alias el="easytier-cli"
+alias ep="easytier-cli peer"
 
 #########
 ### F ###
@@ -133,7 +132,7 @@ alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 
 alias f="feedr"
 alias ff="fastfetch"
-alias fn="fnm"
+alias fm="fnm"
 
 #########
 ### G ###
@@ -249,11 +248,17 @@ alias oa="oha"
 ### P ###
 #########
 
+alias p="pueue"
+alias pad="pueue add"
+alias prs="pueue restart"
+alias pcl="pueue clean"
+
 alias ps="procs"
 
 alias pd="podman"
 alias pdc="podman container"
 alias pdls="podman container ls"
+alias pdla="podman container ls --all"
 alias pdr="podman run"
 alias pds="podman start"
 alias pdst="podman stop"
@@ -349,10 +354,4 @@ alias wic="which"
 #########
 
 alias x="xh"
-
-#########
-### Y ###
-#########
-
-alias y="yazi"
 

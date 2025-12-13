@@ -29,10 +29,10 @@ podman run -d --name stirling-pdf \
   -e INSTALL_BOOK_AND_ADVANCED_HTML_OPS=false \
   -e LANGS=en_GB \
   -p 8080:8080 \
-  -v ./trainingData:/usr/share/tessdata \
-  -v ./extraConfigs:/configs \
+  -v ./data:/usr/share/tessdata \
+  -v ./configs:/configs \
   -v ./logs:/logs \
-  -v ./customFiles:/customFiles \
+  -v ./files:/customFiles \
   --restart=unless-stopped \
   frooodle/s-pdf:latest
 

@@ -72,7 +72,7 @@ function proxy() {
 
   while [[ $# -gt 0 ]]; do
     case $1 in
-      -h|--host) proxy_port="$2"; shift 2 ;;
+      -h|--host) proxy_host="$2"; shift 2 ;;
       -p|--port) proxy_port="$2"; shift 2 ;;
       -s|--slient) slient="true"; shift ;;
       -u|--unset) action="unset"; shift ;;
@@ -257,12 +257,12 @@ zinit ice wait"1" lucid as"program" id-as"brew" \
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
     /home/linuxbrew/.linuxbrew/bin/brew install lnav
-    ' \
+  ' \
   atpull"%atclone" \
   atload'
     export HOMEBREW_NO_AUTO_UPDATE=true
     export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
-    ' \
+  ' \
   src"init.zsh"
 zinit light zdharma-continuum/null
 
@@ -272,14 +272,14 @@ zinit light zdharma-continuum/null
 
 # rustup
 zinit ice wait"1" lucid as"program" id-as"rustup" \
-  atclone"
+  atclone'
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     $HOME/.cargo/bin/rustup completions zsh > _rustup
     $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
-    $HOME/.cargo/bin/cargo install --root $HOME/.local --locked wallust
-    $HOME/.cargo/bin/cargo install --root $HOME/.local --locked feedr
-    command -v wallust &>/dev/null && wallust theme base16-default-dark -s
-    " \
+  ' \
+  atinit'export PATH=$HOME/.cargo/bin:$PATH' \
+  atinit'export CARGO_INSTALL_ROOT=$HOME/.local' \
+  atinit'command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
@@ -290,7 +290,7 @@ zinit ice wait"1" lucid as"program" id-as"golang" \
     wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
     [[ -d /usr/local/go ]] && sudo rm -rf /usr/local/go
     sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
-    ' \
+  ' \
   atload'
     export GOPATH="$HOME/go"
     export GOBIN="$GOPATH/bin"
@@ -299,7 +299,7 @@ zinit ice wait"1" lucid as"program" id-as"golang" \
     export GOPRIVATE="*.corp.example.com,rsc.io/private"
     export GOSUMDB="sum.golang.org"
     export GO111MODULE=on
-    ' \
+  ' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
@@ -431,7 +431,7 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
     [[ ! -e "$NAVI_CONFIG" ]] && navi info config-example > $NAVI_CONFIG
     eval "$(navi widget zsh)"
     bindkey "^N" _navi_widget
-    '
+  '
 zinit light denisidoro/navi
 
 # fzf
@@ -512,8 +512,28 @@ zinit ice wait"1" lucid as"program" id-as"fnm" \
     ~/.local/share/fnm/fnm env --use-on-cd --shell zsh > init.zsh
     ~/.local/share/fnm/fnm completions --shell zsh > _fnm
     ln -fs ~/.local/share/fnm/fnm $BPFX/fnm
-    " \
+  " \
   src"init.zsh" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
+# wallust
+zinit ice wait"1" lucid as"program" id-as"wallust" \
+  atclone"cargo install --locked wallust" \
+  atclone"command -v wallust &>/dev/null && wallust theme base16-default-dark -s" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
+# feedr
+zinit ice wait"1" lucid as"program" id-as"feedr" \
+  atclone"cargo install --locked feedr" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
+# pueue
+zinit ice wait"1" lucid as"program" id-as"pueue" \
+  atclone"cargo install --locked pueue" \
+  atclone"pueue completions zsh > _pueue" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
