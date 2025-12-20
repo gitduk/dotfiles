@@ -174,7 +174,7 @@ zinit light heyman/heynote
 
 # yaak - The most intuitive desktop API client
 zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh-r" id-as"yaak" \
-  atclone"uget mountain-loop/yaak deb" \
+  atclone"uget mountain-loop/yaak amd64.deb$" \
   atclone"sudo dpkg -i /tmp/yaak.deb" \
   atclone"rm -rf ./*" \
   atpull"%atclone"

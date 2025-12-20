@@ -175,6 +175,7 @@ uget() {
     return 1
   }
 
+  echo "Downloading \e[32;1m$download_url\e[0m ..."
   wget -q --show-progress "$download_url" -O "$output"
 }
 

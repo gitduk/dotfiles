@@ -11,13 +11,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/espanso/espanso/dev/schemas/match.schema.json
 
 matches:
-  # Simple text replacement
-  - trigger: ":espanso"
-    replace: "Hi there!"
-
+  # address
+  - trigger: ":addr"
+    replace: "广东省深圳市龙华区民治街道横岭四区"
   # NOTE: espanso uses YAML to define matches, so pay attention to the indentation!
-
-  # But matches can also be dynamic:
 
   # Print the current date
   - trigger: ":date"

@@ -10,7 +10,7 @@ shared:
   shared_secret_path: ~/.local/share/pueue/shared_secret
 
 client:
-  restart_in_place: false
+  restart_in_place: true
   read_local_logs: true
   show_confirmation_questions: false
   show_expanded_aliases: false
@@ -20,7 +20,7 @@ client:
   status_datetime_format: "%Y-%m-%d\n%H:%M:%S"
 
 daemon:
-  default_parallel_tasks: 1
+  default_parallel_tasks: 10
   pause_group_on_failure: false
   pause_all_on_failure: false
   callback: "notify-send \"Task {{ id }} {{ result }}\" \"<b>{{ command }}</b>\""
