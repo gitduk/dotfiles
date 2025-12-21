@@ -101,15 +101,6 @@ function proxy() {
 
 [[ -n "$DISPLAY" ]] && proxy -s
 
-# Qt
-QT_VERSION="6.9.1"
-if [[ -d "$HOME/.local/share/Qt/$QT_VERSION" ]]; then
-  export QT_ROOT="$HOME/.local/share/Qt/$QT_VERSION"
-  export PATH="$QT_ROOT/gcc_64/bin:$PATH"
-  export Qt6_DIR="$QT_ROOT/gcc_64/lib/cmake/Qt6"
-  export LD_LIBRARY_PATH="$QT_ROOT/gcc_64/lib:$LD_LIBRARY_PATH"
-fi
-
 # completion
 export ZSH_COMPLETIONS="$HOME/.zsh.d/completions"
 [[ ! -d "$ZSH_COMPLETIONS" ]] && mkdir -p "$ZSH_COMPLETIONS"
@@ -119,7 +110,7 @@ fpath+=$ZSH_COMPLETIONS
 ### MUST ###
 ############
 
-# installer
+# install tool
 function inster() {
   case "$OS" in
     debian | ubuntu)
@@ -315,7 +306,6 @@ zinit ice wait"0" lucid as"program" id-as"autoload" \
     for script (~/.zsh.d/*.zsh(N)) source $script
     [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh || touch ~/.alias.zsh
     [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh || touch ~/.alias.custom.zsh
-    [[ -n $DISPLAY && -f ~/.installer.zsh ]] && source ~/.installer.zsh || touch ~/.installer.zsh
   '
 zinit light zdharma-continuum/null
 
@@ -371,7 +361,7 @@ zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
 zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 
 #############
-### tools ###
+### Tools ###
 #############
 
 # bat
@@ -491,10 +481,6 @@ zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh-r" id-as"f
   atclone"rm -rf ./*" \
   atpull"%atclone"
 zinit light fastfetch-cli/fastfetch
-
-#######################
-### package manager ###
-#######################
 
 # bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \

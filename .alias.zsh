@@ -117,7 +117,7 @@ alias e="extract"
 
 alias ezs="v ~/.zshrc && source ~/.zshrc"
 alias eas="v ~/.alias.zsh && source ~/.alias.zsh"
-alias eis="v ~/.installer.zsh && source ~/.installer.zsh"
+alias eis="v ~/.config/navi/cheats/install.cheat"
 alias eenv="v ~/.env.zsh && source ~/.env.zsh"
 alias epw="v ~/.pw.json"
 alias ejs="v .justfile"
@@ -196,6 +196,8 @@ alias js="just"
 ialias ls="eza"
 
 balias li="sudo lsof -i:"
+
+alias lv="lnav"
 
 #########
 ### M ###
