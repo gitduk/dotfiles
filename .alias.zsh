@@ -307,7 +307,6 @@ alias rcl="redis-cli"
 
 alias sr="sttr"
 alias sas="source ~/.alias.zsh"
-alias sis="source ~/.installer.zsh"
 
 alias sc="source"
 alias denv="deactivate"

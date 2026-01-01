@@ -34,12 +34,6 @@ sudo nala install librust-xkbcommon-dev libgdk-pixbuf-2.0-dev libxcb-util-dev li
 git clone --depth=1 https://github.com/lbonn/rofi.git /tmp/rofi && cd /tmp/rofi/
 meson setup build --prefix=/usr && ninja -C build && sudo ninja -C build install
 
-# chsrc
-curl https://chsrc.run/posix | sudo bash
-
-# wallust
-cargo install --locked wallust && wallust theme Tokyo-Night
-
 # clipboard - wl-clipboard + cliphist
 git clone --depth 1 https://github.com/bugaevc/wl-clipboard.git /tmp/wl-clipboard && cd /tmp/wl-clipboard/
 meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
@@ -55,23 +49,6 @@ cmake -S . -B build \
   -DUSE_WAYLAND_GRIM=ON \
   && cmake --build build \
   && sudo cmake --install build
-
-# greetd - login manager daemon
-git clone --depth 1 https://git.sr.ht/~kennylevinsen/greetd /tmp/greetd && cd /tmp/greetd/
-cargo build --release
-sudo cp target/release/{greetd,agreety} /usr/local/bin/
-sudo cp greetd.service /etc/systemd/system/greetd.service
-mkdir /etc/greetd && cp ~/.etc/greetd/config.toml /etc/greetd/config.toml
-sudo useradd -M -G video greeter
-sudo chmod -R go+r /etc/greetd/
-
-# tuigreet - Graphical console greeter for greetd.
-git clone --depth 1 https://github.com/apognu/tuigreet.git /tmp/tuigreet && cd /tmp/tuigreet/
-cargo build --release
-sudo mv target/release/tuigreet /usr/local/bin/tuigreet
-sudo mkdir /var/cache/tuigreet
-sudo chown greeter:greeter /var/cache/tuigreet
-sudo chmod 0755 /var/cache/tuigreet
 
 # tdf - A terminal-based PDF viewer.
 sudo nala install -y libpoppler-dev libpoppler-glib-dev
@@ -191,7 +168,7 @@ zinit light Orange-OpenSource/hurl
 
 # fx - Command-line tool and terminal JSON viewer
 zinit ice if'(( ! $+commands[fx] ))' lucid as"command" from"gh-r" id-as"fx" \
-  atclone"mv fx* fx"
+  atclone"mv fx* $LPFX/fx"
 zinit light antonmedv/fx
 
 # gh
@@ -243,6 +220,7 @@ zinit light shadow1ng/fscan
 # sttr
 zinit ice if'(( ! $+commands[sttr] ))' lucid as"command" from"gh-r" id-as"sttr" \
   atclone"./sttr completion zsh > _sttr" \
+  atclone"mv sttr $LPFX/" \
   atpull"%atclone"
 zinit light abhimanyu003/sttr
 
@@ -273,10 +251,6 @@ zinit ice if'(( ! $+commands[claude] ))' lucid as"program" run-atpull id-as"clau
   atclone"bun install -g ccstatusline@latest" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
-
-# gonzo - The Go based TUI for log analysis
-zinit ice if'(( ! $+commands[gonzo] ))' lucid as"program" from"gh-r" id-as"gonzo"
-zinit light control-theory/gonzo
 
 # xh
 zinit ice if'(( ! $+commands[xh] ))' lucid as"program" from"gh-r" id-as"xh" \
@@ -332,3 +306,12 @@ zinit light mountain-loop/yaak
 zinit ice if'(( ! $+commands[xan] ))' lucid as"program" from"gh-r" id-as"xan"
 zinit light medialab/xan
 
+# prek - pre commint hook
+uv tool install prek
+
+# hl - A fast and powerful log viewer and processor that converts JSON logs or logfmt logs into a clear human-readable format
+zinit ice if'(( ! $+commands[hl] ))' lucid as"program" from"gh-r" id-as"hl" \
+  atclone"curl -sSfL https://github.com/pamburus/hl/releases/latest/download/hl-linux-x86_64-musl.tar.gz | tar xz" \
+  atclone"mv hl $LPFX/" \
+  atpull"%atclone"
+zinit light pamburus/hl

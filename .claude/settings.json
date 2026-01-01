@@ -1,5 +1,4 @@
 {
-  "apiKeyHelper": "echo $AI_GATEWAY_API_KEY",
   "permissions": {
     "allow": [
       "Bash",
@@ -26,5 +25,8 @@
     "command": "ccstatusline",
     "padding": 0
   },
-  "alwaysThinkingEnabled": false
+  "enabledPlugins": {
+    "context-engineering@context-engineering-marketplace": true,
+    "book-sft-pipeline@context-engineering-marketplace": true
+  }
 }

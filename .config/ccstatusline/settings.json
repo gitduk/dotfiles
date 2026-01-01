@@ -25,19 +25,25 @@
         "id": "5",
         "type": "tokens-cached",
         "color": "brightBlue"
+      }
+    ],
+    [
+      {
+        "id": "0e04dc19-82bd-407d-a696-55908c4adc0e",
+        "type": "session-cost"
       },
       {
-        "id": "6",
+        "id": "2704b7dc-a3be-467b-a0e0-c06ae9b8a9ed",
         "type": "separator"
       },
       {
-        "id": "7",
-        "type": "session-cost",
-        "color": "brightMagenta",
-        "rawValue": false
+        "id": "ceb5418f-487e-42ce-acd4-18d0b21cb945",
+        "type": "block-timer",
+        "metadata": {
+          "display": "time"
+        }
       }
     ],
-    [],
     []
   ],
   "flexMode": "full-minus-40",

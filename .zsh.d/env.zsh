@@ -2,9 +2,9 @@
 ### Claude Code ###
 ###################
 
-export ANTHROPIC_BASE_URL="https://ai-gateway.vercel.sh/v1"
-export ANTHROPIC_MODEL="google/gemini-2.5-pro"
-export ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash"
+# export ANTHROPIC_BASE_URL="https://ai-gateway.vercel.sh/v1"
+# export ANTHROPIC_MODEL="google/gemini-2.5-pro"
+# export ANTHROPIC_SMALL_FAST_MODEL="google/gemini-2.5-flash"
 
 #############
 ### Codex ###
