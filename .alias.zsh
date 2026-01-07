@@ -348,9 +348,10 @@ alias uz="unzip"
 ### W ###
 #########
 
-alias wch="watch -c -n 1"
+alias wi="witr"
 alias wis="whereis"
 alias wic="which"
+alias wch="watch -c -n 1"
 
 #########
 ### X ###

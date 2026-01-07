@@ -247,7 +247,7 @@ function ialias() {
 function alias-expand-widget() {
   [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
   if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
-    zle _expand_alias
+    zle _expand_alias 2>/dev/null || true
   fi
   zle self-insert
   if [[ "$insertBlank" = "0" ]]; then

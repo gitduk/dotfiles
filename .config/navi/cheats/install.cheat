@@ -126,8 +126,8 @@ sudo nala update
 sudo nala install -y $(ubuntu-drivers devices 2>/dev/null | awk '/recommended/{print $3}')
 
 # mise
-zinit ice if'(( ! $+commands[mise] ))' lucid as"program" from"gh-r" id-as"mise" \
-  atclone"mv mise* $LPFX/mise" \
+zinit ice if'[[ ! -x $commands[mise] ]]' lucid as"program" from"gh-r" id-as"mise" \
+  atclone"mv mise* ~/.local/bin/mise" \
   atpull"%atclone"
 zinit light jdx/mise
 
@@ -143,22 +143,22 @@ zinit ice if'[[ -n $DISPLAY ]]' lucid as"program" id-as"alacritty" \
 zinit light alacritty/alacritty
 
 # sing-box
-zinit ice if'(( ! $+commands[sing-box] ))' lucid as"program" from"gh-r" id-as"sing-box" \
+zinit ice if'[[ ! -x $commands[sing-box] ]]' lucid as"program" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" \
-  atclone"mv */sing-box $LPFX/" \
-  atclone"sudo setcap cap_net_admin=+ep $LPFX/sing-box" \
+  atclone"mv */sing-box ~/.local/bin/" \
+  atclone"sudo setcap cap_net_admin=+ep ~/.local/bin/sing-box" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light SagerNet/sing-box
 
 # curlie
-zinit ice if'(( ! $+commands[curlie] ))' lucid as"command" from"gh-r" id-as"curlie" \
-  atclone"mv curlie $LPFX/" \
+zinit ice if'[[ ! -x $commands[curlie] ]]' lucid as"command" from"gh-r" id-as"curlie" \
+  atclone"mv curlie ~/.local/bin/" \
   atpull"%atclone"
 zinit light rs/curlie
 
 # hurl
-zinit ice if'(( ! $+commands[hurl] ))' lucid as"command" from"gh-r" id-as"hurl" \
+zinit ice if'[[ ! -x $commands[hurl] ]]' lucid as"command" from"gh-r" id-as"hurl" \
   atclone"mv */bin/* ." \
   atclone"mv */completions/_hurl ." \
   atclone"mv */completions/_hurlfmt ." \
@@ -167,19 +167,19 @@ zinit ice if'(( ! $+commands[hurl] ))' lucid as"command" from"gh-r" id-as"hurl" 
 zinit light Orange-OpenSource/hurl
 
 # fx - Command-line tool and terminal JSON viewer
-zinit ice if'(( ! $+commands[fx] ))' lucid as"command" from"gh-r" id-as"fx" \
-  atclone"mv fx* $LPFX/fx"
+zinit ice if'[[ ! -x $commands[fx] ]]' lucid as"command" from"gh-r" id-as"fx" \
+  atclone"mv fx* ~/.local/bin/fx"
 zinit light antonmedv/fx
 
 # gh
-zinit ice if'(( ! $+commands[gh] ))' lucid as"command" from"gh-r" id-as"gh" \
+zinit ice if'[[ ! -x $commands[gh] ]]' lucid as"command" from"gh-r" id-as"gh" \
   atclone"sudo mv */bin/gh /usr/bin" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light cli/cli
 
 # glow - Glow is a terminal-based markdown reader designed from the ground up to bring out the beauty—and power—of the CLI
-zinit ice if'(( ! $+commands[glow] ))' lucid as"command" from"gh-r" id-as"glow" \
+zinit ice if'[[ ! -x $commands[glow] ]]' lucid as"command" from"gh-r" id-as"glow" \
   atclone"mv */glow ." \
   atclone"mv */completions/glow.zsh _glow" \
   atclone"rm -rf */" \
@@ -187,15 +187,15 @@ zinit ice if'(( ! $+commands[glow] ))' lucid as"command" from"gh-r" id-as"glow" 
 zinit light charmbracelet/glow
 
 # grex - A command-line tool and library for generating regular expressions from user-provided test cases
-zinit ice if'(( ! $+commands[grex] ))' lucid as"command" from"gh-r" id-as"grex"
+zinit ice if'[[ ! -x $commands[grex] ]]' lucid as"command" from"gh-r" id-as"grex"
 zinit light pemistahl/grex
 
 # procs - procs is a replacement for ps written in Rust
-zinit ice if'(( ! $+commands[procs] ))' lucid as"command" from"gh-r" id-as"procs"
+zinit ice if'[[ ! -x $commands[procs] ]]' lucid as"command" from"gh-r" id-as"procs"
 zinit light dalance/procs
 
 # ripgrep - ripgrep recursively searches directories for a regex pattern
-zinit ice if'(( ! $+commands[rg] ))' lucid as"command" from"gh-r" id-as"rg" \
+zinit ice if'[[ ! -x $commands[rg] ]]' lucid as"command" from"gh-r" id-as"rg" \
   atclone"sudo mv */rg /usr/bin" \
   atclone"mv */complete/_rg ." \
   atclone"rm -rf */" \
@@ -203,7 +203,7 @@ zinit ice if'(( ! $+commands[rg] ))' lucid as"command" from"gh-r" id-as"rg" \
 zinit light burntSushi/ripgrep
 
 # yazi - file browser
-zinit ice if'(( ! $+commands[yazi] ))' lucid as"command" from"gh-r" id-as"yazi" \
+zinit ice if'[[ ! -x $commands[yazi] ]]' lucid as"command" from"gh-r" id-as"yazi" \
   bpick"yazi-x86_64-unknown-linux-musl.zip" \
   atclone"mv yazi*/* ." \
   atclone"mv comp*/_ya ." \
@@ -213,19 +213,19 @@ zinit ice if'(( ! $+commands[yazi] ))' lucid as"command" from"gh-r" id-as"yazi" 
 zinit light sxyazi/yazi
 
 # fscan
-zinit ice if'(( ! $+commands[fscan] ))' lucid as"command" from"gh-r" id-as"fscan" \
+zinit ice if'[[ ! -x $commands[fscan] ]]' lucid as"command" from"gh-r" id-as"fscan" \
   bpick"fscan"
 zinit light shadow1ng/fscan
 
 # sttr
-zinit ice if'(( ! $+commands[sttr] ))' lucid as"command" from"gh-r" id-as"sttr" \
+zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"command" from"gh-r" id-as"sttr" \
   atclone"./sttr completion zsh > _sttr" \
-  atclone"mv sttr $LPFX/" \
+  atclone"mv sttr ~/.local/bin/" \
   atpull"%atclone"
 zinit light abhimanyu003/sttr
 
 # dysk - A linux utility to get information on filesystems, like df but better
-zinit ice if'(( ! $+commands[dysk] ))' lucid as"command" from"gh-r" id-as"dysk" \
+zinit ice if'[[ ! -x $commands[dysk] ]]' lucid as"command" from"gh-r" id-as"dysk" \
   atclone"mv */completion/_dysk ." \
   atclone"mv */x86_64-unknown-linux-musl/dysk ." \
   atclone"rm -rf */" \
@@ -239,21 +239,21 @@ zinit ice if'[[ -n $DISPLAY ]]' lucid as"command" from"gh-r" id-as"rain" \
 zinit light achristmascarl/rainfrog
 
 # codex
-zinit ice if'(( ! $+commands[codex] ))' lucid as"program" from"gh-r" id-as"codex" \
+zinit ice if'[[ ! -x $commands[codex] ]]' lucid as"program" from"gh-r" id-as"codex" \
   bpick"codex-x86_64-unknown-linux-musl.tar.gz" \
   atclone"mv codex* codex" \
   atpull"%atclone"
 zinit light openai/codex
 
 # claude-code
-zinit ice if'(( ! $+commands[claude] ))' lucid as"program" run-atpull id-as"claude" \
+zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"program" run-atpull id-as"claude" \
   atclone"bun install -g @anthropic-ai/claude-code" \
   atclone"bun install -g ccstatusline@latest" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # xh
-zinit ice if'(( ! $+commands[xh] ))' lucid as"program" from"gh-r" id-as"xh" \
+zinit ice if'[[ ! -x $commands[xh] ]]' lucid as"program" from"gh-r" id-as"xh" \
   extract"!" \
   atclone"mv completions/_xh ./" \
   atclone"rm -rf */" \
@@ -261,7 +261,7 @@ zinit ice if'(( ! $+commands[xh] ))' lucid as"program" from"gh-r" id-as"xh" \
 zinit light ducaale/xh
 
 # tw - view and query tabular data files, such as CSV, TSV, and parquet
-zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh-r" id-as"tw" \
+zinit ice if'[[ ! -x $commands[tw] ]]' lucid as"program" from"gh-r" id-as"tw" \
   atclone"uget shshemi/tabiew tabiew-x86_64-unknown-linux-gnu.deb" \
   atclone"sudo dpkg -i /tmp/tabiew.deb" \
   atclone"rm -rf ./*" \
@@ -269,33 +269,33 @@ zinit ice if'(( ! $+commands[tw] ))' lucid as"program" from"gh-r" id-as"tw" \
 zinit light shshemi/tabiew
 
 # nping
-zinit ice if'(( ! $+commands[nping] ))' lucid as"program" from"gh-r" id-as"nping" \
+zinit ice if'[[ ! -x $commands[nping] ]]' lucid as"program" from"gh-r" id-as"nping" \
   bpick"nping-x86_64-unknown-linux-gnu.tar.gz"
 zinit light hanshuaikang/Nping
 
 # oryx - sniffing network traffic using eBPF on Linux
-zinit ice if'(( ! $+commands[oryx] ))' lucid as"program" from"gh-r" id-as"oryx" \
+zinit ice if'[[ ! -x $commands[oryx] ]]' lucid as"program" from"gh-r" id-as"oryx" \
   bpick"oryx-x86_64-unknown-linux-musl" \
   atclone"sudo mv oryx-x86_64-unknown-linux-musl /usr/bin/oryx" \
   atpull"%atclone"
 zinit light pythops/oryx
 
 # oha - HTTP load generator, inspired by rakyll/hey with tui animation
-zinit ice if'(( ! $+commands[oha] ))' lucid as"program" from"gh-r" id-as"oha" \
+zinit ice if'[[ ! -x $commands[oha] ]]' lucid as"program" from"gh-r" id-as"oha" \
   bpick"oha-linux-amd64" \
   atclone"mv oha-linux-amd64 oha" \
   atpull"%atclone"
 zinit light hatoo/oha
 
 # heynote - A dedicated scratchpad for power users
-zinit ice if'(( ! $+commands[heynote] ))' lucid as"program" from"gh-r" id-as"heynote" \
+zinit ice if'[[ ! -x $commands[heynote] ]]' lucid as"program" from"gh-r" id-as"heynote" \
   bpick"Heynote_*_x86_64.AppImage" \
-  atclone"mv heynote_*_x86_64.appimage $LPFX/heynote" \
+  atclone"mv heynote_*_x86_64.appimage ~/.local/bin/heynote" \
   atpull"%atclone"
 zinit light heyman/heynote
 
 # yaak - The most intuitive desktop API client
-zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh-r" id-as"yaak" \
+zinit ice if'[[ ! -x $commands[yaak] ]]' lucid as"program" from"gh-r" id-as"yaak" \
   atclone"uget mountain-loop/yaak amd64.deb$" \
   atclone"sudo dpkg -i /tmp/yaak.deb" \
   atclone"rm -rf ./*" \
@@ -303,15 +303,19 @@ zinit ice if'(( ! $+commands[yaak] ))' lucid as"program" from"gh-r" id-as"yaak" 
 zinit light mountain-loop/yaak
 
 # xan - The CSV magician
-zinit ice if'(( ! $+commands[xan] ))' lucid as"program" from"gh-r" id-as"xan"
+zinit ice if'[[ ! -x $commands[xan] ]]' lucid as"program" from"gh-r" id-as"xan"
 zinit light medialab/xan
 
 # prek - pre commint hook
 uv tool install prek
 
 # hl - A fast and powerful log viewer and processor that converts JSON logs or logfmt logs into a clear human-readable format
-zinit ice if'(( ! $+commands[hl] ))' lucid as"program" from"gh-r" id-as"hl" \
+zinit ice if'[[ ! -x $commands[hl] ]]' lucid as"program" from"gh-r" id-as"hl" \
   atclone"curl -sSfL https://github.com/pamburus/hl/releases/latest/download/hl-linux-x86_64-musl.tar.gz | tar xz" \
-  atclone"mv hl $LPFX/" \
+  atclone"mv hl ~/.local/bin/" \
   atpull"%atclone"
 zinit light pamburus/hl
+
+# sing-box-script
+bash <(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
+

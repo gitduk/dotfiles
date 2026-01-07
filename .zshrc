@@ -60,16 +60,16 @@ autoload -Uz edit-command-line
 ### ENVS ###
 ############
 
-export OS="$(cat /etc/os-release | grep '^ID=' | awk -F '=' '{printf $2}' | tr -d '"')"
+# get os id
+export OS=$(. /etc/os-release; echo "${ID}")
 
 # proxy settings
 function proxy() {
-
   local proxy_host="127.0.0.1"
   local proxy_port="7890"
   local slient="false"
   local action="set"
-
+  
   while [[ $# -gt 0 ]]; do
     case $1 in
       -h|--host) proxy_host="$2"; shift 2 ;;
@@ -79,24 +79,19 @@ function proxy() {
       *) break ;;
     esac
   done
-
+  
   if [[ "$action" == "unset" ]]; then
-    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
-    unset no_proxy NO_PROXY
+    unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY
     return 0
   fi
-
-  if timeout 0.5 bash -c "echo >/dev/tcp/${proxy_host}/${proxy_port}" 2>/dev/null; then
-    export http_proxy="http://${proxy_host}:${proxy_port}"
-    export HTTP_PROXY="$http_proxy"
-    export https_proxy="http://${proxy_host}:${proxy_port}"
-    export HTTPS_PROXY="$https_proxy"
-    export no_proxy="localhost,127.0.0.1"
-    export NO_PROXY="$no_proxy"
-    [[ "$slient" == "false" ]] && echo "Proxy enabled: ${proxy_host}:${proxy_port}"
-  else
-    [[ "$slient" == "false" ]] && echo "Proxy not available on ${proxy_host}:${proxy_port}"
-  fi
+  
+  export http_proxy="http://${proxy_host}:${proxy_port}"
+  export HTTP_PROXY="$http_proxy"
+  export https_proxy="http://${proxy_host}:${proxy_port}"
+  export HTTPS_PROXY="$https_proxy"
+  export no_proxy="localhost,127.0.0.1"
+  export NO_PROXY="$no_proxy"
+  [[ "$slient" == "false" ]] && echo "✓ Proxy set: ${proxy_host}:${proxy_port}"
 }
 
 [[ -n "$DISPLAY" ]] && proxy -s
@@ -111,10 +106,10 @@ fpath+=$ZSH_COMPLETIONS
 ############
 
 # install tool
-function inster() {
+function instr() {
   case "$OS" in
     debian | ubuntu)
-      sudo nala install -y $@ || { echo "Failed to install: $@"; return 1 }
+      sudo apt install -y $@ || { echo "Failed to install: $@"; return 1 }
       ;;
     fedora | centos | rocky | almalinux)
       sudo dnf install -y $@ || { echo "Failed to install: $@"; return 1 }
@@ -129,58 +124,8 @@ function inster() {
   esac
 }
 
-# uget - download release from repo
-uget() {
-  local repo="$1" pattern="$2" output="${3:-/tmp/$(basename "$1").deb}"
-  local url="https://api.github.com/repos/$repo/releases/latest"
-  local urls=() download_url line
-
-  while IFS= read -r line; do
-    urls+=("$line")
-  done < <(
-    curl -s -H "User-Agent: uget-script" "$url" |
-      jq -r '.assets[]?.browser_download_url' |
-      grep -E "$pattern"
-  )
-
-  if [[ ${#urls[@]} -eq 0 ]]; then
-    echo "$repo: No file found for pattern: $pattern" >&2
-    return 1
-  fi
-
-  if [[ ${#urls[@]} -gt 1 ]]; then
-    if command -v fzf >/dev/null 2>&1; then
-      download_url=$(printf '%s\n' "${urls[@]}" | fzf --header="Select a file to download" --preview="")
-    else
-      echo "Multiple matches found:"
-      select download_url in "${urls[@]}"; do
-        [ -n "$download_url" ] && break
-      done
-    fi
-  else
-    download_url="${urls[0]}${urls[1]}"
-  fi
-
-  [[ -z "$download_url" ]] && {
-    echo "$repo: No selection made."
-    return 1
-  }
-
-  echo "Downloading \e[32;1m$download_url\e[0m ..."
-  wget -q --show-progress "$download_url" -O "$output"
-}
-
-
-if ! command -v nala &>/dev/null; then
-  case "$OS" in
-    debian | ubuntu)
-      sudo apt install -y nala
-      ;;
-  esac
-fi
-
-command -v git &>/dev/null || inster git
-command -v git &>/dev/null || inster curl
+command -v git &>/dev/null || instr git
+command -v curl &>/dev/null || instr curl
 
 #############
 ### ZINIT ###
@@ -195,68 +140,45 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 source "${ZINIT_HOME}/zinit.zsh"
 
 # ensure dir
-export LPFX="$HOME/.local/bin"
-[[ ! -d "$LPFX" ]] && mkdir -p $LPFX
+[[ ! -d "$HOME/.local/bin" ]] && mkdir -p $HOME/.local/bin
 
 # Add the following snippet as the first plugin in your configuration
 zinit light-mode for zdharma-continuum/zinit-annex-bin-gem-node
 
-# prompt
+# starship
 zinit ice lucid as"program" from"gh-r" id-as"starship" \
   atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
-  atload"export STARSHIP_CONFIG=~/.starship.toml" \
+  atpull"%atclone" \
   src"init.zsh" \
-  atpull"%atclone"
+  atload"export STARSHIP_CONFIG=~/.starship.toml"
 zinit light starship/starship
 
-# must
-zinit ice if'[[ ! -f ~/.must.ok && $OS == "ubuntu" ]]' lucid as"program" id-as"must" \
-  atload'
-    ok=0
-    command -v ssh &>/dev/null || inster ssh || ok=1
-    command -v gcc &>/dev/null || inster build-essential || ok=1
-    command -v cmake &>/dev/null || inster cmake || ok=1
-    command -v pkg-config &>/dev/null || inster pkg-config || ok=1
-    command -v sccache &>/dev/null || inster sccache || ok=1
-    command -v openssl &>/dev/null || inster openssh || ok=1
-    command -v ddcutil &>/dev/null || inster ddcutil || ok=1
-    command -v nodejs &>/dev/null || inster nodejs || ok=1
-    command -v tmux &>/dev/null || inster tmux || ok=1
-    command -v unzip &>/dev/null || inster unzip || ok=1
-    command -v jq &>/dev/null || inster jq || ok=1
-    dpkg -l | grep libssl-dev | grep ii &>/dev/null || inster libssl-dev || ok=1
-    [[ $ok -eq 0 ]] && touch ~/.must.ok
-  '
-zinit light zdharma-continuum/null
-
 # display
-zinit ice if'[[ -n $DISPLAY && ! -f ~/.desktop.ok ]]' lucid as"program" id-as"display" \
-  atload'
-    ok=0
-    command -v foot &>/dev/null || inster foot || ok=1
-    command -v kitty &>/dev/null || inster kitty || ok=1
-    [[ $ok -eq 0 ]] && touch ~/.display.ok
-  '
+zinit ice if'[[ -n $DISPLAY ]]' lucid as"program" id-as"display" \
+  atclone'
+    command -v foot &>/dev/null || instr foot || ok=1
+    command -v kitty &>/dev/null || instr kitty || ok=1
+  ' \
+  atpull"%atclone"
 zinit light zdharma-continuum/null
 
 ############
 ### Brew ###
 ############
 
-# brew
-zinit ice wait"0" lucid as"program" run-atpull id-as"brew" \
+# brew - delay loading since it's not frequently used
+zinit ice wait"2" lucid as"program" run-atpull id-as"brew" \
   atclone'
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
   ' \
   atpull"%atclone" \
+  src"init.zsh" \
   atload'
     export HOMEBREW_NO_AUTO_UPDATE=true
     export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
-  ' \
-  src"init.zsh"
+  '
 zinit light zdharma-continuum/null
-export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
 #################
 ### Languages ###
@@ -269,11 +191,12 @@ zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
     $HOME/.cargo/bin/rustup completions zsh > _rustup
     $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
   ' \
-  atload'export CARGO_INSTALL_ROOT=$HOME/.local' \
-  atload'command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)' \
-  atpull"%atclone"
+  atpull"%atclone" \
+  atload'
+    export CARGO_INSTALL_ROOT=$HOME/.local
+    command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)
+  '
 zinit light zdharma-continuum/null
-export PATH=$HOME/.cargo/bin:$PATH
 
 # golang
 zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
@@ -283,22 +206,21 @@ zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
     [[ -d /usr/local/go ]] && sudo rm -rf /usr/local/go
     sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
   ' \
+  atpull"%atclone" \
   atload'
     export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
     export GOPRIVATE="*.corp.example.com,rsc.io/private"
     export GOSUMDB="sum.golang.org"
     export GO111MODULE=on
-  ' \
-  atpull"%atclone"
+  '
 zinit light zdharma-continuum/null
-export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
 
 ##############################
 ### Custom Config & Script ###
 ##############################
 
 # settings & functions
-zinit ice wait"0" lucid as"program" id-as"autoload" \
+zinit ice wait"1b" lucid as"program" id-as"autoload" \
   atinit"fpath+=~/.zsh.d/functions" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
@@ -327,8 +249,7 @@ zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
 zinit light zsh-users/zsh-autosuggestions
 
 # zdharma-continuum/fast-syntax-highlighting
-zinit ice wait"0" lucid id-as"fast-syntax-highlighting" \
-  atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay"
+zinit ice wait"0" lucid id-as"fast-syntax-highlighting"
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 # zsh-users/zsh-history-substring-search
@@ -347,11 +268,14 @@ zinit ice wait"1" blockf lucid id-as"zsh-completions" \
   atpull"zinit creinstall -q ."
 zinit light zsh-users/zsh-completions
 
+# compinit
+zinit ice wait"1a" lucid nocompile id-as"compinit" \
+  atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay"
+zinit light zdharma-continuum/null
+
 # Aloxaf/fzf-tab
-zinit ice wait"1" lucid id-as"fzf-tab" \
-  atload"
-    zstyle ':fzf-tab:*' fzf-flags --ansi
-  "
+zinit ice wait"1b" lucid id-as"fzf-tab" \
+  atload"zstyle ':fzf-tab:*' fzf-flags --ansi"
 zinit light Aloxaf/fzf-tab
 
 # sudo
@@ -365,55 +289,54 @@ zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 #############
 
 # bat
-zinit ice if'(( ! $+commands[bat] ))' lucid as"program" from"gh-r" id-as"bat" \
-  atclone"uget sharkdp/bat bat_.\*_amd64.deb" \
-  atclone"sudo dpkg -i /tmp/bat.deb" \
-  atclone"rm -rf ./*" \
+zinit ice if'[[ ! -x $commands[bat] ]]' lucid as"null" from"gh-r" id-as"bat" \
+  completions extract"!" \
+  atclone'sudo ln -sf $PWD/bat /usr/bin/bat' \
   atclone"bat --completion zsh > _bat" \
   atpull"%atclone"
 zinit light sharkdp/bat
 
 # eza - eza is a modern replacement for ls
-zinit ice if'(( ! $+commands[eza] ))' lucid as"command" from"gh-r" id-as"eza" \
-  atclone"sudo mv eza /usr/bin" \
+zinit ice if'[[ ! -x $commands[eza] ]]' lucid as"null" from"gh-r" id-as"eza" \
+  atclone'sudo ln -sf $PWD/eza /usr/bin/eza' \
   atpull"%atclone"
 zinit light eza-community/eza
 
 # direnv
-zinit ice wait"1" lucid as"command" from"gh-r" id-as"direnv" \
-  atclone"mv direnv* direnv" \
-  atclone"./direnv hook zsh > init.zsh" \
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
+  atclone"
+    mv direnv* direnv
+    ./direnv hook zsh > init.zsh
+  " \
   atpull"%atclone" \
   src"init.zsh"
 zinit light direnv/direnv
 
 # delta - A syntax-highlighting pager for git, diff, and grep output
-zinit ice if'(( ! $+commands[delta] ))' lucid as"command" from"gh-r" id-as"delta" \
-  atclone"mv */delta ." \
-  atclone"rm -rf */" \
-  atpull"%atclone"
+zinit ice if'[[ ! -x $commands[delta] ]]' lucid as"program" from"gh-r" id-as"delta" \
+  extract"!"
 zinit light dandavison/delta
 
 # zoxide - quick jump dir
-zinit ice wait"1" lucid as"command" from"gh-r" id-as"zoxide" \
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"zoxide" \
   atclone"./zoxide init zsh --cmd j > init.zsh" \
-  src"init.zsh" \
-  atpull"%atclone"
+  atpull"%atclone" \
+  src"init.zsh"
 zinit light ajeetdsouza/zoxide
 
-# atuin - command history
-zinit ice wait"0b" lucid as"command" from"gh-r" id-as"atuin" \
-  bpick"atuin-*.tar.gz" \
-  atclone"mv */atuin atuin" \
-  atclone"./atuin init zsh > init.zsh" \
-  atclone"./atuin gen-completions --shell zsh > _atuin" \
-  atclone"rm -rf */" \
-  src"init.zsh" \
-  atpull"%atclone"
+# atuin - command history, load after compinit for completion support
+zinit ice wait"1c" lucid as"program" from"gh-r" id-as"atuin" \
+  bpick"atuin-*.tar.gz" extract"!" \
+  atclone"
+    ./atuin init zsh > init.zsh
+    ./atuin gen-completions --shell zsh > _atuin
+  " \
+  atpull"%atclone" \
+  src"init.zsh"
 zinit light atuinsh/atuin
 
-# navi
-zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
+# navi - cheatsheet tool, load after widgets
+zinit ice wait"1c" lucid as"program" from"gh-r" id-as"navi" \
   atload'
     export NAVI_PATH="$HOME/.config/navi/cheats"
     export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
@@ -424,81 +347,85 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
   '
 zinit light denisidoro/navi
 
-# fzf
-zinit ice wait"0a" lucid as"program" from"gh-r" id-as"fzf" \
-  atclone"./fzf --zsh > init.zsh" \
-  atclone"mv ./fzf $LPFX/fzf" \
-  src"init.zsh" \
-  atpull"%atclone"
+# fzf - essential tool, load early
+zinit ice wait"0" lucid as"null" from"gh-r" id-as"fzf" \
+  atclone'
+    ./fzf --zsh > init.zsh
+    ln -sf $PWD/fzf ~/.local/bin/fzf
+  ' \
+  atpull"%atclone" \
+  src"init.zsh"
 zinit light junegunn/fzf
 
 # fd
-zinit ice if'(( ! $+commands[fd] ))' lucid as"program" from"gh-r" id-as"fd" \
-  atclone"sudo mv */fd /usr/bin/fd" \
-  atclone"mv */autocomplete/_fd ." \
-  atclone"rm -rf */" \
+zinit ice if'[[ ! -x $commands[fd] ]]' lucid as"null" from"gh-r" id-as"fd" \
+  completions extract"!" \
+  atclone'sudo ln -sf $PWD/fd /usr/bin/fd' \
   atpull"%atclone"
 zinit light sharkdp/fd
 
 # dust
-zinit ice if'(( ! $+commands[dust] ))' lucid as"command" from"gh-r" id-as"dust" \
-  atclone"sudo mv */dust /usr/bin" \
-  atclone"rm -rf */" \
+zinit ice if'[[ ! -x $commands[dust] ]]' lucid as"null" from"gh-r" id-as"dust" \
+  completions extract"!" \
+  atclone'
+    sudo ln -sf $PWD/dust /usr/bin/dust
+    wget https://raw.githubusercontent.com/bootandy/dust/refs/heads/master/completions/_dust
+  ' \
   atpull"%atclone"
 zinit light bootandy/dust
 
 # just
-zinit ice if'(( ! $+commands[just] ))' lucid as"command" from"gh-r" id-as"just" \
+zinit ice if'[[ ! -x $commands[just] ]]' lucid as"program" from"gh-r" id-as"just" \
   atclone'./just --completions zsh > _just' \
   atpull"%atclone"
 zinit light casey/just
 
 # nvim
-zinit ice if'(( ! $+commands[nvim] ))' lucid as"program" from"gh-r" id-as"nvim" \
+zinit ice if'[[ ! -x $commands[nvim] ]]' lucid as"null" from"gh-r" id-as"nvim" \
   bpick"nvim-linux-x86_64.appimage" \
-  atclone"sudo mv nvim-linux-x86_64.appimage /usr/bin/nvim" \
+  atclone'sudo ln -sf $PWD/nvim-linux-x86_64.appimage /usr/bin/nvim' \
   atpull"%atclone"
 zinit light neovim/neovim
 
 # easytier
-zinit ice if'(( ! $+commands[easytier-cli] ))' lucid as"command" from"gh-r" id-as"easytier" \
+zinit ice if'[[ ! -x $commands[easytier-cli] ]]' lucid as"null" from"gh-r" id-as"easytier" \
   extract"!" \
-  atclone"sudo mv * /usr/bin" \
+  atclone'
+    sudo ln -sf $PWD/easytier-cli /usr/bin/easytier-cli
+    sudo ln -sf $PWD/easytier-core /usr/bin/easytier-core
+  ' \
   atpull"%atclone"
 zinit light EasyTier/EasyTier
 
 # lnav
-zinit ice if'(( ! $+commands[lnav] ))' lucid as"program" from"gh-r" id-as"lnav" \
-  atclone"brew install lnav" \
-  atclone"rm -rf ./*" \
-  atpull"%atclone"
+zinit ice if'[[ ! -x $commands[lnav] ]]' lucid as"program" from"gh-r" id-as"lnav" \
+  extract"!"
 zinit light tstack/lnav
 
 # fastfetch
-zinit ice if'(( ! $+commands[fastfetch] ))' lucid as"program" from"gh-r" id-as"fastfetch" \
-  atclone"uget fastfetch-cli/fastfetch amd64.deb" \
-  atclone"sudo dpkg -i /tmp/fastfetch.deb" \
-  atclone"rm -rf ./*" \
+zinit ice if'[[ ! -x $commands[fastfetch] ]]' lucid as"program" from"gh-r" id-as"fastfetch" \
+  bpick"fastfetch-linux-amd64.tar.gz" extract"!" \
+  atclone"mv usr/bin/* ." \
   atpull"%atclone"
 zinit light fastfetch-cli/fastfetch
 
 # bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
-  bpick"bun-linux-x64.zip" \
-  atclone"sudo mv */bun /usr/bin" \
-  atclone"SHELL=zsh bun completions > _bun" \
-  atclone"rm -rf */" \
+zinit ice wait"1" lucid as"null" from"gh-r" id-as"bun" \
+  bpick"bun-linux-x64.zip" completions extract"!" \
+  atclone'
+    sudo ln -sf $PWD/bun /usr/bin/bun
+    wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun
+  ' \
   atpull"%atclone" \
   atload'
-    export BUN_INSTALL="$HOME/.local"
+    export BUN_INSTALL=$HOME/.local
   '
 zinit light oven-sh/bun
 
 # uv - python package manager
-zinit ice if'(( ! $+commands[uv] ))' lucid as"command" from"gh-r" id-as"uv" \
-  atclone"mv */* . && ./uv generate-shell-completion zsh > _uv" \
-  atclone"rm -rf */" \
-  atclone"sudo mv uv* /usr/bin" \
+zinit ice if'[[ ! -x $commands[uv] ]]' lucid as"program" from"gh-r" id-as"uv" \
+  extract"!" \
+  atclone"./uv generate-shell-completion zsh > _uv" \
   atpull"%atclone"
 zinit light astral-sh/uv
 
@@ -513,11 +440,10 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"fnm" \
 zinit light Schniz/fnm
 
 # wallust
-zinit ice wait"1" lucid as"program" run-atpull id-as"wallust" \
-  atclone"cargo install --locked wallust" \
-  atclone"command -v wallust &>/dev/null && wallust theme base16-default-dark -s" \
+zinit ice wait"1" lucid as"program" from"codeberg.org" id-as"wallust" \
+  atclone"cargo +nightly install --path ." \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light explosion-mental/wallust
 
 # feedr
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"feedr" \
@@ -526,11 +452,25 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"feedr" \
 zinit light bahdotsh/feedr
 
 # pueue
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"pueue" \
-  atclone"chmod +x pueue*" \
-  atclone"mv pueue* $LPFX/pueue" \
+zinit ice wait"1" lucid as"null" from"gh-r" id-as"pueue" \
+  bpick"pueue-x86_64-unknown-linux-musl" \
+  bpick"pueued-x86_64-unknown-linux-musl" \
+  completions \
+  atclone'
+    chmod +x pueue*
+    ln -sf $PWD/pueue-x86_64-unknown-linux-musl ~/.local/bin/pueue
+    ln -sf $PWD/pueued-x86_64-unknown-linux-musl ~/.local/bin/pueued
+    pueue completions zsh > _pueue
+  ' \
   atpull"%atclone"
 zinit light Nukesor/pueue
+
+# witr
+zinit ice if'[[ ! -x $commands[witr] ]]' lucid as"program" from"gh-r" id-as"witr" \
+  bpick"witr-linux-amd64" \
+  atclone'ln -sf $PWD/witr-linux-amd64 ~/.local/bin/witr' \
+  atpull"%atclone"
+zinit light pranshuparmar/witr
 
 ###################
 ### Completions ###
@@ -539,10 +479,6 @@ zinit light Nukesor/pueue
 # docker
 zinit ice if'[[ -n ${ZLAST_COMMANDS[(r)docker]} ]]' lucid as"completion"
 zinit snippet "https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker"
-
-# fzf
-zinit ice if'[[ -n ${ZLAST_COMMANDS[(r)fzf]} ]]' lucid as"completion"
-zinit snippet "https://raw.githubusercontent.com/lmburns/dotfiles/master/.config/zsh/completions/_fzf"
 
 #############
 ### Zprof ###
@@ -553,3 +489,4 @@ if [[ -n "$ZPROF" ]]; then
   zmodload -u zsh/zprof
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
+
