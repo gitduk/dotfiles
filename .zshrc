@@ -96,11 +96,6 @@ function proxy() {
 
 [[ -n "$DISPLAY" ]] && proxy -s
 
-# completion
-export ZSH_COMPLETIONS="$HOME/.zsh.d/completions"
-[[ ! -d "$ZSH_COMPLETIONS" ]] && mkdir -p "$ZSH_COMPLETIONS"
-fpath+=$ZSH_COMPLETIONS
-
 ############
 ### MUST ###
 ############
@@ -154,10 +149,10 @@ zinit ice lucid as"program" from"gh-r" id-as"starship" \
 zinit light starship/starship
 
 # display
-zinit ice if'[[ -n $DISPLAY ]]' lucid as"program" id-as"display" \
+zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
   atclone'
-    command -v foot &>/dev/null || instr foot || ok=1
-    command -v kitty &>/dev/null || instr kitty || ok=1
+    command -v foot &>/dev/null || instr foot
+    command -v kitty &>/dev/null || instr kitty
   ' \
   atpull"%atclone"
 zinit light zdharma-continuum/null
@@ -224,10 +219,9 @@ zinit ice wait"1b" lucid as"program" id-as"autoload" \
   atinit"fpath+=~/.zsh.d/functions" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
-    [[ -f ~/.env.zsh ]] && source ~/.env.zsh || touch ~/.env.zsh
     for script (~/.zsh.d/*.zsh(N)) source $script
     [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh || touch ~/.alias.zsh
-    [[ -f ~/.alias.custom.zsh ]] && source ~/.alias.custom.zsh || touch ~/.alias.custom.zsh
+    [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
   '
 zinit light zdharma-continuum/null
 
@@ -243,8 +237,8 @@ zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
     export ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
     export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
     bindkey -M viins '^q' autosuggest-clear
-    bindkey -M viins '^e' autosuggest-execute
-    bindkey -M vicmd '^e' autosuggest-execute
+    bindkey -M viins '^ ' autosuggest-execute
+    bindkey -M vicmd '^ ' autosuggest-execute
   "
 zinit light zsh-users/zsh-autosuggestions
 

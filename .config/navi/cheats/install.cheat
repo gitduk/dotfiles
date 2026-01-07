@@ -152,13 +152,13 @@ zinit ice if'[[ ! -x $commands[sing-box] ]]' lucid as"program" from"gh-r" id-as"
 zinit light SagerNet/sing-box
 
 # curlie
-zinit ice if'[[ ! -x $commands[curlie] ]]' lucid as"command" from"gh-r" id-as"curlie" \
+zinit ice if'[[ ! -x $commands[curlie] ]]' lucid as"program" from"gh-r" id-as"curlie" \
   atclone"mv curlie ~/.local/bin/" \
   atpull"%atclone"
 zinit light rs/curlie
 
 # hurl
-zinit ice if'[[ ! -x $commands[hurl] ]]' lucid as"command" from"gh-r" id-as"hurl" \
+zinit ice if'[[ ! -x $commands[hurl] ]]' lucid as"program" from"gh-r" id-as"hurl" \
   atclone"mv */bin/* ." \
   atclone"mv */completions/_hurl ." \
   atclone"mv */completions/_hurlfmt ." \
@@ -167,19 +167,19 @@ zinit ice if'[[ ! -x $commands[hurl] ]]' lucid as"command" from"gh-r" id-as"hurl
 zinit light Orange-OpenSource/hurl
 
 # fx - Command-line tool and terminal JSON viewer
-zinit ice if'[[ ! -x $commands[fx] ]]' lucid as"command" from"gh-r" id-as"fx" \
+zinit ice if'[[ ! -x $commands[fx] ]]' lucid as"program" from"gh-r" id-as"fx" \
   atclone"mv fx* ~/.local/bin/fx"
 zinit light antonmedv/fx
 
 # gh
-zinit ice if'[[ ! -x $commands[gh] ]]' lucid as"command" from"gh-r" id-as"gh" \
+zinit ice if'[[ ! -x $commands[gh] ]]' lucid as"program" from"gh-r" id-as"gh" \
   atclone"sudo mv */bin/gh /usr/bin" \
   atclone"rm -rf */" \
   atpull"%atclone"
 zinit light cli/cli
 
 # glow - Glow is a terminal-based markdown reader designed from the ground up to bring out the beauty—and power—of the CLI
-zinit ice if'[[ ! -x $commands[glow] ]]' lucid as"command" from"gh-r" id-as"glow" \
+zinit ice if'[[ ! -x $commands[glow] ]]' lucid as"program" from"gh-r" id-as"glow" \
   atclone"mv */glow ." \
   atclone"mv */completions/glow.zsh _glow" \
   atclone"rm -rf */" \
@@ -187,15 +187,15 @@ zinit ice if'[[ ! -x $commands[glow] ]]' lucid as"command" from"gh-r" id-as"glow
 zinit light charmbracelet/glow
 
 # grex - A command-line tool and library for generating regular expressions from user-provided test cases
-zinit ice if'[[ ! -x $commands[grex] ]]' lucid as"command" from"gh-r" id-as"grex"
+zinit ice if'[[ ! -x $commands[grex] ]]' lucid as"program" from"gh-r" id-as"grex"
 zinit light pemistahl/grex
 
 # procs - procs is a replacement for ps written in Rust
-zinit ice if'[[ ! -x $commands[procs] ]]' lucid as"command" from"gh-r" id-as"procs"
+zinit ice if'[[ ! -x $commands[procs] ]]' lucid as"program" from"gh-r" id-as"procs"
 zinit light dalance/procs
 
 # ripgrep - ripgrep recursively searches directories for a regex pattern
-zinit ice if'[[ ! -x $commands[rg] ]]' lucid as"command" from"gh-r" id-as"rg" \
+zinit ice if'[[ ! -x $commands[rg] ]]' lucid as"program" from"gh-r" id-as"rg" \
   atclone"sudo mv */rg /usr/bin" \
   atclone"mv */complete/_rg ." \
   atclone"rm -rf */" \
@@ -203,7 +203,7 @@ zinit ice if'[[ ! -x $commands[rg] ]]' lucid as"command" from"gh-r" id-as"rg" \
 zinit light burntSushi/ripgrep
 
 # yazi - file browser
-zinit ice if'[[ ! -x $commands[yazi] ]]' lucid as"command" from"gh-r" id-as"yazi" \
+zinit ice if'[[ ! -x $commands[yazi] ]]' lucid as"program" from"gh-r" id-as"yazi" \
   bpick"yazi-x86_64-unknown-linux-musl.zip" \
   atclone"mv yazi*/* ." \
   atclone"mv comp*/_ya ." \
@@ -213,19 +213,19 @@ zinit ice if'[[ ! -x $commands[yazi] ]]' lucid as"command" from"gh-r" id-as"yazi
 zinit light sxyazi/yazi
 
 # fscan
-zinit ice if'[[ ! -x $commands[fscan] ]]' lucid as"command" from"gh-r" id-as"fscan" \
+zinit ice if'[[ ! -x $commands[fscan] ]]' lucid as"program" from"gh-r" id-as"fscan" \
   bpick"fscan"
 zinit light shadow1ng/fscan
 
 # sttr
-zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"command" from"gh-r" id-as"sttr" \
+zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"program" from"gh-r" id-as"sttr" \
   atclone"./sttr completion zsh > _sttr" \
   atclone"mv sttr ~/.local/bin/" \
   atpull"%atclone"
 zinit light abhimanyu003/sttr
 
 # dysk - A linux utility to get information on filesystems, like df but better
-zinit ice if'[[ ! -x $commands[dysk] ]]' lucid as"command" from"gh-r" id-as"dysk" \
+zinit ice if'[[ ! -x $commands[dysk] ]]' lucid as"program" from"gh-r" id-as"dysk" \
   atclone"mv */completion/_dysk ." \
   atclone"mv */x86_64-unknown-linux-musl/dysk ." \
   atclone"rm -rf */" \
@@ -233,7 +233,7 @@ zinit ice if'[[ ! -x $commands[dysk] ]]' lucid as"command" from"gh-r" id-as"dysk
 zinit light Canop/dysk
 
 # rainfrog - a database management tui
-zinit ice if'[[ -n $DISPLAY ]]' lucid as"command" from"gh-r" id-as"rain" \
+zinit ice if'[[ -n $DISPLAY ]]' lucid as"program" from"gh-r" id-as"rain" \
   atclone"mv rainfrog rain" \
   atpull"%atclone"
 zinit light achristmascarl/rainfrog
@@ -246,7 +246,7 @@ zinit ice if'[[ ! -x $commands[codex] ]]' lucid as"program" from"gh-r" id-as"cod
 zinit light openai/codex
 
 # claude-code
-zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"program" run-atpull id-as"claude" \
+zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"null" run-atpull id-as"claude" \
   atclone"bun install -g @anthropic-ai/claude-code" \
   atclone"bun install -g ccstatusline@latest" \
   atpull"%atclone"

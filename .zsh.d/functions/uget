@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+local repo="$1" pattern="$2" output="${3:-/tmp/$(basename "$1").deb}"
+local url="https://api.github.com/repos/$repo/releases/latest"
+local urls=() download_url line
+
+while IFS= read -r line; do
+  urls+=("$line")
+done < <(
+  curl -s -H "User-Agent: uget-script" "$url" |
+    jq -r '.assets[]?.browser_download_url' |
+    grep -E "$pattern"
+)
+
+if [[ ${#urls[@]} -eq 0 ]]; then
+  echo "$repo: No file found for pattern: $pattern" >&2
+  return 1
+fi
+
+if [[ ${#urls[@]} -gt 1 ]]; then
+  if command -v fzf >/dev/null 2>&1; then
+    download_url=$(printf '%s\n' "${urls[@]}" | fzf --header="Select a file to download" --preview="")
+  else
+    echo "Multiple matches found:"
+    select download_url in "${urls[@]}"; do
+      [ -n "$download_url" ] && break
+    done
+  fi
+else
+  download_url="${urls[0]}${urls[1]}"
+fi
+
+[[ -z "$download_url" ]] && {
+  echo "$repo: No selection made."
+  return 1
+}
+
+echo "Downloading \e[32;1m$download_url\e[0m ..."
+wget -q --show-progress "$download_url" -O "$output"
+
