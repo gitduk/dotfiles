@@ -434,7 +434,7 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"fnm" \
 zinit light Schniz/fnm
 
 # wallust
-zinit ice wait"1" lucid as"program" from"codeberg.org" id-as"wallust" \
+zinit ice if'[[ -n $DISPLAY && ! -x $commands[wallust] ]]' lucid as"null" from"codeberg.org" id-as"wallust" \
   atclone"cargo +nightly install --path ." \
   atpull"%atclone"
 zinit light explosion-mental/wallust
