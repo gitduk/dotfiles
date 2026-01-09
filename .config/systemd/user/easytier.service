@@ -3,7 +3,7 @@ Description=EasyTier Service
 After=network.target
 
 [Service]
-ExecStart=easytier-core --private-mode true --network-name easynet --network-secret changeme
+ExecStart=easytier-core -d --network-name easynet --network-secret changeme -p tcp://net.wukaige.com:11010
 Restart=always
 RestartSec=5
 Environment=PATH=/usr/bin:/usr/local/bin
