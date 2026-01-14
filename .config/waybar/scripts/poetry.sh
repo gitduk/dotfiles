@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_NAME=$(basename "$0")
-VERSION="1.2.0"
+VERSION="1.3.0"
 
 ##############
 ### config ###
@@ -18,11 +18,36 @@ declare -A CONFIG=(
   [token_expire_hours]=24
   [max_content_length]=50
   [min_request_interval]=60
-  [retry_delay]=3600
   [max_history_size]=1000
+  # [retry_delay]=3600  # 保留配置项，将来可用于失败重试间隔
 )
 
-mkdir -p "${CONFIG[cache_dir]}"
+mkdir -p "${CONFIG[cache_dir]}" 2>/dev/null || {
+  echo '{"text":"无法创建缓存目录","class":"error"}' >&2
+  exit 1
+}
+
+# 检查缓存目录是否可写
+if [[ ! -w "${CONFIG[cache_dir]}" ]]; then
+  echo '{"text":"缓存目录不可写","class":"error"}' >&2
+  exit 1
+fi
+
+# 检查必要依赖
+check_dependencies() {
+  local missing_deps=()
+
+  command -v curl >/dev/null || missing_deps+=("curl")
+  command -v jq >/dev/null || missing_deps+=("jq")
+
+  if [[ ${#missing_deps[@]} -gt 0 ]]; then
+    local deps_str="${missing_deps[*]}"
+    echo "{\"text\":\"缺少依赖: $deps_str\",\"class\":\"error\"}" > "${CONFIG[cache_file]}"
+    error "缺少必要依赖: $deps_str"
+    return 1
+  fi
+  return 0
+}
 
 show_help() {
   cat <<EOF
@@ -121,7 +146,19 @@ record_request_time() {
 is_token_expired() {
   [[ ! -f "${CONFIG[token_file]}" ]] && return 0
   local token_mtime file_age_hours
-  token_mtime=$(stat -c %Y "${CONFIG[token_file]}" 2>/dev/null || echo 0)
+
+  # 跨平台获取文件修改时间
+  if stat -c %Y "${CONFIG[token_file]}" &>/dev/null; then
+    # GNU stat (Linux)
+    token_mtime=$(stat -c %Y "${CONFIG[token_file]}")
+  elif stat -f %m "${CONFIG[token_file]}" &>/dev/null; then
+    # BSD stat (macOS)
+    token_mtime=$(stat -f %m "${CONFIG[token_file]}")
+  else
+    # 回退方案：使用 date 和 ls
+    token_mtime=$(date -r "${CONFIG[token_file]}" +%s 2>/dev/null || echo 0)
+  fi
+
   file_age_hours=$(( ( $(date +%s) - token_mtime ) / 3600 ))
   [[ $file_age_hours -gt ${CONFIG[token_expire_hours]} ]]
 }
@@ -238,21 +275,27 @@ save_to_history() {
 
   # 检查是否已存在相同内容（避免重复）
   local exists
-  exists=$(jq --arg content "$content" '.[] | select(.content == $content) | length > 0' <<<"$current_history" 2>/dev/null || echo "false")
+  exists=$(jq --arg content "$content" 'any(.content == $content)' <<<"$current_history" 2>/dev/null || echo "false")
+
+  # 使用 PID 创建唯一临时文件，避免竞态条件
+  local tmpfile="${CONFIG[history_file]}.tmp.$$"
 
   if [[ "$exists" == "true" ]]; then
     # 如果已存在，更新时间戳
     jq --arg content "$content" --arg timestamp "$(date +%s)" \
       'map(if .content == $content then .timestamp = ($timestamp|tonumber) else . end)' \
-      <<<"$current_history" > "${CONFIG[history_file]}.tmp" && \
-      mv "${CONFIG[history_file]}.tmp" "${CONFIG[history_file]}"
+      <<<"$current_history" > "$tmpfile" && \
+      mv "$tmpfile" "${CONFIG[history_file]}"
   else
     # 添加新记录并限制数量
     jq --argjson entry "$history_entry" --argjson max_size "${CONFIG[max_history_size]}" \
       '. + [$entry] | sort_by(.timestamp) | reverse | .[:$max_size]' \
-      <<<"$current_history" > "${CONFIG[history_file]}.tmp" && \
-      mv "${CONFIG[history_file]}.tmp" "${CONFIG[history_file]}"
+      <<<"$current_history" > "$tmpfile" && \
+      mv "$tmpfile" "${CONFIG[history_file]}"
   fi
+
+  # 清理可能残留的临时文件
+  rm -f "$tmpfile" 2>/dev/null || true
 }
 
 format_output() {
@@ -394,11 +437,6 @@ create_fallback_poetry() {
 update_poetry() {
   local force_update="${1:-false}"
 
-  command -v curl >/dev/null || {
-    echo '{"text":"curl not found","class":"error"}' >"${CONFIG[cache_file]}"
-    return 1
-  }
-
   # 检查请求频率限制
   if ! can_make_request "$force_update"; then
     # 如果缓存存在，继续使用旧缓存
@@ -444,16 +482,14 @@ update_poetry() {
   format_output "$poetry_data" >"${CONFIG[cache_file]}"
 }
 
-handle_click() {
-  # 点击时强制尝试刷新（但仍保留 can_make_request 的提示行为）
-  if ! can_make_request "false"; then
-    # 过于频繁时显示随机诗词（临时）
-    create_fallback_poetry >"${CONFIG[cache_file]}"
-    return 0
-  fi
-
+show_loading_state() {
   # 获取当前诗词
-  current_text=$(cat ${CONFIG[cache_file]} | jq -r .text)
+  local current_text
+  if [[ -f "${CONFIG[cache_file]}" ]]; then
+    current_text=$(jq -r .text "${CONFIG[cache_file]}" 2>/dev/null || echo "")
+  else
+    current_text=""
+  fi
 
   # 先写入 loading 状态到缓存，Waybar 等会立即显示
   if command -v jq >/dev/null 2>&1; then
@@ -462,9 +498,39 @@ handle_click() {
   else
     printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' "$current_text ..." "正在刷新诗词..." "loading" >"${CONFIG[cache_file]}"
   fi
+}
 
-  # 后台更新（非阻塞）
-  { sleep 0.1; update_poetry "false"; } &
+handle_click() {
+  # 点击时强制尝试刷新（但仍保留 can_make_request 的提示行为）
+  if ! can_make_request "false"; then
+    # 过于频繁时显示随机诗词（临时）
+    create_fallback_poetry >"${CONFIG[cache_file]}"
+    return 0
+  fi
+
+  show_loading_state
+
+  # 后台更新（非阻塞），使用 disown 确保进程不受父进程影响
+  # 在子 shell 中禁用 set -e 避免意外退出
+  (
+    set +e
+    sleep 0.1
+    update_poetry "false"
+  ) &
+  disown
+}
+
+handle_force() {
+  show_loading_state
+
+  # 后台更新（非阻塞），使用 disown 确保进程不受父进程影响
+  # 在子 shell 中禁用 set -e 避免意外退出
+  (
+    set +e
+    sleep 0.1
+    update_poetry "true"
+  ) &
+  disown
 }
 
 clean_cache() {
@@ -473,12 +539,17 @@ clean_cache() {
 }
 
 main() {
+  # 检查依赖（仅在需要时检查）
+  if [[ $# -eq 0 ]] || [[ "$1" == "--click" ]] || [[ "$1" == "--force" ]]; then
+    check_dependencies || exit 1
+  fi
+
   [[ $# -eq 0 ]] && { update_poetry "false"; exit 0; }
 
   while [[ $# -gt 0 ]]; do
     case $1 in
       --click) handle_click ;;
-      --force) update_poetry "true" ;;
+      --force) handle_force ;;
       --status) show_status ;;
       --clean) clean_cache ;;
       -h|--help) show_help; exit 0 ;;

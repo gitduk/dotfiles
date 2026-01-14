@@ -10,10 +10,8 @@ VERSION="1.0.0"
 # 配置
 declare -A CONFIG=(
   [cache_dir]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
-  [token_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/ip.token"
   [cache_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/ipaddress.json"
-  [token_api]="https://v2.jinrishici.com/token"
-  [ip_api]="https://v2.jinrishici.com/info"
+  [ip_api]="https://ipinfo.io/json"
 )
 
 # 创建缓存目录
@@ -62,51 +60,36 @@ show_loading() {
     '{text: $text, tooltip: $tooltip, class: $class}' >"${CONFIG[cache_file]}"
 }
 
-get_token() {
-  if [[ -f "${CONFIG[token_file]}" ]]; then
-    cat "${CONFIG[token_file]}"
-  else
-    info "正在获取 Token..."
-    local token
-    token=$(curl -s "${CONFIG[token_api]}" | jq -r '.data')
-    if [[ -n "$token" && "$token" != "null" ]]; then
-      echo "$token" >"${CONFIG[token_file]}"
-      echo "$token"
-    else
-      error "获取 Token 失败"
-      return 1
-    fi
-  fi
-}
-
 get_ipaddress() {
-  local token="$1"
-  curl -s -H "X-User-Token: $token" "${CONFIG[ip_api]}"
+  curl -s "${CONFIG[ip_api]}"
 }
 
 format_output() {
   local json_data="$1"
 
-  local class ip region weather temperature time tooltip
-  class=$(jq -r '.status' <<< "$json_data")
-  ip=$(jq -r '.data.ip // "127.0.0.1"' <<< "$json_data")
-  region=$(jq -r '.data.region // ""' <<< "$json_data")
-  weather=$(jq -r '.data.weatherData.weather // ""' <<< "$json_data")
-  temperature=$(jq -r '.data.weatherData.temperature // ""' <<< "$json_data")
-  time=$(jq -r '.data.beijingTime // ""' <<< "$json_data")
+  local ip city region country org timezone time tooltip class
+  ip=$(jq -r '.ip // "127.0.0.1"' <<< "$json_data")
+  city=$(jq -r '.city // ""' <<< "$json_data")
+  region=$(jq -r '.region // ""' <<< "$json_data")
+  country=$(jq -r '.country // ""' <<< "$json_data")
+  org=$(jq -r '.org // ""' <<< "$json_data")
+  timezone=$(jq -r '.timezone // ""' <<< "$json_data")
+  time=$(date "+%H:%M:%S")
 
-  if [[ -z "$time" ]]; then
-    time=$(date "+%H:%M:%S")
-  else
-    time="${time#*T}"
-    time="${time%.*}"
-    region="${region/|/-}"
-  fi
-
-  if [[ "$class" == "error" ]]; then
+  # 检查是否获取到有效IP
+  if [[ "$ip" == "127.0.0.1" || -z "$ip" ]]; then
+    class="error"
     tooltip="请求失败 | $time"
   else
-    tooltip="$region | $weather ${temperature}°C | $time"
+    class="success"
+    # 构建位置信息
+    local location=""
+    [[ -n "$city" ]] && location="$city"
+    [[ -n "$region" ]] && location="${location:+$location, }$region"
+    [[ -n "$country" ]] && location="${location:+$location, }$country"
+    [[ -z "$location" ]] && location="Unknown"
+
+    tooltip="$location | $org | $time"
   fi
 
   jq -n -c \
@@ -121,14 +104,13 @@ update_ip() {
   command -v jq    >/dev/null || { echo '{"text":"jq not found","class":"error"}' > "${CONFIG[cache_file]}"; return 1; }
   command -v curl  >/dev/null || { echo '{"text":"curl not found","class":"error"}' > "${CONFIG[cache_file]}"; return 1; }
 
-  local token
-  token=$(get_token) || { echo '{"text":"get token failed","class":"error"}' > "${CONFIG[cache_file]}"; return 1; }
-
   local ip_data
-  ip_data=$(get_ipaddress "$token")
-  [[ -z "$ip_data" ]] && ip_data='{"status":"error"}'
+  ip_data=$(get_ipaddress)
+  [[ -z "$ip_data" ]] && ip_data='{"ip":"127.0.0.1"}'
 
-  format_output "$ip_data" >"${CONFIG[cache_file]}"
+  local output
+  output=$(format_output "$ip_data")
+  echo "$output" | tee "${CONFIG[cache_file]}"
 }
 
 handle_click() {

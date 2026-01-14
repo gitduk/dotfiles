@@ -217,20 +217,6 @@ zinit ice if'[[ ! -x $commands[fscan] ]]' lucid as"program" from"gh-r" id-as"fsc
   bpick"fscan"
 zinit light shadow1ng/fscan
 
-# sttr
-zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"program" from"gh-r" id-as"sttr" \
-  atclone"./sttr completion zsh > _sttr" \
-  atclone"mv sttr ~/.local/bin/" \
-  atpull"%atclone"
-zinit light abhimanyu003/sttr
-
-# dysk - A linux utility to get information on filesystems, like df but better
-zinit ice if'[[ ! -x $commands[dysk] ]]' lucid as"program" from"gh-r" id-as"dysk" \
-  atclone"mv */completion/_dysk ." \
-  atclone"mv */x86_64-unknown-linux-musl/dysk ." \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light Canop/dysk
 
 # rainfrog - a database management tui
 zinit ice if'[[ -n $DISPLAY ]]' lucid as"program" from"gh-r" id-as"rain" \
@@ -251,14 +237,6 @@ zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"null" run-atpull id-as"claud
   atclone"bun install -g ccstatusline@latest" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
-
-# xh
-zinit ice if'[[ ! -x $commands[xh] ]]' lucid as"program" from"gh-r" id-as"xh" \
-  extract"!" \
-  atclone"mv completions/_xh ./" \
-  atclone"rm -rf */" \
-  atpull"%atclone"
-zinit light ducaale/xh
 
 # tw - view and query tabular data files, such as CSV, TSV, and parquet
 zinit ice if'[[ ! -x $commands[tw] ]]' lucid as"program" from"gh-r" id-as"tw" \
@@ -316,6 +294,24 @@ zinit ice if'[[ ! -x $commands[hl] ]]' lucid as"program" from"gh-r" id-as"hl" \
   atpull"%atclone"
 zinit light pamburus/hl
 
-# sing-box-script
+# sing-box-script - selfhost vpn
 bash <(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
+
+# podman
+echo "deb http://archive.ubuntu.com/ubuntu plucky main universe" | sudo tee /etc/apt/sources.list.d/plucky.list
+cat <<EOF | sudo tee /etc/apt/preferences.d/podman-plucky.pref
+Package: podman buildah golang-github-containers-common crun libgpgme11t64 libgpg-error0 golang-github-containers-image catatonit conmon containers-storage
+Pin: release n=plucky
+Pin-Priority: 991
+
+Package: libsubid4 netavark passt aardvark-dns containernetworking-plugins libslirp0 slirp4netns
+Pin: release n=plucky
+Pin-Priority: 991
+
+Package: *
+Pin: release n=plucky
+Pin-Priority: 400
+EOF
+sudo apt update
+sudo apt install podman
 

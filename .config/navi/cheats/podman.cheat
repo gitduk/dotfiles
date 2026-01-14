@@ -6,6 +6,12 @@ podman generate systemd \
   --restart-policy <policy> \
   --files
 
+# export volume to remote server
+podman volume export \
+  <name> -o - |
+  ssh <host> \
+  "podman volume create <name> && podman volume import <name> -"
+
 $ name: podman container list --all --format json | jq ".[] | .Names[]"
 $ policy: echo "always|unless-stopped|on-failure" | tr "|" "\n"
 
@@ -54,7 +60,6 @@ podman run -d --name pairdrop \
 podman run -d --name uptime-kuma \
   -v uptime-kuma:/app/data \
   --network=host \
-  --restart=unless-stopped \
   louislam/uptime-kuma:1
 
 # beszel: a lightweight server monitoring
@@ -136,6 +141,6 @@ podman run -d --name rustfs \
   -e RUSTFS_SERVER_DOMAINS=example.com \
   -p 9000:9000 \
   -v rustfs:/data \
-  -v ./logs:/logs \
-  rustfs/rustfs:alpha
+  -v /var/log/rustfs:/logs \
+  rustfs/rustfs:latest
 

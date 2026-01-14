@@ -1,0 +1,18 @@
+[progress]
+style = "plain"          # "fancy" (default), "plain" (same as --tui)
+
+[progress.theme]
+# Define progress bar gradient (Hex colors) - Default is a Morandi purple gradient
+bar_gradient = ["#CABBE9", "#7E6EAC"] 
+bar_complete_char = "█"
+bar_incomplete_char = "░"
+text_color = "reset"     # "reset" (default), "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", or Hex "#RRGGBB"
+border_color = "#9E8BCA"
+title_color = "#9E8BCA"
+
+[progress.layout]
+box_style = "rounded"    # "rounded" (default), "double", "heavy", "single"
+
+[copy]
+reflink = "auto"         # "auto" (default), "never"
+

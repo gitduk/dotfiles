@@ -111,7 +111,8 @@
     "tooltip": true,
     "format": "{}",
     "max-length": 60,
-    "on-click": "~/.config/waybar/scripts/poetry.sh --click"
+    "on-click": "~/.config/waybar/scripts/poetry.sh --click",
+    "on-click-right": "~/.config/waybar/scripts/poetry.sh --force"
   },
   "custom/ipaddress": {
     "exec": "cat ~/.cache/waybar/ipaddress.json || echo '{\"text\": \"127.0.0.1\"}'",

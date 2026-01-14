@@ -56,9 +56,9 @@ zmodload zsh/zle
 autoload -Uz add-zsh-hook
 autoload -Uz edit-command-line
 
-############
-### ENVS ###
-############
+#################
+### Functions ###
+#################
 
 # get os id
 export OS=$(. /etc/os-release; echo "${ID}")
@@ -148,83 +148,6 @@ zinit ice lucid as"program" from"gh-r" id-as"starship" \
   atload"export STARSHIP_CONFIG=~/.starship.toml"
 zinit light starship/starship
 
-# display
-zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
-  atclone'
-    command -v foot &>/dev/null || instr foot
-    command -v kitty &>/dev/null || instr kitty
-  ' \
-  atpull"%atclone"
-zinit light zdharma-continuum/null
-
-############
-### Brew ###
-############
-
-# brew - delay loading since it's not frequently used
-zinit ice wait"2" lucid as"program" run-atpull id-as"brew" \
-  atclone'
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    /home/linuxbrew/.linuxbrew/bin/brew shellenv > init.zsh
-  ' \
-  atpull"%atclone" \
-  src"init.zsh" \
-  atload'
-    export HOMEBREW_NO_AUTO_UPDATE=true
-    export HOMEBREW_AUTO_UPDATE_SECS=$((60 * 60 * 24))
-  '
-zinit light zdharma-continuum/null
-
-#################
-### Languages ###
-#################
-
-# rustup
-zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
-  atclone'
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    $HOME/.cargo/bin/rustup completions zsh > _rustup
-    $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
-  ' \
-  atpull"%atclone" \
-  atload'
-    export CARGO_INSTALL_ROOT=$HOME/.local
-    command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)
-  '
-zinit light zdharma-continuum/null
-
-# golang
-zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
-  atclone'
-    version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
-    wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
-    [[ -d /usr/local/go ]] && sudo rm -rf /usr/local/go
-    sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
-  ' \
-  atpull"%atclone" \
-  atload'
-    export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
-    export GOPRIVATE="*.corp.example.com,rsc.io/private"
-    export GOSUMDB="sum.golang.org"
-    export GO111MODULE=on
-  '
-zinit light zdharma-continuum/null
-
-##############################
-### Custom Config & Script ###
-##############################
-
-# settings & functions
-zinit ice wait"1b" lucid as"program" id-as"autoload" \
-  atinit"fpath+=~/.zsh.d/functions" \
-  atload'
-    autoload -Uz ~/.zsh.d/functions/**/*(:t)
-    for script (~/.zsh.d/*.zsh(N)) source $script
-    [[ -f ~/.alias.zsh ]] && source ~/.alias.zsh || touch ~/.alias.zsh
-    [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
-  '
-zinit light zdharma-continuum/null
-
 ###############
 ### Plugins ###
 ###############
@@ -278,23 +201,64 @@ zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
 # extract
 zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 
-#############
-### Tools ###
-#############
+###############
+### Program ###
+###############
 
-# bat
-zinit ice if'[[ ! -x $commands[bat] ]]' lucid as"null" from"gh-r" id-as"bat" \
-  completions extract"!" \
-  atclone'sudo ln -sf $PWD/bat /usr/bin/bat' \
-  atclone"bat --completion zsh > _bat" \
-  atpull"%atclone"
-zinit light sharkdp/bat
+# rustup
+zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
+  atclone'
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    $HOME/.cargo/bin/rustup completions zsh > _rustup
+    $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
+  ' \
+  atpull"%atclone" \
+  atload'
+    export CARGO_INSTALL_ROOT=$HOME/.local
+    export PATH=$HOME/.cargo/bin:$PATH
+    command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)
+  '
+zinit light zdharma-continuum/null
 
-# eza - eza is a modern replacement for ls
-zinit ice if'[[ ! -x $commands[eza] ]]' lucid as"null" from"gh-r" id-as"eza" \
-  atclone'sudo ln -sf $PWD/eza /usr/bin/eza' \
+# golang
+zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
+  atclone'
+    version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
+    wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
+    [[ -d /usr/local/go ]] && sudo rm -rf /usr/local/go
+    sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
+  ' \
+  atpull"%atclone" \
+  atload'
+    export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
+    export GOPRIVATE="*.corp.example.com,rsc.io/private"
+    export GOSUMDB="sum.golang.org"
+    export GO111MODULE=on
+  '
+zinit light zdharma-continuum/null
+
+# bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
+  bpick"bun-linux-x64.zip" extract"!" \
+  atclone'
+    sudo ln -sf $PWD/bun /usr/bin/bun
+    wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun
+  ' \
+  atpull"%atclone" \
+  atload'
+    export BUN_INSTALL=$HOME/.local
+  '
+zinit light oven-sh/bun
+
+# fnm - node version manager
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"fnm" \
+  atclone"
+    ./fnm env --use-on-cd --shell zsh > init.zsh
+    ./fnm completions --shell zsh > _fnm
+  " \
+  src"init.zsh" \
   atpull"%atclone"
-zinit light eza-community/eza
+zinit light Schniz/fnm
 
 # direnv
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
@@ -306,17 +270,22 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
   src"init.zsh"
 zinit light direnv/direnv
 
-# delta - A syntax-highlighting pager for git, diff, and grep output
-zinit ice if'[[ ! -x $commands[delta] ]]' lucid as"program" from"gh-r" id-as"delta" \
-  extract"!"
-zinit light dandavison/delta
-
 # zoxide - quick jump dir
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"zoxide" \
   atclone"./zoxide init zsh --cmd j > init.zsh" \
   atpull"%atclone" \
   src"init.zsh"
 zinit light ajeetdsouza/zoxide
+
+# settings & functions
+zinit ice wait"1b" lucid as"program" id-as"autoload" \
+  atinit"fpath+=~/.zsh.d/functions" \
+  atload'
+    autoload -Uz ~/.zsh.d/functions/**/*(:t)
+    for script (~/.zsh.d/*.zsh(N)) source $script
+    [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
+  '
+zinit light zdharma-continuum/null
 
 # atuin - command history, load after compinit for completion support
 zinit ice wait"1c" lucid as"program" from"gh-r" id-as"atuin" \
@@ -340,6 +309,42 @@ zinit ice wait"1c" lucid as"program" from"gh-r" id-as"navi" \
     bindkey "^N" _navi_widget
   '
 zinit light denisidoro/navi
+
+#############
+### Tools ###
+#############
+
+# display
+zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
+  atclone'
+    command -v foot &>/dev/null || instr foot
+    command -v kitty &>/dev/null || instr kitty
+  ' \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
+# bat
+zinit ice if'[[ ! -x $commands[bat] ]]' lucid as"null" from"gh-r" id-as"bat" \
+  completions extract"!" \
+  atclone'
+    ./bat --completion zsh > _bat
+    ln -sf $PWD/bat ~/.local/bin/cat
+  ' \
+  atpull"%atclone"
+zinit light sharkdp/bat
+
+# eza - eza is a modern replacement for ls
+zinit ice if'[[ ! -x $commands[eza] ]]' lucid as"null" from"gh-r" id-as"eza" \
+  atclone'ln -sf $PWD/eza ~/.local/bin/ls' \
+  atpull"%atclone"
+zinit light eza-community/eza
+
+# delta - A syntax-highlighting pager for git, diff, and grep output
+zinit ice if'[[ ! -x $commands[delta] ]]' lucid as"null" from"gh-r" id-as"delta" \
+  extract"!" \
+  atclone'ln -sf $PWD/delta ~/.local/bin/delta' \
+  atpull"%atclone"
+zinit light dandavison/delta
 
 # fzf - essential tool, load early
 zinit ice wait"0" lucid as"null" from"gh-r" id-as"fzf" \
@@ -368,8 +373,21 @@ zinit ice if'[[ ! -x $commands[dust] ]]' lucid as"null" from"gh-r" id-as"dust" \
   atpull"%atclone"
 zinit light bootandy/dust
 
+# dysk - A linux utility to get information on filesystems, like df but better
+zinit ice if'[[ ! -x $commands[dysk] ]]' lucid as"null" from"gh-r" id-as"dysk" \
+  completions \
+  atclone'
+    mv */completion/_dysk .
+    mv */x86_64-unknown-linux-musl/dysk .
+    ln -sf $PWD/dysk ~/.local/bin/dysk
+    rm -rf */
+  ' \
+  atpull"%atclone"
+zinit light Canop/dysk
+
 # just
-zinit ice if'[[ ! -x $commands[just] ]]' lucid as"program" from"gh-r" id-as"just" \
+zinit ice if'[[ ! -x $commands[just] ]]' lucid as"null" from"gh-r" id-as"just" \
+  completions \
   atclone'./just --completions zsh > _just' \
   atpull"%atclone"
 zinit light casey/just
@@ -392,46 +410,28 @@ zinit ice if'[[ ! -x $commands[easytier-cli] ]]' lucid as"null" from"gh-r" id-as
 zinit light EasyTier/EasyTier
 
 # lnav
-zinit ice if'[[ ! -x $commands[lnav] ]]' lucid as"program" from"gh-r" id-as"lnav" \
-  extract"!"
+zinit ice if'[[ ! -x $commands[lnav] ]]' lucid as"null" from"gh-r" id-as"lnav" \
+  extract"!" \
+  atclone'ln -sf $PWD/lnav ~/.local/bin/lnav' \
+  atpull"%atclone"
 zinit light tstack/lnav
 
 # fastfetch
-zinit ice if'[[ ! -x $commands[fastfetch] ]]' lucid as"program" from"gh-r" id-as"fastfetch" \
+zinit ice if'[[ ! -x $commands[fastfetch] ]]' lucid as"null" from"gh-r" id-as"fastfetch" \
   bpick"fastfetch-linux-amd64.tar.gz" extract"!" \
-  atclone"mv usr/bin/* ." \
+  atclone'ln -sf $PWD/usr/bin/fastfetch ~/.local/bin/fastfetch' \
   atpull"%atclone"
 zinit light fastfetch-cli/fastfetch
 
-# bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps
-zinit ice wait"1" lucid as"null" from"gh-r" id-as"bun" \
-  bpick"bun-linux-x64.zip" completions extract"!" \
-  atclone'
-    sudo ln -sf $PWD/bun /usr/bin/bun
-    wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun
-  ' \
-  atpull"%atclone" \
-  atload'
-    export BUN_INSTALL=$HOME/.local
-  '
-zinit light oven-sh/bun
-
 # uv - python package manager
-zinit ice if'[[ ! -x $commands[uv] ]]' lucid as"program" from"gh-r" id-as"uv" \
+zinit ice if'[[ ! -x $commands[uv] ]]' lucid as"null" from"gh-r" id-as"uv" \
   extract"!" \
-  atclone"./uv generate-shell-completion zsh > _uv" \
+  atclone'
+    ./uv generate-shell-completion zsh > _uv
+    ls -sf $PWD/uv ~/.local/bin/uv
+  ' \
   atpull"%atclone"
 zinit light astral-sh/uv
-
-# fnm - node version manager
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"fnm" \
-  atclone"
-    ./fnm env --use-on-cd --shell zsh > init.zsh
-    ./fnm completions --shell zsh > _fnm
-  " \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light Schniz/fnm
 
 # wallust
 zinit ice if'[[ -n $DISPLAY && ! -x $commands[wallust] ]]' lucid as"null" from"codeberg.org" id-as"wallust" \
@@ -440,13 +440,16 @@ zinit ice if'[[ -n $DISPLAY && ! -x $commands[wallust] ]]' lucid as"null" from"c
 zinit light explosion-mental/wallust
 
 # feedr
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"feedr" \
-  atclone"mv feedr* feedr" \
+zinit ice if'[[ ! -x $commands[feedr] ]]' lucid as"null" from"gh-r" id-as"feedr" \
+  atclone'
+    mv feedr* feedr
+    ln -sf $PWD/feedr ~/.local/bin/feedr
+  ' \
   atpull"%atclone"
 zinit light bahdotsh/feedr
 
 # pueue
-zinit ice wait"1" lucid as"null" from"gh-r" id-as"pueue" \
+zinit ice if'[[ ! -x $commands[pueue] ]]' lucid as"null" from"gh-r" id-as"pueue" \
   bpick"pueue-x86_64-unknown-linux-musl" \
   bpick"pueued-x86_64-unknown-linux-musl" \
   completions \
@@ -460,11 +463,36 @@ zinit ice wait"1" lucid as"null" from"gh-r" id-as"pueue" \
 zinit light Nukesor/pueue
 
 # witr
-zinit ice if'[[ ! -x $commands[witr] ]]' lucid as"program" from"gh-r" id-as"witr" \
+zinit ice if'[[ ! -x $commands[witr] ]]' lucid as"null" from"gh-r" id-as"witr" \
   bpick"witr-linux-amd64" \
   atclone'ln -sf $PWD/witr-linux-amd64 ~/.local/bin/witr' \
   atpull"%atclone"
 zinit light pranshuparmar/witr
+
+# claude-code
+zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"null" run-atpull id-as"claude" \
+  atclone"bun install -g @anthropic-ai/claude-code" \
+  atclone"bun install -g ccstatusline@latest" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+
+# sttr
+zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"null" from"gh-r" id-as"sttr" \
+  atclone"./sttr completion zsh > _sttr" \
+  atclone'ln -sf $PWD/sttr ~/.local/bin/sttr' \
+  atpull"%atclone"
+zinit light abhimanyu003/sttr
+
+# xh
+zinit ice if'[[ ! -x $commands[xh] ]]' lucid as"null" from"gh-r" id-as"xh" \
+  completions extract"!" \
+  atclone'
+    mv completions/_xh ./
+    ln -sf $PWD/xh ~/.local/bin/xh
+    rm -rf */
+  ' \
+  atpull"%atclone"
+zinit light ducaale/xh
 
 ###################
 ### Completions ###

@@ -224,42 +224,13 @@ function backward-delete-widget() {
 }
 zbindkey -M viins '^W' backward-delete-widget
 
-###########################
-### alias-expand-widget ###
-###########################
-
-baliases=()
-function balias() {
-  alias $@
-  args="$@"
-  args=${args%%\=*}
-  baliases+=(${args##* })
-}
-
-ialiases=()
-function ialias() {
-  alias $@
-  args="$@"
-  args=${args%%\=*}
-  ialiases+=(${args##* })
-}
-
-function alias-expand-widget() {
-  [[ $LBUFFER =~ "\<(${(j:|:)baliases})\$" ]]; insertBlank=$?
-  if [[ ! $LBUFFER =~ "\<(${(j:|:)ialiases})\$" ]]; then
-    zle _expand_alias 2>/dev/null || true
-  fi
-  zle self-insert
-  if [[ "$insertBlank" = "0" ]]; then
-    zle backward-delete-char
-  fi
-}
-
 ####################
 ### space-widget ###
 ####################
 
 function space-widget() {
-  alias-expand-widget
+  zle _expand_alias
+  zle self-insert
 }
 zbindkey ' ' space-widget
+

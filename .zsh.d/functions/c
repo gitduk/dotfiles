@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git "$@"
+
