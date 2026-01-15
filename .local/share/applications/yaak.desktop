@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=Development;
+Comment=Play with APIs, intuitively
+Exec=yaak
+Icon=yaak
+Name=yaak
+StartupWMClass=yaak
+Terminal=false
+Type=Application

@@ -139,6 +139,9 @@ alias epr="easytier-cli peer"
 # feedr
 alias f="feedr"
 
+# fscan
+alias fs="fscan"
+
 # fastfetch
 alias ff="fastfetch"
 
@@ -229,6 +232,9 @@ alias sue="systemctl --user enable"
 alias sud="systemctl --user disable"
 alias sued="systemctl --user edit"
 alias suef="systemctl --user edit --force --full"
+
+# vfox
+alias vo="vfox"
 
 # witr
 alias wi="witr"

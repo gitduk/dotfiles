@@ -250,15 +250,17 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
   '
 zinit light oven-sh/bun
 
-# fnm - node version manager
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"fnm" \
-  atclone"
-    ./fnm env --use-on-cd --shell zsh > init.zsh
-    ./fnm completions --shell zsh > _fnm
-  " \
-  src"init.zsh" \
-  atpull"%atclone"
-zinit light Schniz/fnm
+# vfox - cross-platform and extendable version manager
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"vfox" \
+  bpick"vfox_*_linux_x86_64.tar.gz" extract"!" \
+  atclone'
+    ln -sf $PWD/vfox ~/.local/bin/vfox
+    vfox activate zsh > init.zsh
+    mv */zsh_autocomplete _vfox
+  ' \
+  atpull"%atclone" \
+  src"init.zsh"
+zinit light version-fox/vfox
 
 # direnv
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
@@ -327,8 +329,8 @@ zinit light zdharma-continuum/null
 zinit ice if'[[ ! -x $commands[bat] ]]' lucid as"null" from"gh-r" id-as"bat" \
   completions extract"!" \
   atclone'
-    ./bat --completion zsh > _bat
     ln -sf $PWD/bat ~/.local/bin/cat
+    bat --completion zsh > _bat
   ' \
   atpull"%atclone"
 zinit light sharkdp/bat
@@ -471,15 +473,19 @@ zinit light pranshuparmar/witr
 
 # claude-code
 zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"null" run-atpull id-as"claude" \
-  atclone"bun install -g @anthropic-ai/claude-code" \
-  atclone"bun install -g ccstatusline@latest" \
+  atclone"
+    bun install -g @anthropic-ai/claude-code
+    bun install -g ccstatusline@latest
+  " \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
 # sttr
 zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"null" from"gh-r" id-as"sttr" \
-  atclone"./sttr completion zsh > _sttr" \
-  atclone'ln -sf $PWD/sttr ~/.local/bin/sttr' \
+  atclone'
+    ln -sf $PWD/sttr ~/.local/bin/sttr
+    sttr completion zsh > _sttr
+  ' \
   atpull"%atclone"
 zinit light abhimanyu003/sttr
 
@@ -493,6 +499,106 @@ zinit ice if'[[ ! -x $commands[xh] ]]' lucid as"null" from"gh-r" id-as"xh" \
   ' \
   atpull"%atclone"
 zinit light ducaale/xh
+
+# hl - A fast and powerful log viewer and processor that converts JSON logs or logfmt logs into a clear human-readable format
+zinit ice if'[[ ! -x $commands[hl] ]]' lucid as"null" from"gh-r" id-as"hl" \
+  bpick"hl-linux-x86_64-musl.tar.gz" \
+  atclone'ln -sf $PWD/hl ~/.local/bin/hl' \
+  atpull"%atclone"
+zinit light pamburus/hl
+
+# fx - Command-line tool and terminal JSON viewer
+zinit ice if'[[ ! -x $commands[fx] ]]' lucid as"null" from"gh-r" id-as"fx" \
+  completions \
+  atclone'
+    ln -sf $PWD/fx* ~/.local/bin/fx
+    fx --comp zsh > _fx
+  ' \
+  atpull"%atclone"
+zinit light antonmedv/fx
+
+# tw - view and query tabular data files, such as CSV, TSV, and parquet
+zinit ice if'[[ ! -x $commands[tw] ]]' lucid as"null" from"gh-r" id-as"tw" \
+  bpick"tw-x86_64-unknown-linux-gnu" \
+  atclone'ln -sf $PWD/tw* ~/.local/bin/tw' \
+  atpull"%atclone"
+zinit light shshemi/tabiew
+
+# ripgrep - ripgrep recursively searches directories for a regex pattern
+zinit ice if'[[ ! -x $commands[rg] ]]' lucid as"null" from"gh-r" id-as"rg" \
+  completions extract"!" \
+  atclone'
+    sudo ln -sf $PWD/rg /usr/bin/rg
+    mv complete/_rg .
+    rm -rf */
+  ' \
+  atpull"%atclone"
+zinit light burntSushi/ripgrep
+
+# yazi - file browser
+zinit ice if'[[ ! -x $commands[yazi] ]]' lucid as"null" from"gh-r" id-as"yazi" \
+  bpick"yazi-x86_64-unknown-linux-musl.zip" completions extract"!" \
+  atclone'
+    mv comp*/_ya .
+    mv comp*/_yazi .
+    ln -sf $PWD/ya ~/.local/bin/ya
+    ln -sf $PWD/yazi ~/.local/bin/yazi
+    rm -rf */
+  ' \
+  atpull"%atclone"
+zinit light sxyazi/yazi
+
+# fscan
+zinit ice if'[[ ! -x $commands[fscan] ]]' lucid as"null" from"gh-r" id-as"fscan" \
+  atclone'ln -sf $PWD/fscan ~/.local/bin/fscan' \
+  atpull"%atclone"
+zinit light shadow1ng/fscan
+
+# rainfrog - a database management tui
+zinit ice if'[[ ! -x $commands[rain] ]]' lucid as"null" from"gh-r" id-as"rain" \
+  atclone'ln -sf $PWD/rainfrog ~/.local/bin/rain' \
+  atpull"%atclone"
+zinit light achristmascarl/rainfrog
+
+# sing-box
+zinit ice if'[[ ! -x $commands[sing-box] ]]' lucid as"null" from"gh-r" id-as"sing-box" \
+  bpick"sing-box-*-linux-amd64.tar.gz" extract"!" \
+  atclone'
+    ln -sf $PWD/sing-box ~/.local/bin/sing-box
+    sudo setcap cap_net_admin=+ep $PWD/sing-box
+  ' \
+  atpull"%atclone"
+zinit light SagerNet/sing-box
+
+# yaak - The most intuitive desktop API client
+zinit ice if'[[ -n $DISPLAY && ! -x $commands[yaak] ]]' lucid as"null" from"gh-r" id-as"yaak" \
+  bpick"yaak_*_amd64.AppImage" \
+  atclone'ln -sf $PWD/yaak* ~/.local/bin/yaak' \
+  atpull"%atclone"
+zinit light mountain-loop/yaak
+
+# gh
+zinit ice if'[[ ! -x $commands[gh] ]]' lucid as"null" from"gh-r" id-as"gh" \
+  completions extract"!" \
+  atclone'
+    sudo ln -sf $PWD/bin/gh /usr/bin/gh
+    gh completion -s zsh > _gh
+  ' \
+  atpull"%atclone"
+zinit light cli/cli
+
+# alacritty
+zinit ice if'[[ -n $DISPLAY && ! -x $commands[alacritty] ]]' lucid as"null" id-as"alacritty" \
+  atclone'
+    export PATH="$HOME/.cargo/bin:$PATH"
+    cargo build --release --no-default-features --features=wayland
+    sudo ln -sf $PWD/target/release/alacritty /usr/bin/alacritty
+    sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
+    sudo desktop-file-install extra/linux/Alacritty.desktop
+    sudo update-desktop-database
+  ' \
+  atpull"%atclone"
+zinit light alacritty/alacritty
 
 ###################
 ### Completions ###
