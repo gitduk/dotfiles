@@ -89,7 +89,7 @@ output_json() {
   local current="$(current_config)"
   local ip_info=$(get_ip_info)
   local configs=$(ls_config | sed 's/"/\\"/g' | paste -sd ' ' -)
-  local tooltip="Configs: ${configs}\\n---\\n${ip_info}"
+  local tooltip="${configs}\\n---\\n${ip_info}"
   if pidof -q sing-box; then
     current="󰮤 ${current}"
   else

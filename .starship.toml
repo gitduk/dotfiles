@@ -5,12 +5,15 @@
 add_newline = false
 
 # Use custom format
-format = """$all$line_break$character"""
-right_format = """${custom.proxy} $time"""
+format = """$all$fill $time$line_break$character"""
 
 ###############
 ### modules ###
 ###############
+
+[fill]
+symbol = ' '
+style = 'bold blue'
 
 [character]
 success_symbol = "[➜](green)"
@@ -242,12 +245,6 @@ symbol = "terraform "
 
 [zig]
 symbol = "zig "
-
-[custom.proxy]
-disabled = false
-command = "echo 󱐡"
-when = ''' test -n "$http_proxy" '''
-format = "[$output](blue) "
 
 [custom.direnv]
 disabled = true

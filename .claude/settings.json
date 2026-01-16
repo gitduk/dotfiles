@@ -20,13 +20,9 @@
     "ask": [],
     "defaultMode": "bypassPermissions"
   },
-  "statusLine": {
-    "type": "command",
-    "command": "ccstatusline",
-    "padding": 0
-  },
   "enabledPlugins": {
     "context-engineering@context-engineering-marketplace": true,
     "book-sft-pipeline@context-engineering-marketplace": true
-  }
+  },
+  "alwaysThinkingEnabled": true
 }

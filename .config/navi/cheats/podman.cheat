@@ -60,7 +60,7 @@ podman run -d --name pairdrop \
 podman run -d --name uptime-kuma \
   -v uptime-kuma:/app/data \
   --network=host \
-  louislam/uptime-kuma:1
+  louislam/uptime-kuma:2
 
 # beszel: a lightweight server monitoring
 mkdir -p ~/.beszel_data
