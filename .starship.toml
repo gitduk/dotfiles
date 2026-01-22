@@ -5,15 +5,40 @@
 add_newline = false
 
 # Use custom format
-format = """$all$fill $time$line_break$character"""
+format = """
+$directory\
+$fossil_branch\
+$fossil_metrics\
+$git_branch\
+${custom.git_context}\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$package\
+$python\
+$rust\
+$golang\
+$nodejs\
+$meson\
+$cmake\
+$jobs\
+$cmd_duration\
+${custom.direnv}\
+$fill\
+${custom.proxy}\
+$time\
+$line_break\
+$character\
+"""
 
 ###############
 ### modules ###
 ###############
 
 [fill]
-symbol = ' '
-style = 'bold blue'
+symbol = " "
+style = "bold blue"
 
 [character]
 success_symbol = "[➜](green)"
@@ -34,8 +59,9 @@ style = "bold blue"
 
 [direnv]
 disabled = true
-symbol = ""
-style = "bold blue"
+detect_files = [".env", ".envrc"]
+symbol = "direnv "
+style = "bold green"
 format = "[$symbol]($style) "
 
 [git_commit]
@@ -59,7 +85,7 @@ style = "fg:#5c6370"
 format = "[$time]($style)"
 
 [os]
-disabled = true
+disabled = false
 style = "bold white"
 format = "[$symbol ]($style)"
 
@@ -139,7 +165,7 @@ symbol = "fossil "
 symbol = "gcp "
 
 [git_branch]
-symbol = "git "
+symbol = ""
 
 [golang]
 symbol = "go "
@@ -247,16 +273,35 @@ symbol = "terraform "
 symbol = "zig "
 
 [custom.direnv]
-disabled = true
-command = '''
+command = """
 allowed=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed // empty')
+[ -e .env ] && file=".env"
+[ -e .envrc ] && file=".envrc"
 case "$allowed" in
-  0) echo "\e[1;34m.envrc\e[0m" ;;
-  2) echo "\e[1;31m.envrc\e[0m" ;;
+  0) echo "\e[1;34m$file\e[0m" ;;
+  2) echo "\e[1;31m$file\e[0m" ;;
   *) echo "" ;;
 esac
-'''
+"""
 when = "direnv status 2>/dev/null"
+shell = ["sh"]
+symbol = ""
 style = ""
-format = "[($output)]($style) "
+format = "[$symbol$output]($style) "
+
+[custom.proxy]
+command = ""
+when = "test $http_proxy"
+shell = ["sh"]
+symbol = "󱐡 "
+style = "bold blue dimmed"
+format = "[$symbol$output]($style) "
+
+[custom.git_context]
+command = "git worktree list 2>/dev/null | awk '{printf $2}'"
+when = "ls .git"
+shell = ["sh"]
+symbol = ""
+style = "bold blue dimmed"
+format = "[$symbol$output]($style) "
 

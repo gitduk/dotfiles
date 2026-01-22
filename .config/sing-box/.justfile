@@ -2,10 +2,10 @@ default:
   sing-box run -c ./config.json
 
 update url:
-  wget "https://subc.wukaige.com/sub?urls={{url}}&config=https://raw.wukaige.com/sing-box/config.json" -O config.json
+  wget "https://subc.wukaige.com/sub?urls={{url}}&config=https://raw.wukaige.com/sing-box/base.json" -O config.json
 
 add name url:
-  wget "https://subc.wukaige.com/sub?urls={{url}}&config=https://raw.wukaige.com/sing-box/config.json" -O {{name}}.json
+  wget "https://subc.wukaige.com/sub?urls={{url}}&config=https://raw.wukaige.com/sing-box/base.json" -O {{name}}.json
 
 use name:
   ln -sf {{name}}.json config.json

@@ -58,7 +58,7 @@ main () {
     -f | --fzf)
       [[ ! -f "${CONFIG[pwfile]}" ]] && logger error "${CONFIG[pwfile]} not exist." && return 1
       jq -r '.[] | to_entries[] | "\(.key)\t\(.value)"' ${CONFIG[pwfile]} |
-        fzf --delimiter=$'\t' --with-nth=1,2 --tabstop=20 --preview="" |
+        fzf --exact --delimiter=$'\t' --with-nth=1,2 --tabstop=20 --preview="" |
         cut -f2 | tr -d '\n' |
         wl-copy
       shift

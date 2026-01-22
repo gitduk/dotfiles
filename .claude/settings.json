@@ -20,9 +20,9 @@
     "ask": [],
     "defaultMode": "bypassPermissions"
   },
-  "enabledPlugins": {
-    "context-engineering@context-engineering-marketplace": true,
-    "book-sft-pipeline@context-engineering-marketplace": true
-  },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": false,
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline/statusline.sh"
+  }
 }

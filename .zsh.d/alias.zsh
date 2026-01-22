@@ -132,6 +132,7 @@ alias epw="v ~/.pw.json"
 alias ejs="v .justfile"
 alias eis="v ~/.config/navi/cheats/install.cheat"
 alias epd="v ~/.config/navi/cheats/podman.cheat"
+alias ehs="v /etc/hosts"
 
 # easytier
 alias epr="easytier-cli peer"
@@ -179,6 +180,9 @@ alias nas="sudo nala show"
 alias nasc="sudo nala search"
 alias nah="sudo nala history"
 alias nac="sudo nala clean"
+
+# opencode
+alias oc="opencode"
 
 # pueue
 alias p="pueue"
@@ -238,6 +242,7 @@ alias vo="vfox"
 
 # witr
 alias wi="witr"
+alias wip="witr --port"
 
 # xh
 alias x="xh"

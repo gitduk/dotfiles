@@ -94,8 +94,6 @@ function proxy() {
   [[ "$slient" == "false" ]] && echo "✓ Proxy set: ${proxy_host}:${proxy_port}"
 }
 
-[[ -n "$DISPLAY" ]] && proxy -s
-
 ############
 ### MUST ###
 ############
@@ -142,10 +140,12 @@ zinit light-mode for zdharma-continuum/zinit-annex-bin-gem-node
 
 # starship
 zinit ice lucid as"program" from"gh-r" id-as"starship" \
-  atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
+  atclone"./starship completions zsh > _starship" \
   atpull"%atclone" \
-  src"init.zsh" \
-  atload"export STARSHIP_CONFIG=~/.starship.toml"
+  atload'
+    export STARSHIP_CONFIG=~/.starship.toml
+    eval "$(starship init zsh)"
+  '
 zinit light starship/starship
 
 ###############
@@ -201,14 +201,24 @@ zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
 # extract
 zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 
-###############
-### Program ###
-###############
+#############
+### Tools ###
+#############
+
+# settings & functions
+zinit ice wait"0" lucid as"program" id-as"autoload" \
+  atinit"fpath+=~/.zsh.d/functions" \
+  atload'
+    autoload -Uz ~/.zsh.d/functions/**/*(:t)
+    for script (~/.zsh.d/*.zsh(N)) source $script
+    [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
+  '
+zinit light zdharma-continuum/null
 
 # rustup
 zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
   atclone'
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
     $HOME/.cargo/bin/rustup completions zsh > _rustup
     $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
   ' \
@@ -241,7 +251,6 @@ zinit light zdharma-continuum/null
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
   bpick"bun-linux-x64.zip" extract"!" \
   atclone'
-    sudo ln -sf $PWD/bun /usr/bin/bun
     wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun
   ' \
   atpull"%atclone" \
@@ -253,41 +262,22 @@ zinit light oven-sh/bun
 # vfox - cross-platform and extendable version manager
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"vfox" \
   bpick"vfox_*_linux_x86_64.tar.gz" extract"!" \
-  atclone'
-    ln -sf $PWD/vfox ~/.local/bin/vfox
-    vfox activate zsh > init.zsh
-    mv */zsh_autocomplete _vfox
-  ' \
+  atclone'mv */zsh_autocomplete _vfox' \
   atpull"%atclone" \
-  src"init.zsh"
+  atload'eval "$(vfox activate zsh)"'
 zinit light version-fox/vfox
 
 # direnv
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
-  atclone"
-    mv direnv* direnv
-    ./direnv hook zsh > init.zsh
-  " \
+  atclone'mv direnv* direnv' \
   atpull"%atclone" \
-  src"init.zsh"
+  atload'eval "$(direnv hook zsh)"'
 zinit light direnv/direnv
 
 # zoxide - quick jump dir
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"zoxide" \
-  atclone"./zoxide init zsh --cmd j > init.zsh" \
-  atpull"%atclone" \
-  src"init.zsh"
+  atload'eval "$(zoxide init zsh --cmd j)"'
 zinit light ajeetdsouza/zoxide
-
-# settings & functions
-zinit ice wait"1b" lucid as"program" id-as"autoload" \
-  atinit"fpath+=~/.zsh.d/functions" \
-  atload'
-    autoload -Uz ~/.zsh.d/functions/**/*(:t)
-    for script (~/.zsh.d/*.zsh(N)) source $script
-    [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
-  '
-zinit light zdharma-continuum/null
 
 # atuin - command history, load after compinit for completion support
 zinit ice wait"1c" lucid as"program" from"gh-r" id-as"atuin" \
@@ -312,9 +302,15 @@ zinit ice wait"1c" lucid as"program" from"gh-r" id-as"navi" \
   '
 zinit light denisidoro/navi
 
-#############
-### Tools ###
-#############
+# fzf - essential tool, load early
+zinit ice wait"0" lucid as"null" from"gh-r" id-as"fzf" \
+  atclone'
+    ln -sf $PWD/fzf ~/.local/bin/fzf
+    fzf --zsh > init.zsh
+  ' \
+  atpull"%atclone" \
+  src"init.zsh"
+zinit light junegunn/fzf
 
 # display
 zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
@@ -348,16 +344,6 @@ zinit ice if'[[ ! -x $commands[delta] ]]' lucid as"null" from"gh-r" id-as"delta"
   atpull"%atclone"
 zinit light dandavison/delta
 
-# fzf - essential tool, load early
-zinit ice wait"0" lucid as"null" from"gh-r" id-as"fzf" \
-  atclone'
-    ./fzf --zsh > init.zsh
-    ln -sf $PWD/fzf ~/.local/bin/fzf
-  ' \
-  atpull"%atclone" \
-  src"init.zsh"
-zinit light junegunn/fzf
-
 # fd
 zinit ice if'[[ ! -x $commands[fd] ]]' lucid as"null" from"gh-r" id-as"fd" \
   completions extract"!" \
@@ -390,7 +376,10 @@ zinit light Canop/dysk
 # just
 zinit ice if'[[ ! -x $commands[just] ]]' lucid as"null" from"gh-r" id-as"just" \
   completions \
-  atclone'./just --completions zsh > _just' \
+  atclone'
+    ln -sf $PWD/just ~/.local/bin/just
+    just --completions zsh > _just
+  ' \
   atpull"%atclone"
 zinit light casey/just
 
@@ -475,7 +464,7 @@ zinit light pranshuparmar/witr
 zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"null" run-atpull id-as"claude" \
   atclone"
     bun install -g @anthropic-ai/claude-code
-    bun install -g ccstatusline@latest
+    bun install -g opencode-ai
   " \
   atpull"%atclone"
 zinit light zdharma-continuum/null
