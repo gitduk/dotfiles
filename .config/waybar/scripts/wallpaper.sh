@@ -154,7 +154,7 @@ loop_wallpapers() {
 select_wallpaper() {
   local dir=${1:-${CONFIG[wallpaper_dir]}}
   command -v fzf >/dev/null || error "fzf required"
-  local selected=$(find_wallpapers "$dir" | shuf | fzf)
+  local selected=$(find_wallpapers "$dir" | shuf | fzf --preview="kitty icat {}")
   [[ -n $selected ]] && set_wallpaper "$selected"
 }
 

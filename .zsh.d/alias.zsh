@@ -21,7 +21,7 @@ alias nsl="nslookup"
 alias nst="netstat"
 alias ncl="nmcli"
 alias nw="networkctl"
-alias path='echo $PATH | tr ":" "\n" | fzf'
+alias path='echo $PATH | tr ":" "\n" | fzf --preview=""'
 alias pre="proxy"
 alias prd="proxy -u"
 alias rf="rm -rf"
@@ -168,6 +168,9 @@ alias js="just"
 alias jse="just --edit"
 alias jsl="just --list"
 
+# json-server
+alias jss="json-server"
+
 # nala
 alias nai="sudo nala install -y"
 alias nar="sudo nala remove"
@@ -180,6 +183,9 @@ alias nas="sudo nala show"
 alias nasc="sudo nala search"
 alias nah="sudo nala history"
 alias nac="sudo nala clean"
+
+# open
+alias o="open"
 
 # opencode
 alias oc="opencode"
@@ -216,6 +222,9 @@ alias pdn="podman network"
 
 # sttr
 alias sr="sttr"
+
+# snitch
+alias sn="snitch"
 
 # systemctl
 alias scs="sudo systemctl status"

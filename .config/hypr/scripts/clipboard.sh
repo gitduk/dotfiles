@@ -2,7 +2,7 @@
 
 # 从 cliphist 列表中选择或输入新文本
 selection=$(cliphist list \
-  | fzf --no-sort \
+  | fzf --no-sort --exact \
     --bind "D:execute-silent(echo {+} | cliphist delete)+reload(cliphist list)" \
     --bind "C:execute-silent(cliphist wipe)+reload(cliphist list)" \
     --prompt "󱘟 " \

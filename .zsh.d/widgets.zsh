@@ -30,7 +30,11 @@ zbindkey -M vicmd 'Y' vi-yank-copy
 # fzf pkgs
 function fzf-apt-widget {
   package=$(
-    apt-cache search . | fzf --query=$LBUFFER --multi --prompt="pkgs> " \
+    apt-cache search . | fzf \
+      --preview="" \
+      --query=$LBUFFER \
+      --multi \
+      --prompt="pkgs> " \
       --header="U:upgradable I:installed R:reload Enter:copy" \
       --bind="U:reload(apt list --upgradable|sed '1d')" \
       --bind="I:reload(apt list --installed|sed '1d')" \

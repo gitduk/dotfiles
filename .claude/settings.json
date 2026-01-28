@@ -20,9 +20,9 @@
     "ask": [],
     "defaultMode": "bypassPermissions"
   },
-  "alwaysThinkingEnabled": false,
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline/statusline.sh"
-  }
+  },
+  "alwaysThinkingEnabled": false
 }

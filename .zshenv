@@ -96,3 +96,9 @@ fi
 # local path
 export PATH="$HOME/.local/bin:$PATH"
 
+
+# zerobrew
+export PATH="/home/wukaige/.local/bin:$PATH"
+
+# zerobrew
+export PATH="/opt/zerobrew/prefix/bin:$PATH"

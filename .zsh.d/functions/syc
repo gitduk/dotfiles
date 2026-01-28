@@ -13,14 +13,43 @@ print_info()   { echo -e "${GREEN}[INFO]${NC} $1"; }
 print_error()  { echo -e "${RED}[ERROR]${NC} $1"; }
 print_warning(){ echo -e "${YELLOW}[WARNING]${NC} $1"; }
 
+usage() {
+  cat << EOF
+用法: $SCRIPT_NAME [选项] <远程主机>
+
+同步配置文件到远程主机（使用 rsync）
+
+选项:
+  -c, --config FILE    指定配置文件路径 (默认: ~/.syc.cfg)
+  -n, --dry-run       模拟运行，不实际同步
+  -v, --verbose       详细输出，显示传输进度
+  --delete            删除远程多余的文件（谨慎使用）
+  -h, --help          显示此帮助信息
+
+示例:
+  $SCRIPT_NAME myserver              # 同步到 myserver
+  $SCRIPT_NAME -n myserver           # 预览将要同步的文件
+  $SCRIPT_NAME -v --delete myserver  # 详细输出并同步删除
+
+配置文件格式:
+  每行一个文件或目录路径
+  支持 ~ 和 * 通配符
+  # 开头的行为注释
+EOF
+}
+
 REMOTE_HOST=""
 DRY_RUN=false
+VERBOSE=false
+DELETE=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     -h|--help) usage; return 0 ;;
     -c|--config) CONFIG_FILE="$2"; shift 2 ;;
     -n|--dry-run) DRY_RUN=true; shift ;;
+    -v|--verbose) VERBOSE=true; shift ;;
+    --delete) DELETE=true; shift ;;
     *) [[ -z "$REMOTE_HOST" ]] && REMOTE_HOST="$1" || { print_error "多余参数"; return 1; }; shift ;;
   esac
 done
@@ -59,27 +88,38 @@ done < "$CONFIG_FILE" | while read -r f; do
     dest="$f"
   fi
 
-  print_info "同步: $f → $REMOTE_HOST:$dest"
-  
+  # 构建 rsync 选项（使用数组避免空格问题）
+  rsync_opts=(-a -z)
+  $VERBOSE && rsync_opts+=(-v --progress)
+  $DELETE && rsync_opts+=(--delete)
+  $DRY_RUN && rsync_opts+=(--dry-run)
+
   if $DRY_RUN; then
-    echo "[模拟] scp -r $f $REMOTE_HOST:$dest"
-    ((SUCCESS++))
-    continue
+    print_warning "[模拟] rsync ${rsync_opts[*]} \"$f\" \"$REMOTE_HOST:$dest\""
   fi
 
+  # 确保远程父目录存在
   remote_parent=$(dirname "$dest")
   if [[ ! "$remote_parent" = "~" ]]; then
-    ssh "$REMOTE_HOST" "mkdir -p $remote_parent" </dev/null
+    ssh "$REMOTE_HOST" "mkdir -p $remote_parent" </dev/null 2>&1
   fi
 
-  if scp -r "$f" "$REMOTE_HOST:$remote_parent"; then
+  # 使用 rsync 同步
+  # 如果是目录，添加尾随斜杠以同步内容而不是目录本身
+  src="$f"
+  [[ -d "$f" ]] && src="$f/"
+
+  # 打印同步信息（不换行）
+  echo -ne "${GREEN}[INFO]${NC} $f → $REMOTE_HOST:$dest "
+
+  if rsync "${rsync_opts[@]}" "$src" "$REMOTE_HOST:$dest"; then
     ((SUCCESS++))
+    echo -e "${GREEN}✓${NC}"
   else
+    echo -e "${RED}✗${NC}"
     print_error "同步失败: $f"
     ((FAIL++))
   fi
-  
-  echo ""
 
 done
 

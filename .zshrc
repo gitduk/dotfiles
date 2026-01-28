@@ -206,7 +206,7 @@ zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 #############
 
 # settings & functions
-zinit ice wait"0" lucid as"program" id-as"autoload" \
+zinit ice wait"1" lucid as"program" id-as"autoload" \
   atinit"fpath+=~/.zsh.d/functions" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
@@ -221,6 +221,7 @@ zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
     curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
     $HOME/.cargo/bin/rustup completions zsh > _rustup
     $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
+    sudo ln -sf ~/.cargo/bin/cargo /usr/bin/cargo
   ' \
   atpull"%atclone" \
   atload'
@@ -275,23 +276,36 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
 zinit light direnv/direnv
 
 # zoxide - quick jump dir
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"zoxide" \
+zinit ice wait"1" lucid as"null" from"gh-r" id-as"zoxide" \
+  atclone'ln -sf $PWD/zoxide ~/.local/bin/zoxide' \
+  atpull"%atclone" \
   atload'eval "$(zoxide init zsh --cmd j)"'
 zinit light ajeetdsouza/zoxide
 
+# fzf - essential tool, load early
+zinit ice wait"1" lucid as"null" from"gh-r" id-as"fzf" \
+  atclone'
+    ln -sf $PWD/fzf ~/.local/bin/fzf
+    fzf --zsh > init.zsh
+  ' \
+  atpull"%atclone" \
+  src"init.zsh"
+zinit light junegunn/fzf
+
 # atuin - command history, load after compinit for completion support
-zinit ice wait"1c" lucid as"program" from"gh-r" id-as"atuin" \
+zinit ice wait"1" lucid as"null" from"gh-r" id-as"atuin" \
   bpick"atuin-*.tar.gz" extract"!" \
-  atclone"
-    ./atuin init zsh > init.zsh
-    ./atuin gen-completions --shell zsh > _atuin
-  " \
+  atclone'
+    ln -sf $PWD/atuin ~/.local/bin/atuin
+    atuin init zsh > init.zsh
+    atuin gen-completions --shell zsh > _atuin
+  ' \
   atpull"%atclone" \
   src"init.zsh"
 zinit light atuinsh/atuin
 
 # navi - cheatsheet tool, load after widgets
-zinit ice wait"1c" lucid as"program" from"gh-r" id-as"navi" \
+zinit ice wait"1" lucid as"program" from"gh-r" id-as"navi" \
   atload'
     export NAVI_PATH="$HOME/.config/navi/cheats"
     export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
@@ -301,16 +315,6 @@ zinit ice wait"1c" lucid as"program" from"gh-r" id-as"navi" \
     bindkey "^N" _navi_widget
   '
 zinit light denisidoro/navi
-
-# fzf - essential tool, load early
-zinit ice wait"0" lucid as"null" from"gh-r" id-as"fzf" \
-  atclone'
-    ln -sf $PWD/fzf ~/.local/bin/fzf
-    fzf --zsh > init.zsh
-  ' \
-  atpull"%atclone" \
-  src"init.zsh"
-zinit light junegunn/fzf
 
 # display
 zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
@@ -407,6 +411,22 @@ zinit ice if'[[ ! -x $commands[lnav] ]]' lucid as"null" from"gh-r" id-as"lnav" \
   atpull"%atclone"
 zinit light tstack/lnav
 
+# snitch - a prettier way to inspect network connections
+zinit ice if'[[ ! -x $commands[snitch] ]]' lucid as"null" from"gh-r" id-as"snitch" \
+  completions \
+  atclone'
+    ln -sf $PWD/snitch ~/.local/bin/snitch
+    snitch completion zsh > _snitch
+  ' \
+  atpull"%atclone"
+zinit light karol-broda/snitch
+
+# serie - A rich git commit graph in your terminal, like magic 📚
+zinit ice if'[[ ! -x $commands[se] ]]' lucid as"null" from"gh-r" id-as"se" \
+  atclone'ln -sf $PWD/serie ~/.local/bin/se' \
+  atpull"%atclone"
+zinit light lusingander/serie
+
 # fastfetch
 zinit ice if'[[ ! -x $commands[fastfetch] ]]' lucid as"null" from"gh-r" id-as"fastfetch" \
   bpick"fastfetch-linux-amd64.tar.gz" extract"!" \
@@ -423,6 +443,13 @@ zinit ice if'[[ ! -x $commands[uv] ]]' lucid as"null" from"gh-r" id-as"uv" \
   ' \
   atpull"%atclone"
 zinit light astral-sh/uv
+
+# zb - Homebrew alternative
+zinit ice if'[[ ! -x $commands[zb] ]]' lucid as"null" run-atpull id-as"zb" \
+  atclone"curl -sSL https://raw.githubusercontent.com/lucasgelfond/zerobrew/main/install.sh | bash" \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
+export PATH="/opt/zerobrew/prefix/bin:$PATH"
 
 # wallust
 zinit ice if'[[ -n $DISPLAY && ! -x $commands[wallust] ]]' lucid as"null" from"codeberg.org" id-as"wallust" \
