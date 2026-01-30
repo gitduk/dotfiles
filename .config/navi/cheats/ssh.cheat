@@ -15,3 +15,9 @@ sudo chmod 600 $HOME/.ssh/authorized_keys
 sudo chmod 600 $HOME/.ssh/id_rsa
 sudo chmod 644 $HOME/.ssh/id_rsa.pub
 
+# ssh speed test: local -> server
+timeout <time>s dd if=/dev/zero bs=1M | pv | ssh <host> "dd of=/dev/null"
+
+# ssh speed test: server -> local
+timeout -s SIGINT <time>s ssh <host> "dd if=/dev/zero bs=1M" | dd of=/dev/null
+

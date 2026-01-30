@@ -96,9 +96,6 @@ fi
 # local path
 export PATH="$HOME/.local/bin:$PATH"
 
+# custom
+[[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
 
-# zerobrew
-export PATH="/home/wukaige/.local/bin:$PATH"
-
-# zerobrew
-export PATH="/opt/zerobrew/prefix/bin:$PATH"

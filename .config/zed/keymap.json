@@ -1,45 +1,44 @@
 [
   {
-    "context": "Editor",
     "bindings": {
       "alt-enter": "editor::OpenExcerpts",
       "ctrl-enter": "assistant::InlineAssist",
-      "ctrl-space": "terminal_panel::Toggle"
-    }
+      "ctrl-space": "terminal_panel::Toggle",
+    },
   },
   {
     "context": "Editor && vim_mode == insert",
     "bindings": {
       "j k": "vim::NormalBefore",
       "ctrl-h": "editor::Backspace",
-      "ctrl-shift-v": "editor::Paste"
-    }
+      "ctrl-shift-v": "editor::Paste",
+    },
   },
   {
     "context": "Editor && vim_mode == normal && !menu",
     "bindings": {
-      "ctrl-h": "vim::StartOfLine"
-    }
+      "ctrl-h": "vim::StartOfLine",
+    },
   },
   {
     "context": "Editor && edit_prediction",
     "bindings": {
       "ctrl-f": "editor::AcceptEditPrediction",
       "alt-l": null,
-      "alt-tab": null
-    }
+      "alt-tab": null,
+    },
   },
   {
     "context": "Editor && showing_completions",
     "bindings": {
-      "tab": "editor::ComposeCompletion"
-    }
+      "tab": "editor::ComposeCompletion",
+    },
   },
   {
     "context": "Editor && edit_prediction_conflict",
     "bindings": {
-      "ctrl-f": "editor::AcceptEditPrediction"
-    }
+      "ctrl-f": "editor::AcceptEditPrediction",
+    },
   },
   {
     "context": "ProjectPanel",
@@ -50,8 +49,8 @@
       "enter": "project_panel::Rename",
       "space": "project_panel::Open",
       "backspace": "project_panel::Delete",
-      "alt-shift-f": "project_panel::NewSearchInDirectory"
-    }
+      "alt-shift-f": "project_panel::NewSearchInDirectory",
+    },
   },
   {
     "context": "Terminal",
@@ -67,8 +66,8 @@
       "enter": ["terminal::SendKeystroke", "enter"],
       "ctrl-c": ["terminal::SendKeystroke", "ctrl-c"],
       "ctrl-w": ["terminal::SendKeystroke", "ctrl-w"],
-      "ctrl-j": ["terminal::SendKeystroke", "ctrl-j"]
-    }
+      "ctrl-j": ["terminal::SendKeystroke", "ctrl-j"],
+    },
   },
   {
     "bindings": {
@@ -123,7 +122,7 @@
       "ctrl-k right": null,
       "ctrl-k up": null,
       "ctrl-k shift-enter": null,
-      "ctrl-k ctrl-w": null
-    }
-  }
+      "ctrl-k ctrl-w": null,
+    },
+  },
 ]

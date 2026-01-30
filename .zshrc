@@ -211,7 +211,6 @@ zinit ice wait"1" lucid as"program" id-as"autoload" \
   atload'
     autoload -Uz ~/.zsh.d/functions/**/*(:t)
     for script (~/.zsh.d/*.zsh(N)) source $script
-    [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
   '
 zinit light zdharma-continuum/null
 
@@ -489,10 +488,7 @@ zinit light pranshuparmar/witr
 
 # claude-code
 zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"null" run-atpull id-as"claude" \
-  atclone"
-    bun install -g @anthropic-ai/claude-code
-    bun install -g opencode-ai
-  " \
+  atclone"curl -fsSL https://claude.ai/install.sh | bash" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 

@@ -123,7 +123,7 @@ sudo nala update
 sudo nala install -y $(ubuntu-drivers devices 2>/dev/null | awk '/recommended/{print $3}')
 
 # sing-box-script - selfhost vpn
-bash <(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/yonggekkk/sing-box-yg/main/sb.sh)
 
 # podman
 echo "deb http://archive.ubuntu.com/ubuntu plucky main universe" | sudo tee /etc/apt/sources.list.d/plucky.list
