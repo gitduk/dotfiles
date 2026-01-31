@@ -1,124 +1,99 @@
 ---
 name: dotfile
-description: 'help me create commit for ~/.dotfiles.git bare repo'
+description: 'Create conventional commits for ~/.dotfiles.git bare repo. Analyzes changes, stages files, and generates semantic commit messages.'
 license: MIT
-allowed-tools: Bash
+allowed-tools: Bash, Read
 ---
 
-# Git Commit with Conventional Commits
+# Dotfiles Commit Skill
 
-## Overview
+Manage commits for a bare git repo (`~/.dotfiles.git`, worktree `$HOME`) using Conventional Commits.
 
-Create standardized, semantic git commits using the Conventional Commits specification. Analyze the actual diff to determine appropriate type, scope, and message.
+## Git Command
 
-## Conventional Commit Format
+All git operations MUST use this prefix:
 
-```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
+```bash
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git <command>
 ```
 
-## Commit Types
-
-| Type       | Purpose                        |
-| ---------- | ------------------------------ |
-| `feat`     | New feature                    |
-| `fix`      | Bug fix                        |
-| `docs`     | Documentation only             |
-| `style`    | Formatting/style (no logic)    |
-| `refactor` | Code refactor (no feature/fix) |
-| `perf`     | Performance improvement        |
-| `test`     | Add/update tests               |
-| `build`    | Build system/dependencies      |
-| `ci`       | CI/config changes              |
-| `chore`    | Maintenance/misc               |
-| `revert`   | Revert commit                  |
-
-## Breaking Changes
-
-```
-# Exclamation mark after type/scope
-feat!: remove deprecated endpoint
-
-# BREAKING CHANGE footer
-feat: allow config to extend other configs
-
-BREAKING CHANGE: `extends` key behavior changed
-```
+Abbreviated as `dotgit` below for clarity. Always expand to the full form when executing.
 
 ## Workflow
 
-### 1. Analyze Diff
+### 1. Check status and diff
 
 ```bash
-# If files are staged, use staged diff
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git diff --staged
-
-# If nothing staged, use working tree diff
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git diff
-
-# Also check status
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git status --porcelain
+# Always run these three in parallel to understand current state
+dotgit status --porcelain
+dotgit diff --staged
+dotgit diff
 ```
 
-### 2. Stage Files (if needed)
+If nothing is staged, ask the user what to stage, or stage all changed tracked files.
 
-If nothing is staged or you want to group changes differently:
+### 2. Review recent commits for style consistency
 
 ```bash
-# Stage specific files
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git add path/to/file1 path/to/file2
-
-# Stage by pattern
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git add *.test.*
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git add src/components/*
-
-# Interactive staging
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git add -p
+dotgit log --oneline -10
 ```
 
-**Never commit secrets** (.env, credentials.json, private keys).
-
-### 3. Generate Commit Message
-
-Analyze the diff to determine:
-
-- **Type**: What kind of change is this?
-- **Scope**: What area/module is affected?
-- **Description**: One-line summary of what changed (present tense, imperative mood, <72 chars)
-
-### 4. Execute Commit
+### 3. Stage files
 
 ```bash
-# Single line
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git commit -m "<type>[scope]: <description>"
+# Stage specific files (preferred - be explicit)
+dotgit add ~/.zshrc ~/.config/nvim/init.lua
 
-# Multi-line with body/footer
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git commit -m "$(cat <<'EOF'
-<type>[scope]: <description>
+# Stage all tracked changes
+dotgit add -u
+```
+
+**NEVER** stage secrets: `.env`, credentials, private keys, tokens.
+
+### 4. Commit
+
+```bash
+dotgit commit -m "$(cat <<'EOF'
+<type>(<scope>): <description>
 
 <optional body>
-
-<optional footer>
 EOF
 )"
 ```
 
-## Best Practices
+## Commit Convention
 
+Format: `<type>(<scope>): <description>`
+
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `chore`
+
+**Common scopes for dotfiles**:
+
+| Scope      | Files                                  |
+| ---------- | -------------------------------------- |
+| `zsh`      | .zshrc, .zsh.d/, .zprofile, .zshenv   |
+| `vim`      | .vimrc, .config/nvim/                  |
+| `tmux`     | .tmux.conf, .config/tmux/             |
+| `git`      | .gitconfig, .gitignore_global         |
+| `ssh`      | .ssh/config                            |
+| `claude`   | .claude/                               |
+| `alacritty`| .config/alacritty/                     |
+| `kitty`    | .config/kitty/                         |
+| `starship` | .config/starship.toml                  |
+| `homebrew` | Brewfile, .Brewfile                    |
+| `shell`    | cross-shell scripts, .local/bin/       |
+
+Omit scope if changes span multiple unrelated areas.
+
+**Rules**:
+- Imperative mood, present tense: "add", not "added"
+- Description < 72 chars
 - One logical change per commit
-- Present tense: "add" not "added"
-- Imperative mood: "fix bug" not "fixes bug"
-- Reference issues: `Closes #123`, `Refs #456`
-- Keep description under 72 characters
+- Analyze the actual diff content to determine type and scope, don't guess
 
-## Git Safety Protocol
+## Safety
 
 - NEVER update git config
 - NEVER run destructive commands (--force, hard reset) without explicit request
-- NEVER skip hooks (--no-verify) unless user asks
-- NEVER force push to main/master
-- If commit fails due to hooks, fix and create NEW commit (don't amend)
+- NEVER skip hooks unless user asks
+- If commit fails due to hooks, fix and create a NEW commit (don't amend)

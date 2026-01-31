@@ -12,10 +12,11 @@ fi
 # Skip heavy shell initialization for programmatic use (Claude Code, IDE tools, scripts)
 # Must be at the very top before any heavy operations
 if [[ -n "$ZSH_EXECUTION_STRING" ]] || \
-   [[ ! -t 0 ]] || \
-   [[ ! -t 1 ]] || \
-   [[ "$TERM" = "dumb" ]]; then
-  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/go/bin:/opt/zerobrew/prefix/bin:$PATH"
+  [[ ! -t 0 ]] || \
+  [[ ! -t 1 ]] || \
+  [[ "$TERM" = "dumb" ]]; then
+  export PATH="$HOME/.local/bin:$PATH"
+  export PATH="/opt/zerobrew/prefix/bin:$PATH"
   return 0 2>/dev/null || exit 0
 fi
 
