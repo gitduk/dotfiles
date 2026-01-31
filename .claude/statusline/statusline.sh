@@ -11,5 +11,5 @@ if [[ "$USAGE" != "null" ]]; then
   PERCENT_USED=$((CURRENT_TOKENS * 100 / CONTEXT_SIZE))
   printf "%s" "[$MODEL] Context: ${PERCENT_USED}%"
 else
-  printf "%b" "[$MODEL] \033[32mContext: null\033[0m"
+  printf "%b" "[$MODEL] Context: null"
 fi

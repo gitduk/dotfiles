@@ -9,6 +9,16 @@ if [[ -n "$ZPROF" ]]; then
   zmodload zsh/zprof
 fi
 
+# Skip heavy shell initialization for programmatic use (Claude Code, IDE tools, scripts)
+# Must be at the very top before any heavy operations
+if [[ -n "$ZSH_EXECUTION_STRING" ]] || \
+   [[ ! -t 0 ]] || \
+   [[ ! -t 1 ]] || \
+   [[ "$TERM" = "dumb" ]]; then
+  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/usr/local/go/bin:/opt/zerobrew/prefix/bin:$PATH"
+  return 0 2>/dev/null || exit 0
+fi
+
 # Directory navigation and stack management
 setopt AUTOCD            # 允许直接输入目录名就 cd 进去，例如输入 "~/Downloads" 会自动进入目录
 setopt AUTO_PUSHD        # 使用 cd 命令时将目录压入目录栈（可以用 `dirs` / `popd` / `pushd` 管理历史）

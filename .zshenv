@@ -24,7 +24,8 @@ export LC_CTYPE=en_US.UTF-8
 # then /lib/terminfo
 # then /usr/share/terminfo
 export TERMINFO="/lib/terminfo"
-export TERM="xterm-256color"
+# Only set TERM if not already set to a meaningful value (preserve TERM=dumb from tools)
+[[ -z "$TERM" || "$TERM" == "unknown" || "$TERM" == "linux" ]] && export TERM="xterm-256color"
 export KEYTIMEOUT=20
 export CLIPBOARD="$HOME/.clipboard"
 
@@ -83,13 +84,13 @@ export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=hyprland
 export XDG_CURRENT_DESKTOP=hyprland
 
-# update HYPRLAND_INSTANCE_SIGNATURE
-if [[ -d "$XDG_RUNTIME_DIR/hypr" ]]; then
+# update HYPRLAND_INSTANCE_SIGNATURE (only in interactive sessions)
+if [[ -o interactive && -d "$XDG_RUNTIME_DIR/hypr" ]]; then
   export HYPRLAND_INSTANCE_SIGNATURE="$(ls -t "$XDG_RUNTIME_DIR/hypr" | head -n1)"
 fi
 
-# ensure display
-if [[ -z "$DISPLAY" ]]; then
+# ensure display (only in interactive sessions, ps can block in sandboxed envs)
+if [[ -o interactive && -z "$DISPLAY" ]]; then
   export DISPLAY=$(ps -ef | awk '/Xwayland/ && !/grep/ {for(i=1;i<=NF;i++) if ($i ~ /^:[0-9]+$/) print $i; exit}')
 fi
 

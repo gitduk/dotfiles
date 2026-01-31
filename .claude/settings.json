@@ -23,6 +23,5 @@
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline/statusline.sh"
-  },
-  "alwaysThinkingEnabled": false
+  }
 }
