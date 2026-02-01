@@ -163,8 +163,27 @@ zinit light starship/starship
 ### Plugins ###
 ###############
 
+# zsh-completions
+zinit ice wait"0" blockf lucid id-as"zsh-completions" \
+  atpull"zinit creinstall -q ."
+zinit light zsh-users/zsh-completions
+
+# compinit
+zinit ice wait"0a" lucid nocompile id-as"compinit" \
+  atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay"
+zinit light zdharma-continuum/null
+
+# settings & functions
+zinit ice wait"0b" lucid as"program" id-as"autoload" \
+  atinit"fpath+=~/.zsh.d/functions" \
+  atload'
+    autoload -Uz ~/.zsh.d/functions/**/*(:t)
+    for script (~/.zsh.d/*.zsh(N)) source $script
+  '
+zinit light zdharma-continuum/null
+
 # zsh-users/zsh-autosuggestions
-zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
+zinit ice wait"0b" lucid id-as"zsh-autosuggestions" \
   atload"!_zsh_autosuggest_start" \
   atload"
     export ZSH_AUTOSUGGEST_MANUAL_REBIND='1'
@@ -177,34 +196,22 @@ zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
 zinit light zsh-users/zsh-autosuggestions
 
 # zdharma-continuum/fast-syntax-highlighting
-zinit ice wait"0" lucid id-as"fast-syntax-highlighting"
+zinit ice wait"0b" lucid id-as"fast-syntax-highlighting"
 zinit light zdharma-continuum/fast-syntax-highlighting
+
+# Aloxaf/fzf-tab
+zinit ice wait"0c" lucid id-as"fzf-tab" \
+  atload"zstyle ':fzf-tab:*' fzf-flags --ansi"
+zinit light Aloxaf/fzf-tab
 
 # zsh-users/zsh-history-substring-search
 zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
   atload"
     export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
-    bindkey '^[[A' history-substring-search-up
-    bindkey '^[OA' history-substring-search-up
     bindkey '^k' history-substring-search-up
     bindkey '^j' history-substring-search-down
   "
 zinit light zsh-users/zsh-history-substring-search
-
-# zsh-completions
-zinit ice wait"1" blockf lucid id-as"zsh-completions" \
-  atpull"zinit creinstall -q ."
-zinit light zsh-users/zsh-completions
-
-# compinit
-zinit ice wait"1a" lucid nocompile id-as"compinit" \
-  atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay"
-zinit light zdharma-continuum/null
-
-# Aloxaf/fzf-tab
-zinit ice wait"1b" lucid id-as"fzf-tab" \
-  atload"zstyle ':fzf-tab:*' fzf-flags --ansi"
-zinit light Aloxaf/fzf-tab
 
 # sudo
 zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
@@ -215,15 +222,6 @@ zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 #############
 ### Tools ###
 #############
-
-# settings & functions
-zinit ice wait"1" lucid as"program" id-as"autoload" \
-  atinit"fpath+=~/.zsh.d/functions" \
-  atload'
-    autoload -Uz ~/.zsh.d/functions/**/*(:t)
-    for script (~/.zsh.d/*.zsh(N)) source $script
-  '
-zinit light zdharma-continuum/null
 
 # rustup
 zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
@@ -286,7 +284,7 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
 zinit light direnv/direnv
 
 # zoxide - quick jump dir
-zinit ice wait"1" lucid as"null" from"gh-r" id-as"zoxide" \
+zinit ice wait"0" lucid as"null" from"gh-r" id-as"zoxide" \
   atclone'ln -sf $PWD/zoxide ~/.local/bin/zoxide' \
   atpull"%atclone" \
   atload'eval "$(zoxide init zsh --cmd j)"'
@@ -303,7 +301,7 @@ zinit ice wait"1" lucid as"null" from"gh-r" id-as"fzf" \
 zinit light junegunn/fzf
 
 # atuin - command history, load after compinit for completion support
-zinit ice wait"1" lucid as"null" from"gh-r" id-as"atuin" \
+zinit ice wait"0" lucid as"null" from"gh-r" id-as"atuin" \
   bpick"atuin-*.tar.gz" extract"!" \
   atclone'
     ln -sf $PWD/atuin ~/.local/bin/atuin
@@ -315,7 +313,7 @@ zinit ice wait"1" lucid as"null" from"gh-r" id-as"atuin" \
 zinit light atuinsh/atuin
 
 # navi - cheatsheet tool, load after widgets
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"navi" \
+zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
   atload'
     export NAVI_PATH="$HOME/.config/navi/cheats"
     export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
