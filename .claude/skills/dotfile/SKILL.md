@@ -50,7 +50,7 @@ dotgit add -u
 
 **NEVER** stage secrets: `.env`, credentials, private keys, tokens.
 
-### 4. Commit
+### 4. Commit and Push
 
 ```bash
 dotgit commit -m "$(cat <<'EOF'
@@ -59,6 +59,12 @@ dotgit commit -m "$(cat <<'EOF'
 <optional body>
 EOF
 )"
+```
+
+After a successful commit, always push immediately:
+
+```bash
+dotgit push
 ```
 
 ## Commit Convention
