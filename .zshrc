@@ -290,16 +290,6 @@ zinit ice wait"0" lucid as"null" from"gh-r" id-as"zoxide" \
   atload'eval "$(zoxide init zsh --cmd j)"'
 zinit light ajeetdsouza/zoxide
 
-# fzf - essential tool, load early
-zinit ice wait"1" lucid as"null" from"gh-r" id-as"fzf" \
-  atclone'
-    ln -sf $PWD/fzf ~/.local/bin/fzf
-    fzf --zsh > init.zsh
-  ' \
-  atpull"%atclone" \
-  src"init.zsh"
-zinit light junegunn/fzf
-
 # atuin - command history, load after compinit for completion support
 zinit ice wait"0" lucid as"null" from"gh-r" id-as"atuin" \
   bpick"atuin-*.tar.gz" extract"!" \
@@ -324,14 +314,11 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
   '
 zinit light denisidoro/navi
 
-# display
-zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
-  atclone'
-    command -v foot &>/dev/null || instr foot
-    command -v kitty &>/dev/null || instr kitty
-  ' \
+# fzf - essential tool, load early
+zinit ice if'[[ ! -x $commands[fzf] ]]' lucid as"null" from"gh-r" id-as"fzf" \
+  atclone'ln -sf $PWD/fzf ~/.local/bin/fzf' \
   atpull"%atclone"
-zinit light zdharma-continuum/null
+zinit light junegunn/fzf
 
 # bat
 zinit ice if'[[ ! -x $commands[bat] ]]' lucid as"null" from"gh-r" id-as"bat" \
@@ -620,6 +607,15 @@ zinit ice if'[[ -n $DISPLAY && ! -x $commands[alacritty] ]]' lucid as"null" id-a
   ' \
   atpull"%atclone"
 zinit light alacritty/alacritty
+
+# display
+zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
+  atclone'
+    command -v foot &>/dev/null || instr foot
+    command -v kitty &>/dev/null || instr kitty
+  ' \
+  atpull"%atclone"
+zinit light zdharma-continuum/null
 
 ###################
 ### Completions ###

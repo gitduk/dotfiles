@@ -39,6 +39,9 @@ alias wch="watch -c -n 1"
 alias li="sudo lsof -i:"
 alias mt="sudo mount /dev/sd"
 
+# atuin
+alias asy="atuin sync"
+
 # bun
 alias b="bun"
 alias bx="bun x"
