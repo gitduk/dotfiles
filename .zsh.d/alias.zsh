@@ -12,8 +12,8 @@ alias denv="deactivate"
 alias dim="echo $(tput cols)x$(tput lines)"
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 alias jcl="journalctl"
-alias jcu="journalctl -u"
-alias jcuu="journalctl --user -u"
+alias jcu="journalctl --no-pager -u"
+alias jcuu="journalctl --user --no-pager -u"
 alias lv="lnav"
 alias mk="mkdir -p"
 alias nc="netcat -v"
@@ -51,23 +51,21 @@ alias brm="bun remove -g"
 alias brs="bun run serve"
 
 # dotfiles
-if [[ -n "$DISPLAY" ]]; then
-  alias cs="c status"
-  alias cdf="c diff"
-  alias cds="c diff --staged"
-  alias cad="cadd"
-  alias crs="c restore"
-  alias cst="c stash"
-  alias csp="c stash pop"
-  alias clg="c log"
-  alias cme="c commit --edit"
-  alias cma="c commit --amend"
-  alias cman="c commit --amend --no-edit"
-  alias cmm="c commit -m"
-  alias cpl="c pull --rebase"
-  alias cps="c push"
-  alias cls="c ls-tree -r master --name-only"
-fi
+alias cs="c status"
+alias cdf="c diff"
+alias cds="c diff --staged"
+alias cad="cadd"
+alias crs="c restore"
+alias cst="c stash"
+alias csp="c stash pop"
+alias clg="c log"
+alias cme="c commit --edit"
+alias cma="c commit --amend"
+alias cman="c commit --amend --no-edit"
+alias cmm="c commit -m"
+alias cpl="c pull --rebase"
+alias cps="c push"
+alias cls="c ls-tree -r master --name-only"
 
 # cargo
 alias ca="cargo"
@@ -166,6 +164,9 @@ alias gps="git push"
 alias gpl="git pull --rebase"
 alias gcl="git clone --depth 1"
 
+# hyprland
+alias hc="hyprctl"
+
 # just
 alias js="just"
 alias jse="just --edit"
@@ -190,8 +191,11 @@ alias nac="sudo nala clean"
 # open
 alias o="open"
 
+# openclaw
+alias oc="openclaw"
+
 # opencode
-alias oc="opencode"
+alias ocd="opencode"
 
 # pueue
 alias p="pueue"

@@ -71,7 +71,7 @@ autoload -Uz edit-command-line
 ### Functions ###
 #################
 
-# get os id
+# vars
 export OS=$(. /etc/os-release; echo "${ID}")
 
 # proxy settings
@@ -168,6 +168,18 @@ zinit ice wait"0" blockf lucid id-as"zsh-completions" \
   atpull"zinit creinstall -q ."
 zinit light zsh-users/zsh-completions
 
+# zsh-users/zsh-autosuggestions
+zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
+  atload'!
+    ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+    ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
+    bindkey -M viins "^ " autosuggest-execute
+    bindkey -M vicmd "^ " autosuggest-execute
+    _zsh_autosuggest_start
+  '
+zinit light zsh-users/zsh-autosuggestions
+
 # compinit
 zinit ice wait"0a" lucid nocompile id-as"compinit" \
   atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay"
@@ -181,19 +193,6 @@ zinit ice wait"0b" lucid as"program" id-as"autoload" \
     for script (~/.zsh.d/*.zsh(N)) source $script
   '
 zinit light zdharma-continuum/null
-
-# zsh-users/zsh-autosuggestions
-zinit ice wait"0b" lucid id-as"zsh-autosuggestions" \
-  atload"!_zsh_autosuggest_start" \
-  atload"
-    export ZSH_AUTOSUGGEST_MANUAL_REBIND='1'
-    export ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
-    export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-    bindkey -M viins '^q' autosuggest-clear
-    bindkey -M viins '^ ' autosuggest-execute
-    bindkey -M vicmd '^ ' autosuggest-execute
-  "
-zinit light zsh-users/zsh-autosuggestions
 
 # zdharma-continuum/fast-syntax-highlighting
 zinit ice wait"0b" lucid id-as"fast-syntax-highlighting"

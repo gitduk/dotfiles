@@ -86,13 +86,11 @@ export XDG_CURRENT_DESKTOP=hyprland
 
 # update HYPRLAND_INSTANCE_SIGNATURE (only in interactive sessions)
 if [[ -o interactive && -d "$XDG_RUNTIME_DIR/hypr" ]]; then
-  export HYPRLAND_INSTANCE_SIGNATURE="$(ls -t "$XDG_RUNTIME_DIR/hypr" | head -n1)"
+  export HYPRLAND_INSTANCE_SIGNATURE="$(/usr/bin/ls -t "$XDG_RUNTIME_DIR/hypr" | head -n1)"
 fi
 
 # ensure display (only in interactive sessions, ps can block in sandboxed envs)
-if [[ -o interactive && -z "$DISPLAY" ]]; then
-  export DISPLAY=$(ps -ef | awk '/Xwayland/ && !/grep/ {for(i=1;i<=NF;i++) if ($i ~ /^:[0-9]+$/) print $i; exit}')
-fi
+export DISPLAY="$(pgrep -a Xwayland | grep -o ':[0-9]*')"
 
 # local path
 export PATH="$HOME/.local/bin:$PATH"
