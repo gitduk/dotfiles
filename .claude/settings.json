@@ -1,4 +1,28 @@
 {
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send -i dialog-information 'Claude Code' '任务完成，请查看结果'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send -u critical -i dialog-question 'Claude Code' '需要你的输入，请切换到终端'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash",
@@ -23,5 +47,10 @@
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline/statusline.sh"
+  },
+  "enabledPlugins": {
+    "document-skills@anthropic-agent-skills": true,
+    "context7@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   }
 }

@@ -50,7 +50,7 @@ dotgit add -u
 
 **NEVER** stage secrets: `.env`, credentials, private keys, tokens.
 
-### 4. Commit and Push
+### 4. Commit
 
 ```bash
 dotgit commit -m "$(cat <<'EOF'
@@ -61,11 +61,23 @@ EOF
 )"
 ```
 
-After a successful commit, always push immediately:
+### 5. Push (if requested)
+
+**Argument parsing**: Check if the user passed `push` as an argument (e.g., `/dotfile push`).
+
+If `push` argument is present:
 
 ```bash
 dotgit push
 ```
+
+If push fails due to no upstream, set it:
+
+```bash
+dotgit push -u origin $(dotgit branch --show-current)
+```
+
+If `push` argument is NOT present, do NOT push.
 
 ## Commit Convention
 
