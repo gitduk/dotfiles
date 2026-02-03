@@ -3,24 +3,26 @@
 CONFIG_ROOT="$HOME/.config/sing-box"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
 IP_CACHE="$CACHE_DIR/singbox.ip.cache"
+IP_LOCK="$CACHE_DIR/singbox.ip.lock"
 IP_API="https://ipinfo.io/json"
 
-# 创建缓存目录
 mkdir -p "$CACHE_DIR"
 
-# 获取 IP 信息
-get_ip_info() {
-  # 如果缓存文件存在且小于 5 分钟，直接使用缓存
-  if [[ -f "$IP_CACHE" ]] && [[ $(($(date +%s) - $(stat -c %Y "$IP_CACHE" 2>/dev/null || echo 0))) -lt 300 ]]; then
-    cat "$IP_CACHE"
+# 后台刷新 IP 缓存（非阻塞）
+_refresh_ip_cache() {
+  # 防止并发刷新
+  if [[ -f "$IP_LOCK" ]] && kill -0 "$(cat "$IP_LOCK" 2>/dev/null)" 2>/dev/null; then
     return
   fi
 
-  # 获取新的 IP 信息
-  local ip_data
-  ip_data=$(curl -s --max-time 3 "$IP_API" 2>/dev/null)
+  (
+    echo $$ > "$IP_LOCK"
+    trap 'rm -f "$IP_LOCK"' EXIT
 
-  if [[ -n "$ip_data" ]]; then
+    local ip_data
+    ip_data=$(curl -s --max-time 3 "$IP_API" 2>/dev/null)
+    [[ -z "$ip_data" ]] && return
+
     local ip city region country org
     ip=$(echo "$ip_data" | jq -r '.ip // "N/A"')
     city=$(echo "$ip_data" | jq -r '.city // ""')
@@ -28,7 +30,6 @@ get_ip_info() {
     country=$(echo "$ip_data" | jq -r '.country // ""')
     org=$(echo "$ip_data" | jq -r '.org // ""')
 
-    # 构建位置信息
     local location=""
     [[ -n "$city" ]] && location="$city"
     [[ -n "$region" ]] && location="${location:+$location, }$region"
@@ -37,10 +38,21 @@ get_ip_info() {
 
     local info="$ip\\n$location"
     [[ -n "$org" ]] && info="$info | $org"
+    echo "$info" > "$IP_CACHE"
+  ) &
+  disown
+}
 
-    echo "$info" | tee "$IP_CACHE"
+# 获取 IP 信息（立即返回，不阻塞）
+get_ip_info() {
+  if [[ -f "$IP_CACHE" ]]; then
+    cat "$IP_CACHE"
+    # 超过 5 分钟则后台刷新
+    local age=$(( $(date +%s) - $(stat -c %Y "$IP_CACHE" 2>/dev/null || echo 0) ))
+    [[ $age -ge 300 ]] && _refresh_ip_cache
   else
-    echo "IP: N/A"
+    echo "loading..."
+    _refresh_ip_cache
   fi
 }
 
@@ -84,7 +96,7 @@ switch_config() {
   set_config "${configs[$index]}"
 }
 
-# 输出严格 JSON 给 Waybar，tooltip 用 \n 分隔
+# 输出严格 JSON 给 Waybar
 output_json() {
   local current="$(current_config)"
   local ip_info=$(get_ip_info)
@@ -93,7 +105,7 @@ output_json() {
   if pidof -q sing-box; then
     current="󰮤 ${current}"
   else
-    current=" ${current}"
+    current="! ${current}"
   fi
   echo "{\"text\":\"$current\",\"tooltip\":\"$tooltip\"}"
 }

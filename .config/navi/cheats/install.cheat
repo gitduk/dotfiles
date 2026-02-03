@@ -31,8 +31,8 @@ meson setup build --wipe -Drfkill=enabled --prefix=/usr && sudo ninja -C build i
 sudo nala install librust-xkbcommon-dev libgdk-pixbuf-2.0-dev libxcb-util-dev libxcb-ewmh-dev libxcb-icccm4-dev libmpdclient-dev libnl-3-dev \
   libalsa-ocaml-dev libxcb-randr0-dev libxcb-cursor-dev libxcb-xinerama0-dev libxcb-keysyms1-dev libstartup-notification0-dev flex bison \
   pandoc doxygen cppcheck ohcount
-git clone --depth=1 https://github.com/lbonn/rofi.git /tmp/rofi && cd /tmp/rofi/
-meson setup build --prefix=/usr && ninja -C build && sudo ninja -C build install
+git clone --depth=1 https://github.com/DaveDavenport/rofi.git /tmp/rofi && cd /tmp/rofi/
+meson setup build --prefix=$HOME/.local && ninja -C build && ninja -C build install
 
 # clipboard - wl-clipboard + cliphist
 git clone --depth 1 https://github.com/bugaevc/wl-clipboard.git /tmp/wl-clipboard && cd /tmp/wl-clipboard/
@@ -142,4 +142,7 @@ Pin-Priority: 400
 EOF
 sudo apt update
 sudo apt install podman
+
+# openclaw
+curl -fsSL https://openclaw.ai/install.sh | bash
 
