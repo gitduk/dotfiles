@@ -55,7 +55,7 @@ warn()  { echo -e "\e[33mWARN:\e[0m $*" >&2; }
 info()  { echo -e "\e[34mINFO:\e[0m $*"; }
 
 get_focused_monitor() {
-    hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}'
+  hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}'
 }
 
 toggle_foreground() {
@@ -112,7 +112,9 @@ set_wallpaper() {
   local percent=$(check_top_color "$wallpaper")
   [[ $percent -gt 50 ]] && toggle_foreground
 
+  command -v makoctl >/dev/null && makoctl reload &>/dev/null
   command -v hyprctl >/dev/null && hyprctl reload &>/dev/null
+  notify-send "$wallpaper"
 }
 
 random_wallpaper() {
@@ -208,9 +210,10 @@ main() {
   esac
 }
 
-# waiting hyprpaper loaded
+# waiting hyprpaper IPC ready
 while ! pgrep -x hyprpaper &>/dev/null; do
   sleep 0.1
 done
+sleep 0.1
 
 main "$@"

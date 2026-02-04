@@ -34,6 +34,9 @@ hypr.target = '~/.config/hypr/colors.conf'
 waybar.template = 'waybar.css'
 waybar.target = '~/.config/waybar/colors.css'
 
+tofi.template = 'tofi'
+tofi.target = '~/.config/tofi/config'
+
 rofi.template = 'rofi.rasi'
 rofi.target = '~/.config/rofi/colors.rasi'
 
@@ -42,4 +45,7 @@ kitty.target = '~/.config/kitty/kitty.conf'
 
 alacritty.template = 'alacritty.toml'
 alacritty.target = '~/.config/alacritty/colors.toml'
+
+mako.template = 'mako'
+mako.target = '~/.config/mako/config'
 

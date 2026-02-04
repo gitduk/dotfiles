@@ -103,46 +103,38 @@ wget "https://github.com/hyprwm/Hyprland/releases/download/$HYPRLAND_VERSION/sou
 cd /tmp && tar -xzvf source-$HYPRLAND_VERSION.tar.gz && cd hyprland-source/
 make all && sudo make install
 
-# 16. hyprnotify
-sudo nala install -y libalsa-ocaml-dev
-git clone https://github.com/codelif/hyprnotify.git /tmp/hyprnotify && cd /tmp/hyprnotify/
-go build ./cmd/hyprnotify
-sudo mv ./hyprnotify /usr/bin/hyprnotify
-
-# 17. hyprpaper
+# 16. hyprpaper
 sudo nala install -y libmagic-dev
 git clone https://github.com/hyprwm/hyprpaper.git /tmp/hyprpaper && cd /tmp/hyprpaper/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build &&
 cmake --build ./build --config Release --target hyprpaper -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF` &&
 sudo cmake --install ./build
 
-# 18. hyprlock
+# 17. hyprlock
 sudo nala install -y libpam0g-dev libdrm-dev 
 git clone https://github.com/hyprwm/hyprlock.git /tmp/hyprlock && cd /tmp/hyprlock/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
 cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF`
 sudo cmake --install ./build
 
-# 19. hypridle
+# 18. hypridle
 git clone https://github.com/hyprwm/hypridle.git /tmp/hypridle && cd /tmp/hypridle/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
 cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF`
 sudo cmake --install build && systemctl --user enable --now hypridle.service
 
-# 20. qt6
+# 19. qt6
 wget "https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run" -P /tmp
 chmod +x /tmp/qt-online-installer-linux-x64-online.run && /tmp/qt-online-installer-linux-x64-online.run
 
-# 21. hyprland-qtutils
-sudo nala install -y qt6-base-dev qt6-declarative-dev qt6-declarative-private-dev \
-  qt6-wayland-dev qt6-wayland-private-dev qml6-module-qtwayland-compositor \
-  qml6-module-qtcore qml6-module-qtqml-workerscript qml6-module-qtqml-models \
-  qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
-  qml6-module-qtquick-templates qml6-module-qtquick-window libqt6quick6
-git clone https://github.com/hyprwm/hyprland-qtutils.git /tmp/hyprland-qtutils && cd /tmp/hyprland-qtutils/
-cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \
-  && cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF` \
-  && sudo cmake --install build
+# 20. mako
+git clone https://github.com/emersion/mako.git /tmp/mako && cd /tmp/mako
+meson setup build && sudo ninja -C build/ install
+
+# hyprland-guiutils
+git clone https://github.com/hyprwm/hyprland-guiutils.git /tmp/guiutils && cd /tmp/guiutils
+mkdir build && cd build
+cmake .. && make all && sudo make install
 
 # sdbus-cpp
 sudo nala install -y libsystemd-dev
@@ -150,3 +142,20 @@ git clone https://github.com/Kistler-Group/sdbus-cpp.git /tmp/sdbus-cpp && cd /t
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=ReleaseA
 cmake --build . && sudo cmake --build . --target install
+
+# hyprtoolkit
+git clone https://github.com/hyprwm/iniparser.git /tmp/iniparser && cd /tmp/iniparser
+mkdir build && cd build
+cmake .. && make all && sudo make install
+sudo nala install -y libiniparser-dev
+git clone https://github.com/hyprwm/hyprtoolkit.git /tmp/hyprtoolkit && cd /tmp/hyprtoolkit
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf NPROCESSORS_CONF`
+sudo cmake --build ./build --target install
+
+# hyprlauncher
+sudo nala install -y libqalculate-dev
+git clone https://github.com/hyprwm/hyprlauncher.git /tmp/hyprlauncher && cd /tmp/hyprlauncher
+mkdir build && cd build
+cmake .. && make all && sudo make install
+

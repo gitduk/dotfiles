@@ -52,7 +52,7 @@ hint-font = true
 # Default text color
 #
 # All text defaults to this color if not otherwise specified.
-text-color = #abb2bf
+text-color = #EEE4C7
 
 # All pieces of text have the same theming attributes available:
 #
@@ -175,7 +175,7 @@ width = 30%
 height = 20%
 
 # Window background color
-background-color = #282c34
+background-color = #000010
 
 # Width of the border outlines in pixels.
 outline-width = 0
