@@ -31,6 +31,7 @@ zbindkey -M vicmd 'Y' vi-yank-copy
 function fzf-apt-widget {
   package=$(
     apt-cache search . | fzf \
+      --exact \
       --preview="" \
       --query=$LBUFFER \
       --multi \
