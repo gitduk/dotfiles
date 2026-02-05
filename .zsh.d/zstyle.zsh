@@ -21,17 +21,13 @@ zstyle ':completion:*' menu select=1
 zstyle ':completion:*' verbose yes
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} 'ln=target' 'or=31' 'mi=31'
 zstyle ':completion:*' group-name ''
-zstyle ':completion:*' keep-prefix true
 zstyle ':completion:*' complete-options true
 
 ####################################
 ### Matching and Error Tolerance ###
 ####################################
 # Smart case and fuzzy matching
-zstyle ':completion:*' matcher-list '' \
-  'm:{a-zA-Z}={A-Za-z}' \
-  'r:|[._-]=* r:|=*' \
-  'l:|=* r:|=*'
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*'
 
 # Error tolerance (allow up to 1/3 input errors)
 zstyle -e ':completion:*:approximate:*' max-errors 'reply=($((($#PREFIX+$#SUFFIX)/3))numeric)'
@@ -113,14 +109,7 @@ zstyle ':completion:*:*:ls:*' file-patterns \
 # Speed up completion in large directories
 zstyle ':completion:*' max-errors 2 not-numeric
 
-# Avoid blocking in large directories
-zstyle ':completion:*' insert-tab pending
-
 # Better sorting
-zstyle ':completion:*:*:*:*:*' menu select
-zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w -w"
-
-# Improved completion sorting
 zstyle ':completion:*:*:*:*:*' menu select=2
 
 # Set different completion behaviors for different file types

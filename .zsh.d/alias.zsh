@@ -70,6 +70,7 @@ alias cls="c ls-tree -r master --name-only"
 # cargo
 alias ca="cargo"
 alias cai="cargo init"
+alias can="cargo new"
 alias caad="cargo add"
 alias cab="cargo build"
 alias car="cargo run"
@@ -146,6 +147,9 @@ alias fs="fscan"
 
 # fastfetch
 alias ff="fastfetch"
+
+# gmini
+alias gm="gemini"
 
 # go
 alias gomi="go mod init"

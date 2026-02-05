@@ -23,12 +23,14 @@ usage() {
   -c, --config FILE    指定配置文件路径 (默认: ~/.syc.cfg)
   -n, --dry-run       模拟运行，不实际同步
   -v, --verbose       详细输出，显示传输进度
+  -f, --filter PATTERN 筛选需要同步的文件 (支持正则)
   --delete            删除远程多余的文件（谨慎使用）
   -h, --help          显示此帮助信息
 
 示例:
   $SCRIPT_NAME myserver              # 同步到 myserver
   $SCRIPT_NAME -n myserver           # 预览将要同步的文件
+  $SCRIPT_NAME -f ".zsh" myserver    # 只同步包含 .zsh 的文件
   $SCRIPT_NAME -v --delete myserver  # 详细输出并同步删除
 
 配置文件格式:
@@ -42,6 +44,7 @@ REMOTE_HOST=""
 DRY_RUN=false
 VERBOSE=false
 DELETE=false
+FILTER=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -49,6 +52,7 @@ while [[ $# -gt 0 ]]; do
     -c|--config) CONFIG_FILE="$2"; shift 2 ;;
     -n|--dry-run) DRY_RUN=true; shift ;;
     -v|--verbose) VERBOSE=true; shift ;;
+    -f|--filter) FILTER="$2"; shift 2 ;;
     --delete) DELETE=true; shift ;;
     *) [[ -z "$REMOTE_HOST" ]] && REMOTE_HOST="$1" || { print_error "多余参数"; return 1; }; shift ;;
   esac
@@ -62,25 +66,15 @@ FAIL=0
 SKIP=0
 
 print_info "开始同步文件到 $REMOTE_HOST ..."
+[[ -n "$FILTER" ]] && print_info "已启用筛选器: $FILTER"
 echo "----------------------------------------"
 
-while IFS= read -r raw; do
-  [[ -z "$raw" || "$raw" =~ ^[[:space:]]*# ]] && continue
-
-  # 展开 ~
-  pattern="${raw/#\~/$HOME}"
-
-  # 分解路径
-  dir=$(dirname "$pattern")
-  base=$(basename "$pattern")
-
-  if [[ $raw = *\** ]]; then
-    find "$dir" -maxdepth 1 -name "$base" 2>/dev/null
-  else
-    echo $pattern
+while read -r f; do
+  if [[ -n "$FILTER" ]] && ! echo "$f" | grep -qE "$FILTER"; then
+    ((SKIP++))
+    continue
   fi
 
-done < "$CONFIG_FILE" | while read -r f; do
   if [[ "$f" == "$HOME"* ]]; then
     rel="${f#$HOME/}"
     dest="~/$rel"
@@ -101,7 +95,10 @@ done < "$CONFIG_FILE" | while read -r f; do
   # 确保远程父目录存在
   remote_parent=$(dirname "$dest")
   if [[ ! "$remote_parent" = "~" ]]; then
-    ssh "$REMOTE_HOST" "mkdir -p $remote_parent" </dev/null 2>&1
+    # 模拟运行时不执行远程创建目录
+    if ! $DRY_RUN; then
+      ssh "$REMOTE_HOST" "mkdir -p $remote_parent" </dev/null 2>&1
+    fi
   fi
 
   # 使用 rsync 同步
@@ -121,7 +118,24 @@ done < "$CONFIG_FILE" | while read -r f; do
     ((FAIL++))
   fi
 
-done
+done < <(
+  while IFS= read -r raw; do
+    [[ -z "$raw" || "$raw" =~ ^[[:space:]]*# ]] && continue
+
+    # 展开 ~
+    pattern="${raw/#\~/$HOME}"
+
+    # 分解路径
+    dir=$(dirname "$pattern")
+    base=$(basename "$pattern")
+
+    if [[ $raw = *\** ]]; then
+      find "$dir" -maxdepth 1 -name "$base" 2>/dev/null
+    else
+      echo "$pattern"
+    fi
+  done < "$CONFIG_FILE"
+)
 
 echo "----------------------------------------"
 print_info "成功: $SUCCESS | 失败: $FAIL | 跳过: $SKIP"
