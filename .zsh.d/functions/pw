@@ -13,10 +13,11 @@ declare -A CONFIG=(
 )
 
 usage() {
-  echo "Usage: $0 [-n <length>] [-s]"
+  echo "Usage: $0 [-n <length>] [-s] [-u]"
   cat <<'EOF'
   -n, --length <length>          Specify password length
   -s, --special                  Use special characters
+  -u, --uuid                     Generate a UUID (v4)
 EOF
   return 1
 }
@@ -54,6 +55,11 @@ main () {
     -s | --special)
       CONFIG[use_special]="true"
       shift
+      ;;
+    -u | --uuid)
+      cat /proc/sys/kernel/random/uuid
+      shift
+      return 0
       ;;
     -f | --fzf)
       [[ ! -f "${CONFIG[pwfile]}" ]] && logger error "${CONFIG[pwfile]} not exist." && return 1
