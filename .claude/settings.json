@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(cargo *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cargo fmt --check && cargo clippy --quiet 2>/dev/null || true",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -17,6 +29,17 @@
           {
             "type": "command",
             "command": "notify-send 'Claude Code' '需要你的输入，请切换到终端'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Claude Code' '需要你的授权，请切换到终端'",
             "timeout": 5
           }
         ]
