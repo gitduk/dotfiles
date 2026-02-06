@@ -38,3 +38,19 @@ registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
 [source.rustcc]
 registry = "https://code.aliyun.com/rustcc/crates.io-index.git"
 
+[alias]
+i = "init"
+n = "new"
+a = "add"
+r = "run"
+c = "clean"
+s = "sync"
+u = "update"
+ck = "check"
+rb = "run --bin"
+b = "build"
+f = "fetch"
+rm = "remove"
+in = "install --locked"
+un = "uninstall"
+

@@ -36,7 +36,9 @@ cmake -DCMAKE_INSTALL_PREFIX=/usr -B build \
 
 # 6. aquamarine
 git clone https://github.com/stephenberry/glaze.git /tmp/glaze && cd /tmp/glaze
-make all && sudo make install
+cmake -DCMAKE_INSTALL_PREFIX=/usr -B build \
+  && cmake --build build -j `nproc` \
+  && sudo cmake --install ./build
 sudo nala install -y libseat-dev libdrm-dev libgbm-dev
 git clone https://github.com/hyprwm/aquamarine.git /tmp/aquamarine && cd /tmp/aquamarine/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build \

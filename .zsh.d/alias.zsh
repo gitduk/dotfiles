@@ -50,6 +50,10 @@ alias bis="bun install -g"
 alias brm="bun remove -g"
 alias brs="bun run serve"
 
+# bacon
+alias bcn="bacon"
+alias bci="bacon --init"
+
 # dotfiles
 alias cs="c status"
 alias cdf="c diff"
@@ -82,7 +86,7 @@ alias cac="cargo clean"
 alias cack="cargo check"
 alias cas="cargo sync"
 alias cau="cargo update"
-alias cais="cargo install --locked"
+alias cais="cargo install"
 alias caui="cargo uninstall"
 
 # claude

@@ -222,7 +222,7 @@ zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 ### Tools ###
 #############
 
-# rustup
+# rustup - Rust toolchain installer
 zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
   atclone'
     curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -234,11 +234,11 @@ zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
   atload'
     export CARGO_INSTALL_ROOT=$HOME/.local
     export PATH=$HOME/.cargo/bin:$PATH
-    command -v sccache &>/dev/null && export RUSTC_WRAPPER=$(command -v sccache)
+    command -v sccache &>/dev/null && export RUSTC_WRAPPER="$(command -v sccache)"
   '
 zinit light zdharma-continuum/null
 
-# golang
+# golang - Go programming language
 zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
   atclone'
     version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
@@ -275,7 +275,7 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"vfox" \
   atload'eval "$(vfox activate zsh)"'
 zinit light version-fox/vfox
 
-# direnv
+# direnv - Load and unload environment variables depending on the current directory
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
   atclone'mv direnv* direnv' \
   atpull"%atclone" \
@@ -313,13 +313,27 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
   '
 zinit light denisidoro/navi
 
+# bacon - background code checker
+zinit ice wait'1b' lucid as"null" run-atpull id-as"bacon" \
+  atclone"cargo install bacon" \
+  atpull"%atclone" \
+  atload"export BACON_CONFIG=~/.config/bacon/bacon.toml"
+zinit light zdharma-continuum/null
+
+# sccache - shared compilation cache
+zinit ice if'[[ ! -x $commands[sccache] ]]' lucid as"null" from"gh-r" id-as"sccache" \
+  extract"!" \
+  atclone'sudo ln -sf $PWD/sccache-dist /usr/bin/sccache' \
+  atpull"%atclone"
+zinit light mozilla/sccache
+
 # fzf - essential tool, load early
 zinit ice if'[[ ! -x $commands[fzf] ]]' lucid as"null" from"gh-r" id-as"fzf" \
   atclone'ln -sf $PWD/fzf ~/.local/bin/fzf' \
   atpull"%atclone"
 zinit light junegunn/fzf
 
-# bat
+# bat - A cat(1) clone with wings
 zinit ice if'[[ ! -x $commands[bat] ]]' lucid as"null" from"gh-r" id-as"bat" \
   completions extract"!" \
   atclone'
@@ -342,14 +356,14 @@ zinit ice if'[[ ! -x $commands[delta] ]]' lucid as"null" from"gh-r" id-as"delta"
   atpull"%atclone"
 zinit light dandavison/delta
 
-# fd
+# fd - A simple, fast and user-friendly alternative to 'find'
 zinit ice if'[[ ! -x $commands[fd] ]]' lucid as"null" from"gh-r" id-as"fd" \
   completions extract"!" \
   atclone'sudo ln -sf $PWD/fd /usr/bin/fd' \
   atpull"%atclone"
 zinit light sharkdp/fd
 
-# dust
+# dust - A more intuitive version of du in rust
 zinit ice if'[[ ! -x $commands[dust] ]]' lucid as"null" from"gh-r" id-as"dust" \
   completions extract"!" \
   atclone'
@@ -371,7 +385,7 @@ zinit ice if'[[ ! -x $commands[dysk] ]]' lucid as"null" from"gh-r" id-as"dysk" \
   atpull"%atclone"
 zinit light Canop/dysk
 
-# just
+# just - A handy way to save and run project-specific commands
 zinit ice if'[[ ! -x $commands[just] ]]' lucid as"null" from"gh-r" id-as"just" \
   completions \
   atclone'
@@ -381,14 +395,14 @@ zinit ice if'[[ ! -x $commands[just] ]]' lucid as"null" from"gh-r" id-as"just" \
   atpull"%atclone"
 zinit light casey/just
 
-# nvim
+# nvim - Hyperextensible Vim-based text editor
 zinit ice if'[[ ! -x $commands[nvim] ]]' lucid as"null" from"gh-r" id-as"nvim" \
   bpick"nvim-linux-x86_64.appimage" \
   atclone'sudo ln -sf $PWD/nvim-linux-x86_64.appimage /usr/bin/nvim' \
   atpull"%atclone"
 zinit light neovim/neovim
 
-# easytier
+# easytier - A simple, decentralized mesh VPN with ease of use
 zinit ice if'[[ ! -x $commands[easytier-cli] ]]' lucid as"null" from"gh-r" id-as"easytier" \
   extract"!" \
   atclone'
@@ -398,7 +412,7 @@ zinit ice if'[[ ! -x $commands[easytier-cli] ]]' lucid as"null" from"gh-r" id-as
   atpull"%atclone"
 zinit light EasyTier/EasyTier
 
-# lnav
+# lnav - Log file navigator
 zinit ice if'[[ ! -x $commands[lnav] ]]' lucid as"null" from"gh-r" id-as"lnav" \
   extract"!" \
   atclone'ln -sf $PWD/lnav ~/.local/bin/lnav' \
@@ -421,7 +435,7 @@ zinit ice if'[[ ! -x $commands[se] ]]' lucid as"null" from"gh-r" id-as"se" \
   atpull"%atclone"
 zinit light lusingander/serie
 
-# fastfetch
+# fastfetch - Like neofetch, but much faster because written in C
 zinit ice if'[[ ! -x $commands[fastfetch] ]]' lucid as"null" from"gh-r" id-as"fastfetch" \
   bpick"fastfetch-linux-amd64.tar.gz" extract"!" \
   atclone'ln -sf $PWD/usr/bin/fastfetch ~/.local/bin/fastfetch' \
@@ -445,13 +459,13 @@ zinit ice if'[[ ! -x $commands[zb] ]]' lucid as"null" run-atpull id-as"zb" \
 zinit light zdharma-continuum/null
 export PATH="/opt/zerobrew/prefix/bin:$PATH"
 
-# wallust
+# wallust - A fast color schemes generator
 zinit ice if'[[ -n $DISPLAY && ! -x $commands[wallust] ]]' lucid as"null" from"codeberg.org" id-as"wallust" \
   atclone"cargo +nightly install --path ." \
   atpull"%atclone"
 zinit light explosion-mental/wallust
 
-# feedr
+# feedr - Minimalistic RSS feed reader
 zinit ice if'[[ ! -x $commands[feedr] ]]' lucid as"null" from"gh-r" id-as"feedr" \
   atclone'
     mv feedr* feedr
@@ -460,7 +474,7 @@ zinit ice if'[[ ! -x $commands[feedr] ]]' lucid as"null" from"gh-r" id-as"feedr"
   atpull"%atclone"
 zinit light bahdotsh/feedr
 
-# pueue
+# pueue - A command-line task management tool for sequential and parallel execution
 zinit ice if'[[ ! -x $commands[pueue] ]]' lucid as"null" from"gh-r" id-as"pueue" \
   bpick"pueue-x86_64-unknown-linux-musl" \
   bpick"pueued-x86_64-unknown-linux-musl" \
@@ -474,20 +488,20 @@ zinit ice if'[[ ! -x $commands[pueue] ]]' lucid as"null" from"gh-r" id-as"pueue"
   atpull"%atclone"
 zinit light Nukesor/pueue
 
-# witr
+# witr - A command-line weather tool
 zinit ice if'[[ ! -x $commands[witr] ]]' lucid as"null" from"gh-r" id-as"witr" \
   bpick"witr-linux-amd64" \
   atclone'ln -sf $PWD/witr-linux-amd64 ~/.local/bin/witr' \
   atpull"%atclone"
 zinit light pranshuparmar/witr
 
-# claude-code
+# claude-code - Agentic CLI that can help you with coding tasks
 zinit ice if'[[ ! -x $commands[claude] ]]' lucid as"null" run-atpull id-as"claude" \
   atclone"curl -fsSL https://claude.ai/install.sh | bash" \
   atpull"%atclone"
 zinit light zdharma-continuum/null
 
-# sttr
+# sttr - CLI tool to perform various string transformations
 zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"null" from"gh-r" id-as"sttr" \
   atclone'
     ln -sf $PWD/sttr ~/.local/bin/sttr
@@ -496,7 +510,7 @@ zinit ice if'[[ ! -x $commands[sttr] ]]' lucid as"null" from"gh-r" id-as"sttr" \
   atpull"%atclone"
 zinit light abhimanyu003/sttr
 
-# xh
+# xh - A friendly and fast tool for sending HTTP requests
 zinit ice if'[[ ! -x $commands[xh] ]]' lucid as"null" from"gh-r" id-as"xh" \
   completions extract"!" \
   atclone'
@@ -555,7 +569,7 @@ zinit ice if'[[ ! -x $commands[yazi] ]]' lucid as"null" from"gh-r" id-as"yazi" \
   atpull"%atclone"
 zinit light sxyazi/yazi
 
-# fscan
+# fscan - An intranet scanning tool
 zinit ice if'[[ ! -x $commands[fscan] ]]' lucid as"null" from"gh-r" id-as"fscan" \
   atclone'ln -sf $PWD/fscan ~/.local/bin/fscan' \
   atpull"%atclone"
@@ -567,7 +581,7 @@ zinit ice if'[[ ! -x $commands[rain] ]]' lucid as"null" from"gh-r" id-as"rain" \
   atpull"%atclone"
 zinit light achristmascarl/rainfrog
 
-# sing-box
+# sing-box - The universal proxy platform
 zinit ice if'[[ ! -x $commands[sing-box] ]]' lucid as"null" from"gh-r" id-as"sing-box" \
   bpick"sing-box-*-linux-amd64.tar.gz" extract"!" \
   atclone'
@@ -584,7 +598,7 @@ zinit ice if'[[ -n $DISPLAY && ! -x $commands[yaak] ]]' lucid as"null" from"gh-r
   atpull"%atclone"
 zinit light mountain-loop/yaak
 
-# gh
+# gh - GitHub CLI
 zinit ice if'[[ ! -x $commands[gh] ]]' lucid as"null" from"gh-r" id-as"gh" \
   completions extract"!" \
   atclone'
@@ -594,7 +608,7 @@ zinit ice if'[[ ! -x $commands[gh] ]]' lucid as"null" from"gh-r" id-as"gh" \
   atpull"%atclone"
 zinit light cli/cli
 
-# alacritty
+# alacritty - A cross-platform, GPU-accelerated terminal emulator
 zinit ice if'[[ -n $DISPLAY && ! -x $commands[alacritty] ]]' lucid as"null" id-as"alacritty" \
   atclone'
     export PATH="$HOME/.cargo/bin:$PATH"
@@ -607,7 +621,7 @@ zinit ice if'[[ -n $DISPLAY && ! -x $commands[alacritty] ]]' lucid as"null" id-a
   atpull"%atclone"
 zinit light alacritty/alacritty
 
-# display
+# display - Terminal display tools (foot, kitty)
 zinit ice if'[[ -n $DISPLAY ]]' lucid as"null" id-as"display" \
   atclone'
     command -v foot &>/dev/null || instr foot
