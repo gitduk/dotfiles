@@ -314,7 +314,7 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
 zinit light denisidoro/navi
 
 # bacon - background code checker
-zinit ice wait'1b' lucid as"null" run-atpull id-as"bacon" \
+zinit ice wait'1' lucid as"null" run-atpull id-as"bacon" \
   atclone"cargo install bacon" \
   atpull"%atclone" \
   atload"export BACON_CONFIG=~/.config/bacon/bacon.toml"
@@ -322,8 +322,8 @@ zinit light zdharma-continuum/null
 
 # sccache - shared compilation cache
 zinit ice if'[[ ! -x $commands[sccache] ]]' lucid as"null" from"gh-r" id-as"sccache" \
-  extract"!" \
-  atclone'sudo ln -sf $PWD/sccache-dist /usr/bin/sccache' \
+  bpick"sccache-v*-x86_64-unknown-linux-musl.tar.gz" extract"!" \
+  atclone'sudo ln -sf $PWD/sccache /usr/bin/sccache' \
   atpull"%atclone"
 zinit light mozilla/sccache
 

@@ -45,14 +45,15 @@ alias asy="atuin sync"
 # bun
 alias b="bun"
 alias bx="bun x"
+alias br="bun run"
 alias bad="bun add"
 alias bis="bun install -g"
 alias brm="bun remove -g"
 alias brs="bun run serve"
 
 # bacon
-alias bcn="bacon"
-alias bci="bacon --init"
+alias bac="bacon"
+alias bai="bacon --init"
 
 # dotfiles
 alias cs="c status"
