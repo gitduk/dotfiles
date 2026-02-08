@@ -38,8 +38,3 @@ export CLUTTER_IM_MODULE=fcitx
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=hyprland
 export XDG_CURRENT_DESKTOP=hyprland
-
-# update HYPRLAND_INSTANCE_SIGNATURE
-if [[ -d "$XDG_RUNTIME_DIR/hypr" ]]; then
-  export HYPRLAND_INSTANCE_SIGNATURE="$(ls $XDG_RUNTIME_DIR/hypr | tail -n 1)"
-fi

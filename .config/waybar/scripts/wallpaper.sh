@@ -37,7 +37,7 @@ commands:
     select [wallpaper dir]  select wallpaper interactively
     download [source]       download wallpaper from a source
     sources                 list available sources
-    
+
 options:
     -i, --interval <sec>    loop interval (default: ${CONFIG[interval]})
     -d, --dir <dir>         wallpaper directory (default: ${CONFIG[wallpaper_dir]})
@@ -187,7 +187,7 @@ main() {
       *) break ;;
     esac
   done
-  
+
   case ${1:-help} in
     set) [[ -n $2 ]] || error "Please specify file"; set_wallpaper "$2" ;;
     random|rand) random_wallpaper "$2" ;;
@@ -214,6 +214,5 @@ main() {
 while ! pgrep -x hyprpaper &>/dev/null; do
   sleep 0.1
 done
-sleep 0.1
 
 main "$@"

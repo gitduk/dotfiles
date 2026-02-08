@@ -7,8 +7,11 @@ sudo dpkg -i /tmp/google-chrome-stable_current_amd64.deb
 # fcitx5-rime - 白霜拼音
 sudo nala install -y fcitx5 \
   fcitx5-chinese-addons \
-  fcitx5-frontend-gtk4 fcitx5-frontend-gtk3 fcitx5-frontend-gtk2 \
-  fcitx5-frontend-qt5 fcitx5-rime
+  fcitx5-frontend-gtk4 \
+  fcitx5-frontend-gtk3 \
+  fcitx5-frontend-gtk2 \
+  fcitx5-frontend-qt5 \
+  fcitx5-rime
 im-config -n fcitx5
 mkdir -p ~/.local/share/fcitx5 && cd ~/.local/share/fcitx5
 git clone --depth 1 https://github.com/gaboolic/rime-frost rime
@@ -21,16 +24,49 @@ curl -f https://zed.dev/install.sh | sh
 curl -f https://zed.dev/install.sh | ZED_CHANNEL=preview sh
 
 # waybar
-sudo nala install libspdlog-dev libgtkmm-3.0-dev libjsoncpp-dev libnl-genl-3-dev libupower-glib-dev \
-  libpipewire-0.3-dev libplayerctl-dev libpulse-dev libxkbregistry-dev scdoc liburfkill-glib-dev \
-  libdbusmenu-gtk3-dev libjack-dev libgps-dev libiniparser-dev libfftw3-dev portaudio19-dev libsdl2-dev
+sudo nala install clang-tidy \
+  gobject-introspection \
+  libdbusmenu-gtk3-dev \
+  libevdev-dev \
+  libfmt-dev \
+  libgirepository1.0-dev \
+  libgtk-3-dev \
+  libgtkmm-3.0-dev \
+  libinput-dev \
+  libjsoncpp-dev \
+  libmpdclient-dev \
+  libnl-3-dev \
+  libnl-genl-3-dev \
+  libpulse-dev \
+  libsigc++-2.0-dev \
+  libspdlog-dev \
+  libwayland-dev \
+  scdoc \
+  upower \
+  libxkbregistry-dev
 git clone --depth 1 https://github.com/Alexays/Waybar.git /tmp/Waybar && cd /tmp/Waybar/
-meson setup build --wipe -Drfkill=enabled --prefix=/usr && sudo ninja -C build install
+sudo make install
 
 # rofi - wayland support
-sudo nala install librust-xkbcommon-dev libgdk-pixbuf-2.0-dev libxcb-util-dev libxcb-ewmh-dev libxcb-icccm4-dev libmpdclient-dev libnl-3-dev \
-  libalsa-ocaml-dev libxcb-randr0-dev libxcb-cursor-dev libxcb-xinerama0-dev libxcb-keysyms1-dev libstartup-notification0-dev flex bison \
-  pandoc doxygen cppcheck ohcount
+sudo nala install librust-xkbcommon-dev \
+  libgdk-pixbuf-2.0-dev \
+  libxcb-util-dev \
+  libxcb-ewmh-dev \
+  libxcb-icccm4-dev \
+  libmpdclient-dev \
+  libnl-3-dev \
+  libalsa-ocaml-dev \
+  libxcb-randr0-dev \
+  libxcb-cursor-dev \
+  libxcb-xinerama0-dev \
+  libxcb-keysyms1-dev \
+  libstartup-notification0-dev \
+  flex \
+  bison \
+  pandoc \
+  doxygen \
+  cppcheck \
+  ohcount
 git clone --depth=1 https://github.com/DaveDavenport/rofi.git /tmp/rofi && cd /tmp/rofi/
 meson setup build --prefix=$HOME/.local && ninja -C build && ninja -C build install
 
@@ -39,16 +75,6 @@ git clone --depth 1 https://github.com/bugaevc/wl-clipboard.git /tmp/wl-clipboar
 meson build/ --prefix=/usr --buildtype=release && sudo ninja -C build/ install
 go install go.senan.xyz/cliphist@latest
 sudo cp -vf $GOBIN/cliphist /usr/bin/
-
-# flameshot - screenshot tool
-sudo nala install -y g++ cmake build-essential qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libkf5guiaddons-dev
-sudo nala install -y libqt5dbus5 libqt5network5 libqt5core5a libqt5widgets5 libqt5gui5 libqt5svg5
-git clone --depth 1 https://github.com/flameshot-org/flameshot.git /tmp/flameshot && cd /tmp/flameshot/
-cmake -S . -B build \
-  -DUSE_WAYLAND_CLIPBOARD=true \
-  -DUSE_WAYLAND_GRIM=ON \
-  && cmake --build build \
-  && sudo cmake --install build
 
 # tdf - A terminal-based PDF viewer.
 sudo nala install -y libpoppler-dev libpoppler-glib-dev
@@ -94,7 +120,12 @@ sudo apt update
 sudo apt install postgresql-client-17
 
 # tofi
-sudo nala install -y libfreetype-dev libcairo2-dev libpango1.0-dev libwayland-dev libxkbcommon-dev libharfbuzz-dev
+sudo nala install -y libfreetype-dev \
+  libcairo2-dev \
+  libpango1.0-dev \
+  libwayland-dev \
+  libxkbcommon-dev \
+  libharfbuzz-dev
 git clone --depth 1 https://github.com/philj56/tofi.git /tmp/tofi && cd /tmp/tofi
 meson setup build && sudo ninja -C build/ install
 
@@ -106,13 +137,6 @@ curl -sSL https://raw.githubusercontent.com/brennercruvinel/CCPlugins/main/insta
 
 # ipfs
 brew install ipfs
-
-# espanso
-sudo nala update && sudo nala install build-essential git libx11-dev libxtst-dev libxkbcommon-dev libdbus-1-dev libssl-dev libwxgtk3.*-dev
-sudo apt --fix-broken install
-wget https://github.com/espanso/espanso/releases/latest/download/espanso-debian-wayland-amd64.deb -P /tmp/
-sudo dpkg -i /tmp/espanso-debian-wayland-amd64.deb
-sudo setcap "cap_dac_override+p" $(which espanso)
 
 # nvidia-smi
 sudo nala remove -y --purge nvidia-*
