@@ -19,8 +19,8 @@ export LC_ALL=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
 
 # Term options
-# terminfo directory: ${HOME}/.terminfo
 # then /etc/terminfo
+# terminfo directory: ${HOME}/.terminfo
 # then /lib/terminfo
 # then /usr/share/terminfo
 export TERMINFO="/lib/terminfo"
@@ -83,9 +83,6 @@ export CLUTTER_IM_MODULE=fcitx
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=hyprland
 export XDG_CURRENT_DESKTOP=hyprland
-
-# local path
-export PATH="$HOME/.local/bin:$PATH"
 
 # custom
 [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh

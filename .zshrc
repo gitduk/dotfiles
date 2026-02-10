@@ -80,7 +80,7 @@ function proxy() {
   local proxy_port="7890"
   local slient="false"
   local action="set"
-  
+
   while [[ $# -gt 0 ]]; do
     case $1 in
       -h|--host) proxy_host="$2"; shift 2 ;;
@@ -90,12 +90,12 @@ function proxy() {
       *) break ;;
     esac
   done
-  
+
   if [[ "$action" == "unset" ]]; then
     unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY
     return 0
   fi
-  
+
   export http_proxy="http://${proxy_host}:${proxy_port}"
   export HTTP_PROXY="$http_proxy"
   export https_proxy="http://${proxy_host}:${proxy_port}"
@@ -145,6 +145,7 @@ source "${ZINIT_HOME}/zinit.zsh"
 
 # ensure dir
 [[ ! -d "$HOME/.local/bin" ]] && mkdir -p $HOME/.local/bin
+export PATH="$HOME/.local/bin:$PATH"
 
 # Add the following snippet as the first plugin in your configuration
 zinit light-mode for zdharma-continuum/zinit-annex-bin-gem-node
@@ -255,6 +256,12 @@ zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
   '
 zinit light zdharma-continuum/null
 
+# tmux - a terminal multiplexer
+zinit ice if'[[ ! -x $commands[tmux] ]]' lucid as"null" from"gh-r" id-as"tmux" \
+  atclone'sudo ln -sf $PWD/tmux /usr/bin/tmux' \
+  atpull"%atclone"
+zinit light tmux/tmux-builds
+
 # bun - Bun is an all-in-one toolkit for JavaScript and TypeScript apps
 zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
   bpick"bun-linux-x64.zip" extract"!" \
@@ -268,7 +275,7 @@ zinit ice wait"1" lucid as"program" from"gh-r" id-as"bun" \
 zinit light oven-sh/bun
 
 # vfox - cross-platform and extendable version manager
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"vfox" \
+zinit ice lucid as"program" from"gh-r" id-as"vfox" \
   bpick"vfox_*_linux_x86_64.tar.gz" extract"!" \
   atclone'mv */zsh_autocomplete _vfox' \
   atpull"%atclone" \
@@ -291,14 +298,15 @@ zinit light ajeetdsouza/zoxide
 
 # atuin - command history, load after compinit for completion support
 zinit ice wait"0" lucid as"null" from"gh-r" id-as"atuin" \
-  bpick"atuin-*.tar.gz" extract"!" \
+  bpick"atuin-x86_64-unknown-linux-musl.tar.gz" extract"!" \
   atclone'
     ln -sf $PWD/atuin ~/.local/bin/atuin
+    $PWD/atuin gen-completions --shell zsh > _atuin
     atuin init zsh > init.zsh
-    atuin gen-completions --shell zsh > _atuin
   ' \
   atpull"%atclone" \
-  src"init.zsh"
+  src"init.zsh" \
+  atload"export ATUIN_TMUX_POPUP=false"
 zinit light atuinsh/atuin
 
 # navi - cheatsheet tool, load after widgets
@@ -337,7 +345,7 @@ zinit light junegunn/fzf
 zinit ice if'[[ ! -x $commands[bat] ]]' lucid as"null" from"gh-r" id-as"bat" \
   completions extract"!" \
   atclone'
-    ln -sf $PWD/bat ~/.local/bin/cat
+    ln -sf $PWD/bat ~/.local/bin/bat
     bat --completion zsh > _bat
   ' \
   atpull"%atclone"
@@ -647,4 +655,3 @@ if [[ -n "$ZPROF" ]]; then
   zmodload -u zsh/zprof
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
-
