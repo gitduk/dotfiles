@@ -1,6 +1,7 @@
 [Unit]
-Description=Atuin Service
-After=network.target
+Description=Start the Atuin server syncing service
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
 
 [Service]
 Type=simple
@@ -9,4 +10,4 @@ Restart=on-failure
 RestartSec=5
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target

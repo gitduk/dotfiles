@@ -1,7 +1,6 @@
 ## where to store your database, default is your system data directory
 ## linux/mac: ~/.local/share/atuin/history.db
 ## windows: %USERPROFILE%/.local/share/atuin/history.db
-db_path = "~/.history.db"
 
 ## where to store your encryption key, default is your system data directory
 ## linux/mac: ~/.local/share/atuin/key
@@ -253,7 +252,7 @@ records = true
 
 [daemon]
 ## Enables using the daemon to sync. Requires the daemon to be running in the background. Start it with `atuin daemon`
-# enabled = false
+enabled = true
 
 ## How often the daemon should sync in seconds
 # sync_frequency = 300
@@ -261,7 +260,7 @@ records = true
 ## The path to the unix socket used by the daemon (on unix systems)
 ## linux/mac: ~/.local/share/atuin/atuin.sock
 ## windows: Not Supported
-# socket_path = "~/.local/share/atuin/atuin.sock"
+socket_path = "~/.local/share/atuin/atuin.sock"
 
 ## Use systemd socket activation rather than opening the given path (the path must still be correct for the client)
 ## linux: false
@@ -269,7 +268,7 @@ records = true
 # systemd_socket = false
 
 ## The port that should be used for TCP on non unix systems
-# tcp_port = 8889
+tcp_port = 8899
 
 # [theme]
 ## Color theme to use for rendering in the terminal.
