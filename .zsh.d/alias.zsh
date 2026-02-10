@@ -47,8 +47,8 @@ alias b="bun"
 alias bx="bun x"
 alias br="bun run"
 alias bad="bun add"
-alias bis="bun install -g"
-alias brm="bun remove -g"
+alias bis="bun install"
+alias brm="bun remove"
 alias brs="bun run serve"
 
 # bacon

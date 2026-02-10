@@ -115,7 +115,9 @@ history_filter = [
   "^ls",
   "^ssh .*--secret=.+",
   "^cd",
-  "^v "
+  "^c ",
+  "^v ",
+  "^atuin "
 ]
 
 
