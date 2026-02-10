@@ -195,10 +195,10 @@ main() {
     select|choose) select_wallpaper "$2" ;;
     download|dl)
       if [[ -n $2 ]]; then
-        if [[ -n ${WALLPAPER_SOURCES[$1]} ]]; then
-          ${WALLPAPER_SOURCES[$1]}
+        if [[ -n ${WALLPAPER_SOURCES[$2]} ]]; then
+          ${WALLPAPER_SOURCES[$2]}
         else
-          error "Unsupported source: $1"
+          error "Unsupported source: $2"
         fi
       else
         random_source
