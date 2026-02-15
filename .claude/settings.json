@@ -76,6 +76,8 @@
     "context7@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true
   },
+  "skipDangerousModePermissionPrompt": true,
   "packageManager": "bun",
-  "hasCompletedOnboarding": true
+  "hasCompletedOnboarding": true,
+  "model": "opus"
 }
