@@ -4,19 +4,18 @@
 
 alias e="extract"
 alias bt="bluetoothctl"
-alias cmd="sudo chmod +x"
-alias cwn="sudo chown -Rv $USER:$USER"
+alias chx="sudo chmod +x"
+alias cwn='sudo chown -Rv $USER:$USER'
 alias cre="crontab -e"
 alias dis="sudo dpkg -i"
 alias denv="deactivate"
-alias dim="echo $(tput cols)x$(tput lines)"
+alias dim='echo $(tput cols)x$(tput lines)'
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 alias jcl="journalctl"
 alias jcu="journalctl -u"
 alias jcuu="journalctl --user -u"
 alias lv="lnav"
 alias mk="mkdir -p"
-alias nc="netcat -v"
 alias nsl="nslookup"
 alias nst="netstat"
 alias ncl="nmcli"
@@ -134,6 +133,7 @@ alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{
 
 # edit
 alias ezs="v ~/.zshrc && source ~/.zshrc"
+alias ela="v ~/.zsh.d/lazy.zsh && source ~/.zsh.d/lazy.zsh"
 alias eas="v ~/.zsh.d/alias.zsh && source ~/.zsh.d/alias.zsh"
 alias ecs="v ~/.custom.zsh && source ~/.custom.zsh"
 alias epw="v ~/.pw.json"
@@ -262,9 +262,6 @@ alias sue="systemctl --user enable"
 alias sud="systemctl --user disable"
 alias sued="systemctl --user edit"
 alias suef="systemctl --user edit --force --full"
-
-# vfox
-alias vo="vfox"
 
 # witr
 alias wi="witr"

@@ -17,7 +17,6 @@ bindkey -rpM viins "^J"
 
 # vim ins
 bindkey -M viins "^h" backward-delete-char
-bindkey -M viins "^w" backward-kill-word
 bindkey -M viins "^f" vi-forward-char
 bindkey -M viins "jk" vi-cmd-mode
 

@@ -51,7 +51,7 @@ zstyle ':completion:*:warnings' format '%F{red}[ no matches found ]%f'
 ###############
 zstyle ':completion:*:history-words' stop yes
 zstyle ':completion:*:history-words' remove-all-dups yes
-zstyle ':completion:*:history-words' list false 
+zstyle ':completion:*:history-words' list false
 zstyle ':completion:*:history-words' menu yes
 
 ########################################
@@ -108,9 +108,6 @@ zstyle ':completion:*:*:ls:*' file-patterns \
 
 # Speed up completion in large directories
 zstyle ':completion:*' max-errors 2 not-numeric
-
-# Better sorting
-zstyle ':completion:*:*:*:*:*' menu select=2
 
 # Set different completion behaviors for different file types
 zstyle ':completion:*:*:v:*:*files' ignored-patterns \

@@ -73,16 +73,20 @@ export QT_QPA_PLATFORM='wayland;xcb'
 export QT_QPA_PLATFORMTHEME=qt5ct
 
 # fcitx input-related
-export XMODIFIERS=@im=fcitx
-export QT_IM_MODULE=fcitx
-export QT_IM_MODULES="wayland;fcitx;ibus"
-export SDL_IM_MODULE=fcitx
-export CLUTTER_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx5
+export QT_IM_MODULE=fcitx5
+export QT_IM_MODULES="wayland;fcitx5;ibus"
+export SDL_IM_MODULE=fcitx5
+export CLUTTER_IM_MODULE=fcitx5
 
 # xdg
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=hyprland
 export XDG_CURRENT_DESKTOP=hyprland
+
+# add path
+[[ ! -d "$HOME/.local/bin" ]] && mkdir -p $HOME/.local/bin
+export PATH="$HOME/.local/bin:$PATH"
 
 # custom
 [[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh

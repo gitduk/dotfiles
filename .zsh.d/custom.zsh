@@ -12,25 +12,19 @@ esac
 ### fzf ###
 ###########
 
-# fzf default command
-if (( $+commands[fd] )); then
-  export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow \
-    --exclude .git \
-    --exclude .venv \
-    --exclude venv \
-    --exclude node_modules"
-fi
+export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow ..."
 
-# fzf preview command
-if (( $+commands[bat] )); then
-  preview="--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
-else
-  preview="--preview 'head -200 {}'"
-fi
+# fzf default command
+export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow \
+  --exclude .git \
+  --exclude .venv \
+  --exclude venv \
+  --exclude node_modules \
+  2>/dev/null || find . -type f"
 
 # fzf default opts
 export FZF_DEFAULT_OPTS="
-  $preview
+  --preview 'bat --color=always --style=numbers --line-range=:500 {}'
   --preview-window=right:50%:wrap
   --height 100%
   --bind 'ctrl-k:up'

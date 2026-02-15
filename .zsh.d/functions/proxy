@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+local proxy_host="127.0.0.1"
+local proxy_port="7890"
+local slient="false"
+local action="set"
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--host) proxy_host="$2"; shift 2 ;;
+    -p|--port) proxy_port="$2"; shift 2 ;;
+    -s|--slient) slient="true"; shift ;;
+    -u|--unset) action="unset"; shift ;;
+    *) break ;;
+  esac
+done
+
+if [[ "$action" == "unset" ]]; then
+  unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY
+  return 0
+fi
+
+export http_proxy="http://${proxy_host}:${proxy_port}"
+export HTTP_PROXY="$http_proxy"
+export https_proxy="http://${proxy_host}:${proxy_port}"
+export HTTPS_PROXY="$https_proxy"
+export no_proxy="localhost,127.0.0.1"
+export NO_PROXY="$no_proxy"
+[[ "$slient" == "false" ]] && echo "✓ Proxy set: ${proxy_host}:${proxy_port}"
+
