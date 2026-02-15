@@ -112,14 +112,16 @@ ctrl_n_shortcuts = true
 ## For details on the supported regular expression syntax, see
 ## https://docs.rs/regex/latest/regex/#syntax
 history_filter = [
-  "^ls",
   "^ssh .*--secret=.+",
+  "^ls",
   "^cd",
   "^c ",
+  "^j ",
   "^v ",
-  "^atuin "
+  "^atuin ",
+  "^zinit ",
+  "^cadd "
 ]
-
 
 ## prevent commands run with cwd matching any of these regexes from being written
 ## to history. Note that these regular expressions are unanchored, i.e. if they don't
