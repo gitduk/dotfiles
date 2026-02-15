@@ -167,6 +167,7 @@ EOF
 sudo apt update
 sudo apt install podman
 
-# openclaw
-curl -fsSL https://openclaw.ai/install.sh | bash
+# nvm
+tag=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r .tag_name)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$tag/install.sh | bash
 
