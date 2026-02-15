@@ -11,7 +11,6 @@
     "orientation": "inherit",
     "drawer": {
       "transition-duration": 500,
-      "children-class": "cpu",
       "transition-left-to-right": true
     },
     "modules": [
@@ -24,12 +23,12 @@
     "orientation": "inherit",
     "drawer": {
       "transition-duration": 500,
-      "children-class": "network",
       "transition-left-to-right": true
     },
     "modules": [
       "network#speed",
-      "custom/ipaddress"
+      "custom/singbox",
+      "custom/sites"
     ]
   },
   "group/color": {
@@ -40,23 +39,22 @@
       "custom/color_scheme"
     ]
   },
-  "group/laptop": {
-    "orientation": "inherit",
-    "modules": [
-      "backlight",
-      "battery"
-    ]
-  },
   "group/audio": {
-    "orientation": "inherit",
-    "drawer": {
-      "transition-duration": 500,
-      "children-class": "pulseaudio",
-      "transition-left-to-right": true
-    },
+    "orientation": "horizontal",
     "modules": [
       "pulseaudio",
       "pulseaudio#microphone"
+    ]
+  },
+  "group/laptop": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 500,
+      "transition-left-to-right": true
+    },
+    "modules": [
+      "battery",
+      "backlight"
     ]
   },
   "backlight": {
@@ -80,8 +78,6 @@
     "on-click-middle": "",
     "on-click-right": "",
     "on-update": "",
-    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --inc 10",
-    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --dec 10",
     "smooth-scrolling-threshold": 1
   },
   "backlight#2": {
@@ -93,13 +89,11 @@
     ]
   },
   "battery": {
-    // "interval": 5,
     "align": 0,
     "rotate": 0,
-    // "bat": "BAT1",
-    // "adapter": "ACAD",
     "full-at": 100,
     "design-capacity": false,
+    "interval": 2,
     "states": {
       "good": 95,
       "warning": 30,

@@ -35,13 +35,10 @@
 
   "modules-right": [
     "hyprland/submap",
-    "network#speed",
+    "group/connections",
     "custom/separator#dot-line",
-    "custom/singbox",
-    "custom/sites",
+    "group/audio",
     "custom/separator#dot-line",
-    "pulseaudio",
-    "custom/separator#dot-line",
-    "pulseaudio#microphone"
+    "group/laptop"
   ]
 }
