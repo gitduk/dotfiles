@@ -20,7 +20,6 @@
     "ask": [],
     "defaultMode": "bypassPermissions"
   },
-  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -66,19 +65,56 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/claudeception-activator.sh"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
     "type": "command",
-    "command": "bash -c '\"/usr/bin/node\" \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
+    "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "context7@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "claude-hud@claude-hud": true,
-    "ralph-wiggum@claude-code-plugins": true
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "skipDangerousModePermissionPrompt": true,
+  "mcpServers": {
+    "memory": {
+      "command": "bun",
+      "args": [
+        "x",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "description": "Persistent memory across sessions"
+    },
+    "context7": {
+      "command": "bun",
+      "args": [
+        "x",
+        "-y",
+        "@context7/mcp-server"
+      ],
+      "description": "Live documentation lookup"
+    },
+    "sequential-thinking": {
+      "command": "bun",
+      "args": [
+        "x",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "description": "Chain-of-thought reasoning"
+    }
+  },
   "packageManager": "bun",
-  "hasCompletedOnboarding": true
+  "hasCompletedOnboarding": true,
+  "model": "opus"
 }
