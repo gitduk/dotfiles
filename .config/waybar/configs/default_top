@@ -19,7 +19,9 @@
   "modules-left": [
     "hyprland/workspaces#roman",
     "custom/separator#dot-line",
-    "group/motherboard",
+    "cpu",
+    "memory",
+    "temperature",
     "custom/separator#dot-line",
     "custom/poetry"
   ],
@@ -35,10 +37,11 @@
 
   "modules-right": [
     "hyprland/submap",
-    "group/connections",
+    "network#speed",
+    "custom/singbox",
     "custom/separator#dot-line",
     "group/audio",
-    "custom/separator#dot-line",
-    "group/laptop"
+    "battery",
+    "backlight"
   ]
 }
