@@ -8,7 +8,7 @@ alias chx="sudo chmod +x"
 alias cwn='sudo chown -Rv $USER:$USER'
 alias cre="crontab -e"
 alias dis="sudo dpkg -i"
-alias denv="deactivate"
+alias dac="deactivate"
 alias dim='echo $(tput cols)x$(tput lines)'
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 alias jcl="journalctl"
@@ -70,6 +70,10 @@ alias cmm="c commit -m"
 alias cpl="c pull --rebase"
 alias cps="c push"
 alias cls="c ls-tree -r master --name-only"
+
+# direnv
+alias dia="direnv allow"
+alias did="direnv deny"
 
 # cargo
 alias ca="cargo"
