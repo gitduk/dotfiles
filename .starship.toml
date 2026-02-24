@@ -16,7 +16,6 @@ $git_commit\
 $git_state\
 $git_metrics\
 $git_status\
-$package\
 $python\
 $rust\
 $golang\
@@ -25,8 +24,11 @@ $meson\
 $cmake\
 $jobs\
 $cmd_duration\
-${custom.direnv}\
 $fill\
+${custom.direnv}\
+${custom.claude}\
+${custom.openai}\
+${custom.gemini}\
 ${custom.proxy}\
 $time\
 $line_break\
@@ -298,8 +300,40 @@ symbol = "󱐡 "
 style = "bold blue dimmed"
 format = "[$symbol$output]($style) "
 
+[custom.claude]
+command = """
+[ -n "$ANTHROPIC_BASE_URL" ] && echo "claude*" || echo "claude"
+"""
+when = 'test -n "$ANTHROPIC_API_KEY"'
+shell = ["sh"]
+symbol = ""
+style = "fg:#d4a574"
+format = "[$output]($style) "
+
+[custom.openai]
+command = """
+[ -n "$OPENAI_BASE_URL" ] && echo "openai*" || echo "openai"
+"""
+when = 'test -n "$OPENAI_API_KEY"'
+shell = ["sh"]
+symbol = ""
+style = "fg:#74aa9c"
+format = "[$output]($style) "
+
+[custom.gemini]
+command = """
+[ -n "$GEMINI_BASE_URL" ] && echo "gemini*" || echo "gemini"
+"""
+when = 'test -n "$GEMINI_API_KEY"'
+shell = ["sh"]
+symbol = ""
+style = "fg:#4285f4"
+format = "[$output]($style) "
+
 [custom.git_context]
-command = "git worktree list 2>/dev/null | awk '{printf $2}'"
+command = """
+git worktree list 2>/dev/null | awk '{printf $2}'
+"""
 when = "ls .git"
 shell = ["sh"]
 symbol = ""

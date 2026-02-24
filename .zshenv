@@ -84,10 +84,7 @@ export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=hyprland
 export XDG_CURRENT_DESKTOP=hyprland
 
-# add path
+# path
 [[ ! -d "$HOME/.local/bin" ]] && mkdir -p $HOME/.local/bin
 export PATH="$HOME/.local/bin:$PATH"
-
-# custom
-[[ -f ~/.custom.zsh ]] && source ~/.custom.zsh || touch ~/.custom.zsh
 

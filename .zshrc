@@ -13,7 +13,6 @@ if [[ -n "$ZSH_EXECUTION_STRING" ]] || \
   [[ ! -t 0 ]] || \
   [[ ! -t 1 ]] || \
   [[ "$TERM" = "dumb" ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
   return 0 2>/dev/null || exit 0
 fi
 
@@ -71,7 +70,15 @@ zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
 zinit light zsh-users/zsh-autosuggestions
 
 zinit ice wait"0a" lucid nocompile id-as"compinit" \
-  atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay"
+  atinit'
+    _zcd="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump"
+    if [[ ! -s "$_zcd" || -n ${_zcd}(N.mh+24) ]]; then
+      ZINIT[COMPINIT_OPTS]="-i -d $_zcd"
+    else
+      ZINIT[COMPINIT_OPTS]="-C -d $_zcd"
+    fi
+    zicompinit; zicdreplay
+  '
 zinit light zdharma-continuum/null
 
 zinit ice wait"0b" lucid as"program" id-as"autoload" \
@@ -97,7 +104,6 @@ zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
   "
 zinit light zsh-users/zsh-history-substring-search
 
-zinit ice wait"1" lucid; zinit snippet OMZP::nvm
 zinit ice wait"1" lucid; zinit snippet OMZP::sudo
 zinit ice wait"1" lucid; zinit snippet OMZP::extract
 

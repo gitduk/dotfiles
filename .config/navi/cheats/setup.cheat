@@ -9,3 +9,7 @@ sudo setcap cap_net_admin,cap_net_bind_service+ep `which easytier-core`
 # docker without sudo
 sudo usermod -aG docker $(whoami) && newgrp docker
 
+# battery limit
+sudo tee /sys/class/power_supply/BAT0/charge_control_start_threshold <<< 40
+sudo tee /sys/class/power_supply/BAT0/charge_control_end_threshold <<< 80
+

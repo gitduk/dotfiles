@@ -20,6 +20,7 @@
     "ask": [],
     "defaultMode": "bypassPermissions"
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -69,15 +70,15 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline/statusline.sh"
+    "command": "bash -c '\"/usr/bin/node\" \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)dist/index.js\"'"
   },
   "enabledPlugins": {
-    "document-skills@anthropic-agent-skills": true,
     "context7@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "claude-hud@claude-hud": true,
+    "ralph-wiggum@claude-code-plugins": true
   },
   "skipDangerousModePermissionPrompt": true,
   "packageManager": "bun",
-  "hasCompletedOnboarding": true,
-  "model": "opus"
+  "hasCompletedOnboarding": true
 }

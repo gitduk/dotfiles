@@ -98,7 +98,7 @@ shshemi/tabiew bpick"tw-x86_64-unknown-linux-gnu" sbin"tw* -> tw"
 shadow1ng/fscan sbin"fscan"
 achristmascarl/rainfrog sbin"rainfrog -> rain"
 SagerNet/sing-box bpick"sing-box-*-linux-amd64.tar.gz" sbin"sing-box" atclone'sudo setcap cap_net_admin=+ep $PWD/sing-box'
-cli/cli sbin"bin/gh -> gh" atclone'./bin/gh completion -s zsh > _gh'
+cli/cli extract"!" sbin"bin/gh -> gh" atclone'./bin/gh completion -s zsh > _gh'
 EasyTier/EasyTier sbin"easytier-cli; easytier-core"
 Nukesor/pueue bpick"pueue-x86_64-unknown-linux-musl" bpick"pueued-x86_64-unknown-linux-musl" sbin"pueue*-musl -> pueue; pueued*-musl -> pueued" atclone'pueue completions zsh > _pueue'
 sxyazi/yazi bpick"yazi-x86_64-unknown-linux-musl.zip" sbin"yazi; ya" completions atclone'mv comp*/_ya .; mv comp*/_yazi .'
@@ -106,7 +106,7 @@ mountain-loop/yaak bpick"yaak_*_amd64.AppImage" sbin"yaak* -> yaak"
 explosion-mental/wallust as"null" from"codeberg.org" atclone"cargo +nightly install --path ."
 alacritty/alacritty as"null" atclone'export PATH="$HOME/.cargo/bin:$PATH"; cargo build --release --no-default-features --features=wayland; sudo ln -sf $PWD/target/release/alacritty /usr/bin/alacritty; sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg; sudo desktop-file-install extra/linux/Alacritty.desktop; sudo update-desktop-database'
 oven-sh/bun bpick"bun-linux-x64.zip" sbin"bun" atclone'wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun' env"BUN_INSTALL=~/.local"
-eza-community/eza sbin"eza; eza -> ls"
+eza-community/eza sbin"eza"
 sharkdp/bat sbin"bat-*/bat" atclone"./bat-*/bat --completion zsh > _bat"
 mozilla/sccache bpick"sccache-v*-x86_64-unknown-linux-musl.tar.gz" sbin"sccache"
 

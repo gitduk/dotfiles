@@ -1,13 +1,3 @@
-############
-### pnpm ###
-############
-
-export PNPM_HOME="$HOME/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-
 ###########
 ### fzf ###
 ###########
@@ -37,18 +27,5 @@ export FZF_DEFAULT_OPTS="
   --bind 'ctrl-u:half-page-up'
   --bind 'ctrl-d:half-page-down'
   --bind 'ctrl-p:toggle-preview'
-  --cycle --ansi
+  --cycle --ansi --exact
 "
-
-##########
-### Qt ###
-##########
-
-QT_VERSION="6.9.1"
-if [[ -d "$HOME/.local/share/Qt/$QT_VERSION" ]]; then
-  export QT_ROOT="$HOME/.local/share/Qt/$QT_VERSION"
-  export PATH="$QT_ROOT/gcc_64/bin:$PATH"
-  export Qt6_DIR="$QT_ROOT/gcc_64/lib/cmake/Qt6"
-  export LD_LIBRARY_PATH="$QT_ROOT/gcc_64/lib:$LD_LIBRARY_PATH"
-fi
-

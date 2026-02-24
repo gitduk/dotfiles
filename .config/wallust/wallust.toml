@@ -32,7 +32,7 @@ hypr.template = 'hyprland.conf'
 hypr.target = '~/.config/hypr/colors.conf'
 
 waybar.template = 'waybar.css'
-waybar.target = '~/.config/waybar/colors.css'
+waybar.target = '~/.config/waybar/colors.css.tmp'
 
 tofi.template = 'tofi'
 tofi.target = '~/.config/tofi/config'

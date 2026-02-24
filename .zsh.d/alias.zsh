@@ -135,7 +135,6 @@ alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{
 alias ezs="v ~/.zshrc && source ~/.zshrc"
 alias ela="v ~/.zsh.d/lazy.zsh && source ~/.zsh.d/lazy.zsh"
 alias eas="v ~/.zsh.d/alias.zsh && source ~/.zsh.d/alias.zsh"
-alias ecs="v ~/.custom.zsh && source ~/.custom.zsh"
 alias epw="v ~/.pw.json"
 alias ejs="v .justfile"
 alias eis="v ~/.config/navi/cheats/install.cheat"
@@ -184,6 +183,9 @@ alias jsl="just --list"
 
 # json-server
 alias jss="json-server"
+
+# ls
+alias ls="eza"
 
 # nala
 alias nai="sudo nala install -y"

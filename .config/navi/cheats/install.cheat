@@ -6,7 +6,6 @@ sudo dpkg -i /tmp/google-chrome-stable_current_amd64.deb
 
 # fcitx5-rime - 白霜拼音
 sudo nala install -y fcitx5 \
-  fcitx5-chinese-addons \
   fcitx5-frontend-gtk4 \
   fcitx5-frontend-gtk3 \
   fcitx5-frontend-gtk2 \

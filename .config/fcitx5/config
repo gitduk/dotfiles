@@ -63,7 +63,7 @@ CustomXkbOption=
 # Force Enabled Addons
 EnabledAddons=
 # Force Disabled Addons
-DisabledAddons=xcb,xim
+DisabledAddons=xcb,xim,pinyin,pinyinhelper
 # Preload input method to be used by default
 PreloadInputMethod=True
 # Allow input method in the password field
@@ -72,4 +72,3 @@ AllowInputMethodForPassword=False
 ShowPreeditForPassword=False
 # Interval of saving user data in minutes
 AutoSavePeriod=30
-
