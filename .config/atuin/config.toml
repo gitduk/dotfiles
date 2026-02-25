@@ -120,7 +120,7 @@ history_filter = [
   "^v ",
   "^atuin ",
   "^zinit ",
-  "^cadd "
+  "c"
 ]
 
 ## prevent commands run with cwd matching any of these regexes from being written
