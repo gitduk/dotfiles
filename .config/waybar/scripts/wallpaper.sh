@@ -21,6 +21,8 @@ Usage: ${SCRIPT_NAME} <command> [options]
 
 commands:
     set <wallpaper path>    set wallpaper
+    next [wallpaper dir]    switch to next wallpaper
+    prev [wallpaper dir]    switch to previous wallpaper
     random [wallpaper dir]  set a random wallpaper (default: ${CONFIG[wallpaper_dir]})
     loop [wallpaper dir]    loop wallpapers
     select [wallpaper dir]  select wallpaper interactively
@@ -64,8 +66,8 @@ check_top_color() {
   local crop_width=$((width / 2))
   local crop_area="${crop_width}x100+${start_x}+0"
   convert "$wallpaper" -crop "$crop_area" +repage -alpha off -colorspace Gray -resize 200x100 -depth 8 txt:- 2>/dev/null |
-    awk -F'[()]' '/gray\(/ { total++; val=int($2); if (val > 127) bright++ }
-      END { if (total > 0) printf "%d", bright * 100 / total; else print 50 }'
+    awk -F'[()]' '/gray\(/ { total++; sum+=int($2) }
+      END { if (total > 0) printf "%d", sum * 100 / total / 255; else print 50 }'
 }
 
 find_wallpapers() {
@@ -81,6 +83,7 @@ set_wallpaper() {
 
   info "Setting wallpaper: ${wallpaper##*/}"
   hyprctl hyprpaper wallpaper "$monitor,$wallpaper" &>/dev/null
+  echo "$wallpaper" > "$HOME/.cache/waybar/current_wallpaper"
 
   if ! command -v wallust >/dev/null; then
     warn "wallust not found"; return
@@ -95,14 +98,35 @@ set_wallpaper() {
   wait "$check_pid"
   local percent=$(<"$percent_file")
   rm -f "$percent_file"
-  [[ $percent -gt 45 ]] && toggle_foreground "${css}.tmp"
+  [[ $percent -gt 42 ]] && toggle_foreground "${css}.tmp"
   mv -f "${css}.tmp" "$css"
 
   if command -v makoctl >/dev/null; then
     makoctl reload &>/dev/null
     makoctl dismiss -a
   fi
-  notify-send "${wallpaper##*/}"
+  notify-send "${wallpaper##*/}" "top_color: $percent"
+}
+
+navigate_wallpaper() {
+  local direction=$1
+  local dir=${2:-${CONFIG[wallpaper_dir]}}
+  local current_file="$HOME/.cache/waybar/current_wallpaper"
+
+  mapfile -t wallpapers < <(find_wallpapers "$dir")
+  [[ ${#wallpapers[@]} -gt 0 ]] || error "No wallpapers found"
+
+  local current_idx=-1
+  if [[ -f $current_file ]]; then
+    local current=$(<"$current_file")
+    for i in "${!wallpapers[@]}"; do
+      [[ ${wallpapers[$i]} == "$current" ]] && { current_idx=$i; break; }
+    done
+  fi
+
+  local count=${#wallpapers[@]}
+  local new_idx=$(( (current_idx + direction + count) % count ))
+  set_wallpaper "${wallpapers[$new_idx]}"
 }
 
 random_wallpaper() {
@@ -147,6 +171,8 @@ main() {
   done
   case ${1:-help} in
     set) [[ -n $2 ]] || error "Please specify file"; set_wallpaper "$2" ;;
+    next) navigate_wallpaper 1 "$2" ;;
+    prev) navigate_wallpaper -1 "$2" ;;
     random|rand) random_wallpaper "$2" ;;
     loop) loop_wallpapers "$2" ;;
     select|choose) select_wallpaper "$2" ;;

@@ -1,17 +1,20 @@
 {
-  "include": "~/.config/waybar/modules.jsonc",
+  "include": [
+    "~/.config/waybar/modules.jsonc",
+    "~/.config/waybar/custom.jsonc",
+    "~/.config/waybar/hyprland.jsonc"
+  ],
   "layer": "top",
   "position": "bottom",
   "height": 14,
   "margin-left": 10,
   "margin-right": 10,
   "margin-bottom": 2,
-      
+
   "modules-left": [
     "custom/menu",
     "custom/separator#blank_2",
     "hyprland/workspaces",
-    "custom/separator#blank_2",
     "mpris",
     "tray"
   ],
@@ -20,17 +23,14 @@
     "idle_inhibitor",
     "custom/separator#blank",
     "clock",
-    "custom/separator#blank",
     "custom/swaync"
   ],
-          
+
   "modules-right": [
     "hyprland/window",
     "custom/separator#blank",
-    "custom/separator#blank", 
     "pulseaudio",
-    "custom/separator#blank",
-    "custom/power",                    
+    "custom/power",
   ],
 
 }

@@ -1,6 +1,10 @@
 [
   {
-    "include": "~/.config/waybar/modules.jsonc",
+    "include": [
+      "~/.config/waybar/modules.jsonc",
+      "~/.config/waybar/custom.jsonc",
+      "~/.config/waybar/hyprland.jsonc"
+    ],
     "layer": "top",
     //"mode": "dock",
     "exclusive": true,
@@ -14,32 +18,36 @@
     "margin-right": 8,
 
     "modules-left": [
-      "cpu", 
-      "temperature", 
+      "cpu",
+      "temperature",
       "memory",
-      "disk", 
+      "disk",
     ],
-      
+
     "modules-center": [
       "idle_inhibitor",
-      "clock",  
+      "clock",
       "custom/light_dark",
-    ], 
+    ],
 
     "modules-right": [
-      "custom/weather",      
-      "battery", 
+      "custom/weather",
+      "battery",
       "backlight",
       "bluetooth",
       "network",
       "custom/updater",
       "custom/cycle_wall",
-      "custom/lock", 
+      "custom/lock",
     ],
   },
 
   {
-    "include": "~/.config/waybar/modules.jsonc",
+    "include": [
+      "~/.config/waybar/modules.jsonc",
+      "~/.config/waybar/custom.jsonc",
+      "~/.config/waybar/hyprland.jsonc"
+    ],
     "layer": "top",
     //"mode": "dock",
     "exclusive": true,
@@ -55,12 +63,12 @@
     //"margin-bottom": 0,
 
     "modules-left": [
-      "custom/menu",  
+      "custom/menu",
       "wlr/taskbar",
-     ],
+    ],
 
     "modules-center": [
-      "hyprland/workspaces#rw", 
+      "hyprland/workspaces#rw",
     ],
 
     "modules-right": [
@@ -70,9 +78,9 @@
       "mpris",
       "keyboard-state",
       "pulseaudio",
-      //"wireplumber", 
-      "pulseaudio#microphone",      
+      //"wireplumber",
+      "pulseaudio#microphone",
       "custom/power",
-    ],  
+    ],
   }
 ]

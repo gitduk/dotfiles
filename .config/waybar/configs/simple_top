@@ -1,7 +1,11 @@
 {
-  "include": "~/.config/waybar/modules.jsonc",
-  "layer": "top", 
-  "position": "top", 
+  "include": [
+    "~/.config/waybar/modules.jsonc",
+    "~/.config/waybar/custom.jsonc",
+    "~/.config/waybar/hyprland.jsonc"
+  ],
+  "layer": "top",
+  "position": "top",
   //"mode": "dock",
   "exclusive": true,
   "passthrough": false,
@@ -10,23 +14,23 @@
   "margin-right": 6,
   "margin-top": 2,
 
-  "modules-left": [    
+  "modules-left": [
     "idle_inhibitor",
     "group/mobo_drawer",
     "hyprland/workspaces#rw",
     "tray",
-    "mpris", 
+    "mpris",
   ],
-      
+
   "modules-center": [
     "clock#2",
     "custom/swaync",
   ],
-      
+
   "modules-right": [
-    "hyprland/window",  
+    "hyprland/window",
     "battery",
-     "group/audio", 
+    "group/audio",
     "custom/power",
   ],
 }

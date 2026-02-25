@@ -1,5 +1,9 @@
 {
-  "include": "~/.config/waybar/modules.jsonc",
+  "include": [
+    "~/.config/waybar/modules.jsonc",
+    "~/.config/waybar/custom.jsonc",
+    "~/.config/waybar/hyprland.jsonc"
+  ],
   "layer": "top",
   "position": "top",
   "width": 1050,
@@ -15,15 +19,15 @@
   ],
 
   "modules-right": [
-    "custom/menu", 
+    "custom/menu",
     "tray",
     "custom/swaync",
-    "mpris", 
-    "network", 
-    "bluetooth", 
-    "backlight", 
-    "pulseaudio", 
-    "battery", 
+    "mpris",
+    "network",
+    "bluetooth",
+    "backlight",
+    "pulseaudio",
+    "battery",
     "custom/power"
   ],
 }

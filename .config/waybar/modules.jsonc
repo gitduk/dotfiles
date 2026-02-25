@@ -113,8 +113,8 @@
       "on-click-right": "mode",
       "on-click-forward": "tz_up",
       "on-click-backward": "tz_down",
-      "on-scroll-up": "shift_down",
-      "on-scroll-down": "shift_up"
+      "on-scroll-up": "shift_up",
+      "on-scroll-down": "shift_down"
     }
   },
   "cpu": {
@@ -177,8 +177,8 @@
     "on-click": "playerctl previous",
     "on-click-right": "playerctl next",
     "scroll-step": 5.0,
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --dec",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --inc",
+    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --inc",
+    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --dec",
     "smooth-scrolling-threshold": 1,
     "player-icons": {
       "chromium": "",
@@ -272,8 +272,8 @@
     "scroll-step": 5.0,
     "on-click": "~/.config/waybar/scripts/volume.sh --toggle",
     "on-click-right": "pavucontrol -t 3",
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --dec",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --inc",
+    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --inc",
+    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --dec",
     "tooltip-format": "{icon} {desc} | {volume}%",
     "smooth-scrolling-threshold": 1
   },
@@ -306,8 +306,8 @@
     "format-source-muted": "󰍭 {volume}%",
     "on-click": "~/.config/waybar/scripts/volume.sh --toggle-mic",
     "on-click-right": "pavucontrol -t 4",
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --mic-dec",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --mic-inc",
+    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --mic-inc",
+    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --mic-dec",
     "tooltip-format": "{source_desc} | {source_volume}%",
     "scroll-step": 5
   },
@@ -386,8 +386,8 @@
     "on-click-middle": "",
     "on-click-right": "",
     "on-update": "",
-    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --dec",
-    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --inc",
+    "on-scroll-up": "~/.config/waybar/scripts/brightness.sh --inc",
+    "on-scroll-down": "~/.config/waybar/scripts/brightness.sh --dec",
     "smooth-scrolling-threshold": 1,
     "tooltip-format": "{percent}%"
   },
@@ -444,8 +444,8 @@
     "scroll-step": 5.0,
     "on-click": "~/.config/waybar/scripts/volume.sh --toggle",
     "on-click-right": "pavucontrol -t 3",
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --dec",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --inc",
+    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --inc",
+    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --dec",
     "tooltip-format": "{icon} {desc} | {volume}%",
     "smooth-scrolling-threshold": 1
   },
@@ -455,8 +455,8 @@
     "format-source-muted": "󰍭",
     "on-click-right": "pavucontrol",
     "on-click": "~/.config/waybar/scripts/volume.sh --toggle-mic",
-    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --mic-dec",
-    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --mic-inc",
+    "on-scroll-up": "~/.config/waybar/scripts/volume.sh --mic-inc",
+    "on-scroll-down": "~/.config/waybar/scripts/volume.sh --mic-dec",
     "max-volume": 100,
     "tooltip": true,
     "tooltip-format": "{source_desc} | {source_volume}%"

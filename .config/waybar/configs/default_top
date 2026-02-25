@@ -1,8 +1,8 @@
 {
   "include": [
     "~/.config/waybar/modules.jsonc",
-    "~/.config/waybar/modules/custom.jsonc",
-    "~/.config/waybar/modules/hyprland.jsonc"
+    "~/.config/waybar/custom.jsonc",
+    "~/.config/waybar/hyprland.jsonc"
   ],
   "layer": "top",
   "exclusive": true,
@@ -22,7 +22,6 @@
     "cpu",
     "memory",
     "temperature",
-    "custom/separator#dot-line",
     "custom/poetry"
   ],
 
@@ -31,7 +30,6 @@
     "idle_inhibitor",
     "custom/separator#dot-line",
     "clock",
-    "custom/separator#dot-line",
     "group/color"
   ],
 
@@ -41,7 +39,7 @@
     "custom/singbox",
     "custom/separator#dot-line",
     "group/audio",
-    "battery",
-    "backlight"
+    "backlight",
+    "battery"
   ]
 }
