@@ -1,4 +1,31 @@
-#!/usr/bin/env bash
+git_cmd=(git --work-tree="$HOME" --git-dir="$HOME/.dotfiles.git")
 
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git "$@"
+# With arguments: pass through to git
+if [[ $# -gt 0 ]]; then
+  "${git_cmd[@]}" "$@"
+  return $?
+fi
 
+# No arguments: auto-stage all unstaged changes
+while IFS= read -r line; do
+  # porcelain format: XY filename (or XY old -> new for renames)
+  xy=${line:0:2}
+  worktree_status=${xy:1:1}
+  file_path=${line:3}
+
+  # Skip already-staged-only entries (worktree column is space)
+  [[ "$worktree_status" = " " ]] && continue
+
+  # Handle renames: "old -> new" — take the new path
+  if [[ "$file_path" == *" -> "* ]]; then
+    file_path=${file_path##* -> }
+  fi
+
+  local abs_path="$HOME/$file_path"
+  if [[ "$worktree_status" = "D" ]]; then
+    "${git_cmd[@]}" rm -- "$abs_path" || echo "Failed to remove $file_path"
+  else
+    echo "add $file_path"
+    "${git_cmd[@]}" add -- "$abs_path" || echo "Failed to add $file_path"
+  fi
+done < <("${git_cmd[@]}" status --porcelain)

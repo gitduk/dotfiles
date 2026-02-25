@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 # Set a default editor if $EDITOR is not set
 set_default_editor() {

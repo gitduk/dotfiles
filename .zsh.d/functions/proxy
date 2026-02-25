@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 local proxy_host="127.0.0.1"
 local proxy_port="7890"

@@ -56,9 +56,8 @@ alias bai="bacon --init"
 
 # dotfiles
 alias cs="c status"
-alias cdf="c diff"
+alias cdi="c diff"
 alias cds="c diff --staged"
-alias cad="cadd"
 alias crs="c restore"
 alias cst="c stash"
 alias csp="c stash pop"

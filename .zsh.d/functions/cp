@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 if [[ $# -eq 0 ]]; then
   # 读取标准输入，去掉尾部换行符后复制
