@@ -398,8 +398,6 @@ sections=(
   section_cfg_mcp
   section_cfg_hooks
   section_duration
-  ---
-  section_todos
 )
 
 line=""
