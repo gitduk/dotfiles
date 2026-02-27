@@ -1,0 +1,6 @@
+% git
+
+# set remote origin fetch for dotfile bare repo
+c remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+c fetch origin
+

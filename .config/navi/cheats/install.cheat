@@ -166,7 +166,6 @@ EOF
 sudo apt update
 sudo apt install podman
 
-# nvm
-tag=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r .tag_name)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$tag/install.sh | bash
+# Automated CLAUDE.md Management Tool
+curl -fsSL https://raw.githubusercontent.com/alirezarezvani/ClaudeForge/main/install.sh | bash
 
