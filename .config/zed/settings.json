@@ -1,0 +1,69 @@
+{
+  "context_servers": {
+    "mcp-server-context7": {
+      "enabled": true,
+      "remote": false,
+      "settings": {
+        "context7_api_key": ""
+      }
+    }
+  },
+  "edit_predictions": {
+    "provider": "zed",
+  },
+  "languages": {
+    "Python": {
+      "prettier": {
+        "allowed": true,
+      },
+      "language_servers": ["ty", "!basedpyright"],
+    },
+  },
+  "language_models": {
+    "anthropic": {
+      "api_url": "https://yunyi.rdzhvip.com/claude",
+    },
+  },
+  "agent": {
+    "tool_permissions": {
+      "tools": {
+        "mcp:mcp-server-sequential-thinking:sequentialthinking": {
+          "default": "allow"
+        },
+        "save_file": {
+          "default": "allow",
+        },
+        "move_path": {
+          "default": "allow",
+        },
+        "terminal": {
+          "default": "allow",
+        },
+      },
+    },
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6-latest",
+      "enable_thinking": false,
+    },
+    "commit_message_model": {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-latest",
+    },
+    "thread_summary_model": {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-latest",
+    },
+  },
+  "session": {
+    "trust_all_worktrees": true,
+  },
+  "vim_mode": true,
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark Pro",
+  },
+}
