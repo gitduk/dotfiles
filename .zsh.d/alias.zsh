@@ -56,6 +56,7 @@ alias bai="bacon --init"
 
 # dotfiles
 alias cs="c status"
+alias cad="c add"
 alias cdi="c diff"
 alias cds="c diff --staged"
 alias crs="c restore"
@@ -147,8 +148,8 @@ alias ehs="v /etc/hosts"
 # easytier
 alias epr="easytier-cli peer"
 
-# feedr
-alias f="feedr"
+# fnm
+alias f="fnm"
 
 # fscan
 alias fs="fscan"
@@ -165,16 +166,7 @@ alias gomt="go mod tidy"
 alias gor="go run ."
 
 # git
-alias gad="git add ."
-alias gst="git status"
-alias gdf="git diff"
-alias gsth="git stash"
-alias gco="git checkout"
-alias gsp="git stash pop"
-alias gcm="git commit -m"
-alias gps="git push"
-alias gpl="git pull --rebase"
-alias gcl="git clone --depth 1"
+alias g="git"
 
 # hyprland
 alias hc="hyprctl"

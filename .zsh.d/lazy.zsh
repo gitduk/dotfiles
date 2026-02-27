@@ -22,13 +22,19 @@ command_not_found_handler() {
     else
       local id="${repo##*/}"
       local -a ices=("${(z)LAZY_ICE[$1]}")
+      local -a _evals=()
+      for _i in "${ices[@]}"; do
+        [[ "${(Q)_i}" == eval* ]] && _evals+=("${${(Q)_i}#eval}")
+      done
       ices=(${ices:#cmd*})
       ices=(${ices:#env\"*})
+      ices=(${ices:#eval\"*})
       (( ${ices[(I)as*]} )) || ices+=(as"program")
       (( ${ices[(I)from*]} )) || ices+=(from"gh-r")
       (( ${ices[(I)atpull*]} )) || ices+=(atpull"%atclone")
       zinit ice lucid id-as"$id" "${(Q@)ices}"
       zinit light "$repo"
+      for _e in "${_evals[@]}"; do eval "$(eval "$_e")"; done
     fi
     unset "LAZY_REPO[$1]" "LAZY_ICE[$1]"
     command "$@"
@@ -60,15 +66,25 @@ _parse_lazy_cmds() {
 
 while read -r repo ice_opts; do
   [[ "$repo" =~ ^# || -z "$repo" ]] && continue
-  # process env"KEY=VALUE"
+  # process env"KEY=VALUE" and eval"cmd"
+  local -a _evals=()
   for t in "${(Q@)${(z)ice_opts}}"; do
     [[ "$t" == env* ]] && { local _v="${t#env}"; export "${_v%%=*}=${${_v#*=}/#\~/$HOME}"; }
+    [[ "$t" == eval* ]] && _evals+=("${t#eval}")
   done
   local -a cmds=($(_parse_lazy_cmds "$ice_opts"))
   if (( ${#cmds} == 0 )); then
     typeset name="${repo#*:}"
     name="${name##*/}"
     cmds=("$name")
+  fi
+  if (( ${#_evals} )); then
+    for cmd in "${cmds[@]}"; do
+      if (( $+commands[$cmd] )); then
+        for _e in "${_evals[@]}"; do eval "$(eval "$_e")"; done
+        break
+      fi
+    done
   fi
   for cmd in "${cmds[@]}"; do
     LAZY_REPO[$cmd]="$repo"
@@ -109,6 +125,7 @@ oven-sh/bun bpick"bun-linux-x64.zip" sbin"bun" atclone'wget https://raw.githubus
 eza-community/eza sbin"eza"
 sharkdp/bat sbin"bat-*/bat" atclone"./bat-*/bat --completion zsh > _bat"
 mozilla/sccache bpick"sccache-v*-x86_64-unknown-linux-musl.tar.gz" sbin"sccache"
+Schniz/fnm bpick"fnm-linux.zip" sbin"fnm" eval"fnm env --use-on-cd --shell zsh"
 
 # apt installer
 apt:foot
