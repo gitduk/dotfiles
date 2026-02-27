@@ -25,11 +25,11 @@ $cmake\
 $jobs\
 $cmd_duration\
 $fill\
+${custom.proxy}\
 ${custom.direnv}\
 ${custom.claude}\
 ${custom.openai}\
 ${custom.gemini}\
-${custom.proxy}\
 $time\
 $line_break\
 $character\
