@@ -1,31 +1,70 @@
 git_cmd=(git --work-tree="$HOME" --git-dir="$HOME/.dotfiles.git")
 
+# `c add` with no extra args: auto-stage all unstaged changes
+if [[ $# -eq 1 && "$1" = "add" ]]; then
+  while IFS= read -r line; do
+    xy=${line:0:2}
+    worktree_status=${xy:1:1}
+    file_path=${line:3}
+
+    [[ "$worktree_status" = " " ]] && continue
+
+    if [[ "$file_path" == *" -> "* ]]; then
+      file_path=${file_path##* -> }
+    fi
+
+    local abs_path="$HOME/$file_path"
+    if [[ "$worktree_status" = "D" ]]; then
+      printf '\033[31mdel %s\033[0m\n' "$file_path"
+      "${git_cmd[@]}" rm -- "$abs_path" &>/dev/null
+    else
+      printf '\033[32madd %s\033[0m\n' "$file_path"
+      "${git_cmd[@]}" add -- "$abs_path" 2>/dev/null
+    fi
+  done < <("${git_cmd[@]}" status --porcelain)
+  return $?
+fi
+
+# `c restore` with no extra args:
+#   - has unstaged changes: restore unstaged only
+#   - all staged: restore staged
+if [[ $# -eq 1 && "$1" = "restore" ]]; then
+  local has_unstaged=false
+  while IFS= read -r line; do
+    xy=${line:0:2}
+    [[ "${xy:1:1}" != " " && "${xy:0:1}" != "?" ]] && has_unstaged=true && break
+  done < <("${git_cmd[@]}" status --porcelain)
+
+  while IFS= read -r line; do
+    xy=${line:0:2}
+    index_status=${xy:0:1}
+    worktree_status=${xy:1:1}
+    file_path=${line:3}
+
+    [[ "$index_status" = "?" ]] && continue
+
+    if [[ "$file_path" == *" -> "* ]]; then
+      file_path=${file_path##* -> }
+    fi
+
+    if $has_unstaged; then
+      [[ "$worktree_status" = " " ]] && continue
+      printf '\033[33mres %s\033[0m\n' "$file_path"
+      "${git_cmd[@]}" restore --worktree -- "$HOME/$file_path"
+    else
+      [[ "$index_status" = " " ]] && continue
+      printf '\033[33mres %s\033[0m\n' "$file_path"
+      "${git_cmd[@]}" restore --staged -- "$HOME/$file_path"
+    fi
+  done < <("${git_cmd[@]}" status --porcelain)
+  return $?
+fi
+
 # With arguments: pass through to git
 if [[ $# -gt 0 ]]; then
   "${git_cmd[@]}" "$@"
   return $?
 fi
 
-# No arguments: auto-stage all unstaged changes
-while IFS= read -r line; do
-  # porcelain format: XY filename (or XY old -> new for renames)
-  xy=${line:0:2}
-  worktree_status=${xy:1:1}
-  file_path=${line:3}
-
-  # Skip already-staged-only entries (worktree column is space)
-  [[ "$worktree_status" = " " ]] && continue
-
-  # Handle renames: "old -> new" — take the new path
-  if [[ "$file_path" == *" -> "* ]]; then
-    file_path=${file_path##* -> }
-  fi
-
-  local abs_path="$HOME/$file_path"
-  if [[ "$worktree_status" = "D" ]]; then
-    "${git_cmd[@]}" rm -- "$abs_path" || echo "Failed to remove $file_path"
-  else
-    echo "add $file_path"
-    "${git_cmd[@]}" add -- "$abs_path" || echo "Failed to add $file_path"
-  fi
-done < <("${git_cmd[@]}" status --porcelain)
+# No arguments: show status
+"${git_cmd[@]}" status

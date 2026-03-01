@@ -26,7 +26,7 @@ if [[ ${#urls[@]} -gt 1 ]]; then
     done
   fi
 else
-  download_url="${urls[0]}${urls[1]}"
+  download_url="${urls[0]}"
 fi
 
 [[ -z "$download_url" ]] && {

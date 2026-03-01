@@ -11,23 +11,24 @@ Manage commits for a bare git repo (`~/.dotfiles.git`, worktree `$HOME`) using C
 
 ## Git Command
 
-All git operations MUST use this prefix:
+`c` is a user shell alias — **not available in Bash tool**. Always use the full form:
 
 ```bash
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git <command>
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git <git-args>
 ```
 
-Abbreviated as `dotgit` below for clarity. Always expand to the full form when executing.
+All examples below use `dgit` as shorthand for this command.
 
 ## Workflow
 
 ### 1. Check status and diff
 
 ```bash
+dgit="git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git"
 # Always run these three in parallel to understand current state
-dotgit status --porcelain
-dotgit diff --staged
-dotgit diff
+$dgit status --porcelain
+$dgit diff --staged
+$dgit diff
 ```
 
 If nothing is staged, ask the user what to stage, or stage all changed tracked files.
@@ -35,17 +36,17 @@ If nothing is staged, ask the user what to stage, or stage all changed tracked f
 ### 2. Review recent commits for style consistency
 
 ```bash
-dotgit log --oneline -10
+$dgit log --oneline -10
 ```
 
 ### 3. Stage files
 
 ```bash
 # Stage specific files (preferred - be explicit)
-dotgit add ~/.zshrc ~/.config/nvim/init.lua
+$dgit add ~/.zshrc ~/.config/nvim/init.lua
 
 # Stage all tracked changes
-dotgit add -u
+$dgit add -u
 ```
 
 **NEVER** stage secrets: `.env`, credentials, private keys, tokens.
@@ -53,7 +54,7 @@ dotgit add -u
 ### 4. Commit
 
 ```bash
-dotgit commit -m "$(cat <<'EOF'
+$dgit commit -m "$(cat <<'EOF'
 <type>(<scope>): <description>
 
 <optional body>
@@ -68,13 +69,13 @@ EOF
 If `push` argument is present:
 
 ```bash
-dotgit push
+$dgit push
 ```
 
 If push fails due to no upstream, set it:
 
 ```bash
-dotgit push -u origin $(dotgit branch --show-current)
+$dgit push -u origin $($dgit branch --show-current)
 ```
 
 If `push` argument is NOT present, do NOT push.
