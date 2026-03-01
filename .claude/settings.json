@@ -21,18 +21,6 @@
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash(cargo *)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cargo fmt --check && cargo clippy --quiet 2>/dev/null || true",
-            "timeout": 60
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "hooks": [
@@ -65,16 +53,6 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/claudeception-activator.sh"
-          }
-        ]
-      }
     ]
   },
   "statusLine": {
@@ -86,15 +64,6 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "mcpServers": {
-    "memory": {
-      "command": "bun",
-      "args": [
-        "x",
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
-      "description": "Persistent memory across sessions"
-    },
     "context7": {
       "command": "bun",
       "args": [
@@ -103,15 +72,6 @@
         "@context7/mcp-server"
       ],
       "description": "Live documentation lookup"
-    },
-    "sequential-thinking": {
-      "command": "bun",
-      "args": [
-        "x",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "description": "Chain-of-thought reasoning"
     }
   },
   "packageManager": "bun",
