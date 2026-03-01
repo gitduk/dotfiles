@@ -17,18 +17,15 @@ Manage commits for a bare git repo (`~/.dotfiles.git`, worktree `$HOME`) using C
 git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git <git-args>
 ```
 
-All examples below use `dgit` as shorthand for this command.
-
 ## Workflow
 
 ### 1. Check status and diff
 
 ```bash
-dgit="git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git"
 # Always run these three in parallel to understand current state
-$dgit status --porcelain
-$dgit diff --staged
-$dgit diff
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git status --porcelain
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git diff --staged
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git diff
 ```
 
 If nothing is staged, ask the user what to stage, or stage all changed tracked files.
@@ -36,17 +33,17 @@ If nothing is staged, ask the user what to stage, or stage all changed tracked f
 ### 2. Review recent commits for style consistency
 
 ```bash
-$dgit log --oneline -10
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git log --oneline -10
 ```
 
 ### 3. Stage files
 
 ```bash
 # Stage specific files (preferred - be explicit)
-$dgit add ~/.zshrc ~/.config/nvim/init.lua
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git add ~/.zshrc ~/.config/nvim/init.lua
 
 # Stage all tracked changes
-$dgit add -u
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git add -u
 ```
 
 **NEVER** stage secrets: `.env`, credentials, private keys, tokens.
@@ -54,7 +51,7 @@ $dgit add -u
 ### 4. Commit
 
 ```bash
-$dgit commit -m "$(cat <<'EOF'
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git commit -m "$(cat <<'EOF'
 <type>(<scope>): <description>
 
 <optional body>
@@ -69,13 +66,13 @@ EOF
 If `push` argument is present:
 
 ```bash
-$dgit push
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git push
 ```
 
 If push fails due to no upstream, set it:
 
 ```bash
-$dgit push -u origin $($dgit branch --show-current)
+git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git push -u origin $(git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git branch --show-current)
 ```
 
 If `push` argument is NOT present, do NOT push.
