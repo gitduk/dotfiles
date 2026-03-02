@@ -1,6 +1,7 @@
 ---
 name: commit
 description: 'Create conventional commits for git repositories. Analyzes staged/unstaged changes, generates semantic commit messages following project conventions, and commits. This skill should be used when the user asks to "commit", "git commit", "save changes", "create a commit", or mentions committing code changes.'
+model: haiku
 allowed-tools: Bash, Read
 ---
 

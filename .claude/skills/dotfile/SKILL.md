@@ -2,6 +2,7 @@
 name: dotfile
 description: 'Create conventional commits for ~/.dotfiles.git bare repo. Analyzes changes, stages files, and generates semantic commit messages.'
 license: MIT
+model: haiku
 allowed-tools: Bash, Read
 ---
 

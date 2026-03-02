@@ -20,6 +20,7 @@
     "ask": [],
     "defaultMode": "bypassPermissions"
   },
+  "model": "opus",
   "hooks": {
     "Stop": [
       {
@@ -60,7 +61,8 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true
   },
   "skipDangerousModePermissionPrompt": true,
   "mcpServers": {
@@ -75,6 +77,5 @@
     }
   },
   "packageManager": "bun",
-  "hasCompletedOnboarding": true,
-  "model": "opus"
+  "hasCompletedOnboarding": true
 }

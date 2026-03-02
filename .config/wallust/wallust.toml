@@ -43,9 +43,6 @@ rofi.target = '~/.config/rofi/colors.rasi'
 kitty.template = 'kitty.conf'
 kitty.target = '~/.config/kitty/kitty.conf'
 
-alacritty.template = 'alacritty.toml'
-alacritty.target = '~/.config/alacritty/colors.toml'
-
 mako.template = 'mako'
 mako.target = '~/.config/mako/config'
 

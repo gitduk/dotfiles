@@ -7,17 +7,22 @@ input=$(cat)
 # ============================================================
 # Data extraction (parsed once, used by section functions)
 # ============================================================
-model=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
-used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
-ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
-total_in=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
-total_out=$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')
-total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
-duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
-api_duration_ms=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
-cwd=$(echo "$input" | jq -r '.workspace.current_dir // empty')
-project_dir=$(echo "$input" | jq -r '.workspace.project_dir // empty')
-transcript_path=$(echo "$input" | jq -r '.transcript_path // empty')
+eval "$(echo "$input" | jq -r '
+  @sh "model=\(.model.display_name // "Unknown")",
+  @sh "used_pct=\(.context_window.used_percentage // "")",
+  @sh "ctx_size=\(.context_window.context_window_size // 0)",
+  @sh "total_in=\(.context_window.total_input_tokens // 0)",
+  @sh "total_out=\(.context_window.total_output_tokens // 0)",
+  @sh "total_cost=\(.cost.total_cost_usd // 0)",
+  @sh "duration_ms=\(.cost.total_duration_ms // 0)",
+  @sh "api_duration_ms=\(.cost.total_api_duration_ms // 0)",
+  @sh "cwd=\(.workspace.current_dir // "")",
+  @sh "project_dir=\(.workspace.project_dir // "")",
+  @sh "transcript_path=\(.transcript_path // "")"
+')"
+
+# Plugin count from settings.json
+plugins_count=$(jq '[.enabledPlugins // {} | to_entries[] | select(.value == true)] | length' ~/.claude/settings.json 2>/dev/null)
 
 # ============================================================
 # ANSI colors
@@ -39,6 +44,13 @@ pct_color() {
   elif [ "$pct" -ge 60 ]; then printf '\033[33m'
   else printf '\033[32m'
   fi
+}
+
+# Generic section: _sec "label" "value" [color]  →  label:value (dim label, colored value)
+_sec() {
+  local label="$1" value="$2" color="${3:-$WHITE}"
+  [ -z "$value" ] && return
+  printf '%b' "${DIM}${label}:${RESET}${color}${value}${RESET}"
 }
 
 # Format token counts: 1234 -> 1.2k, 1234567 -> 1.2M
@@ -70,7 +82,7 @@ fmt_duration() {
 # Quota API (cached, non-blocking)
 # ============================================================
 CACHE_FILE="$HOME/.cache/claude/quota-cache.json"
-CACHE_TTL=60
+CACHE_TTL=15
 
 fetch_quota() {
   local token
@@ -180,201 +192,211 @@ section_git() {
 # Context: percentage, colored by usage
 section_context() {
   if [ -n "$used_pct" ]; then
-    local pct_int ccolor
-    pct_int=$(printf "%.0f" "$used_pct")
-    ccolor=$(pct_color "$pct_int")
-    printf '%b' "${DIM}ctx:${RESET}${ccolor}${pct_int}%${RESET}"
+    local pct_int; pct_int=$(printf "%.0f" "$used_pct")
+    _sec "ctx" "${pct_int}%" "$(pct_color "$pct_int")"
   else
     printf '%b' "${DIM}no ctx${RESET}"
   fi
 }
 
 # Session cost
-section_cost() {
-  local cost_fmt
-  cost_fmt=$(printf "\$%.4f" "$total_cost")
-  printf '%b' "${MAGENTA}${cost_fmt}${RESET}"
-}
+section_cost() { printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"; }
 
-# Input token count
-section_tokens_in() {
-  local in_fmt
-  in_fmt=$(fmt_tokens "$total_in")
-  printf '%b' "${DIM}in:${RESET}${WHITE}${in_fmt}${RESET}"
-}
-
-# Output token count
-section_tokens_out() {
-  local out_fmt
-  out_fmt=$(fmt_tokens "$total_out")
-  printf '%b' "${DIM}out:${RESET}${WHITE}${out_fmt}${RESET}"
-}
+# Input / output token counts
+section_tokens_in()  { _sec "in" "$(fmt_tokens "$total_in")"; }
+section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
 
 # Output speed (tokens/sec based on API duration)
 section_speed() {
   [ "$api_duration_ms" -le 0 ] 2>/dev/null && return
   [ "$total_out" -le 0 ] 2>/dev/null && return
-  local tps
-  tps=$(echo "scale=1; $total_out * 1000 / $api_duration_ms" | bc 2>/dev/null)
+  local tps; tps=$(echo "scale=1; $total_out * 1000 / $api_duration_ms" | bc 2>/dev/null)
   [ -z "$tps" ] && return
-  printf '%b' "${DIM}speed:${RESET}${WHITE}${tps}t/s${RESET}"
+  _sec "speed" "${tps}t/s"
 }
 
 # Session duration
 section_duration() {
   [ "$duration_ms" -le 0 ] 2>/dev/null && return
-  local dur
-  dur=$(fmt_duration "$duration_ms")
-  printf '%b' "${DIM}time:${RESET}${WHITE}${dur}${RESET}"
+  _sec "time" "$(fmt_duration "$duration_ms")"
 }
 
-# 5-hour quota usage
+# Quota usage: 5h / 7d (colored by percentage)
+_section_quota() {
+  local label="$1" value="$2"
+  [ -z "$value" ] && return
+  local pct; pct=$(printf "%.0f" "$value")
+  _sec "$label" "${pct}%" "$(pct_color "$pct")"
+}
 section_quota_5h() {
-  if [ -n "$five_h" ]; then
-    local five_int five_color
-    five_int=$(printf "%.0f" "$five_h")
-    five_color=$(pct_color "$five_int")
-    printf '%b' "${DIM}5h:${RESET}${five_color}${five_int}%${RESET}"
-  fi
-}
-
-# Time remaining until 5-hour quota reset
-section_reset_5h() {
-  [ -z "$quota_json" ] || [ "$quota_json" = "null" ] && return
-  local resets_at
-  resets_at=$(echo "$quota_json" | jq -r '.five_hour.resets_at // empty' 2>/dev/null)
-  [ -z "$resets_at" ] && return
-  local reset_epoch now_epoch secs_left
-  reset_epoch=$(date -d "$resets_at" +%s 2>/dev/null) || return
-  now_epoch=$(date +%s)
-  secs_left=$((reset_epoch - now_epoch))
-  [ "$secs_left" -le 0 ] && printf '%b' "${DIM}5h reset:${RESET}${GREEN}now${RESET}" && return
-  local mins=$((secs_left / 60))
-  local hrs=$((mins / 60))
-  local rem_mins=$((mins % 60))
-  local label
-  if [ "$hrs" -gt 0 ]; then
-    label="${hrs}h ${rem_mins}m"
-  else
-    label="${mins}m"
-  fi
-  local color
-  if [ "$secs_left" -le 600 ]; then color="$RED"
-  elif [ "$secs_left" -le 1800 ]; then color="$YELLOW"
-  else color="$GREEN"
-  fi
-  printf '%b' "${DIM}reset in:${RESET}${color}${label}${RESET}"
-}
-
-# 7-day quota usage
-section_quota_7d() {
-  if [ -n "$seven_d" ]; then
-    local seven_int seven_color
-    seven_int=$(printf "%.0f" "$seven_d")
-    seven_color=$(pct_color "$seven_int")
-    printf '%b' "${DIM}7d:${RESET}${seven_color}${seven_int}%${RESET}"
-  fi
-}
-
-# Tool activity summary
-section_tools() {
-  [ -z "$tool_summary" ] && return
-  printf '%b' "${DIM}tools:${RESET}${WHITE}${tool_summary}${RESET}"
-}
-
-# Todo progress
-section_todos() {
-  [ -z "$todo_summary" ] && return
-  printf '%b' "${DIM}todo:${RESET}${GREEN}${todo_summary}${RESET}"
-}
-
-# Config counts: CLAUDE.md, rules, mcps, hooks (cached per session)
-CONFIG_CACHE="$HOME/.cache/claude/config-cache.json"
-CONFIG_CACHE_TTL=60  # 1 minutes
-
-compute_config() {
-  local dir="${1:-.}"
-  local md_count=0 rules_count=0 mcp_count=0 hook_count=0
-
-  # CLAUDE.md files: user-level
-  [ -f "$HOME/.claude/CLAUDE.md" ] && md_count=$((md_count + 1))
-  if [ "$dir" != "$HOME" ]; then
-    [ -f "$dir/CLAUDE.md" ] && md_count=$((md_count + 1))
-    [ -f "$dir/.claude/CLAUDE.md" ] && md_count=$((md_count + 1))
-  fi
-
-  # Rules files
-  [ -d "$HOME/.claude/rules" ] && rules_count=$(find "$HOME/.claude/rules" -type f 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$dir" != "$HOME" ] && [ -d "$dir/.claude/rules" ]; then
-    rules_count=$((rules_count + $(find "$dir/.claude/rules" -type f 2>/dev/null | wc -l | tr -d ' ')))
-  fi
-
-  # MCP servers
-  mcp_count=$(jq -r '.mcpServers // {} | length' "$HOME/.claude/settings.json" 2>/dev/null)
-  if [ "$dir" != "$HOME" ] && [ -f "$dir/.claude/settings.json" ]; then
-    mcp_count=$((mcp_count + $(jq -r '.mcpServers // {} | length' "$dir/.claude/settings.json" 2>/dev/null)))
-  fi
-
-  # Hooks
-  count_hooks_in_file() {
-    jq -r '[.hooks // {} | to_entries[].value[] | .hooks | length] | add // 0' "$1" 2>/dev/null
-  }
-  hook_count=$(count_hooks_in_file "$HOME/.claude/settings.json")
-  if [ "$dir" != "$HOME" ]; then
-    [ -f "$dir/.claude/settings.json" ] && hook_count=$((hook_count + $(count_hooks_in_file "$dir/.claude/settings.json")))
-    [ -f "$dir/.claude/settings.local.json" ] && hook_count=$((hook_count + $(count_hooks_in_file "$dir/.claude/settings.local.json")))
-  fi
-  local plugins_file="$HOME/.claude/plugins/installed_plugins.json"
-  if [ -f "$plugins_file" ]; then
-    while IFS= read -r ppath; do
-      [ -z "$ppath" ] && continue
-      [ -f "$ppath/hooks/hooks.json" ] && hook_count=$((hook_count + $(count_hooks_in_file "$ppath/hooks/hooks.json")))
-    done <<< "$(jq -r '.plugins // {} | to_entries[].value[0].installPath // empty' "$plugins_file" 2>/dev/null)"
-  fi
-
-  jq -n --arg dir "$dir" --argjson md "$md_count" --argjson rules "$rules_count" \
-    --argjson mcp "${mcp_count:-0}" --argjson hooks "${hook_count:-0}" --arg ts "$(date +%s)" \
-    '{dir: $dir, md: $md, rules: $rules, mcp: $mcp, hooks: $hooks, cached_at: ($ts | tonumber)}' \
-    > "$CONFIG_CACHE" 2>/dev/null
-}
-
-# Load config counts once at top level
-_cfg_md=0 _cfg_rules=0 _cfg_mcp=0 _cfg_hooks=0
-_cfg_dir="${project_dir:-$cwd}"
-if [ -n "$_cfg_dir" ]; then
-  _need_compute=1
-  if [ -f "$CONFIG_CACHE" ]; then
-    _cached_dir=$(jq -r '.dir // ""' "$CONFIG_CACHE" 2>/dev/null)
-    _cached_at=$(jq -r '.cached_at // 0' "$CONFIG_CACHE" 2>/dev/null)
-    _now=$(date +%s)
-    _age=$((_now - _cached_at))
-    if [ "$_cached_dir" = "$_cfg_dir" ] && [ "$_age" -lt "$CONFIG_CACHE_TTL" ]; then
-      _need_compute=0
+  [ -z "$five_h" ] && return
+  local pct; pct=$(printf "%.0f" "$five_h")
+  local pct_c; pct_c="$(pct_color "$pct")"
+  # Try to append reset countdown
+  local reset_part=""
+  if [ -n "$quota_json" ] && [ "$quota_json" != "null" ]; then
+    local resets_at
+    resets_at=$(echo "$quota_json" | jq -r '.five_hour.resets_at // empty' 2>/dev/null)
+    if [ -n "$resets_at" ]; then
+      local reset_epoch now_epoch secs_left
+      reset_epoch=$(date -d "$resets_at" +%s 2>/dev/null)
+      if [ -n "$reset_epoch" ]; then
+        now_epoch=$(date +%s)
+        secs_left=$((reset_epoch - now_epoch))
+        local tlabel tcolor
+        if [ "$secs_left" -le 0 ]; then
+          tlabel="now"; tcolor="$GREEN"
+        else
+          local mins=$((secs_left / 60)) hrs=$((secs_left / 3600))
+          if [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$((mins % 60))m"; else tlabel="${mins}m"; fi
+          if [ "$secs_left" -le 600 ]; then tcolor="$RED"
+          elif [ "$secs_left" -le 1800 ]; then tcolor="$YELLOW"
+          else tcolor="$GREEN"; fi
+        fi
+        reset_part="${DIM} - ${RESET}${tcolor}${tlabel}${RESET}"
+      fi
     fi
   fi
-  [ "$_need_compute" -eq 1 ] && compute_config "$_cfg_dir"
-  if [ -f "$CONFIG_CACHE" ]; then
-    _cfg_md=$(jq -r '.md' "$CONFIG_CACHE")
-    _cfg_rules=$(jq -r '.rules' "$CONFIG_CACHE")
-    _cfg_mcp=$(jq -r '.mcp' "$CONFIG_CACHE")
-    _cfg_hooks=$(jq -r '.hooks' "$CONFIG_CACHE")
+  printf '%b' "${DIM}5h:${RESET}${pct_c}${pct}%${RESET}${reset_part}"
+}
+section_quota_7d() { _section_quota "7d" "$seven_d"; }
+
+# Tool activity / todo progress
+section_tools() { _sec "tools" "$tool_summary"; }
+section_todos() { _sec "todo" "$todo_summary" "$GREEN"; }
+
+# ============================================================
+# Config & memory stats — collected in a single pass
+# ============================================================
+
+# Check if a rules file with `paths:` frontmatter matches the current project.
+# No paths → always loaded (return 0). Has paths → check if any glob matches.
+_should_load_rule() {
+  local f="$1" dir="$2"
+  [ "$(head -1 "$f" 2>/dev/null)" = "---" ] || return 0
+  local fm
+  fm=$(sed -n '2,/^---$/p' "$f" 2>/dev/null)
+  echo "$fm" | grep -q '^paths:' || return 0
+  [ -z "$dir" ] && return 1
+  # Skip path matching when project dir is $HOME (no real project)
+  [ "$dir" = "$HOME" ] && return 1
+  local pattern
+  while IFS= read -r pattern; do
+    pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+    pattern="${pattern#- }"
+    pattern="${pattern#\"}" ; pattern="${pattern%\"}"
+    [ -z "$pattern" ] && continue
+    if find "$dir" -not -path "*/.claude/*" -path "$dir/$pattern" -print -quit 2>/dev/null | grep -q .; then
+      return 0
+    fi
+  done < <(echo "$fm" | grep '^ *- ')
+  return 1
+}
+
+# Count MCP servers in a settings file
+_count_mcp() { jq -r '.mcpServers // {} | length' "$1" 2>/dev/null; }
+
+# Count hooks in a settings file
+_count_hooks() { jq -r '[.hooks // {} | to_entries[].value[] | .hooks | length] | add // 0' "$1" 2>/dev/null; }
+
+# Accumulate stats from a settings file (MCP + hooks)
+_collect_settings() {
+  local f="$1"
+  [ -f "$f" ] || return
+  _cfg_mcp=$((_cfg_mcp + $(_count_mcp "$f")))
+  _cfg_hooks=$((_cfg_hooks + $(_count_hooks "$f")))
+}
+
+# Accumulate stats from an instruction file (md/rules count + mem chars/lines)
+_collect_instruction() {
+  local f="$1" type="$2"  # type: "md" or "rule"
+  [ -f "$f" ] || return
+  local c n
+  c=$(wc -c < "$f" 2>/dev/null) || return
+  n=$(wc -l < "$f" 2>/dev/null) || return
+  [ "$type" = "md" ] && _cfg_md=$((_cfg_md + 1))
+  [ "$type" = "rule" ] && _cfg_rules=$((_cfg_rules + 1))
+  _mem_chars=$((_mem_chars + c))
+  _mem_files=$((_mem_files + 1))
+  [ "$n" -gt 200 ] && _mem_oversize=$((_mem_oversize + 1))
+}
+
+# Collect loaded rules from a directory
+_collect_rules_dir() {
+  local dir="$1" project="$2"
+  [ -d "$dir" ] || return
+  while IFS= read -r rf; do
+    _should_load_rule "$rf" "$project" && _collect_instruction "$rf" "rule"
+  done < <(find "$dir" -type f 2>/dev/null)
+}
+
+# --- Run collection ---
+_cfg_md=0 _cfg_rules=0 _cfg_mcp=0 _cfg_hooks=0
+_mem_chars=0 _mem_files=0 _mem_oversize=0
+_cfg_dir="${project_dir:-$cwd}"
+
+if [ -n "$_cfg_dir" ]; then
+  # Global level
+  _collect_instruction "$HOME/.claude/CLAUDE.md" "md"
+  _collect_rules_dir "$HOME/.claude/rules" "$_cfg_dir"
+  _collect_settings "$HOME/.claude/settings.json"
+  _collect_settings "$HOME/.claude/settings.local.json"
+
+  # Project level (skip if project IS ~/.claude to avoid double-counting)
+  if [ "$_cfg_dir" != "$HOME" ] && [ "$_cfg_dir" != "$HOME/.claude" ]; then
+    _collect_instruction "$_cfg_dir/CLAUDE.md" "md"
+    _collect_instruction "$_cfg_dir/.claude/CLAUDE.md" "md"
+    _collect_rules_dir "$_cfg_dir/.claude/rules" "$_cfg_dir"
+    _collect_settings "$_cfg_dir/.claude/settings.json"
+    _collect_settings "$_cfg_dir/.claude/settings.local.json"
+  fi
+
+  # Plugin hooks
+  _plugins_file="$HOME/.claude/plugins/installed_plugins.json"
+  if [ -f "$_plugins_file" ]; then
+    while IFS= read -r ppath; do
+      [ -z "$ppath" ] && continue
+      [ -f "$ppath/hooks/hooks.json" ] && _cfg_hooks=$((_cfg_hooks + $(_count_hooks "$ppath/hooks/hooks.json")))
+    done <<< "$(jq -r '.plugins // {} | to_entries[].value[0].installPath // empty' "$_plugins_file" 2>/dev/null)"
   fi
 fi
 
-section_cfg_md() {
-  [ "${_cfg_md:-0}" -gt 0 ] && printf '%b' "${DIM}md:${RESET}${WHITE}${_cfg_md}${RESET}"
-}
+_mem_tokens=$((_mem_chars / 4))
 
-section_cfg_rules() {
-  [ "${_cfg_rules:-0}" -gt 0 ] && printf '%b' "${DIM}rules:${RESET}${WHITE}${_cfg_rules}${RESET}"
-}
+# --- Section renderers ---
+_sec_nonzero() { [ "${2:-0}" -gt 0 ] && _sec "$1" "$2"; }
+section_cfg_md()      { _sec_nonzero "md" "$_cfg_md"; }
+section_cfg_rules()   { _sec_nonzero "rules" "$_cfg_rules"; }
+section_cfg_mcp()     { _sec_nonzero "mcp" "$_cfg_mcp"; }
+section_cfg_hooks()   { _sec_nonzero "hooks" "$_cfg_hooks"; }
+section_cfg_plugins() { _sec_nonzero "plugins" "$plugins_count"; }
 
-section_cfg_mcp() {
-  [ "${_cfg_mcp:-0}" -gt 0 ] && printf '%b' "${DIM}mcp:${RESET}${WHITE}${_cfg_mcp}${RESET}"
-}
+# Memory budget: tokens consumed by loaded CLAUDE.md + rules files.
+# Color by % of context window:  green < 3%,  yellow 3-5%,  red > 5%
+# "!" if any single file exceeds 200-line guideline (official per-file recommendation)
+section_mem_tokens() {
+  [ "$_mem_files" -eq 0 ] && return
+  local tok_fmt color warn=""
 
-section_cfg_hooks() {
-  [ "${_cfg_hooks:-0}" -gt 0 ] && printf '%b' "${DIM}hooks:${RESET}${WHITE}${_cfg_hooks}${RESET}"
+  if [ "$_mem_tokens" -ge 1000 ]; then
+    tok_fmt=$(printf "%.1fk" "$(echo "scale=1; $_mem_tokens / 1000" | bc)")
+  else
+    tok_fmt="${_mem_tokens}"
+  fi
+
+  local ctx="${ctx_size:-200000}"
+  [ "$ctx" -le 0 ] 2>/dev/null && ctx=200000
+  local pct_x100=$((_mem_tokens * 10000 / ctx))
+  if [ "$pct_x100" -gt 500 ]; then
+    color="$RED"
+  elif [ "$pct_x100" -ge 300 ]; then
+    color="$YELLOW"
+  else
+    color="$GREEN"
+  fi
+
+  [ "$_mem_oversize" -gt 0 ] && warn="!"
+  _sec "mem" "${tok_fmt}${warn}" "$color"
 }
 
 # ============================================================
@@ -388,7 +410,6 @@ sections=(
   section_model
   section_context
   section_quota_5h
-  section_reset_5h
   section_quota_7d
   section_cost
   ---
@@ -397,7 +418,10 @@ sections=(
   section_cfg_rules
   section_cfg_mcp
   section_cfg_hooks
-  section_duration
+  section_cfg_plugins
+  section_mem_tokens
+  ---
+  # section_duration
 )
 
 line=""

@@ -96,7 +96,7 @@ alias cais="cargo install"
 alias caui="cargo uninstall"
 
 # claude
-alias cld="claude"
+alias cla="claude"
 
 # dust
 alias du="dust"
@@ -199,9 +199,6 @@ alias nac="sudo nala clean"
 # open
 alias o="open"
 
-# openclaw
-alias oc="openclaw"
-
 # opencode
 alias ocd="opencode"
 
@@ -212,6 +209,7 @@ alias prs="pueue restart"
 alias pkl="pueue kill"
 alias pcl="pueue clean"
 alias ped="pueue edit"
+alias pfl="pueue follow"
 
 # podman
 alias pd="podman"

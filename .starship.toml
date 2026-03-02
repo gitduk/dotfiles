@@ -27,9 +27,7 @@ $cmd_duration\
 $fill\
 ${custom.proxy}\
 ${custom.direnv}\
-${custom.claude}\
-${custom.openai}\
-${custom.gemini}\
+${custom.ai}\
 $time\
 $line_break\
 $character\
@@ -282,7 +280,7 @@ allowed=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed // em
 [ -e .envrc ] && file=".envrc"
 case "$allowed" in
   0) echo "\e[1;34m$file\e[0m" ;;
-  2) echo "\e[1;31m$file\e[0m" ;;
+  2) echo "\e[90m$file\e[0m" ;;
   *) echo "" ;;
 esac
 """
@@ -300,35 +298,19 @@ symbol = "󱐡 "
 style = "bold blue dimmed"
 format = "[$symbol$output]($style) "
 
-[custom.claude]
-command = """
-[ -n "$ANTHROPIC_BASE_URL" ] && echo "claude*" || echo "claude"
-"""
-when = 'test -n "$ANTHROPIC_API_KEY"'
+[custom.ai]
+command = '''
+_ai() { i="󱕅"; [ -n "$2" ] && i="󱝁"; printf "$1${i}\e[0m"; }
+s=""
+[ -n "$ANTHROPIC_API_KEY" ] && s="$(_ai "\e[93m" "$ANTHROPIC_BASE_URL")"
+[ -n "$OPENAI_API_KEY" ]    && s="${s:+$s }$(_ai "\e[32m" "$OPENAI_BASE_URL")"
+[ -n "$GEMINI_API_KEY" ]    && s="${s:+$s }$(_ai "\e[34m" "$GEMINI_BASE_URL")"
+printf "$s"
+'''
+when = '[ -n "$ANTHROPIC_API_KEY$OPENAI_API_KEY$GEMINI_API_KEY" ]'
 shell = ["sh"]
-symbol = ""
-style = "fg:#d4a574"
-format = "[$output]($style) "
-
-[custom.openai]
-command = """
-[ -n "$OPENAI_BASE_URL" ] && echo "openai*" || echo "openai"
-"""
-when = 'test -n "$OPENAI_API_KEY"'
-shell = ["sh"]
-symbol = ""
-style = "fg:#74aa9c"
-format = "[$output]($style) "
-
-[custom.gemini]
-command = """
-[ -n "$GEMINI_BASE_URL" ] && echo "gemini*" || echo "gemini"
-"""
-when = 'test -n "$GEMINI_API_KEY"'
-shell = ["sh"]
-symbol = ""
-style = "fg:#4285f4"
-format = "[$output]($style) "
+style = ""
+format = "$output "
 
 [custom.git_context]
 command = """

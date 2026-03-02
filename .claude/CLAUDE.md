@@ -13,7 +13,8 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 
 - After a correction that reveals a **recurring pattern or non-obvious mistake**, append to the project's `CLAUDE.md` under `## Lessons`. Skip trivial one-offs. Deduplicate before writing.
 - When observing **user habits or preferences** (workflow patterns, naming conventions, tool choices, communication style), append to the project's `CLAUDE.md` under `## Preferences`. Deduplicate before writing.
-- If a lesson or preference applies across all projects, propose promoting it to `~/.claude/rules/` (lessons to the relevant rule file, preferences to `rules/preferences.md`); after promotion, remove from the project file.
+- If a lesson applies across all projects, propose promoting it to the relevant `~/.claude/rules/` file; after promotion, remove from the project file.
+- If a preference applies across all projects, propose promoting it to `~/.claude/CLAUDE.md` under `## Preferences`; after promotion, remove from the project file.
 - Remove entries that are outdated or proven incorrect; don't let stale knowledge accumulate.
 
 ## Core Principles
@@ -21,6 +22,7 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - **Simplicity First**: Make every change as simple as possible. Impact minimal code.
 - **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
 - **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
+- **Stop and Re-plan**: If execution goes sideways, stop immediately and re-plan — don't keep pushing a failing approach.
 
 ## Subagent Strategy
 
@@ -34,3 +36,13 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - For non-trivial changes: pause and ask "is there a more elegant way?"
 - If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
 - Skip this for simple, obvious fixes - don't over-engineer
+- After completing a feature or fix, scan for repeated patterns and extract shared helpers
+
+## Preferences
+
+- Language: respond in Chinese (中文) unless the context is English-only code/docs
+- Rules should be minimal — only write what Claude doesn't do by default; delete anything redundant with built-in behavior
+- Language/framework-specific rules must use `paths` frontmatter for conditional loading
+- Containers: prefer `podman` over `docker`
+- JS/TS packages: prefer `bun` over `npm`
+
