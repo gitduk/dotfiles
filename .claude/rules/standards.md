@@ -10,7 +10,7 @@ Non-default conventions only — Claude's built-in judgment covers the rest.
 ## Testing
 
 - Mocks are for external I/O only (network, DB, filesystem); never mock your own modules
-- Quality gates before every commit — see `rust.md` / `python.md` for language-specific commands
+- Quality gates before every commit: run your language's formatter, linter, type checker, and tests
 
 ## Security
 

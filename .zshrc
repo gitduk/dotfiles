@@ -104,8 +104,8 @@ zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
   "
 zinit light zsh-users/zsh-history-substring-search
 
+# snippets
 zinit ice wait"1" lucid; zinit snippet OMZP::sudo
-zinit ice wait"1" lucid; zinit snippet OMZP::extract
 
 ####################
 ### Binary Tools ###

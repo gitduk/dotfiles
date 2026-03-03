@@ -166,6 +166,3 @@ EOF
 sudo apt update
 sudo apt install podman
 
-# Automated CLAUDE.md Management Tool
-curl -fsSL https://raw.githubusercontent.com/alirezarezvani/ClaudeForge/main/install.sh | bash
-

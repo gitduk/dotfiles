@@ -97,6 +97,8 @@ alias caui="cargo uninstall"
 
 # claude
 alias cld="claude"
+alias cldr="claude --resume"
+alias cldc="claude --continue"
 
 # dust
 alias du="dust"

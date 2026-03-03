@@ -84,3 +84,9 @@ async fn hash_password(password: String) -> anyhow::Result<String> {
 - Unit tests in the same file under `#[cfg(test)] mod tests`
 - Integration tests in `tests/`; `#[tokio::test]` for async tests
 - Test error paths explicitly
+
+## Quality Gates
+
+```bash
+cargo fmt --check && cargo clippy -- -D warnings && cargo test
+```

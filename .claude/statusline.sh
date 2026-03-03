@@ -243,17 +243,14 @@ section_quota_5h() {
       if [ -n "$reset_epoch" ]; then
         now_epoch=$(date +%s)
         secs_left=$((reset_epoch - now_epoch))
-        local tlabel tcolor
+        local tlabel
         if [ "$secs_left" -le 0 ]; then
-          tlabel="now"; tcolor="$GREEN"
+          tlabel="now"
         else
           local mins=$((secs_left / 60)) hrs=$((secs_left / 3600))
           if [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$((mins % 60))m"; else tlabel="${mins}m"; fi
-          if [ "$secs_left" -le 600 ]; then tcolor="$RED"
-          elif [ "$secs_left" -le 1800 ]; then tcolor="$YELLOW"
-          else tcolor="$GREEN"; fi
         fi
-        reset_part="${DIM} - ${RESET}${tcolor}${tlabel}${RESET}"
+        reset_part="${DIM}·${RESET}${pct_c}${tlabel}${RESET}"
       fi
     fi
   fi
@@ -371,6 +368,10 @@ section_cfg_mcp()     { _sec_nonzero "mcp" "$_cfg_mcp"; }
 section_cfg_hooks()   { _sec_nonzero "hooks" "$_cfg_hooks"; }
 section_cfg_plugins() { _sec_nonzero "plugins" "$plugins_count"; }
 
+# Skills count: directories under ~/.claude/skills/
+_skills_count=$(find "$HOME/.claude/skills" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+section_cfg_skills() { _sec_nonzero "skills" "$_skills_count"; }
+
 # Memory budget: tokens consumed by loaded CLAUDE.md + rules files.
 # Color by % of context window:  green < 3%,  yellow 3-5%,  red > 5%
 # "!" if any single file exceeds 200-line guideline (official per-file recommendation)
@@ -419,6 +420,7 @@ sections=(
   section_cfg_mcp
   section_cfg_hooks
   section_cfg_plugins
+  section_cfg_skills
   section_mem_tokens
   ---
   # section_duration
