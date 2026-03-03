@@ -96,7 +96,7 @@ alias cais="cargo install"
 alias caui="cargo uninstall"
 
 # claude
-alias cla="claude"
+alias cld="claude"
 
 # dust
 alias du="dust"
