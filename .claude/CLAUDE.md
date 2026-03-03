@@ -38,6 +38,10 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - Skip this for simple, obvious fixes - don't over-engineer
 - After completing a feature or fix, scan for repeated patterns and extract shared helpers
 
+## Compaction
+
+When compacting, preserve: modified file list, active task state, key architectural decisions.
+
 ## Preferences
 
 - Language: respond in Chinese (中文) unless the context is English-only code/docs
