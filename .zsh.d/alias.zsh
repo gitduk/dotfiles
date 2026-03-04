@@ -75,6 +75,7 @@ alias cls="c ls-files"
 # direnv
 alias dia="direnv allow"
 alias did="direnv deny"
+alias denv="v .envrc"
 
 # cargo
 alias ca="cargo"

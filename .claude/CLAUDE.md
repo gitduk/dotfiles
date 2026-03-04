@@ -49,4 +49,5 @@ When compacting, preserve: modified file list, active task state, key architectu
 - Language/framework-specific rules must use `paths` frontmatter for conditional loading
 - Containers: prefer `podman` over `docker`
 - JS/TS packages: prefer `bun` over `npm`
+- Skills: install with `--copy` flag to copy files instead of symlinking (e.g., `bun x skills add <package> -g -y --copy`)
 

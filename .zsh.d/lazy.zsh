@@ -134,6 +134,7 @@ apt:kitty
 # curl installer
 curl:https://raw.githubusercontent.com/lucasgelfond/zerobrew/main/install.sh cmd"zb"
 curl:https://claude.ai/install.sh cmd"claude"
+curl:https://raw.githubusercontent.com/flamestro/deff/main/install.sh cmd"deff"
 
 # bun installer
 bun:@openai/codex

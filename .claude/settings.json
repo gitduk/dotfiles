@@ -2,6 +2,7 @@
   "permissions": {
     "defaultMode": "bypassPermissions"
   },
+  "model": "opusplan",
   "hooks": {
     "Stop": [
       {
@@ -46,7 +47,6 @@
     "code-simplifier@claude-plugins-official": true,
     "dev-browser@dev-browser-marketplace": true
   },
-  "fastMode": true,
   "autoUpdatesChannel": "latest",
   "skipDangerousModePermissionPrompt": true,
   "mcpServers": {

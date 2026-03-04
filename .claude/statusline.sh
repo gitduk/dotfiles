@@ -117,12 +117,10 @@ fi
 
 # Git
 _git_dir="${project_dir:-$cwd}"
-_git_branch="" _git_dirty="no" _git_ahead=0 _git_behind=0
+_git_branch="" _git_dirty="no"
 if [ -n "$_git_dir" ] && [ -d "$_git_dir/.git" ]; then
   _git_branch=$(git --no-optional-locks -C "$_git_dir" branch --show-current 2>/dev/null)
   git --no-optional-locks -C "$_git_dir" diff --quiet 2>/dev/null || _git_dirty="yes"
-  _git_ahead=$(git --no-optional-locks -C "$_git_dir" rev-list --count @{upstream}..HEAD 2>/dev/null) || _git_ahead=0
-  _git_behind=$(git --no-optional-locks -C "$_git_dir" rev-list --count HEAD..@{upstream} 2>/dev/null) || _git_behind=0
 fi
 
 # Transcript: tool-use and todo summaries read directly from the transcript file
@@ -265,10 +263,7 @@ section_git() {
   [ -z "$_git_branch" ] && return
   local dirty=""
   [ "$_git_dirty" = "yes" ] && dirty="${YELLOW}*${RESET}"
-  local ab_info=""
-  [ "${_git_ahead:-0}" -gt 0 ] && ab_info="${GREEN}↑${_git_ahead}${RESET}"
-  [ "${_git_behind:-0}" -gt 0 ] && ab_info="${ab_info}${RED}↓${_git_behind}${RESET}"
-  printf '%b' "${CYAN}${_git_branch}${RESET}${dirty}${ab_info}"
+  printf '%b' "${CYAN}${_git_branch}${RESET}${dirty}"
 }
 
 section_context() {
