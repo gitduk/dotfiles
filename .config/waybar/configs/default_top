@@ -36,6 +36,7 @@
   "modules-right": [
     "hyprland/submap",
     "network#speed",
+    "custom/easytier",
     "custom/singbox",
     "custom/separator#dot-line",
     "group/audio",

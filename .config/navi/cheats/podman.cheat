@@ -54,7 +54,7 @@ podman run -d --name pairdrop \
   -e TZ=Etc/UTC \
   -p 0.0.0.0:3000:3000 \
   --restart=unless-stopped \
-  lscr.io/linuxserver/pairdrop 
+  lscr.io/linuxserver/pairdrop
 
 # uptime-kuma:3001
 podman run -d --name uptime-kuma \
@@ -143,4 +143,10 @@ podman run -d --name rustfs \
   -v rustfs:/data \
   -v /var/log/rustfs:/logs \
   rustfs/rustfs:latest
+
+# bifrost
+podman run -d --name bifrost \
+  -p 8080:8080 \
+  --network=host \
+  maximhq/bifrost
 

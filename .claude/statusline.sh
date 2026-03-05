@@ -74,24 +74,33 @@ fmt_duration() {
 }
 
 # ============================================================
-# Quota — async curl, stale-while-revalidate (no TTL)
+# Quota — async curl with TTL to avoid rate limiting
 # Each render fires a background curl; the result file in /tmp is read by the
 # *next* render.  Using session_id keeps instances isolated and avoids a cold
 # blank on the very first render (the file simply won't exist yet).
+# TTL: only fire curl if the cache file is older than 60 seconds.
 # ============================================================
 _quota_file="/tmp/claude-quota-${session_id:-$$}.json"
 _quota_token=$(jq -r '.claudeAiOauth.accessToken // empty' \
   "$HOME/.claude/.credentials.json" 2>/dev/null)
 
-# Fire curl in the background — never blocks the render path.
+# Fire curl in the background only if cache is stale or missing.
 if [ -n "$_quota_token" ]; then
-  (curl -sf --max-time 3 \
-    -H "Authorization: Bearer $_quota_token" \
-    -H "anthropic-beta: oauth-2025-04-20" \
-    "https://api.anthropic.com/api/oauth/usage" \
-    > "$_quota_file.tmp" 2>/dev/null \
-    && mv -f "$_quota_file.tmp" "$_quota_file" 2>/dev/null \
-    || rm -f "$_quota_file.tmp" 2>/dev/null) &
+  _should_fetch=0
+  if [ ! -f "$_quota_file" ]; then
+    _should_fetch=1
+  elif [ $(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0))) -gt 30 ]; then
+    _should_fetch=1
+  fi
+  if [ "$_should_fetch" = "1" ]; then
+    (curl -sf --max-time 3 \
+      -H "Authorization: Bearer $_quota_token" \
+      -H "anthropic-beta: oauth-2025-04-20" \
+      "https://api.anthropic.com/api/oauth/usage" \
+      > "$_quota_file.tmp" 2>/dev/null \
+      && mv -f "$_quota_file.tmp" "$_quota_file" 2>/dev/null \
+      || rm -f "$_quota_file.tmp" 2>/dev/null) &
+  fi
 fi
 
 # Read whatever the previous render wrote.

@@ -221,8 +221,8 @@
   "network#speed": {
     "interval": 2,
     "format": "{ifname}",
-    "format-wifi": "{icon}{bandwidthTotalBytes:<7}",
-    "format-ethernet": "󰣺 {bandwidthTotalBytes:<7}",
+    "format-wifi": "{icon}{bandwidthTotalBytes:<5}",
+    "format-ethernet": "󰣺 {bandwidthTotalBytes:<5}",
     "format-disconnected": "󰣻",
     "tooltip-format": "{ipaddr}",
     "format-linked": "󰈁 {ifname} (No IP)",

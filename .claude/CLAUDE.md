@@ -50,4 +50,5 @@ When compacting, preserve: modified file list, active task state, key architectu
 - Containers: prefer `podman` over `docker`
 - JS/TS packages: prefer `bun` over `npm`
 - Skills: install with `--copy` flag to copy files instead of symlinking (e.g., `bun x skills add <package> -g -y --copy`)
+- Bash scripts: use 2 spaces for indentation
 

@@ -98,7 +98,8 @@ window#waybar.empty #window {
 
 /* 特殊状态样式 */
 #temperature.critical {
-  background-color: #ff0000;
+  color: #ff0000;
+  background-color: transparent;
 }
 
 #battery.critical:not(.charging) {
