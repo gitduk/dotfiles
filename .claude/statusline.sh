@@ -394,7 +394,9 @@ sections=(
   section_cfg_hooks
   section_cfg_mcp
   section_cfg_plugins
-  section_duration
+  section_speed
+  ---
+  # section_duration
 )
 
 line=""
