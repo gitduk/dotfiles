@@ -75,7 +75,6 @@ alias cls="c ls-files"
 # direnv
 alias dia="direnv allow"
 alias did="direnv deny"
-alias denv="v .envrc"
 
 # cargo
 alias ca="cargo"
@@ -148,6 +147,7 @@ alias ejs="v .justfile"
 alias eis="v ~/.config/navi/cheats/install.cheat"
 alias epd="v ~/.config/navi/cheats/podman.cheat"
 alias ehs="v /etc/hosts"
+alias eenv="v .envrc"
 
 # easytier
 alias epr="easytier-cli peer"

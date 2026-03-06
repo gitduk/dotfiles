@@ -4,9 +4,9 @@
       "enabled": true,
       "remote": false,
       "settings": {
-        "context7_api_key": ""
-      }
-    }
+        "context7_api_key": "",
+      },
+    },
   },
   "edit_predictions": {
     "provider": "zed",
@@ -20,38 +20,15 @@
     },
   },
   "language_models": {
-    "openai_compatible": {
-      "bs": {
-        "api_url": "https://api.edgefn.net/v1",
-        "available_models": [
-          {
-            "name": "GLM-5",
-            "max_tokens": 200000,
-            "max_output_tokens": 32000,
-            "max_completion_tokens": 200000,
-            "capabilities": {
-              "tools": true,
-              "images": false,
-              "parallel_tool_calls": false,
-              "prompt_cache_key": false,
-              "chat_completions": true
-            }
-          }
-        ]
-      }
-    },
-    "ollama": {
-      "api_url": "http://localhost:11434"
-    },
     "anthropic": {
-      "api_url": "https://yunyi.rdzhvip.com/claude",
+      "api_url": "http://localhost:8080/anthropic",
     },
   },
   "agent": {
     "tool_permissions": {
       "tools": {
         "mcp:mcp-server-sequential-thinking:sequentialthinking": {
-          "default": "allow"
+          "default": "allow",
         },
         "save_file": {
           "default": "allow",
