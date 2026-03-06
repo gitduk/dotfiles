@@ -89,7 +89,7 @@ if [ -n "$_quota_token" ]; then
   _should_fetch=0
   if [ ! -f "$_quota_file" ]; then
     _should_fetch=1
-  elif [ $(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0))) -gt 30 ]; then
+  elif [ $(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0))) -gt 60 ]; then
     _should_fetch=1
   fi
   if [ "$_should_fetch" = "1" ]; then

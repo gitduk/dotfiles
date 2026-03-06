@@ -7,10 +7,10 @@ podman generate systemd \
   --files
 
 # export volume to remote server
-podman volume export \
-  <name> -o - |
-  ssh <host> \
-  "podman volume create <name> && podman volume import <name> -"
+podman volume export <name> -o - | ssh <host> "podman volume create <name> && podman volume import <name> -"
+
+# import volume from remote server
+podman volume create <volume> && ssh wk "podman volume export <volume> -o -" | podman volume import <volume> -
 
 $ name: podman container list --all --format json | jq ".[] | .Names[]"
 $ policy: echo "always|unless-stopped|on-failure" | tr "|" "\n"
@@ -146,7 +146,7 @@ podman run -d --name rustfs \
 
 # bifrost
 podman run -d --name bifrost \
-  -p 8080:8080 \
+  -v bifrost:/app/data \
   --network=host \
   maximhq/bifrost
 

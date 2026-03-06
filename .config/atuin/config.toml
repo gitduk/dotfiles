@@ -120,7 +120,7 @@ history_filter = [
   "^v ",
   "^atuin ",
   "^zinit ",
-  "c",
+  "^eza",
   "pueue"
 ]
 
