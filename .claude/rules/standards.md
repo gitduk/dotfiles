@@ -4,7 +4,7 @@ Non-default conventions only — Claude's built-in judgment covers the rest.
 
 ## Code Style
 
-- Prefer immutability: return new objects, never mutate in place
+- Prefer immutability: return new objects, avoid mutation unless language-specific performance guidance requires it
 - Markers: `TODO(context):` for gaps, `FIXME:` for bugs, `SAFETY:` for unsafe blocks
 
 ## Testing
