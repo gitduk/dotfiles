@@ -29,7 +29,7 @@ threshold = 10
 
 [templates]
 hypr.template = 'hyprland.conf'
-hypr.target = '~/.config/hypr/colors.conf'
+hypr.target = '~/.config/hypr/configs/colors.conf'
 
 waybar.template = 'waybar.css'
 waybar.target = '~/.config/waybar/colors.css.tmp'

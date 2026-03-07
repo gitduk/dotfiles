@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+show_help() {
+  cat <<EOF
+Usage: sl [-r] <pattern>
+
+SSH port forwarding wrapper with simplified syntax.
+
+Patterns:
+  <host>:<port>                    Forward local port to remote (same port both sides)
+  <local_port>:<host>:<remote_port> Forward local port to different remote port
+
+Options:
+  -r    Remote forwarding (default: local forwarding)
+  -h    Show this help message
+
+Examples:
+  sl max:8000              # Local forward: localhost:8000 -> max:8000
+  sl 8001:max:8000         # Local forward: localhost:8001 -> max:8000
+  sl -r max:8000           # Remote forward: max:8000 -> localhost:8000
+  sl -r 8001:max:8000      # Remote forward: max:8001 -> localhost:8000
+EOF
+}
+
+main() {
+  local mode="-NL"
+  local arg="$1"
+
+  # Handle options
+  case "$1" in
+    -h|--help)
+      show_help
+      return 0
+      ;;
+    -r)
+      mode="-NR"
+      arg="$2"
+      ;;
+  esac
+
+  # Validate argument exists
+  if [[ -z "$arg" ]]; then
+    echo "Error: Missing argument" >&2
+    show_help
+    return 1
+  fi
+
+  # Pattern: local_port:host:remote_port
+  if [[ "$arg" =~ ^([0-9]+):([^:]+):([0-9]+)$ ]]; then
+    local local_port="${BASH_REMATCH[1]}"
+    local host="${BASH_REMATCH[2]}"
+    local remote_port="${BASH_REMATCH[3]}"
+    if [[ "$mode" == "-NL" ]]; then
+      printf "\e[32m[L]\e[0m \e[32m:%-6s\e[0m ⇒  \e[34m%s:%-6s\e[0m\n" "${local_port}" "${host}" "${remote_port}" >&2
+    else
+      printf "\e[34m[R]\e[0m \e[34m%s:%-6s\e[0m ⇒  \e[32m:%-6s\e[0m\n" "${host}" "${local_port}" "${remote_port}" >&2
+    fi
+    ssh $mode "${local_port}:localhost:${remote_port}" "${host}"
+  # Pattern: host:port (same port both sides)
+  elif [[ "$arg" =~ ^([^:]+):([0-9]+)$ ]]; then
+    local host="${BASH_REMATCH[1]}"
+    local port="${BASH_REMATCH[2]}"
+    if [[ "$mode" == "-NL" ]]; then
+      printf "\e[32m[L]\e[0m \e[32m:%-6s\e[0m ⇒  \e[34m%s:%-6s\e[0m\n" "${port}" "${host}" "${port}" >&2
+    else
+      printf "\e[34m[R]\e[0m \e[34m%s:%-6s\e[0m ⇒  \e[32m:%-6s\e[0m\n" "${host}" "${port}" "${port}" >&2
+    fi
+    ssh $mode "${port}:localhost:${port}" "${host}"
+  else
+    echo "Error: Invalid pattern '$arg'" >&2
+    show_help
+    return 1
+  fi
+}
+
+main "$@"
