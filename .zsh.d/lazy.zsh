@@ -138,7 +138,6 @@ curl:https://raw.githubusercontent.com/flamestro/deff/main/install.sh cmd"deff"
 
 # bun installer
 bun:@openai/codex
-bun:@anthropic-ai/claude-code cmd"claude"
 
 # cargo installer
 cargo:bacon env"BACON_CONFIG=~/.config/bacon/bacon.toml"

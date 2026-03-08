@@ -66,4 +66,5 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - JS/TS packages: prefer `bun` over `npm`
 - Skills: install with `--copy` flag to copy files instead of symlinking (e.g., `bun x skills add <package> -g -y --copy`)
 - Bash scripts: use 2 spaces for indentation
+- Clipboard: use `wl-copy` to copy content directly to system clipboard (text, HTML, file paths, etc.)
 
