@@ -212,6 +212,7 @@ alias prs="pueue restart"
 alias prm="pueue remove"
 alias pkl="pueue kill"
 alias pcl="pueue clean"
+alias plg="pueue log"
 alias ped="pueue edit"
 alias pfl="pueue follow"
 

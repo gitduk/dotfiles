@@ -24,12 +24,12 @@ main() {
   ')
 
   if [[ -z "$parsed" ]]; then
-    echo '{"text":"󰌙 离线","tooltip":"easytier 未运行","class":"disconnected"}'
+    echo '{"text":"󰌙 Offline","tooltip":"easytier not running","class":"disconnected"}'
     return
   fi
 
   local peer_count=0
-  local tooltip="easytier 连接状态\n---"
+  local tooltip="easytier connection status\n---"
 
   while IFS='|' read -r host ip loss; do
     ((peer_count++))
@@ -40,9 +40,9 @@ main() {
 
   if [[ $peer_count -eq 0 ]]; then
     icon="󰌙"
-    text="$icon 无连接"
+    text="$icon No connections"
     class="warning"
-    tooltip="$tooltip\n无活动连接"
+    tooltip="$tooltip\nNo active connections"
   else
     icon="󰀂"
     text="$icon $peer_count"

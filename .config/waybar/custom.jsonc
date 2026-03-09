@@ -175,7 +175,9 @@
     "exec": "~/.config/waybar/scripts/easytier.sh",
     "return-type": "json",
     "format": "{}",
-    "interval": 5,
+    "interval": 1,
+    "on-click": "systemctl --user restart easytier.service",
+    "on-click-right": "systemctl --user stop easytier.service",
     "tooltip": true
   }
 }

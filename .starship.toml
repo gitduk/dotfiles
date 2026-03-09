@@ -294,7 +294,7 @@ format = "[$symbol$output]($style) "
 command = ""
 when = "test $http_proxy"
 shell = ["sh"]
-symbol = "󱐡 "
+symbol = "󱐡"
 style = "bold blue dimmed"
 format = "[$symbol$output]($style) "
 
