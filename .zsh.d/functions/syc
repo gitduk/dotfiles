@@ -1,4 +1,3 @@
-
 SCRIPT_NAME=$(basename "$0")
 
 RED='\033[0;31m'

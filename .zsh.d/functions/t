@@ -1,0 +1,42 @@
+# DeepL translation function
+# Usage: t "text to translate"
+# API key should be set in DEEPL_API_KEY environment variable
+
+if [[ -z "$DEEPL_API_KEY" ]]; then
+  echo "Error: DEEPL_API_KEY environment variable is not set"
+  return 1
+fi
+
+if [[ -z "$1" ]]; then
+  echo "Usage: t \"text to translate\""
+  return 1
+fi
+
+local text="$*"
+local target_lang
+
+# Detect if text contains Chinese characters
+if echo "$text" | grep -qP '[\p{Han}]'; then
+  target_lang="EN"
+else
+  target_lang="ZH"
+fi
+
+# Use free API endpoint (change to https://api.deepl.com/v2/translate for paid version)
+local api_url="https://api-free.deepl.com/v2/translate"
+
+local response=$(curl -s -X POST "$api_url" \
+  -H "Authorization: DeepL-Auth-Key $DEEPL_API_KEY" \
+  -d "text=$text" \
+  -d "target_lang=$target_lang")
+
+# Extract translated text from JSON response
+local translated=$(echo "$response" | grep -o '"text":"[^"]*"' | sed 's/"text":"//;s/"$//')
+
+if [[ -n "$translated" ]]; then
+  echo "$translated"
+else
+  echo "Translation failed. Response:"
+  echo "$response"
+  return 1
+fi

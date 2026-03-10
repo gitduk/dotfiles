@@ -27,8 +27,9 @@ export CLUTTER_BACKEND=wayland
 export QT_QPA_PLATFORM='wayland;xcb'
 export QT_QPA_PLATFORMTHEME=qt5ct
 
-# fcitx input-related
+# fcitx5 input-related
 export XMODIFIERS=@im=fcitx
+export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export QT_IM_MODULES="wayland;fcitx;ibus"
 export SDL_IM_MODULE=fcitx
