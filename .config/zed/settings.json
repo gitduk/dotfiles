@@ -14,6 +14,9 @@
   "languages": {
     "Python": {
       "format_on_save": "on",
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true,
+      },
       "formatter": {
         "external": {
           "command": "ruff",
@@ -24,15 +27,6 @@
     },
   },
   "lsp": {
-    "ruff": {
-      "initialization_options": {
-        "settings": {
-          "lint": {
-            "args": ["--ignore", "E501"],
-          },
-        },
-      },
-    },
     "basedpyright": {
       "settings": {
         "basedpyright.analysis.typeCheckingMode": "standard",

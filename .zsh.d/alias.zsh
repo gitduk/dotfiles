@@ -98,6 +98,7 @@ alias caui="cargo uninstall"
 alias cld="claude"
 alias cldr="claude --resume"
 alias cldc="claude --continue"
+alias ccc='claude -p "commit my dotfiles changes"'
 
 # dust
 alias du="dust"
