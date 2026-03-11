@@ -1,0 +1,257 @@
+#######################################
+### Lazy-loaded tools configuration ###
+#######################################
+
+[[lazy]]
+repo = "dandavison/delta"
+sbin = "delta"
+description = "A viewer for git and diff output"
+
+[[lazy]]
+repo = "sharkdp/fd"
+sbin = "fd"
+completions = true
+description = "A program to find entries in your filesystem"
+
+[[lazy]]
+repo = "burntSushi/ripgrep"
+sbin = "rg"
+completions = true
+description = "ripgrep recursively searches directories for a regex pattern"
+
+[[lazy]]
+repo = "bootandy/dust"
+sbin = "dust"
+atclone = "wget -q https://raw.githubusercontent.com/bootandy/dust/refs/heads/master/completions/_dust"
+description = "Like du but more intuitive"
+
+[[lazy]]
+repo = "Canop/dysk"
+sbin = "dysk"
+completions = true
+atclone = "mv */completion/_dysk .; mv */x86_64-unknown-linux-musl/dysk .; rm -rf */"
+description = "dysk displays filesystem information in a pretty table"
+
+[[lazy]]
+repo = "casey/just"
+sbin = "just"
+atclone = "./just --completions zsh > _just"
+description = "Just a command runner"
+
+[[lazy]]
+repo = "neovim/neovim"
+bpick = "nvim-linux-x86_64.appimage"
+sbin = "nvim-*.appimage -> nvim"
+description = "Hyperextensible Vim-based text editor"
+
+[[lazy]]
+repo = "tstack/lnav"
+sbin = "lnav"
+description = "A log file viewer for the terminal that indexes log messages"
+
+[[lazy]]
+repo = "karol-broda/snitch"
+sbin = "snitch"
+atclone = "./snitch completion zsh > _snitch"
+description = "A tool for inspecting network connections"
+
+[[lazy]]
+repo = "lusingander/serie"
+sbin = "serie -> se"
+description = "A rich git commit graph in your terminal"
+
+[[lazy]]
+repo = "fastfetch-cli/fastfetch"
+bpick = "fastfetch-linux-amd64.tar.gz"
+sbin = "usr/bin/fastfetch -> fastfetch"
+description = "A neofetch-like tool for fetching system information"
+
+[[lazy]]
+repo = "astral-sh/uv"
+sbin = "uv"
+atclone = "./uv generate-shell-completion zsh > _uv"
+description = "An extremely fast Python package manager"
+
+[[lazy]]
+repo = "bahdotsh/feedr"
+sbin = "feedr* -> feedr"
+description = "A modern terminal-based RSS/Atom feed reader"
+
+[[lazy]]
+repo = "pranshuparmar/witr"
+bpick = "witr-linux-amd64"
+sbin = "witr* -> witr"
+description = "Explains why a process or port is running by tracing its ancestry"
+
+[[lazy]]
+repo = "abhimanyu003/sttr"
+sbin = "sttr"
+atclone = "./sttr completion zsh > _sttr"
+description = "A command line tool to quickly apply various transformation operations"
+
+[[lazy]]
+repo = "ducaale/xh"
+sbin = "xh"
+completions = true
+atclone = "mv completions/_xh ./"
+description = "A friendly and fast tool for sending HTTP requests"
+
+[[lazy]]
+repo = "pamburus/hl"
+bpick = "hl-linux-x86_64-musl.tar.gz"
+sbin = "hl"
+description = "JSON and logfmt log converter to human readable representation"
+
+[[lazy]]
+repo = "antonmedv/fx"
+sbin = "fx* -> fx"
+atclone = "./fx* --comp zsh > _fx"
+description = "Terminal JSON viewer"
+
+[[lazy]]
+repo = "shshemi/tabiew"
+bpick = "tw-x86_64-unknown-linux-gnu"
+sbin = "tw* -> tw"
+description = "A lightweight TUI to view and query CSV, TSV, and parquet files"
+
+[[lazy]]
+repo = "shadow1ng/fscan"
+sbin = "fscan"
+description = "An intranet comprehensive scanning tool"
+
+[[lazy]]
+repo = "achristmascarl/rainfrog"
+sbin = "rainfrog -> rain"
+description = "A database management tui"
+
+[[lazy]]
+repo = "SagerNet/sing-box"
+bpick = "sing-box-*-linux-amd64.tar.gz"
+sbin = "sing-box"
+atclone = "sudo setcap cap_net_admin=+ep $PWD/sing-box"
+description = "The universal proxy platform"
+
+[[lazy]]
+repo = "cli/cli"
+extract = "!"
+sbin = "bin/gh -> gh"
+atclone = "./bin/gh completion -s zsh > _gh"
+description = "Work seamlessly with GitHub from the command line"
+
+[[lazy]]
+repo = "EasyTier/EasyTier"
+sbin = "easytier-cli; easytier-core"
+description = "A full meshed p2p VPN, connecting all your devices in one network"
+
+[[lazy]]
+repo = "Nukesor/pueue"
+bpick = ["pueue-x86_64-unknown-linux-musl", "pueued-x86_64-unknown-linux-musl"]
+sbin = "pueue*-musl -> pueue; pueued*-musl -> pueued"
+atclone = "pueue completions zsh > _pueue"
+description = "Interact with the Pueue daemon - a command-line task management tool"
+
+[[lazy]]
+repo = "sxyazi/yazi"
+bpick = "yazi-x86_64-unknown-linux-musl.zip"
+sbin = "yazi; ya"
+completions = true
+atclone = "mv comp*/_ya .; mv comp*/_yazi ."
+description = "Blazing fast terminal file manager written in Rust"
+
+[[lazy]]
+repo = "mountain-loop/yaak"
+bpick = "yaak_*_amd64.AppImage"
+sbin = "yaak* -> yaak"
+description = "Desktop API client for REST, GraphQL, and gRPC"
+
+[[lazy]]
+repo = "explosion-mental/wallust"
+as = "null"
+from = "codeberg.org"
+atclone = "cargo +nightly install --path ."
+description = "A tool to generate color schemes from an image"
+
+[[lazy]]
+repo = "alacritty/alacritty"
+as = "null"
+atclone = '''export PATH="$HOME/.cargo/bin:$PATH"; cargo build --release --no-default-features --features=wayland; sudo ln -sf $PWD/target/release/alacritty /usr/bin/alacritty; sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg; sudo desktop-file-install extra/linux/Alacritty.desktop; sudo update-desktop-database'''
+description = "A fast, cross-platform, OpenGL terminal emulator"
+
+[[lazy]]
+repo = "oven-sh/bun"
+bpick = "bun-linux-x64.zip"
+sbin = "bun"
+atclone = "wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun"
+env = "BUN_INSTALL=~/.local"
+description = "A fast JavaScript runtime, package manager, bundler, and test runner"
+
+[[lazy]]
+repo = "eza-community/eza"
+sbin = "eza"
+description = "A modern replacement for ls"
+
+[[lazy]]
+repo = "sharkdp/bat"
+sbin = "bat-*/bat"
+atclone = "./bat-*/bat --completion zsh > _bat"
+description = "A cat clone with syntax highlighting and Git integration"
+
+[[lazy]]
+repo = "mozilla/sccache"
+bpick = "sccache-v*-x86_64-unknown-linux-musl.tar.gz"
+sbin = "sccache"
+description = "Shared compilation cache for C/C++ and Rust"
+
+[[lazy]]
+repo = "Schniz/fnm"
+bpick = "fnm-linux.zip"
+sbin = "fnm"
+eval = "fnm env --use-on-cd --shell zsh"
+description = "A fast and simple Node.js manager"
+
+[[lazy]]
+repo = "astral-sh/ruff"
+bpick = "ruff-x86_64-unknown-linux-musl.tar.gz"
+sbin = "ruff"
+description = "An extremely fast Python linter and code formatter"
+
+# APT packages
+[[lazy]]
+repo = "apt:foot"
+description = "A fast, lightweight and minimalistic Wayland terminal emulator"
+
+[[lazy]]
+repo = "apt:kitty"
+description = "A cross-platform, GPU-accelerated terminal emulator"
+
+# Curl installers
+[[lazy]]
+repo = "curl:https://raw.githubusercontent.com/lucasgelfond/zerobrew/main/install.sh"
+cmd = "zb"
+description = "A fast Homebrew-compatible package installer"
+
+[[lazy]]
+repo = "curl:https://claude.ai/install.sh"
+cmd = "claude"
+description = "Claude Code - AI-powered coding assistant CLI"
+
+[[lazy]]
+repo = "curl:https://raw.githubusercontent.com/flamestro/deff/main/install.sh"
+cmd = "deff"
+description = "Shows side-by-side file content for a git diff in an interactive terminal UI"
+
+[[lazy]]
+repo = "curl:https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh"
+cmd = "rtk"
+description = "Token-optimized CLI proxy for Claude Code"
+
+# Bun packages
+[[lazy]]
+repo = "bun:@openai/codex"
+description = "OpenAI Codex command-line interface"
+
+# Cargo packages
+[[lazy]]
+repo = "cargo:bacon"
+env = "BACON_CONFIG=~/.config/bacon/bacon.toml"
+description = "Background rust code checker"

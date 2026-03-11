@@ -8,7 +8,6 @@ alias chx="sudo chmod +x"
 alias cwn='sudo chown -Rv $USER:$USER'
 alias cre="crontab -e"
 alias dis="sudo dpkg -i"
-alias dac="deactivate"
 alias dim='echo $(tput cols)x$(tput lines)'
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 alias jcl="journalctl"
@@ -140,7 +139,7 @@ alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{
 
 # edit
 alias ezs="v ~/.zshrc && source ~/.zshrc"
-alias ela="v ~/.zsh.d/lazy.zsh && source ~/.zsh.d/lazy.zsh"
+alias ela="v ~/.zsh.d/lazy.toml && source ~/.zsh.d/lazy.zsh"
 alias eas="v ~/.zsh.d/alias.zsh && source ~/.zsh.d/alias.zsh"
 alias epw="v ~/.pw.json"
 alias ejs="v .justfile"

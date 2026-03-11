@@ -13,10 +13,30 @@
   },
   "languages": {
     "Python": {
-      "prettier": {
-        "allowed": true,
+      "format_on_save": "on",
+      "formatter": {
+        "external": {
+          "command": "ruff",
+          "arguments": ["format", "--stdin-filename", "{buffer_path}", "-"],
+        },
       },
-      "language_servers": ["ty", "!basedpyright"],
+      "language_servers": ["basedpyright", "ruff"],
+    },
+  },
+  "lsp": {
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "lint": {
+            "args": ["--ignore", "E501"],
+          },
+        },
+      },
+    },
+    "basedpyright": {
+      "settings": {
+        "basedpyright.analysis.typeCheckingMode": "standard",
+      },
     },
   },
   "language_models": {
@@ -66,4 +86,15 @@
     "light": "One Light",
     "dark": "One Dark Pro",
   },
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+    },
+  },
+  "terminal": {
+    "shell": {
+      "program": "zsh",
+    },
+  },
+  "autosave": "on_focus_change",
 }

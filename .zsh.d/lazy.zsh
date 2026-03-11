@@ -2,11 +2,15 @@
 ### Lazy Load ###
 #################
 # Lazy-loaded tools (install on first use via command_not_found_handler)
-typeset -gA LAZY_REPO LAZY_ICE
+typeset -gA LAZY_REPO LAZY_ICE LAZY_DESC
 
 command_not_found_handler() {
   local repo="${LAZY_REPO[$1]}"
   if [[ -n "$repo" ]]; then
+    local desc="${LAZY_DESC[$1]}"
+    local _i _e
+    [[ -n "$desc" ]] && echo "📦 Installing $1: $desc" >&2
+
     if [[ "$repo" == curl:* ]]; then
       curl -fsSL "${repo#curl:}" | bash
       rehash
@@ -36,48 +40,155 @@ command_not_found_handler() {
       zinit light "$repo"
       for _e in "${_evals[@]}"; do eval "$(eval "$_e")"; done
     fi
-    unset "LAZY_REPO[$1]" "LAZY_ICE[$1]"
-    command "$@"
-    return $?
+    if (( $+commands[$1] )); then
+      unset "LAZY_REPO[$1]" "LAZY_ICE[$1]" "LAZY_DESC[$1]"
+      command "$@"
+      return $?
+    else
+      echo "lazy: ✗ installation failed for '$1' — retry by running the command again" >&2
+      return 1
+    fi
   fi
   echo "zsh: command not found: $1" >&2
   return 127
 }
 
-# Parse sbin/cmd ice to extract command names
+# Parse sbin/cmd ice to extract command names; results returned via reply array
 _parse_lazy_cmds() {
+  reply=()
   local -a args=("${(Q@)${(z)1}}")
+  local arg entry
   for arg in "${args[@]}"; do
     if [[ "$arg" == cmd* ]]; then
-      echo "${arg#cmd}"
+      reply+=("${arg#cmd}")
     elif [[ "$arg" == sbin* ]]; then
       for entry in ${(s:;:)${arg#sbin}}; do
         entry="${entry#"${entry%%[![:space:]]*}"}"
         entry="${entry%"${entry##*[![:space:]]}"}"
         if [[ "$entry" == *" -> "* ]]; then
-          echo "${entry##* -> }"
+          reply+=("${entry##* -> }")
         else
-          echo "${entry##*/}"
+          reply+=("${entry##*/}")
         fi
       done
     fi
   done
 }
 
-while read -r repo ice_opts; do
-  [[ "$repo" =~ ^# || -z "$repo" ]] && continue
-  # process env"KEY=VALUE" and eval"cmd"
+# Parse TOML and load tools
+_load_lazy_tools() {
+  local toml_file="${_LAZY_DIR:-${0:h}}/lazy.toml"
+  [[ ! -f "$toml_file" ]] && return
+
+  local in_tool=0 repo="" line
+  local -A tool_fields
+
+  while IFS= read -r line; do
+    # Skip comments and empty lines
+    [[ "$line" =~ ^[[:space:]]*# || -z "$line" ]] && continue
+
+    # Detect [[lazy]] section
+    if [[ "$line" == "[[lazy]]" ]]; then
+      # Process previous tool if exists
+      if [[ -n "$repo" ]]; then
+        _process_tool "$repo" tool_fields
+      fi
+      repo=""
+      tool_fields=()
+      in_tool=1
+      continue
+    fi
+
+    # Parse fields
+    if [[ "$line" =~ ^([a-z_]+)[[:space:]]*=[[:space:]]*(.*)$ ]]; then
+      local key="${match[1]}"
+      local value="${match[2]}"
+
+      # Remove quotes (triple-single first to prevent partial stripping)
+      if [[ "${value[1,3]}" == "'''" && "${value[-3,-1]}" == "'''" ]]; then
+        value="${value[4,-4]}"
+      elif [[ "${value[1]}" == "'" && "${value[-1]}" == "'" ]]; then
+        value="${value[2,-2]}"
+      elif [[ "${value[1]}" == '"' && "${value[-1]}" == '"' ]]; then
+        value="${value[2,-2]}"
+      fi
+      value="${value%[[:space:]]}"
+      # Handle TOML array: ["a", "b"] → (a|b) for zinit bpick glob
+      if [[ "$value" == \[*\] ]]; then
+        local raw="${value[2,-2]}"
+        local -a _arr_items=("${(s:,:)raw}")
+        local _arr_item _arr_cleaned=()
+        for _arr_item in "${_arr_items[@]}"; do
+          _arr_item="${_arr_item## }"
+          _arr_item="${_arr_item#\"}"
+          _arr_item="${_arr_item%\"}"
+          _arr_cleaned+=("$_arr_item")
+        done
+        value="(${(j:|:)_arr_cleaned})"
+      fi
+
+      if [[ "$key" == "repo" ]]; then
+        repo="$value"
+      else
+        tool_fields[$key]="$value"
+      fi
+    fi
+  done < "$toml_file"
+
+  # Process last tool
+  if [[ -n "$repo" ]]; then
+    _process_tool "$repo" tool_fields
+  fi
+}
+
+# Process a single tool entry
+_process_tool() {
+  local repo="$1"
+  shift
+  local -A fields=("${(@kvP)1}")
+
+  # Build ice string from fields
+  local ice=""
+
+  # Handle special fields
+  [[ -n "${fields[bpick]}" ]] && ice+=" bpick\"${fields[bpick]}\""
+  [[ -n "${fields[sbin]}" ]] && ice+=" sbin\"${fields[sbin]}\""
+  [[ -n "${fields[cmd]}" ]] && ice+=" cmd\"${fields[cmd]}\""
+  [[ "${fields[completions]}" == "true" ]] && ice+=" completions"
+  [[ -n "${fields[atclone]}" ]] && ice+=" atclone'${fields[atclone]}'"
+  [[ -n "${fields[atpull]}" ]] && ice+=" atpull'${fields[atpull]}'"
+  [[ -n "${fields[extract]}" ]] && ice+=" extract\"${fields[extract]}\""
+  [[ -n "${fields[as]}" ]] && ice+=" as\"${fields[as]}\""
+  [[ -n "${fields[from]}" ]] && ice+=" from\"${fields[from]}\""
+  [[ -n "${fields[eval]}" ]] && ice+=" eval\"${fields[eval]}\""
+  [[ -n "${fields[env]}" ]] && ice+=" env\"${fields[env]}\""
+
+  ice="${ice# }"  # Remove leading space
+
+  # Process env variables
+  if [[ -n "${fields[env]}" ]]; then
+    local _v="${fields[env]}"
+    export "${_v%%=*}=${${_v#*=}/#\~/$HOME}"
+  fi
+
+  # Process eval commands
   local -a _evals=()
-  for t in "${(Q@)${(z)ice_opts}}"; do
-    [[ "$t" == env* ]] && { local _v="${t#env}"; export "${_v%%=*}=${${_v#*=}/#\~/$HOME}"; }
-    [[ "$t" == eval* ]] && _evals+=("${t#eval}")
-  done
-  local -a cmds=($(_parse_lazy_cmds "$ice_opts"))
+  if [[ -n "${fields[eval]}" ]]; then
+    _evals+=("${fields[eval]}")
+  fi
+
+  # Extract command names (via reply to avoid subshell fork)
+  local -a cmds=()
+  _parse_lazy_cmds "$ice"
+  cmds=("${reply[@]}")
   if (( ${#cmds} == 0 )); then
     typeset name="${repo#*:}"
     name="${name##*/}"
     cmds=("$name")
   fi
+
+  # Execute eval if command already exists
+  local cmd
   if (( ${#_evals} )); then
     for cmd in "${cmds[@]}"; do
       if (( $+commands[$cmd] )); then
@@ -86,61 +197,14 @@ while read -r repo ice_opts; do
       fi
     done
   fi
+
+  # Register commands
   for cmd in "${cmds[@]}"; do
     LAZY_REPO[$cmd]="$repo"
-    LAZY_ICE[$cmd]="$ice_opts"
+    LAZY_ICE[$cmd]="$ice"
+    LAZY_DESC[$cmd]="${fields[description]}"
   done
-done << 'LAZY_TOOLS'
-# zinit ice
-dandavison/delta sbin"delta"
-sharkdp/fd sbin"fd" completions
-burntSushi/ripgrep sbin"rg" completions
-bootandy/dust sbin"dust" atclone'wget -q https://raw.githubusercontent.com/bootandy/dust/refs/heads/master/completions/_dust'
-Canop/dysk sbin"dysk" completions atclone'mv */completion/_dysk .; mv */x86_64-unknown-linux-musl/dysk .; rm -rf */'
-casey/just sbin"just" atclone'./just --completions zsh > _just'
-neovim/neovim bpick"nvim-linux-x86_64.appimage" sbin"nvim-*.appimage -> nvim"
-tstack/lnav sbin"lnav"
-karol-broda/snitch sbin"snitch" atclone'./snitch completion zsh > _snitch'
-lusingander/serie sbin"serie -> se"
-fastfetch-cli/fastfetch bpick"fastfetch-linux-amd64.tar.gz" sbin"usr/bin/fastfetch -> fastfetch"
-astral-sh/uv sbin"uv" atclone'./uv generate-shell-completion zsh > _uv'
-bahdotsh/feedr sbin"feedr* -> feedr"
-pranshuparmar/witr bpick"witr-linux-amd64" sbin"witr* -> witr"
-abhimanyu003/sttr sbin"sttr" atclone'./sttr completion zsh > _sttr'
-ducaale/xh sbin"xh" completions atclone'mv completions/_xh ./'
-pamburus/hl bpick"hl-linux-x86_64-musl.tar.gz" sbin"hl"
-antonmedv/fx sbin"fx* -> fx" atclone'./fx* --comp zsh > _fx'
-shshemi/tabiew bpick"tw-x86_64-unknown-linux-gnu" sbin"tw* -> tw"
-shadow1ng/fscan sbin"fscan"
-achristmascarl/rainfrog sbin"rainfrog -> rain"
-SagerNet/sing-box bpick"sing-box-*-linux-amd64.tar.gz" sbin"sing-box" atclone'sudo setcap cap_net_admin=+ep $PWD/sing-box'
-cli/cli extract"!" sbin"bin/gh -> gh" atclone'./bin/gh completion -s zsh > _gh'
-EasyTier/EasyTier sbin"easytier-cli; easytier-core"
-Nukesor/pueue bpick"pueue-x86_64-unknown-linux-musl" bpick"pueued-x86_64-unknown-linux-musl" sbin"pueue*-musl -> pueue; pueued*-musl -> pueued" atclone'pueue completions zsh > _pueue'
-sxyazi/yazi bpick"yazi-x86_64-unknown-linux-musl.zip" sbin"yazi; ya" completions atclone'mv comp*/_ya .; mv comp*/_yazi .'
-mountain-loop/yaak bpick"yaak_*_amd64.AppImage" sbin"yaak* -> yaak"
-explosion-mental/wallust as"null" from"codeberg.org" atclone"cargo +nightly install --path ."
-alacritty/alacritty as"null" atclone'export PATH="$HOME/.cargo/bin:$PATH"; cargo build --release --no-default-features --features=wayland; sudo ln -sf $PWD/target/release/alacritty /usr/bin/alacritty; sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg; sudo desktop-file-install extra/linux/Alacritty.desktop; sudo update-desktop-database'
-oven-sh/bun bpick"bun-linux-x64.zip" sbin"bun" atclone'wget https://raw.githubusercontent.com/oven-sh/bun/refs/heads/main/completions/bun.zsh -O _bun' env"BUN_INSTALL=~/.local"
-eza-community/eza sbin"eza"
-sharkdp/bat sbin"bat-*/bat" atclone"./bat-*/bat --completion zsh > _bat"
-mozilla/sccache bpick"sccache-v*-x86_64-unknown-linux-musl.tar.gz" sbin"sccache"
-Schniz/fnm bpick"fnm-linux.zip" sbin"fnm" eval"fnm env --use-on-cd --shell zsh"
+}
 
-# apt installer
-apt:foot
-apt:kitty
-
-# curl installer
-curl:https://raw.githubusercontent.com/lucasgelfond/zerobrew/main/install.sh cmd"zb"
-curl:https://claude.ai/install.sh cmd"claude"
-curl:https://raw.githubusercontent.com/flamestro/deff/main/install.sh cmd"deff"
-curl:https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh cmd"rtk"
-
-# bun installer
-bun:@openai/codex
-
-# cargo installer
-cargo:bacon env"BACON_CONFIG=~/.config/bacon/bacon.toml"
-
-LAZY_TOOLS
+_LAZY_DIR="${0:h}"
+_load_lazy_tools

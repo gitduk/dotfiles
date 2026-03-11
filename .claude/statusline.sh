@@ -74,49 +74,64 @@ fmt_duration() {
 }
 
 # ============================================================
-# Quota — async curl with TTL to avoid rate limiting
-# Each render fires a background curl; the result file in /tmp is read by the
-# *next* render.  Using session_id keeps instances isolated and avoids a cold
-# blank on the very first render (the file simply won't exist yet).
-# TTL: only fire curl if the cache file is older than 60 seconds.
+# Quota — shared cache with file locking to avoid rate limiting
+# All Claude Code sessions share ~/.cache/claude/quota.json.
+# Only one session fetches at a time (via flock), others read the cache.
+# TTL: 60 seconds (aligned with claude-hud).
 # ============================================================
-_quota_file="/tmp/claude-quota-${session_id:-$$}.json"
+_quota_cache_dir="$HOME/.cache/claude"
+_quota_file="$_quota_cache_dir/quota.json"
+_quota_lock="$_quota_cache_dir/quota.lock"
 _quota_token=$(jq -r '.claudeAiOauth.accessToken // empty' \
   "$HOME/.claude/.credentials.json" 2>/dev/null)
 
+# Ensure cache directory exists
+[ ! -d "$_quota_cache_dir" ] && mkdir -p "$_quota_cache_dir" 2>/dev/null
+
 # Fire curl in the background only if cache is stale or missing.
+# Use flock to ensure only one session fetches at a time.
 if [ -n "$_quota_token" ]; then
   _should_fetch=0
   if [ ! -f "$_quota_file" ]; then
     _should_fetch=1
-  elif [ $(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0))) -gt 120 ]; then
-    _should_fetch=1
+  else
+    _file_age=$(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0)))
+    # Only refetch if older than 60 seconds
+    if [ "$_file_age" -gt 60 ]; then
+      _should_fetch=1
+    fi
   fi
   if [ "$_should_fetch" = "1" ]; then
-    (curl -sf --max-time 3 \
-      -H "Authorization: Bearer $_quota_token" \
-      -H "anthropic-beta: oauth-2025-04-20" \
-      "https://api.anthropic.com/api/oauth/usage" \
-      > "$_quota_file.tmp" 2>/dev/null \
-      && mv -f "$_quota_file.tmp" "$_quota_file" 2>/dev/null \
-      || rm -f "$_quota_file.tmp" 2>/dev/null) &
+    # Use flock with non-blocking mode: if another session is fetching, skip
+    (
+      flock -n 200 || exit 0
+      curl -sf --max-time 5 \
+        -H "Authorization: Bearer $_quota_token" \
+        -H "anthropic-beta: oauth-2025-04-20" \
+        "https://api.anthropic.com/api/oauth/usage" \
+        > "$_quota_file.tmp" 2>/dev/null \
+        && mv -f "$_quota_file.tmp" "$_quota_file" 2>/dev/null \
+        || rm -f "$_quota_file.tmp" 2>/dev/null
+    ) 200>"$_quota_lock" &
   fi
 fi
 
-# Read whatever the previous render wrote.
-# _quota_ready: 0 = no token (quota N/A), 1 = token exists but file not yet written (show placeholder), 2 = data available
+# Read the shared cache file.
+# _quota_ready: 0 = no token (quota N/A), 1 = token exists but no valid data yet (show placeholder), 2 = data available
 _quota_five_h="" _quota_seven_d="" _quota_json=""
 _quota_ready=0
 if [ -n "$_quota_token" ]; then
+  _quota_ready=1  # token exists, default to placeholder
   if [ -f "$_quota_file" ]; then
     _quota_json=$(cat "$_quota_file" 2>/dev/null)
     if [ -n "$_quota_json" ]; then
-      _quota_five_h=$(printf '%s' "$_quota_json" | jq -r '.five_hour.utilization  // empty' 2>/dev/null)
-      _quota_seven_d=$(printf '%s' "$_quota_json" | jq -r '.seven_day.utilization // empty' 2>/dev/null)
-      _quota_ready=2
+      _quota_five_h=$(printf '%s' "$_quota_json" | jq -r '.data.five_hour.utilization  // empty' 2>/dev/null)
+      _quota_seven_d=$(printf '%s' "$_quota_json" | jq -r '.data.seven_day.utilization // empty' 2>/dev/null)
+      # Only mark ready if we actually got valid data
+      if [ -n "$_quota_five_h" ] || [ -n "$_quota_seven_d" ]; then
+        _quota_ready=2
+      fi
     fi
-  else
-    _quota_ready=1  # curl fired but result not yet written — show placeholder
   fi
 fi
 
@@ -308,11 +323,12 @@ section_quota_5h() {
     printf '%b' "${DIM}5h:...${RESET}"
     return
   fi
+  [ -z "$_quota_five_h" ] && return
   local pct pct_c reset_part=""
   pct=$(printf "%.0f" "$_quota_five_h")
   pct_c=$(pct_color "$pct")
   local resets_at
-  resets_at=$(printf '%s' "$_quota_json" | jq -r '.five_hour.resets_at // empty' 2>/dev/null)
+  resets_at=$(printf '%s' "$_quota_json" | jq -r '.data.five_hour.resets_at // empty' 2>/dev/null)
   if [ -n "$resets_at" ]; then
     local reset_epoch secs_left
     reset_epoch=$(date -d "$resets_at" +%s 2>/dev/null)
@@ -337,6 +353,7 @@ section_quota_7d() {
     printf '%b' "${DIM}7d:...${RESET}"
     return
   fi
+  [ -z "$_quota_seven_d" ] && return
   local pct; pct=$(printf "%.0f" "$_quota_seven_d")
   _sec "7d" "${pct}%" "$(pct_color "$pct")"
 }

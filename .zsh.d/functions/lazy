@@ -1,0 +1,49 @@
+# lazy - manage lazy-loaded tools
+# Usage: lazy [list|info <cmd>|reload]
+local subcmd="${1:-list}"
+
+case "$subcmd" in
+  list)
+    local -a all_cmds=("${(@k)LAZY_REPO}")
+    local cmd marker
+    for cmd in "${(o)all_cmds[@]}"; do
+      if (( $+commands[$cmd] )); then
+        marker="●"
+      else
+        marker="○"
+      fi
+      printf "%s %-20s %s\n" "$marker" "$cmd" "${LAZY_DESC[$cmd]}"
+    done
+    ;;
+  info)
+    local cmd="$2"
+    if [[ -z "$cmd" ]]; then
+      echo "Usage: lazy info <cmd>" >&2
+      return 1
+    fi
+    if [[ -z "${LAZY_REPO[$cmd]}" ]]; then
+      echo "lazy: unknown command: $cmd" >&2
+      return 1
+    fi
+    printf "Command:  %s\n" "$cmd"
+    printf "Repo:     %s\n" "${LAZY_REPO[$cmd]}"
+    printf "Ice:      %s\n" "${LAZY_ICE[$cmd]}"
+    printf "Desc:     %s\n" "${LAZY_DESC[$cmd]}"
+    if (( $+commands[$cmd] )); then
+      printf "Status:   installed (●)\n"
+    else
+      printf "Status:   not installed (○)\n"
+    fi
+    ;;
+  reload)
+    LAZY_REPO=()
+    LAZY_ICE=()
+    LAZY_DESC=()
+    _load_lazy_tools
+    echo "lazy: reloaded ${#LAZY_REPO} tools"
+    ;;
+  *)
+    echo "Usage: lazy [list|info <cmd>|reload]" >&2
+    return 1
+    ;;
+esac

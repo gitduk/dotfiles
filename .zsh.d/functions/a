@@ -1,3 +1,16 @@
+# Kill mode
+if [[ "$1" == "-k" || "$1" == "--kill" ]]; then
+  shift
+  if [ -z "$*" ]; then
+    sessions="$(tmux ls -F '#{session_name}#{?session_attached,: attached,}' 2>/dev/null | fzf)"
+  else
+    sessions="$(echo "$*" | tr ' ' '\n')"
+  fi
+  [[ -n "$sessions" ]] && xargs -I _ tmux kill-session -t _ <<<${sessions//: attached/}
+  return
+fi
+
+# Attach/switch mode
 [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
 
 if [[ $# -eq 1 ]]; then

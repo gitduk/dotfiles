@@ -117,6 +117,7 @@ history_filter = [
   "^cd",
   "^c ",
   "^j ",
+  "^t ",
   "^v ",
   "^atuin ",
   "^zinit ",
