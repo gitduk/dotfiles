@@ -125,8 +125,8 @@ if [ -n "$_quota_token" ]; then
   if [ -f "$_quota_file" ]; then
     _quota_json=$(cat "$_quota_file" 2>/dev/null)
     if [ -n "$_quota_json" ]; then
-      _quota_five_h=$(printf '%s' "$_quota_json" | jq -r '.data.five_hour.utilization  // empty' 2>/dev/null)
-      _quota_seven_d=$(printf '%s' "$_quota_json" | jq -r '.data.seven_day.utilization // empty' 2>/dev/null)
+      _quota_five_h=$(printf '%s' "$_quota_json" | jq -r '.five_hour.utilization  // empty' 2>/dev/null)
+      _quota_seven_d=$(printf '%s' "$_quota_json" | jq -r '.seven_day.utilization // empty' 2>/dev/null)
       # Only mark ready if we actually got valid data
       if [ -n "$_quota_five_h" ] || [ -n "$_quota_seven_d" ]; then
         _quota_ready=2
@@ -328,7 +328,7 @@ section_quota_5h() {
   pct=$(printf "%.0f" "$_quota_five_h")
   pct_c=$(pct_color "$pct")
   local resets_at
-  resets_at=$(printf '%s' "$_quota_json" | jq -r '.data.five_hour.resets_at // empty' 2>/dev/null)
+  resets_at=$(printf '%s' "$_quota_json" | jq -r '.five_hour.resets_at // empty' 2>/dev/null)
   if [ -n "$resets_at" ]; then
     local reset_epoch secs_left
     reset_epoch=$(date -d "$resets_at" +%s 2>/dev/null)
@@ -428,3 +428,4 @@ for item in "${sections[@]}"; do
 done
 [ -n "$line" ] && printf '%b\n' "$line"
 exit 0
+

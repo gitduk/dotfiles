@@ -1,4 +1,9 @@
 {
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
   "context_servers": {
     "mcp-server-context7": {
       "enabled": true,

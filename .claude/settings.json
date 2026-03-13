@@ -1,6 +1,11 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "deny": [
+      "Read(./.envrc)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
   },
   "model": "opusplan",
   "hooks": {
@@ -74,3 +79,4 @@
   "packageManager": "bun",
   "hasCompletedOnboarding": true
 }
+

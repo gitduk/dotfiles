@@ -99,6 +99,7 @@ alias cld="claude"
 alias cldr="claude --resume"
 alias cldc="claude --continue"
 alias ccc='claude -p "commit my dotfiles changes"'
+alias ccm='claude -p "/git-commit"'
 
 # dust
 alias du="dust"

@@ -6,9 +6,9 @@ if [[ $# -eq 2 && "$2" == *:* ]]; then
   # 按冒号分割 "host:path"
   IFS=: read -r host pth <<< "$url"
 
+  # 空路径默认为 home 目录
   if [[ -z "$pth" ]]; then
-    echo -e "\033[1;31mError: invalid format. Expected host:path\033[0m"
-    return 1
+    pth="."
   fi
 
   # 构建远程目标路径（相对路径 → 放到远程 $HOME 下）
@@ -41,10 +41,9 @@ url="$1"
 # 按冒号分割 "host:path"
 IFS=: read -r _ pth <<< "$url"
 
-# 没有 path 部分则报错
+# 空路径默认为当前目录
 if [[ -z "$pth" ]]; then
-  echo -e "\033[1;31mError: invalid format. Expected host:path\033[0m"
-  return 1
+  pth="."
 fi
 
 # 构建目标路径（相对路径 → 放到 $HOME 下）
