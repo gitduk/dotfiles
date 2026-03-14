@@ -37,15 +37,21 @@ if [ "$assistant_count" -le 2 ]; then
   exit 0
 fi
 
+# Check if last assistant message contains reflection marker
+last_message=$(tail -n 100 "$transcript" | tac | grep -m1 '"role":"assistant"' | jq -r '.message.content[] | select(.type=="text") | .text' 2>/dev/null || echo "")
+if ! echo "$last_message" | grep -q '<!-- REFLECT -->'; then
+  exit 0
+fi
+
 # Detect reflection loops via Claude Code's official stop_hook_active flag
 if [ "$stop_hook_active" = "true" ]; then
   exit 0
 fi
 
-# Session-scoped dedup: only reflect once per transcript session
-# (stop_hook_active may reset after Claude responds to the block)
-SESSION_FLAG="$HOME/.claude/hooks/.reflected-$(basename "$transcript" .jsonl)"
-if [ -f "$SESSION_FLAG" ]; then
+# Deduplicate: skip if already reflected for this transcript state
+REFLECTED_FLAG="$HOME/.claude/hooks/.reflected-$(basename "$transcript" .jsonl)"
+transcript_mtime=$(stat -c %Y "$transcript" 2>/dev/null || echo 0)
+if [ -f "$REFLECTED_FLAG" ] && [ "$(cat "$REFLECTED_FLAG" 2>/dev/null)" = "$transcript_mtime" ]; then
   exit 0
 fi
 
@@ -54,12 +60,9 @@ LOCK_FILE="$HOME/.claude/hooks/.reflect.lock"
 exec 200>"$LOCK_FILE"
 if ! flock -w 5 200; then
   echo "[$(date -Iseconds)] Reflection skipped: lock timeout after 5s. Transcript: $transcript" >> "$HOME/.claude/hooks/reflect.log"
-  echo "ERROR: Another reflection in progress, skipping. Logged to ~/.claude/hooks/reflect.log" >&2
   exit 0
 fi
 
-# Mark this session as reflected (before doing work, to prevent races)
-touch "$SESSION_FLAG"
 # Cleanup: run every 10 invocations to reduce I/O overhead
 CLEANUP_COUNTER="$HOME/.claude/hooks/.cleanup-counter"
 counter=$(cat "$CLEANUP_COUNTER" 2>/dev/null || echo 0)
@@ -67,6 +70,11 @@ counter=$((counter + 1))
 echo "$counter" > "$CLEANUP_COUNTER"
 if [ $((counter % 10)) -eq 0 ]; then
   find "$HOME/.claude/hooks/" \( -name ".reflected-*" -o -name ".count-*" -o -name ".stale-cache-*" \) -mmin +1440 -delete 2>/dev/null || true
+  # Rotate reflect.log if over 100KB
+  LOG_FILE="$HOME/.claude/hooks/reflect.log"
+  if [ -f "$LOG_FILE" ] && [ "$(stat -c %s "$LOG_FILE" 2>/dev/null || echo 0)" -gt 102400 ]; then
+    tail -n 50 "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
+  fi
 fi
 
 # Run health check (now protected by lock)
@@ -74,46 +82,69 @@ heal_exit=0
 heal_output=$(~/.claude/hooks/memory-heal.sh 2>&1) || heal_exit=$?
 
 if [ $heal_exit -ne 0 ]; then
-  echo "CRITICAL: Health check crashed (exit $heal_exit). Output:" >&2
-  echo "$heal_output" >&2
-  echo "[$(date -Iseconds)] Health check failed: $heal_output" >> "$HOME/.claude/hooks/reflect.log"
-  jq -n --arg reason "⚠️ CRITICAL: Memory health check crashed. Check ~/.claude/hooks/reflect.log for details. Do not proceed with reflection until this is resolved." '{decision: "block", reason: $reason}'
+  echo "[$(date -Iseconds)] Health check failed (exit $heal_exit): $heal_output" >> "$HOME/.claude/hooks/reflect.log"
+  # Don't block, just log and skip reflection
   exit 0
 fi
 
+# Compute project memory directory
+PROJECT_SLUG=$(echo "$PWD" | sed 's|[/.]|-|g; s|^-||')
+MEMORY_DIR="$HOME/.claude/projects/-${PROJECT_SLUG}/memory"
+
+# Log health check issues (don't ask haiku to fix them — too risky)
 if [ -n "$heal_output" ]; then
-  prompt="⚠️ Memory system health check found issues. Fix them first, then reflect:
-
-$heal_output
-
-Repair rules (BACKUP FIRST - MEMORY.md.bak created automatically):
-- ORPHAN_FILES → Read file frontmatter, verify type/description exist, add to MEMORY.md (format: \"- [file.md](file.md) — description\")
-- PHANTOM_ENTRIES → Remove lines referencing missing files from MEMORY.md
-- MISPLACED_MEMORY → Move user/feedback type files to ~/.claude/rules/<domain>.md (e.g., git.md, python.md). Remove from project MEMORY.md. Update content to match rules format
-- ORPHANED_TMP → Delete .tmp and .bak files older than 1 hour (safe to remove)
-- INDEX_BLOAT → Merge entries ONLY if they reference same topic (e.g., \"git workflow\" + \"git commits\" → \"git workflow\"). Keep distinct topics separate
-- FILE_BLOAT → Split large files by subtopic, ensure each ≤30 lines. Update MEMORY.md links
-- STALE_FILES → Keep if: architectural decision, active project context, or user preference. Delete only if: temporary task notes, resolved bugs, outdated external references
-- RULES_OVERSIZE → Remove redundant rules (check if Claude does by default), merge duplicate guidance, split by domain if needed
-- SECURITY_ERROR → Report immediately, do not attempt repair
-
-MANDATORY: Use atomic operations for ALL file modifications:
-1. Backup: cp MEMORY.md MEMORY.md.bak (if modifying index)
-2. Create temp: Write changes to .tmp file
-3. Validate: Check frontmatter, no duplicate entries, valid markdown links
-4. Atomic replace: mv .tmp target (overwrites atomically)
-5. Verify: Read back and confirm changes applied correctly
-
-After repairs, proceed with reflection:
-Review conversation for memorable content?
-- Preferences/corrections/role → ~/.claude/rules/ or CLAUDE.md Preferences (cross-project)
-- Project decisions/external resources → current project memory directory
-Confirm no duplicates. If content exists, save and state which file. If nothing to save, produce no output at all — no acknowledgment, no summary, complete silence."
-else
-  prompt="Review conversation for memorable content?
-- Preferences/corrections/role → ~/.claude/rules/ or CLAUDE.md Preferences (cross-project)
-- Project decisions/external resources → current project memory directory
-Confirm no duplicates. If content exists, save and state which file. If nothing to save, produce no output at all — no acknowledgment, no summary, complete silence."
+  echo "[$(date -Iseconds)] Health check issues (will be fixed by main session next time): $heal_output" >> "$HOME/.claude/hooks/reflect.log"
 fi
 
-jq -n --arg reason "$prompt" '{decision: "block", reason: $reason}'
+# Ensure memory directory exists
+mkdir -p "$MEMORY_DIR"
+
+# Extract recent conversation context (include tool_use for richer context)
+conversation=$(tail -n 500 "$transcript" | grep -E '"role":"(assistant|user)"' | tail -n 50 | jq -r '
+  .role as $role |
+  .message.content[]? |
+  if .type == "text" then "\($role): \(.text)"
+  elif .type == "tool_use" then "\($role) [tool: \(.name)]: \(.input | tostring | .[0:200])"
+  else empty end
+' 2>/dev/null | head -c 8000 || echo "(failed to extract conversation)")
+
+# Mark as reflected before launching (use mtime for dedup)
+echo "$transcript_mtime" > "$REFLECTED_FLAG"
+
+# Write prompt to temp file to avoid shell argument size/quoting issues
+PROMPT_FILE=$(mktemp /tmp/reflect-prompt.XXXXXX)
+cat > "$PROMPT_FILE" <<PROMPT
+You are a reflection agent. Review the conversation below and save memorable content.
+
+## Decision tree (follow strictly)
+
+1. Is this a user preference, correction, or feedback about YOUR behavior?
+   → Append to ~/.claude/rules/user.md (role/knowledge) or ~/.claude/rules/standards.md (code style) or create ~/.claude/rules/<domain>.md if no existing file fits
+   → Each rules file must stay under 30 lines. Read the file first, update existing entries rather than appending duplicates.
+
+2. Is this a project-specific decision, architecture choice, or external resource reference?
+   → Write to $MEMORY_DIR/<topic>.md with frontmatter (name, description, type: project|reference)
+   → Update $MEMORY_DIR/MEMORY.md index
+
+3. Neither? → Do nothing.
+
+## Rules
+
+- Write all content in English only
+- ALWAYS read the target file before writing to check for duplicates
+- NEVER modify ~/.claude/CLAUDE.md
+- NEVER create new rules files if an existing one covers the domain — update it instead
+- If unsure whether something is memorable, skip it
+
+Recent conversation:
+$conversation
+PROMPT
+
+# Launch claude CLI in background for reflection
+nohup claude -p --model haiku --dangerously-skip-permissions < "$PROMPT_FILE" >> "$HOME/.claude/hooks/reflect.log" 2>&1 &
+CLAUDE_PID=$!
+
+# Clean up prompt file after claude reads it (give it a moment to start)
+(sleep 5 && rm -f "$PROMPT_FILE") &
+
+exit 0

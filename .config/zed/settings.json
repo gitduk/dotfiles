@@ -1,17 +1,4 @@
 {
-  "ssh_connections": [
-    {
-      "host": "max",
-      "args": [],
-      "projects": [
-        {
-          "paths": [
-            "/home/wukaige/axum-project"
-          ]
-        }
-      ]
-    }
-  ],
   "agent_servers": {
     "claude-acp": {
       "type": "registry"
@@ -110,3 +97,4 @@
   },
   "autosave": "on_focus_change",
 }
+

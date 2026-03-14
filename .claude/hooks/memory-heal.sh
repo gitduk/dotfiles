@@ -64,36 +64,41 @@ if [ -d "$MEMORY_DIR" ] && [ ! -L "$MEMORY_DIR" ]; then
   done
   actual=$(echo "$actual" | sort)
 
-  # Check 1: Index consistency
+  # Check 1: Index consistency (subshell to avoid cd side effects)
   if [ -f "$MEMORY_DIR/MEMORY.md" ]; then
-    cd "$MEMORY_DIR"
+    index_issues=$(
+      cd "$MEMORY_DIR"
 
-    indexed=$(grep -oP '\[.*?\]\(\K[^)]+' MEMORY.md 2>/dev/null | sort || true)
+      indexed=$(grep -oP '\[.*?\]\(\K[^)]+' MEMORY.md 2>/dev/null | sort || true)
 
-    # Validate extracted filenames (no path traversal, no symlinks)
-    if [ -n "$indexed" ]; then
-      while IFS= read -r filename; do
-        if [[ "$filename" =~ \.\./|^/ ]]; then
-          issues+=("SECURITY_ERROR: Path traversal detected in MEMORY.md: $filename")
-          continue
-        fi
-        if [ -f "$filename" ] && [ -L "$filename" ]; then
-          issues+=("SECURITY_ERROR: Symlink detected: $filename")
-        fi
-      done <<< "$indexed"
+      # Validate extracted filenames (no path traversal, no symlinks)
+      if [ -n "$indexed" ]; then
+        while IFS= read -r filename; do
+          if [[ "$filename" =~ \.\./|^/ ]]; then
+            echo "SECURITY_ERROR: Path traversal detected in MEMORY.md: $filename"
+            continue
+          fi
+          if [ -f "$filename" ] && [ -L "$filename" ]; then
+            echo "SECURITY_ERROR: Symlink detected: $filename"
+          fi
+        done <<< "$indexed"
+      fi
+
+      orphans=$(comm -13 <(echo "$indexed") <(echo "$actual") | grep -v '^$' || true)
+      if [ -n "$orphans" ]; then
+        echo "ORPHAN_FILES: $(echo "$orphans" | tr '\n' ', ' | sed 's/,$//')"
+      fi
+
+      phantoms=$(comm -23 <(echo "$indexed") <(echo "$actual") | grep -v '^$' || true)
+      if [ -n "$phantoms" ]; then
+        echo "PHANTOM_ENTRIES: $(echo "$phantoms" | tr '\n' ', ' | sed 's/,$//')"
+      fi
+    )
+    if [ -n "$index_issues" ]; then
+      while IFS= read -r issue; do
+        issues+=("$issue")
+      done <<< "$index_issues"
     fi
-
-    orphans=$(comm -13 <(echo "$indexed") <(echo "$actual") | grep -v '^$' || true)
-    if [ -n "$orphans" ]; then
-      issues+=("ORPHAN_FILES: $(echo "$orphans" | tr '\n' ', ' | sed 's/,$//')")
-    fi
-
-    phantoms=$(comm -23 <(echo "$indexed") <(echo "$actual") | grep -v '^$' || true)
-    if [ -n "$phantoms" ]; then
-      issues+=("PHANTOM_ENTRIES: $(echo "$phantoms" | tr '\n' ', ' | sed 's/,$//')")
-    fi
-
-    cd - >/dev/null
   fi
 
   # Check 1.5 result: misplaced memory type
@@ -123,6 +128,14 @@ if [ -d "$MEMORY_DIR" ] && [ ! -L "$MEMORY_DIR" ]; then
   if [ "$stale_loaded" = false ]; then
     stale=$(find "$MEMORY_DIR" -type f -name "*.md" ! -name "MEMORY.md" -mtime +180 2>/dev/null || true)
     echo "$stale" > "$STALE_CACHE"
+  fi
+  # Filter out files that no longer exist (cache may be stale)
+  if [ -n "$stale" ]; then
+    stale_valid=""
+    while IFS= read -r f; do
+      [ -f "$f" ] && stale_valid+="$f"$'\n'
+    done <<< "$stale"
+    stale="$stale_valid"
   fi
   if [ -n "$stale" ]; then
     stale_list=$(echo "$stale" | xargs -n1 basename | tr '\n' ', ' | sed 's/,$//')

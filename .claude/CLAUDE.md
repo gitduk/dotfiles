@@ -19,9 +19,16 @@
 - **Size control** — keep each entry to one line; if details are needed, create a separate file and link from CLAUDE.md. Aim for the whole file to stay under 100 lines.
 - **Cleanup** — remove entries that are outdated or proven incorrect; don't let stale knowledge accumulate.
 - **Promote eagerly** — when writing a lesson or preference, immediately evaluate if it's project-specific or universal. If universal, promote now and remove from project file. Don't wait for a future rediscovery. Promote targets: lessons → `~/.claude/rules/<domain>.md` (one file per domain, e.g. `git.md`, `python.md`; use `paths` frontmatter for language-specific rules); preferences → `~/.claude/CLAUDE.md` `## Preferences`. Keep each rules file under 30 lines; if promoting would exceed this, consolidate existing entries first.
-- **Memory placement** — `user` 和 `feedback` 记忆跨项目通用，直接写入 `~/.claude/rules/<domain>.md` 或 `~/.claude/CLAUDE.md` Preferences；只有 `project` 和 `reference` 写入项目 memory 目录
+- **Memory placement** — `user` and `feedback` memories are cross-project, write to `~/.claude/rules/<domain>.md` or `~/.claude/CLAUDE.md` Preferences; only `project` and `reference` go to project memory directory
 - **Survive resets** — when writing lessons from failed experiments or self-corrections, also write them to `~/.claude/projects/<project>/memory/` as backup. Project CLAUDE.md lives in the git worktree and can be lost to `git reset`; memory files survive. If a reset is observed in the current session, mention it and offer to re-apply from memory.
 - **Meta-rule boundary** — Core Principles, Execution, Self-Improvement, and Consistency Check in `~/.claude/CLAUDE.md` are user-managed. Propose changes to the user, never auto-modify.
+
+### Reflection
+
+Add `<!-- REFLECT -->` at the end of your response to trigger background reflection (stop hook runs `claude` CLI automatically — no action needed from main session).
+
+**When to signal:** user shares preferences, corrections, role info, feedback on approach, project decisions, or teaches something project-specific.
+**Don't signal:** routine tasks, bug fixes, simple Q&A.
 
 ## Consistency Check
 
@@ -55,6 +62,7 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - Skills: install with `--copy` flag to copy files instead of symlinking (e.g., `bun x skills add <package> -g -y --copy`)
 - Bash scripts: use 2 spaces for indentation; shebang `#!/usr/bin/env bash`
 - Clipboard: use `wl-copy` to copy content directly to system clipboard (text, HTML, file paths, etc.)
+- HTTP client: prefer `xh` over `curl` for examples and commands
 
 ## Workflow
 
@@ -64,6 +72,5 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - Provide a high-level summary of changes at each step; demonstrate correctness, don't just assert it
 - In Plan Mode, strictly follow read-only workflow: explore → design → review → write plan → ExitPlanMode. Never execute modifications (Write/Edit/Bash changes) until after user approves plan. System auto-exits Plan Mode if write operations detected, collapsing output to dots.
 - Use `/api-impact` skill after modifying HTTP backend code (Axum / FastAPI) to trace affected endpoints.
-- Reflect hook: when finding no memorable content, produce zero output — no acknowledgment, no repeated questions, complete silence.
 
 @RTK.md
