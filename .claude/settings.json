@@ -1,11 +1,11 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "deny": [
       "Read(./.envrc)",
       "Read(./.env)",
       "Read(./.env.*)"
-    ]
+    ],
+    "defaultMode": "bypassPermissions"
   },
   "model": "opusplan",
   "hooks": {
@@ -25,8 +25,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "notify-send 'Claude Code' '任务完成，请查看结果'",
-            "timeout": 5
+            "command": "notify-send 'Claude Code' '任务完成，请查看结果'"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/reflect.sh"
           }
         ]
       }
@@ -77,6 +80,7 @@
     }
   },
   "packageManager": "bun",
-  "hasCompletedOnboarding": true
+  "hasCompletedOnboarding": true,
+  "voiceEnabled": true
 }
 
