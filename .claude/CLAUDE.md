@@ -63,6 +63,7 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - Bash scripts: use 2 spaces for indentation; shebang `#!/usr/bin/env bash`
 - Clipboard: use `wl-copy` to copy content directly to system clipboard (text, HTML, file paths, etc.)
 - HTTP client: prefer `xh` over `curl` for examples and commands
+- Always provide context and explanations after tool execution — don't just output `.` or stay silent
 
 ## Workflow
 
@@ -70,7 +71,6 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - Mark todo items complete as you go using `TodoUpdate`
 - Never mark a task complete without proving it works — run tests, check logs, demonstrate correctness
 - Provide a high-level summary of changes at each step; demonstrate correctness, don't just assert it
-- In Plan Mode, strictly follow read-only workflow: explore → design → review → write plan → ExitPlanMode. Never execute modifications (Write/Edit/Bash changes) until after user approves plan. System auto-exits Plan Mode if write operations detected, collapsing output to dots.
 - Use `/api-impact` skill after modifying HTTP backend code (Axum / FastAPI) to trace affected endpoints.
 
 @RTK.md
