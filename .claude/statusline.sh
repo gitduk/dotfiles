@@ -275,7 +275,13 @@ plugins_count=$(jq '[.enabledPlugins // {} | to_entries[] | select(.value == tru
 # Section functions
 # ============================================================
 
-section_model()   { printf '%b' "${CYAN}${model}${RESET}"; }
+section_model() {
+  # Shorten "Opus 4.6 (1M context)" to "Opus 4.6 [1m]"
+  local display="$model"
+  display="${display// (1M context)/}"
+  display="${display//Opus 4.6/Opus 4.6 [1m]}"
+  printf '%b' "${CYAN}${display}${RESET}"
+}
 
 section_project() {
   local dir="${project_dir:-$cwd}"
@@ -370,6 +376,16 @@ section_cfg_plugins() { _sec_nonzero "plugins" "$plugins_count"; }
 section_cfg_skills()  { _sec_nonzero "skills"  "$_skills_count"; }
 section_cfg_agents()  { _sec_nonzero "agents"  "$_agents_count"; }
 
+section_cfg_summary() {
+  # Compact with spaces: M2 R6 S10 A20
+  local parts=""
+  [ "$_cfg_md" -gt 0 ] && parts="${parts}M${_cfg_md}"
+  [ "$_cfg_rules" -gt 0 ] && parts="${parts:+${parts} }R${_cfg_rules}"
+  [ "$_skills_count" -gt 0 ] && parts="${parts:+${parts} }S${_skills_count}"
+  [ "$_agents_count" -gt 0 ] && parts="${parts:+${parts} }A${_agents_count}"
+  [ -n "$parts" ] && printf '%b' "${DIM}cfg:${RESET}${WHITE}${parts}${RESET}"
+}
+
 section_mem_tokens() {
   [ "$_mem_files" -eq 0 ] && return
   local tok_fmt color warn=""
@@ -390,7 +406,7 @@ section_mem_tokens() {
 }
 
 # ============================================================
-# Render — use "---" to start a new line
+# Render — single line, all left-aligned
 # ============================================================
 SEP="  "
 
@@ -399,33 +415,19 @@ sections=(
   section_context
   section_quota_5h
   section_quota_7d
-  section_cost
-  ---
-  section_git
-  section_cfg_md
-  section_cfg_rules
-  section_cfg_skills
-  section_cfg_agents
   section_mem_tokens
-  ---
-  section_cfg_hooks
-  section_cfg_mcp
-  section_cfg_plugins
+  section_cost
+  section_cfg_summary
   section_speed
-  ---
-  # section_duration
 )
 
-line=""
+# Build output
+output=""
 for item in "${sections[@]}"; do
-  if [ "$item" = "---" ]; then
-    [ -n "$line" ] && printf '%b\n' "$line"
-    line=""
-  else
-    part=$($item)
-    [ -n "$part" ] && line="${line:+${line}${SEP}}${part}"
-  fi
+  part=$($item)
+  [ -n "$part" ] && output="${output:+${output}${SEP}}${part}"
 done
-[ -n "$line" ] && printf '%b\n' "$line"
+
+printf '%b\n' "$output"
 exit 0
 

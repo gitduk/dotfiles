@@ -7,7 +7,7 @@
     ],
     "defaultMode": "bypassPermissions"
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -26,10 +26,6 @@
           {
             "type": "command",
             "command": "notify-send 'Claude Code' '任务完成，请查看结果'"
-          },
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/reflect.sh"
           }
         ]
       }

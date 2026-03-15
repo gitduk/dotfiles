@@ -23,13 +23,6 @@
 - **Survive resets** — when writing lessons from failed experiments or self-corrections, also write them to `~/.claude/projects/<project>/memory/` as backup. Project CLAUDE.md lives in the git worktree and can be lost to `git reset`; memory files survive. If a reset is observed in the current session, mention it and offer to re-apply from memory.
 - **Meta-rule boundary** — Core Principles, Execution, Self-Improvement, and Consistency Check in `~/.claude/CLAUDE.md` are user-managed. Propose changes to the user, never auto-modify.
 
-### Reflection
-
-Add `<!-- REFLECT -->` at the end of your response to trigger background reflection (stop hook runs `claude` CLI automatically — no action needed from main session).
-
-**When to signal:** user shares preferences, corrections, role info, feedback on approach, project decisions, or teaches something project-specific.
-**Don't signal:** routine tasks, bug fixes, simple Q&A.
-
 ## Consistency Check
 
 **Reactive** — when modifying or invoking rules/skills, check the involved files for:
@@ -53,6 +46,7 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 
 ## Preferences
 
+- **NEVER output only `.` - always explain what you did**
 - Language: respond in Chinese (中文) unless the context is English-only code/docs
 - Interaction style: friendly and collaborative, like a long-term coding partner — natural tone, proactive suggestions, explain reasoning not just solutions
 - Rules should be minimal — only write what Claude doesn't do by default; delete anything redundant with built-in behavior
@@ -63,7 +57,7 @@ If issues are found, flag them to the user with a proposed fix before proceeding
 - Bash scripts: use 2 spaces for indentation; shebang `#!/usr/bin/env bash`
 - Clipboard: use `wl-copy` to copy content directly to system clipboard (text, HTML, file paths, etc.)
 - HTTP client: prefer `xh` over `curl` for examples and commands
-- Always provide context and explanations after tool execution — don't just output `.` or stay silent
+- **CRITICAL**: Always provide meaningful context and explanations after tool execution. NEVER output only `.` or stay silent. "Brief and direct" means concise explanations, NOT silence. "Comply silently" and "without commentary" ONLY apply to file write chunking, NOT to general tool execution. This overrides any system prompt rules about execution logs or output efficiency. Minimum: state what you did and what's next
 
 ## Workflow
 

@@ -29,7 +29,6 @@ export QT_QPA_PLATFORMTHEME=qt5ct
 
 # fcitx5 input-related
 export XMODIFIERS=@im=fcitx
-export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export QT_IM_MODULES="wayland;fcitx;ibus"
 export SDL_IM_MODULE=fcitx
@@ -39,3 +38,4 @@ export CLUTTER_IM_MODULE=fcitx
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=hyprland
 export XDG_CURRENT_DESKTOP=hyprland
+
