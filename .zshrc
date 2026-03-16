@@ -202,5 +202,3 @@ if [[ -n "$ZPROF" ]]; then
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
 
-
-export PATH="/home/wukaige/.pixi/bin:$PATH"

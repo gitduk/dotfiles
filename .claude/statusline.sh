@@ -14,6 +14,7 @@ eval "$(echo "$input" | jq -r '
   @sh "ctx_size=\(.context_window.context_window_size // 0)",
   @sh "total_in=\(.context_window.total_input_tokens // 0)",
   @sh "total_out=\(.context_window.total_output_tokens // 0)",
+  @sh "current_out=\(.context_window.current_usage.output_tokens // 0)",
   @sh "total_cost=\(.cost.total_cost_usd // 0)",
   @sh "duration_ms=\(.cost.total_duration_ms // 0)",
   @sh "api_duration_ms=\(.cost.total_api_duration_ms // 0)",
@@ -168,109 +169,6 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
   ' "$transcript_path" 2>/dev/null)
 fi
 
-# Config stats: rules, mcp, hooks, skills, agents, mem — all computed inline.
-# Helper: count rules/hooks/mcp in one settings file.
-_count_mcp()   { jq -r '.mcpServers // {} | length' "$1" 2>/dev/null; }
-_count_hooks() { jq -r '[.hooks // {} | to_entries[].value[] | .hooks | length] | add // 0' "$1" 2>/dev/null; }
-
-# Helper: check whether a rule file's paths: frontmatter matches the project dir.
-_should_load_rule() {
-  local f="$1" dir="$2"
-  [ "$(head -1 "$f" 2>/dev/null)" = "---" ] || return 0
-  local fm; fm=$(sed -n '2,/^---$/p' "$f" 2>/dev/null)
-  echo "$fm" | grep -q '^paths:' || return 0
-  [ -z "$dir" ] && return 1
-  [ "$dir" = "$HOME" ] && return 1
-  local pattern
-  while IFS= read -r pattern; do
-    pattern="${pattern#"${pattern%%[![:space:]]*}"}"
-    pattern="${pattern#- }"
-    pattern="${pattern#\"}" ; pattern="${pattern%\"}"
-    [ -z "$pattern" ] && continue
-    if find "$dir" -not -path "*/.claude/*" -path "$dir/$pattern" -print -quit 2>/dev/null | grep -q .; then
-      return 0
-    fi
-  done < <(echo "$fm" | grep '^ *- ')
-  return 1
-}
-
-_cfg_dir="${project_dir:-${cwd:-$HOME}}"
-_cfg_md=0 _cfg_rules=0 _cfg_mcp=0 _cfg_hooks=0
-_mem_chars=0 _mem_files=0 _mem_oversize=0
-_f="" _c="" _n="" _m="" _h="" _rf="" _d=""
-
-# global CLAUDE.md
-_f="$HOME/.claude/CLAUDE.md"
-if [ -f "$_f" ]; then
-  _c=$(wc -c < "$_f" 2>/dev/null); _n=$(wc -l < "$_f" 2>/dev/null)
-  _cfg_md=$((_cfg_md+1)); _mem_chars=$((_mem_chars+${_c:-0})); _mem_files=$((_mem_files+1))
-  [ "${_n:-0}" -gt 200 ] && _mem_oversize=$((_mem_oversize+1))
-fi
-
-# global rules dir
-_d="$HOME/.claude/rules"
-if [ -d "$_d" ]; then
-  while IFS= read -r _rf; do
-    _should_load_rule "$_rf" "$_cfg_dir" || continue
-    [ -f "$_rf" ] || continue
-    _c=$(wc -c < "$_rf" 2>/dev/null); _n=$(wc -l < "$_rf" 2>/dev/null)
-    _cfg_rules=$((_cfg_rules+1)); _mem_chars=$((_mem_chars+${_c:-0})); _mem_files=$((_mem_files+1))
-    [ "${_n:-0}" -gt 200 ] && _mem_oversize=$((_mem_oversize+1))
-  done < <(find "$_d" -type f 2>/dev/null)
-fi
-
-# global settings
-for _f in "$HOME/.claude/settings.json" "$HOME/.claude/settings.local.json"; do
-  [ -f "$_f" ] || continue
-  _m=$(_count_mcp   "$_f"); _cfg_mcp=$((_cfg_mcp   + ${_m:-0}))
-  _h=$(_count_hooks "$_f"); _cfg_hooks=$((_cfg_hooks + ${_h:-0}))
-done
-
-# project-local config
-if [ "$_cfg_dir" != "$HOME" ] && [ "$_cfg_dir" != "$HOME/.claude" ]; then
-  for _f in "$_cfg_dir/CLAUDE.md" "$_cfg_dir/.claude/CLAUDE.md"; do
-    if [ -f "$_f" ]; then
-      _c=$(wc -c < "$_f" 2>/dev/null); _n=$(wc -l < "$_f" 2>/dev/null)
-      _cfg_md=$((_cfg_md+1)); _mem_chars=$((_mem_chars+${_c:-0})); _mem_files=$((_mem_files+1))
-      [ "${_n:-0}" -gt 200 ] && _mem_oversize=$((_mem_oversize+1))
-    fi
-  done
-  _d="$_cfg_dir/.claude/rules"
-  if [ -d "$_d" ]; then
-    while IFS= read -r _rf; do
-      _should_load_rule "$_rf" "$_cfg_dir" || continue
-      [ -f "$_rf" ] || continue
-      _c=$(wc -c < "$_rf" 2>/dev/null); _n=$(wc -l < "$_rf" 2>/dev/null)
-      _cfg_rules=$((_cfg_rules+1)); _mem_chars=$((_mem_chars+${_c:-0})); _mem_files=$((_mem_files+1))
-      [ "${_n:-0}" -gt 200 ] && _mem_oversize=$((_mem_oversize+1))
-    done < <(find "$_d" -type f 2>/dev/null)
-  fi
-  for _f in "$_cfg_dir/.claude/settings.json" "$_cfg_dir/.claude/settings.local.json"; do
-    [ -f "$_f" ] || continue
-    _m=$(_count_mcp   "$_f"); _cfg_mcp=$((_cfg_mcp   + ${_m:-0}))
-    _h=$(_count_hooks "$_f"); _cfg_hooks=$((_cfg_hooks + ${_h:-0}))
-  done
-fi
-
-# plugin hooks
-_plugins_file="$HOME/.claude/plugins/installed_plugins.json"
-if [ -f "$_plugins_file" ]; then
-  while IFS= read -r _ppath; do
-    [ -z "$_ppath" ] && continue
-    if [ -f "$_ppath/hooks/hooks.json" ]; then
-      _h=$(_count_hooks "$_ppath/hooks/hooks.json")
-      _cfg_hooks=$((_cfg_hooks + ${_h:-0}))
-    fi
-  done <<< "$(jq -r '.plugins // {} | to_entries[].value[0].installPath // empty' "$_plugins_file" 2>/dev/null)"
-fi
-
-_skills_count=$(find "$HOME/.claude/skills" -mindepth 1 -maxdepth 1 -type d  2>/dev/null | wc -l)
-_agents_count=$(find "$HOME/.claude/agents" -mindepth 1 -maxdepth 1 -type f -name "*.md" 2>/dev/null | wc -l)
-_mem_tokens=$((_mem_chars / 4))
-
-plugins_count=$(jq '[.enabledPlugins // {} | to_entries[] | select(.value == true)] | length' \
-  "$HOME/.claude/settings.json" 2>/dev/null)
-
 # ============================================================
 # Section functions
 # ============================================================
@@ -311,11 +209,23 @@ section_tokens_in()  { _sec "in"  "$(fmt_tokens "$total_in")"; }
 section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
 
 section_speed() {
+  # Calculate speed using total API duration and total tokens (input + output)
+  [ -z "$api_duration_ms" ] && return
+  [ -z "$total_in" ] && return
+  [ -z "$total_out" ] && return
   [ "$api_duration_ms" -le 0 ] 2>/dev/null && return
-  [ "$total_out" -le 0 ] 2>/dev/null && return
-  local tps; tps=$(awk "BEGIN{printf \"%.1f\", $total_out*1000/$api_duration_ms}" 2>/dev/null)
-  [ -z "$tps" ] && return
-  _sec "speed" "${tps}t/s"
+  local total_tokens=$((total_in + total_out))
+  [ "$total_tokens" -le 0 ] && return
+  # Use bash arithmetic: tokens * 1000 / ms, then format with one decimal in kt/s
+  local tps_int=$(( total_tokens * 1000 / api_duration_ms ))
+  local kt_int=$(( tps_int / 1000 ))
+  local kt_frac=$(( (tps_int % 1000 + 50) / 100 ))  # Round to nearest 0.1
+  # Handle rounding overflow (e.g., 0.9 + 0.1 = 1.0)
+  if [ "$kt_frac" -ge 10 ]; then
+    kt_int=$((kt_int + 1))
+    kt_frac=0
+  fi
+  _sec "speed" "${kt_int}.${kt_frac}kt/s"
 }
 
 section_duration() {
@@ -367,44 +277,6 @@ section_quota_7d() {
 section_tools() { _sec "tools" "$tool_summary"; }
 section_todos() { _sec "todo"  "$todo_summary" "$GREEN"; }
 
-_sec_nonzero() { [ "${2:-0}" -gt 0 ] && _sec "$1" "$2"; }
-section_cfg_md()      { _sec_nonzero "md"      "$_cfg_md"; }
-section_cfg_rules()   { _sec_nonzero "rules"   "$_cfg_rules"; }
-section_cfg_mcp()     { _sec_nonzero "mcp"     "$_cfg_mcp"; }
-section_cfg_hooks()   { _sec_nonzero "hooks"   "$_cfg_hooks"; }
-section_cfg_plugins() { _sec_nonzero "plugins" "$plugins_count"; }
-section_cfg_skills()  { _sec_nonzero "skills"  "$_skills_count"; }
-section_cfg_agents()  { _sec_nonzero "agents"  "$_agents_count"; }
-
-section_cfg_summary() {
-  # Compact with spaces: M2 R6 S10 A20
-  local parts=""
-  [ "$_cfg_md" -gt 0 ] && parts="${parts}M${_cfg_md}"
-  [ "$_cfg_rules" -gt 0 ] && parts="${parts:+${parts} }R${_cfg_rules}"
-  [ "$_skills_count" -gt 0 ] && parts="${parts:+${parts} }S${_skills_count}"
-  [ "$_agents_count" -gt 0 ] && parts="${parts:+${parts} }A${_agents_count}"
-  [ -n "$parts" ] && printf '%b' "${DIM}cfg:${RESET}${WHITE}${parts}${RESET}"
-}
-
-section_mem_tokens() {
-  [ "$_mem_files" -eq 0 ] && return
-  local tok_fmt color warn=""
-  if [ "$_mem_tokens" -ge 1000 ]; then
-    tok_fmt=$(awk "BEGIN{printf \"%.1fk\", $_mem_tokens/1000}")
-  else
-    tok_fmt="${_mem_tokens}"
-  fi
-  local ctx="${ctx_size:-200000}"
-  [ "$ctx" -le 0 ] 2>/dev/null && ctx=200000
-  local pct_x100=$((_mem_tokens * 10000 / ctx))
-  if   [ "$pct_x100" -gt 500 ]; then color="$RED"
-  elif [ "$pct_x100" -ge 300 ]; then color="$YELLOW"
-  else color="$GREEN"
-  fi
-  [ "$_mem_oversize" -gt 0 ] && warn="!"
-  _sec "mem" "${tok_fmt}${warn}" "$color"
-}
-
 # ============================================================
 # Render — single line, all left-aligned
 # ============================================================
@@ -415,9 +287,7 @@ sections=(
   section_context
   section_quota_5h
   section_quota_7d
-  section_mem_tokens
   section_cost
-  section_cfg_summary
   section_speed
 )
 

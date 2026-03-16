@@ -101,6 +101,9 @@ alias cldc="claude --continue"
 alias ccc='claude -p "commit my dotfiles changes"'
 alias ccm='claude -p "/git-commit"'
 
+# cc-switch
+alias ccs="cc-switch"
+
 # dust
 alias du="dust"
 

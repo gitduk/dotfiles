@@ -28,11 +28,10 @@ export QT_QPA_PLATFORM='wayland;xcb'
 export QT_QPA_PLATFORMTHEME=qt5ct
 
 # fcitx5 input-related
-export XMODIFIERS=@im=fcitx
-export QT_IM_MODULE=fcitx
-export QT_IM_MODULES="wayland;fcitx;ibus"
-export SDL_IM_MODULE=fcitx
-export CLUTTER_IM_MODULE=fcitx
+# Note: GTK_IM_MODULE should NOT be set in Wayland - use wayland input method frontend
+export XMODIFIERS=@im=fcitx5
+export QT_IM_MODULE=fcitx5
+export SDL_IM_MODULE=fcitx5
 
 # xdg
 export XDG_SESSION_TYPE=wayland

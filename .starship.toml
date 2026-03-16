@@ -295,7 +295,7 @@ command = ""
 when = "test $http_proxy"
 shell = ["sh"]
 symbol = "󱐡"
-style = "bold blue dimmed"
+style = "bold blue"
 format = "[$symbol$output]($style) "
 
 [custom.ai]

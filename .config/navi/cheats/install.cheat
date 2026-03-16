@@ -166,3 +166,6 @@ EOF
 sudo apt update
 sudo apt install podman
 
+# cc-switch
+curl -fsSL https://github.com/SaladDay/cc-switch-cli/releases/latest/download/install.sh | bash
+
