@@ -2,6 +2,7 @@
 if [[ -z "$DISPLAY" && "${XDG_VTNR}" -eq 1 && -t 0 && -t 1 ]]; then
   if ! pgrep -x Hyprland &>/dev/null; then
     rm -rf "$XDG_RUNTIME_DIR/hypr"/* 2>/dev/null
+    pkill -x fcitx5 2>/dev/null; true
     exec start-hyprland
   fi
 fi

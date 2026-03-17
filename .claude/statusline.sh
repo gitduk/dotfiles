@@ -83,6 +83,7 @@ fmt_duration() {
 _quota_cache_dir="$HOME/.cache/claude"
 _quota_file="$_quota_cache_dir/quota.json"
 _quota_lock="$_quota_cache_dir/quota.lock"
+_quota_ttl=60  # Cache TTL in seconds
 _quota_token=$(jq -r '.claudeAiOauth.accessToken // empty' \
   "$HOME/.claude/.credentials.json" 2>/dev/null)
 
@@ -98,7 +99,7 @@ if [ -n "$_quota_token" ]; then
   else
     _file_age=$(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0)))
     # Only refetch if older than 60 seconds
-    if [ "$_file_age" -gt 60 ]; then
+    if [ "$_file_age" -gt "$_quota_ttl" ]; then
       _should_fetch=1
     fi
   fi
@@ -126,12 +127,19 @@ if [ -n "$_quota_token" ]; then
   if [ -f "$_quota_file" ]; then
     _quota_json=$(cat "$_quota_file" 2>/dev/null)
     if [ -n "$_quota_json" ]; then
-      _quota_five_h=$(printf '%s' "$_quota_json" | jq -r '.five_hour.utilization  // empty' 2>/dev/null)
-      _quota_seven_d=$(printf '%s' "$_quota_json" | jq -r '.seven_day.utilization // empty' 2>/dev/null)
+      # Parse both fields in a single jq call
+      eval "$(printf '%s' "$_quota_json" | jq -r '
+        @sh "_quota_five_h=\(.five_hour.utilization  // "")",
+        @sh "_quota_seven_d=\(.seven_day.utilization // "")"
+      ' 2>/dev/null)"
       # Only mark ready if we actually got valid data
       if [ -n "$_quota_five_h" ] || [ -n "$_quota_seven_d" ]; then
         _quota_ready=2
       fi
+      # Stale: cache older than TTL means the last fetch failed (e.g. rate limited)
+      _quota_stale=0
+      _cache_age=$(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0)))
+      [ "$_cache_age" -gt "$_quota_ttl" ] && _quota_stale=1
     fi
   fi
 fi
@@ -174,10 +182,11 @@ fi
 # ============================================================
 
 section_model() {
-  # Shorten "Opus 4.6 (1M context)" to "Opus 4.6 [1m]"
-  local display="$model"
-  display="${display// (1M context)/}"
-  display="${display//Opus 4.6/Opus 4.6 [1m]}"
+  local display
+  case "$model" in
+    *"Opus 4.6"*) display="${model// (1M context)/}"; display="${display/Opus 4.6/Opus 4.6 [1m]}" ;;
+    *)            display="$model" ;;
+  esac
   printf '%b' "${CYAN}${display}${RESET}"
 }
 
@@ -203,29 +212,48 @@ section_context() {
   fi
 }
 
-section_cost() { printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"; }
+section_cost() {
+  # Only show cost once something has been spent
+  [ "${total_cost:-0}" = "0" ] && return
+  printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"
+}
 
 section_tokens_in()  { _sec "in"  "$(fmt_tokens "$total_in")"; }
 section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
 
+_speed_cache="$_quota_cache_dir/speed-cache.json"
+
 section_speed() {
-  # Calculate speed using total API duration and total tokens (input + output)
-  [ -z "$api_duration_ms" ] && return
-  [ -z "$total_in" ] && return
-  [ -z "$total_out" ] && return
-  [ "$api_duration_ms" -le 0 ] 2>/dev/null && return
-  local total_tokens=$((total_in + total_out))
-  [ "$total_tokens" -le 0 ] && return
-  # Use bash arithmetic: tokens * 1000 / ms, then format with one decimal in kt/s
-  local tps_int=$(( total_tokens * 1000 / api_duration_ms ))
-  local kt_int=$(( tps_int / 1000 ))
-  local kt_frac=$(( (tps_int % 1000 + 50) / 100 ))  # Round to nearest 0.1
-  # Handle rounding overflow (e.g., 0.9 + 0.1 = 1.0)
-  if [ "$kt_frac" -ge 10 ]; then
-    kt_int=$((kt_int + 1))
-    kt_frac=0
+  # Speed = current_out / (api_duration_ms delta since last invocation)
+  [ "${current_out:-0}" -le 0 ] && return
+  [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null && return
+  local speed_display="" last_speed=""
+
+  if [ -f "$_speed_cache" ]; then
+    local prev_api_ms prev_speed
+    prev_api_ms=$(jq -r '.apiDurationMs // 0' "$_speed_cache" 2>/dev/null)
+    prev_speed=$(jq -r '.lastSpeed // ""' "$_speed_cache" 2>/dev/null)
+    local delta_ms=$(( api_duration_ms - prev_api_ms ))
+    if [ "$delta_ms" -gt 0 ]; then
+      local tps=$(( current_out * 1000 / delta_ms ))
+      if [ "$tps" -gt 0 ]; then
+        local k_int=$(( tps / 1000 ))
+        local k_frac=$(( (tps % 1000 + 5) / 10 ))
+        [ "$k_frac" -ge 100 ] && k_int=$(( k_int + 1 )) && k_frac=0
+        speed_display="$(printf '%d.%02dtk/s' "$k_int" "$k_frac")"
+      fi
+    fi
+    last_speed="$prev_speed"
   fi
-  _sec "speed" "${kt_int}.${kt_frac}kt/s"
+
+  printf '{"apiDurationMs":%d,"lastSpeed":"%s"}' \
+    "$api_duration_ms" "${speed_display:-$last_speed}" > "$_speed_cache"
+
+  if [ -n "$speed_display" ]; then
+    _sec "speed" "$speed_display"
+  elif [ -n "$last_speed" ]; then
+    printf '%b' "${DIM}speed:${RESET}${DIM}${last_speed}${RESET}"
+  fi
 }
 
 section_duration() {
@@ -242,19 +270,18 @@ section_quota_5h() {
   [ -z "$_quota_five_h" ] && return
   local pct pct_c reset_part=""
   pct=$(printf "%.0f" "$_quota_five_h")
-  pct_c=$(pct_color "$pct")
+  pct_c=$([ "$_quota_stale" = "1" ] && printf '%b' "$DIM" || pct_color "$pct")
   local resets_at
   resets_at=$(printf '%s' "$_quota_json" | jq -r '.five_hour.resets_at // empty' 2>/dev/null)
   if [ -n "$resets_at" ]; then
-    local reset_epoch secs_left
+    local reset_epoch secs_left tlabel mins hrs
     reset_epoch=$(date -d "$resets_at" +%s 2>/dev/null)
     if [ -n "$reset_epoch" ]; then
       secs_left=$(( reset_epoch - $(date +%s) ))
-      local tlabel
       if [ "$secs_left" -le 0 ]; then
         tlabel="now"
       else
-        local mins=$(( secs_left / 60 )) hrs=$(( secs_left / 3600 ))
+        mins=$(( secs_left / 60 )); hrs=$(( secs_left / 3600 ))
         if [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$(( mins % 60 ))m"; else tlabel="${mins}m"; fi
       fi
       reset_part="${DIM}·${RESET}${pct_c}${tlabel}${RESET}"
@@ -271,7 +298,8 @@ section_quota_7d() {
   fi
   [ -z "$_quota_seven_d" ] && return
   local pct; pct=$(printf "%.0f" "$_quota_seven_d")
-  _sec "7d" "${pct}%" "$(pct_color "$pct")"
+  local pct_c; pct_c=$([ "$_quota_stale" = "1" ] && printf '%b' "$DIM" || pct_color "$pct")
+  _sec "7d" "${pct}%" "$pct_c"
 }
 
 section_tools() { _sec "tools" "$tool_summary"; }
