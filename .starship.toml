@@ -302,12 +302,12 @@ format = "[$symbol$output]($style) "
 command = '''
 _ai() { i="󱕅"; [ -n "$2" ] && i="󱝁"; printf "$1${i}\e[0m"; }
 s=""
-[ -n "$ANTHROPIC_API_KEY" ] && s="$(_ai "\e[93m" "$ANTHROPIC_BASE_URL")"
-[ -n "$OPENAI_API_KEY" ]    && s="${s:+$s }$(_ai "\e[32m" "$OPENAI_BASE_URL")"
-[ -n "$GEMINI_API_KEY" ]    && s="${s:+$s }$(_ai "\e[34m" "$GEMINI_BASE_URL")"
+[ -n "$ANTHROPIC_BASE_URL" ] && s="$(_ai "\e[93m" "$ANTHROPIC_API_KEY")"
+[ -n "$OPENAI_BASE_URL" ]    && s="${s:+$s }$(_ai "\e[32m" "$OPENAI_API_KEY")"
+[ -n "$GEMINI_BASE_URL" ]    && s="${s:+$s }$(_ai "\e[34m" "$GEMINI_API_KEY")"
 printf "$s"
 '''
-when = '[ -n "$ANTHROPIC_API_KEY$OPENAI_API_KEY$GEMINI_API_KEY" ]'
+when = '[ -n "$ANTHROPIC_BASE_URL$OPENAI_BASE_URL$GEMINI_BASE_URL" ]'
 shell = ["sh"]
 style = ""
 format = "$output "

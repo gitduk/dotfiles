@@ -83,7 +83,8 @@ fmt_duration() {
 _quota_cache_dir="$HOME/.cache/claude"
 _quota_file="$_quota_cache_dir/quota.json"
 _quota_lock="$_quota_cache_dir/quota.lock"
-_quota_ttl=60  # Cache TTL in seconds
+_quota_backoff="$_quota_cache_dir/quota.backoff"
+_quota_ttl=300  # Cache TTL in seconds
 _quota_token=$(jq -r '.claudeAiOauth.accessToken // empty' \
   "$HOME/.claude/.credentials.json" 2>/dev/null)
 
@@ -104,17 +105,42 @@ if [ -n "$_quota_token" ]; then
     fi
   fi
   if [ "$_should_fetch" = "1" ]; then
-    # Use flock with non-blocking mode: if another session is fetching, skip
-    (
-      flock -n 200 || exit 0
-      curl -sf --max-time 5 \
-        -H "Authorization: Bearer $_quota_token" \
-        -H "anthropic-beta: oauth-2025-04-20" \
-        "https://api.anthropic.com/api/oauth/usage" \
-        > "$_quota_file.tmp" 2>/dev/null \
-        && mv -f "$_quota_file.tmp" "$_quota_file" 2>/dev/null \
-        || rm -f "$_quota_file.tmp" 2>/dev/null
-    ) 200>"$_quota_lock" &
+    # Check backoff: if quota.backoff exists and is < 10 minutes old, skip fetch
+    _in_backoff=0
+    if [ -f "$_quota_backoff" ]; then
+      _backoff_ts=$(cat "$_quota_backoff" 2>/dev/null)
+      if [ -n "$_backoff_ts" ] && [ "$(( $(date +%s) - _backoff_ts ))" -lt 600 ]; then
+        _in_backoff=1
+      else
+        rm -f "$_quota_backoff" 2>/dev/null
+      fi
+    fi
+    if [ "$_in_backoff" = "0" ]; then
+      # Use flock with non-blocking mode: if another session is fetching, skip
+      (
+        flock -n 200 || exit 0
+        _resp=$(curl -sf --max-time 5 \
+          -H "Authorization: Bearer $_quota_token" \
+          -H "anthropic-beta: oauth-2025-04-20" \
+          "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
+        _curl_exit=$?
+        if [ "$_curl_exit" -eq 0 ] && [ -n "$_resp" ]; then
+          # Check for rate_limit_error in response body
+          if printf '%s' "$_resp" | grep -q '"rate_limit_error"'; then
+            date +%s > "$_quota_backoff" 2>/dev/null
+          else
+            printf '%s' "$_resp" > "$_quota_file.tmp" 2>/dev/null \
+              && mv -f "$_quota_file.tmp" "$_quota_file" 2>/dev/null \
+              || rm -f "$_quota_file.tmp" 2>/dev/null
+          fi
+        elif [ "$_curl_exit" -eq 22 ]; then
+          # HTTP 4xx/5xx from -f flag; treat as rate limit backoff
+          date +%s > "$_quota_backoff" 2>/dev/null
+        else
+          rm -f "$_quota_file.tmp" 2>/dev/null
+        fi
+      ) 200>"$_quota_lock" &
+    fi
   fi
 fi
 
@@ -136,10 +162,12 @@ if [ -n "$_quota_token" ]; then
       if [ -n "$_quota_five_h" ] || [ -n "$_quota_seven_d" ]; then
         _quota_ready=2
       fi
-      # Stale: cache older than TTL means the last fetch failed (e.g. rate limited)
+      # Stale: cache much older than TTL means the last fetch truly failed (e.g. rate limited).
+      # Use 2x TTL to avoid false positives from async background fetches that haven't
+      # completed yet (fetch is non-blocking, so file age can briefly exceed TTL).
       _quota_stale=0
       _cache_age=$(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0)))
-      [ "$_cache_age" -gt "$_quota_ttl" ] && _quota_stale=1
+      [ "$_cache_age" -gt "$(( _quota_ttl * 2 ))" ] && _quota_stale=1
     fi
   fi
 fi
@@ -221,41 +249,6 @@ section_cost() {
 section_tokens_in()  { _sec "in"  "$(fmt_tokens "$total_in")"; }
 section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
 
-_speed_cache="$_quota_cache_dir/speed-cache.json"
-
-section_speed() {
-  # Speed = current_out / (api_duration_ms delta since last invocation)
-  [ "${current_out:-0}" -le 0 ] && return
-  [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null && return
-  local speed_display="" last_speed=""
-
-  if [ -f "$_speed_cache" ]; then
-    local prev_api_ms prev_speed
-    prev_api_ms=$(jq -r '.apiDurationMs // 0' "$_speed_cache" 2>/dev/null)
-    prev_speed=$(jq -r '.lastSpeed // ""' "$_speed_cache" 2>/dev/null)
-    local delta_ms=$(( api_duration_ms - prev_api_ms ))
-    if [ "$delta_ms" -gt 0 ]; then
-      local tps=$(( current_out * 1000 / delta_ms ))
-      if [ "$tps" -gt 0 ]; then
-        local k_int=$(( tps / 1000 ))
-        local k_frac=$(( (tps % 1000 + 5) / 10 ))
-        [ "$k_frac" -ge 100 ] && k_int=$(( k_int + 1 )) && k_frac=0
-        speed_display="$(printf '%d.%02dtk/s' "$k_int" "$k_frac")"
-      fi
-    fi
-    last_speed="$prev_speed"
-  fi
-
-  printf '{"apiDurationMs":%d,"lastSpeed":"%s"}' \
-    "$api_duration_ms" "${speed_display:-$last_speed}" > "$_speed_cache"
-
-  if [ -n "$speed_display" ]; then
-    _sec "speed" "$speed_display"
-  elif [ -n "$last_speed" ]; then
-    printf '%b' "${DIM}speed:${RESET}${DIM}${last_speed}${RESET}"
-  fi
-}
-
 section_duration() {
   [ "${duration_ms:-0}" -le 0 ] 2>/dev/null && return
   _sec "time" "$(fmt_duration "$duration_ms")"
@@ -316,7 +309,6 @@ sections=(
   section_quota_5h
   section_quota_7d
   section_cost
-  section_speed
 )
 
 # Build output

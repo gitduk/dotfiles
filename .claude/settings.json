@@ -61,10 +61,10 @@
     "code-simplifier@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true
   },
+  "effortLevel": "medium",
   "autoUpdatesChannel": "latest",
   "voiceEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "packageManager": "bun",
   "hasCompletedOnboarding": true
 }
-
