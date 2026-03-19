@@ -28,6 +28,7 @@ eval "$(echo "$input" | jq -r '
 # ANSI colors
 # ============================================================
 RESET='\033[0m'
+BOLD='\033[1m'
 DIM='\033[2m'
 CYAN='\033[36m'
 GREEN='\033[32m'
@@ -75,77 +76,106 @@ fmt_duration() {
 }
 
 # ============================================================
-# Quota — shared cache with file locking to avoid rate limiting
-# All Claude Code sessions share ~/.cache/claude/quota.json.
-# Only one session fetches at a time (via flock), others read the cache.
-# TTL: 60 seconds (aligned with claude-hud).
+# Quota — per-session cache under ~/.cache/claude/<session_id>/
+# Each session maintains its own quota cache; TTL prevents over-fetching.
+# TTL: 300 seconds (5 minutes) to avoid rate limiting.
+# Backoff: on fetch failure, record next-allowed time in quota.backoff
+#   - If Retry-After header present, use it; else default 300s backoff.
 # ============================================================
 _quota_cache_dir="$HOME/.cache/claude"
-_quota_file="$_quota_cache_dir/quota.json"
-_quota_lock="$_quota_cache_dir/quota.lock"
-_quota_backoff="$_quota_cache_dir/quota.backoff"
-_quota_ttl=300  # Cache TTL in seconds
+_session_cache_dir="$_quota_cache_dir/${session_id:-default}"
+_quota_file="$_session_cache_dir/quota.json"
+_quota_lock="$_session_cache_dir/quota.lock"
+_quota_backoff_file="$_session_cache_dir/quota.backoff"
+_quota_ttl=300  # Cache TTL in seconds (5 minutes)
 _quota_token=$(jq -r '.claudeAiOauth.accessToken // empty' \
   "$HOME/.claude/.credentials.json" 2>/dev/null)
 
-# Ensure cache directory exists
-[ ! -d "$_quota_cache_dir" ] && mkdir -p "$_quota_cache_dir" 2>/dev/null
+# Ensure per-session cache directory exists
+mkdir -p "$_session_cache_dir" 2>/dev/null
 
-# Fire curl in the background only if cache is stale or missing.
-# Use flock to ensure only one session fetches at a time.
+# Fire curl in the background only if cache is stale or missing,
+# and we are not in a backoff window from a previous failure.
+# Use flock with non-blocking mode: if another session is already fetching, skip.
 if [ -n "$_quota_token" ]; then
   _should_fetch=0
-  if [ ! -f "$_quota_file" ]; then
+  _now=$(date +%s)
+
+  # Check backoff: if backoff file exists and its timestamp is in the future, skip fetch
+  _backoff_until=0
+  if [ -f "$_quota_backoff_file" ]; then
+    _backoff_until=$(cat "$_quota_backoff_file" 2>/dev/null || echo 0)
+  fi
+
+  if [ "$_now" -lt "${_backoff_until:-0}" ] 2>/dev/null; then
+    _should_fetch=0  # Still in backoff window
+  elif [ ! -f "$_quota_file" ]; then
     _should_fetch=1
   else
-    _file_age=$(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0)))
-    # Only refetch if older than 60 seconds
-    if [ "$_file_age" -gt "$_quota_ttl" ]; then
-      _should_fetch=1
-    fi
+    _file_age=$(( _now - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0) ))
+    [ "$_file_age" -gt "$_quota_ttl" ] && _should_fetch=1
   fi
+
   if [ "$_should_fetch" = "1" ]; then
-    # Check backoff: if quota.backoff exists and is < 10 minutes old, skip fetch
-    _in_backoff=0
-    if [ -f "$_quota_backoff" ]; then
-      _backoff_ts=$(cat "$_quota_backoff" 2>/dev/null)
-      if [ -n "$_backoff_ts" ] && [ "$(( $(date +%s) - _backoff_ts ))" -lt 600 ]; then
-        _in_backoff=1
-      else
-        rm -f "$_quota_backoff" 2>/dev/null
+    (
+      flock -n 200 || exit 0
+      # Re-check backoff inside the lock (another session may have just set it)
+      _inner_now=$(date +%s)
+      _inner_backoff=0
+      [ -f "$_quota_backoff_file" ] && _inner_backoff=$(cat "$_quota_backoff_file" 2>/dev/null || echo 0)
+      [ "$_inner_now" -lt "${_inner_backoff:-0}" ] 2>/dev/null && exit 0
+
+      # Re-check TTL inside the lock (avoid double fetch)
+      if [ -f "$_quota_file" ]; then
+        _inner_age=$(( _inner_now - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0) ))
+        [ "$_inner_age" -le "$_quota_ttl" ] && exit 0
       fi
-    fi
-    if [ "$_in_backoff" = "0" ]; then
-      # Use flock with non-blocking mode: if another session is fetching, skip
-      (
-        flock -n 200 || exit 0
-        _resp=$(curl -sf --max-time 5 \
-          -H "Authorization: Bearer $_quota_token" \
-          -H "anthropic-beta: oauth-2025-04-20" \
-          "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
-        _curl_exit=$?
-        if [ "$_curl_exit" -eq 0 ] && [ -n "$_resp" ]; then
-          # Check for rate_limit_error in response body
-          if printf '%s' "$_resp" | grep -q '"rate_limit_error"'; then
-            date +%s > "$_quota_backoff" 2>/dev/null
-          else
-            printf '%s' "$_resp" > "$_quota_file.tmp" 2>/dev/null \
-              && mv -f "$_quota_file.tmp" "$_quota_file" 2>/dev/null \
-              || rm -f "$_quota_file.tmp" 2>/dev/null
-          fi
-        elif [ "$_curl_exit" -eq 22 ]; then
-          # HTTP 4xx/5xx from -f flag; treat as rate limit backoff
-          date +%s > "$_quota_backoff" 2>/dev/null
+
+      # Fetch with response headers to detect Retry-After
+      _resp_headers=$(mktemp)
+      _resp_body=$(mktemp)
+      _http_code=$(curl -s --max-time 8 \
+        -D "$_resp_headers" \
+        -o "$_resp_body" \
+        -w "%{http_code}" \
+        -H "Authorization: Bearer $_quota_token" \
+        -H "anthropic-beta: oauth-2025-04-20" \
+        "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
+
+      if [ "$_http_code" = "200" ]; then
+        # Success: update cache, clear any backoff
+        mv -f "$_resp_body" "$_quota_file" 2>/dev/null
+        rm -f "$_quota_backoff_file" 2>/dev/null
+      else
+        # Failure: set backoff window
+        _retry_after=$(grep -i '^retry-after:' "$_resp_headers" 2>/dev/null \
+          | head -1 | awk '{print $2}' | tr -d '[:space:][:cntrl:]')
+        if [ -n "$_retry_after" ] && [ "$_retry_after" -eq "$_retry_after" ] 2>/dev/null; then
+          _backoff_secs="$_retry_after"
         else
-          rm -f "$_quota_file.tmp" 2>/dev/null
+          _backoff_secs=300  # Default 5-minute backoff on any error
         fi
-      ) 200>"$_quota_lock" &
-    fi
+        echo $(( $(date +%s) + _backoff_secs )) > "$_quota_backoff_file" 2>/dev/null
+        rm -f "$_resp_body" 2>/dev/null
+      fi
+      rm -f "$_resp_headers" 2>/dev/null
+    ) 200>"$_quota_lock" &
   fi
 fi
 
 # Read the shared cache file.
 # _quota_ready: 0 = no token (quota N/A), 1 = token exists but no valid data yet (show placeholder), 2 = data available
+# Detect custom base URL: if ANTHROPIC_BASE_URL is set and points away from
+# the official api.anthropic.com endpoint, quota data is irrelevant (different
+# provider / proxy won't serve the usage API).
+_quota_custom_url=0
+if [ -n "$ANTHROPIC_BASE_URL" ]; then
+  case "$ANTHROPIC_BASE_URL" in
+    *api.anthropic.com*) ;;  # official endpoint — quota still applies
+    *) _quota_custom_url=1 ;;
+  esac
+fi
+
 _quota_five_h="" _quota_seven_d="" _quota_json=""
 _quota_ready=0
 if [ -n "$_quota_token" ]; then
@@ -162,12 +192,10 @@ if [ -n "$_quota_token" ]; then
       if [ -n "$_quota_five_h" ] || [ -n "$_quota_seven_d" ]; then
         _quota_ready=2
       fi
-      # Stale: cache much older than TTL means the last fetch truly failed (e.g. rate limited).
-      # Use 2x TTL to avoid false positives from async background fetches that haven't
-      # completed yet (fetch is non-blocking, so file age can briefly exceed TTL).
+      # Stale: cache older than TTL means the last fetch failed (e.g. rate limited)
       _quota_stale=0
       _cache_age=$(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0)))
-      [ "$_cache_age" -gt "$(( _quota_ttl * 2 ))" ] && _quota_stale=1
+      [ "$_cache_age" -gt "$_quota_ttl" ] && _quota_stale=1
     fi
   fi
 fi
@@ -215,7 +243,11 @@ section_model() {
     *"Opus 4.6"*) display="${model// (1M context)/}"; display="${display/Opus 4.6/Opus 4.6 [1m]}" ;;
     *)            display="$model" ;;
   esac
-  printf '%b' "${CYAN}${display}${RESET}"
+  local model_color="$CYAN"
+  if [ "$_quota_custom_url" = "1" ]; then
+    model_color="$GREEN"
+  fi
+  printf '%b' "${BOLD}${model_color}${display}${RESET}"
 }
 
 section_project() {
@@ -241,13 +273,72 @@ section_context() {
 }
 
 section_cost() {
-  # Only show cost once something has been spent
-  [ "${total_cost:-0}" = "0" ] && return
+  if [ "${total_cost:-0}" = "0" ]; then
+    printf '%b' "${DIM}cost:...${RESET}"
+    return
+  fi
   printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"
 }
 
 section_tokens_in()  { _sec "in"  "$(fmt_tokens "$total_in")"; }
 section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
+
+# Per-session speed cache: stored in the session's own cache directory.
+_speed_cache="$_session_cache_dir/speed.json"
+
+section_speed() {
+  # Speed = delta(total_input_tokens + total_output_tokens) / delta(total_api_duration_ms)
+  # Both are cumulative session totals; consistent baseline.
+  local total_tokens=$(( total_in + total_out ))
+  if [ "${total_tokens:-0}" -le 0 ] 2>/dev/null || [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null; then
+    printf '%b' "${DIM}speed:...${RESET}"
+    return
+  fi
+  local speed_display="" last_speed=""
+
+  if [ -f "$_speed_cache" ]; then
+    local prev_total_tokens prev_api_ms prev_speed
+    # Use empty string (not 0) as default so we can detect a missing/stale cache entry
+    prev_total_tokens=$(jq -r '.totalTokens // ""' "$_speed_cache" 2>/dev/null)
+    prev_api_ms=$(      jq -r '.apiDurationMs // 0' "$_speed_cache" 2>/dev/null)
+    prev_speed=$(       jq -r '.lastSpeed // ""'   "$_speed_cache" 2>/dev/null)
+
+    # Skip calculation if prev_total_tokens is absent (old cache format)
+    if [ -n "$prev_total_tokens" ]; then
+      local delta_tokens=$(( total_tokens - prev_total_tokens ))
+      local delta_ms=$(( api_duration_ms - prev_api_ms ))
+
+      if [ "$delta_ms" -gt 0 ] && [ "$delta_tokens" -gt 0 ]; then
+        # tps in micro-tokens/s for precision at low speeds; convert to tok/s for display
+        local tps_micro=$(( delta_tokens * 1000000 / delta_ms ))
+        if [ "$tps_micro" -gt 0 ]; then
+          local t_int=$(( tps_micro / 1000000 ))
+          local t_frac=$(( (tps_micro % 1000000 + 5000) / 10000 ))
+          [ "$t_frac" -ge 100 ] && t_int=$(( t_int + 1 )) && t_frac=0
+          if [ "$t_int" -ge 1000 ]; then
+            local kt_int=$(( t_int / 1000 ))
+            local kt_frac=$(( (t_int % 1000 + 5) / 10 ))
+            speed_display="$(printf '%d.%02dkt/s' "$kt_int" "$kt_frac")"
+          else
+            speed_display="$(printf '%d.%02dt/s' "$t_int" "$t_frac")"
+          fi
+        fi
+      fi
+    fi  # end prev_total_out check
+    last_speed="$prev_speed"
+  fi
+
+  printf '{"totalTokens":%d,"apiDurationMs":%d,"lastSpeed":"%s"}' \
+    "$total_tokens" "$api_duration_ms" "${speed_display:-$last_speed}" > "$_speed_cache"
+
+  if [ -n "$speed_display" ]; then
+    _sec "speed" "$speed_display"
+  elif [ -n "$last_speed" ]; then
+    printf '%b' "${DIM}speed:${RESET}${DIM}${last_speed}${RESET}"
+  else
+    printf '%b' "${DIM}speed:...${RESET}"
+  fi
+}
 
 section_duration() {
   [ "${duration_ms:-0}" -le 0 ] 2>/dev/null && return
@@ -255,7 +346,8 @@ section_duration() {
 }
 
 section_quota_5h() {
-  [ "$_quota_ready" = "0" ] && return
+  # Show 5h regardless of base URL; only skip if there is no token at all.
+  [ -z "$_quota_token" ] && return
   if [ "$_quota_ready" = "1" ]; then
     printf '%b' "${DIM}5h:...${RESET}"
     return
@@ -309,6 +401,7 @@ sections=(
   section_quota_5h
   section_quota_7d
   section_cost
+  section_speed
 )
 
 # Build output
@@ -319,5 +412,9 @@ for item in "${sections[@]}"; do
 done
 
 printf '%b\n' "$output"
+
+# Clean up session cache directories older than 24 hours.
+find "$_quota_cache_dir" -maxdepth 1 -mindepth 1 -type d -mmin +1440 -exec rm -rf {} + 2>/dev/null || true
+
 exit 0
 

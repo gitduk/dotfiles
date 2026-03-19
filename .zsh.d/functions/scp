@@ -18,10 +18,12 @@ if [[ $# -eq 2 && "$2" == *:* ]]; then
     remote_dst="\$HOME/$pth"
   fi
 
-  # 在远程创建父目录
+  # 在远程创建父目录（不存在时才创建）
   parent="${remote_dst%/*}"
-  echo -e "\033[1;32m→ ssh $host mkdir -p $parent\033[0m"
-  ssh "$host" "mkdir -p \"$parent\""
+  if ! ssh "$host" "[[ -d \"$parent\" ]]"; then
+    echo -e "\033[1;32m→ ssh $host mkdir -p $parent\033[0m"
+    ssh "$host" "mkdir -p \"$parent\""
+  fi
 
   # 显示并执行上传
   echo -e "\033[1;32m→ scp $src $url\033[0m"
