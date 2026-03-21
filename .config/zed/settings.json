@@ -44,6 +44,7 @@
     },
   },
   "agent": {
+    "default_profile": "write",
     "tool_permissions": {
       "tools": {
         "mcp:mcp-server-sequential-thinking:sequentialthinking": {
@@ -61,9 +62,10 @@
       },
     },
     "default_model": {
-      "provider": "anthropic",
-      "model": "claude-3-haiku-20240307",
-      "enable_thinking": false,
+      "effort": "high",
+      "provider": "copilot_chat",
+      "model": "claude-sonnet-4.6",
+      "enable_thinking": true,
     },
     "commit_message_model": {
       "provider": "anthropic",

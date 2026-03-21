@@ -15,13 +15,20 @@ eval "$(echo "$input" | jq -r '
   @sh "total_in=\(.context_window.total_input_tokens // 0)",
   @sh "total_out=\(.context_window.total_output_tokens // 0)",
   @sh "current_out=\(.context_window.current_usage.output_tokens // 0)",
+  @sh "current_in=\(.context_window.current_usage.input_tokens // 0)",
+  @sh "cache_read=\(.context_window.current_usage.cache_read_input_tokens // 0)",
+  @sh "cache_creation=\(.context_window.current_usage.cache_creation_input_tokens // 0)",
   @sh "total_cost=\(.cost.total_cost_usd // 0)",
   @sh "duration_ms=\(.cost.total_duration_ms // 0)",
   @sh "api_duration_ms=\(.cost.total_api_duration_ms // 0)",
   @sh "cwd=\(.workspace.current_dir // "")",
   @sh "project_dir=\(.workspace.project_dir // "")",
   @sh "transcript_path=\(.transcript_path // "")",
-  @sh "session_id=\(.session_id // "")"
+  @sh "session_id=\(.session_id // "")",
+  @sh "rl_5h_pct=\(.rate_limits.five_hour.used_percentage // "")",
+  @sh "rl_5h_resets=\(.rate_limits.five_hour.resets_at // "")",
+  @sh "rl_7d_pct=\(.rate_limits.seven_day.used_percentage // "")",
+  @sh "rl_7d_resets=\(.rate_limits.seven_day.resets_at // "")"
 ')"
 
 # ============================================================
@@ -76,128 +83,19 @@ fmt_duration() {
 }
 
 # ============================================================
-# Quota — per-session cache under ~/.cache/claude/<session_id>/
-# Each session maintains its own quota cache; TTL prevents over-fetching.
-# TTL: 300 seconds (5 minutes) to avoid rate limiting.
-# Backoff: on fetch failure, record next-allowed time in quota.backoff
-#   - If Retry-After header present, use it; else default 300s backoff.
+# Session cache (for speed calculation)
 # ============================================================
 _quota_cache_dir="$HOME/.cache/claude"
 _session_cache_dir="$_quota_cache_dir/${session_id:-default}"
-_quota_file="$_session_cache_dir/quota.json"
-_quota_lock="$_session_cache_dir/quota.lock"
-_quota_backoff_file="$_session_cache_dir/quota.backoff"
-_quota_ttl=300  # Cache TTL in seconds (5 minutes)
-_quota_token=$(jq -r '.claudeAiOauth.accessToken // empty' \
-  "$HOME/.claude/.credentials.json" 2>/dev/null)
-
-# Ensure per-session cache directory exists
 mkdir -p "$_session_cache_dir" 2>/dev/null
 
-# Fire curl in the background only if cache is stale or missing,
-# and we are not in a backoff window from a previous failure.
-# Use flock with non-blocking mode: if another session is already fetching, skip.
-if [ -n "$_quota_token" ]; then
-  _should_fetch=0
-  _now=$(date +%s)
-
-  # Check backoff: if backoff file exists and its timestamp is in the future, skip fetch
-  _backoff_until=0
-  if [ -f "$_quota_backoff_file" ]; then
-    _backoff_until=$(cat "$_quota_backoff_file" 2>/dev/null || echo 0)
-  fi
-
-  if [ "$_now" -lt "${_backoff_until:-0}" ] 2>/dev/null; then
-    _should_fetch=0  # Still in backoff window
-  elif [ ! -f "$_quota_file" ]; then
-    _should_fetch=1
-  else
-    _file_age=$(( _now - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0) ))
-    [ "$_file_age" -gt "$_quota_ttl" ] && _should_fetch=1
-  fi
-
-  if [ "$_should_fetch" = "1" ]; then
-    (
-      flock -n 200 || exit 0
-      # Re-check backoff inside the lock (another session may have just set it)
-      _inner_now=$(date +%s)
-      _inner_backoff=0
-      [ -f "$_quota_backoff_file" ] && _inner_backoff=$(cat "$_quota_backoff_file" 2>/dev/null || echo 0)
-      [ "$_inner_now" -lt "${_inner_backoff:-0}" ] 2>/dev/null && exit 0
-
-      # Re-check TTL inside the lock (avoid double fetch)
-      if [ -f "$_quota_file" ]; then
-        _inner_age=$(( _inner_now - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0) ))
-        [ "$_inner_age" -le "$_quota_ttl" ] && exit 0
-      fi
-
-      # Fetch with response headers to detect Retry-After
-      _resp_headers=$(mktemp)
-      _resp_body=$(mktemp)
-      _http_code=$(curl -s --max-time 8 \
-        -D "$_resp_headers" \
-        -o "$_resp_body" \
-        -w "%{http_code}" \
-        -H "Authorization: Bearer $_quota_token" \
-        -H "anthropic-beta: oauth-2025-04-20" \
-        "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
-
-      if [ "$_http_code" = "200" ]; then
-        # Success: update cache, clear any backoff
-        mv -f "$_resp_body" "$_quota_file" 2>/dev/null
-        rm -f "$_quota_backoff_file" 2>/dev/null
-      else
-        # Failure: set backoff window
-        _retry_after=$(grep -i '^retry-after:' "$_resp_headers" 2>/dev/null \
-          | head -1 | awk '{print $2}' | tr -d '[:space:][:cntrl:]')
-        if [ -n "$_retry_after" ] && [ "$_retry_after" -eq "$_retry_after" ] 2>/dev/null; then
-          _backoff_secs="$_retry_after"
-        else
-          _backoff_secs=300  # Default 5-minute backoff on any error
-        fi
-        echo $(( $(date +%s) + _backoff_secs )) > "$_quota_backoff_file" 2>/dev/null
-        rm -f "$_resp_body" 2>/dev/null
-      fi
-      rm -f "$_resp_headers" 2>/dev/null
-    ) 200>"$_quota_lock" &
-  fi
-fi
-
-# Read the shared cache file.
-# _quota_ready: 0 = no token (quota N/A), 1 = token exists but no valid data yet (show placeholder), 2 = data available
-# Detect custom base URL: if ANTHROPIC_BASE_URL is set and points away from
-# the official api.anthropic.com endpoint, quota data is irrelevant (different
-# provider / proxy won't serve the usage API).
+# Detect custom base URL (used by section_model for color)
 _quota_custom_url=0
 if [ -n "$ANTHROPIC_BASE_URL" ]; then
   case "$ANTHROPIC_BASE_URL" in
-    *api.anthropic.com*) ;;  # official endpoint — quota still applies
+    *api.anthropic.com*) ;;
     *) _quota_custom_url=1 ;;
   esac
-fi
-
-_quota_five_h="" _quota_seven_d="" _quota_json=""
-_quota_ready=0
-if [ -n "$_quota_token" ]; then
-  _quota_ready=1  # token exists, default to placeholder
-  if [ -f "$_quota_file" ]; then
-    _quota_json=$(cat "$_quota_file" 2>/dev/null)
-    if [ -n "$_quota_json" ]; then
-      # Parse both fields in a single jq call
-      eval "$(printf '%s' "$_quota_json" | jq -r '
-        @sh "_quota_five_h=\(.five_hour.utilization  // "")",
-        @sh "_quota_seven_d=\(.seven_day.utilization // "")"
-      ' 2>/dev/null)"
-      # Only mark ready if we actually got valid data
-      if [ -n "$_quota_five_h" ] || [ -n "$_quota_seven_d" ]; then
-        _quota_ready=2
-      fi
-      # Stale: cache older than TTL means the last fetch failed (e.g. rate limited)
-      _quota_stale=0
-      _cache_age=$(($(date +%s) - $(stat -c %Y "$_quota_file" 2>/dev/null || echo 0)))
-      [ "$_cache_age" -gt "$_quota_ttl" ] && _quota_stale=1
-    fi
-  fi
 fi
 
 # ============================================================
@@ -264,12 +162,19 @@ section_git() {
 }
 
 section_context() {
+  local ctx_part cache_part
   if [ -n "$used_pct" ]; then
     local pct_int; pct_int=$(printf "%.0f" "$used_pct")
-    _sec "ctx" "${pct_int}%" "$(pct_color "$pct_int")"
+    ctx_part="${DIM}ctx:${RESET}$(pct_color "$pct_int")${pct_int}%${RESET}"
   else
-    printf '%b' "${DIM}no ctx${RESET}"
+    ctx_part="${DIM}no ctx${RESET}"
   fi
+  local total=$(( current_in + cache_read + cache_creation ))
+  if [ "$total" -gt 0 ] && [ "$cache_read" -gt 0 ]; then
+    local cpct=$(( cache_read * 100 / total ))
+    cache_part="${DIM}·${RESET}$(pct_color $(( 100 - cpct )))${cpct}%${RESET}"
+  fi
+  printf '%b' "${ctx_part}${cache_part}"
 }
 
 section_cost() {
@@ -287,49 +192,44 @@ section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
 _speed_cache="$_session_cache_dir/speed.json"
 
 section_speed() {
-  # Speed = delta(total_input_tokens + total_output_tokens) / delta(total_api_duration_ms)
-  # Both are cumulative session totals; consistent baseline.
-  local total_tokens=$(( total_in + total_out ))
-  if [ "${total_tokens:-0}" -le 0 ] 2>/dev/null || [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null; then
+  # Speed = delta(total_output_tokens) / delta(total_api_duration_ms)
+  # Output-only: input tokens are batched, not streamed — they skew the number.
+  if [ "${total_out:-0}" -le 0 ] 2>/dev/null || [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null; then
     printf '%b' "${DIM}speed:...${RESET}"
     return
   fi
   local speed_display="" last_speed=""
 
   if [ -f "$_speed_cache" ]; then
-    local prev_total_tokens prev_api_ms prev_speed
-    # Use empty string (not 0) as default so we can detect a missing/stale cache entry
-    prev_total_tokens=$(jq -r '.totalTokens // ""' "$_speed_cache" 2>/dev/null)
-    prev_api_ms=$(      jq -r '.apiDurationMs // 0' "$_speed_cache" 2>/dev/null)
-    prev_speed=$(       jq -r '.lastSpeed // ""'   "$_speed_cache" 2>/dev/null)
+    local prev_total_out prev_api_ms prev_speed
+    prev_total_out=$(jq -r '.totalOut // ""' "$_speed_cache" 2>/dev/null)
+    prev_api_ms=$(   jq -r '.apiDurationMs // 0' "$_speed_cache" 2>/dev/null)
+    prev_speed=$(    jq -r '.lastSpeed // ""' "$_speed_cache" 2>/dev/null)
 
-    # Skip calculation if prev_total_tokens is absent (old cache format)
-    if [ -n "$prev_total_tokens" ]; then
-      local delta_tokens=$(( total_tokens - prev_total_tokens ))
+    if [ -n "$prev_total_out" ]; then
+      local delta_out=$(( total_out - prev_total_out ))
       local delta_ms=$(( api_duration_ms - prev_api_ms ))
 
-      if [ "$delta_ms" -gt 0 ] && [ "$delta_tokens" -gt 0 ]; then
-        # tps in micro-tokens/s for precision at low speeds; convert to tok/s for display
-        local tps_micro=$(( delta_tokens * 1000000 / delta_ms ))
-        if [ "$tps_micro" -gt 0 ]; then
-          local t_int=$(( tps_micro / 1000000 ))
-          local t_frac=$(( (tps_micro % 1000000 + 5000) / 10000 ))
-          [ "$t_frac" -ge 100 ] && t_int=$(( t_int + 1 )) && t_frac=0
+      if [ "$delta_ms" -gt 0 ] && [ "$delta_out" -gt 0 ]; then
+        # tps100 = tokens/s scaled by 100 (for 2 decimal places)
+        # delta_out * 100000 / delta_ms = delta_out * 100 * (1000/delta_ms) = t/s * 100
+        local tps100=$(( delta_out * 100000 / delta_ms ))
+        if [ "$tps100" -gt 0 ]; then
+          local t_int=$(( tps100 / 100 ))
+          local t_frac=$(( tps100 % 100 ))
           if [ "$t_int" -ge 1000 ]; then
-            local kt_int=$(( t_int / 1000 ))
-            local kt_frac=$(( (t_int % 1000 + 5) / 10 ))
-            speed_display="$(printf '%d.%02dkt/s' "$kt_int" "$kt_frac")"
+            speed_display="$(printf '%d.%02dkt/s' $(( t_int / 1000 )) $(( (t_int % 1000) / 10 )))"
           else
             speed_display="$(printf '%d.%02dt/s' "$t_int" "$t_frac")"
           fi
         fi
       fi
-    fi  # end prev_total_out check
+    fi
     last_speed="$prev_speed"
   fi
 
-  printf '{"totalTokens":%d,"apiDurationMs":%d,"lastSpeed":"%s"}' \
-    "$total_tokens" "$api_duration_ms" "${speed_display:-$last_speed}" > "$_speed_cache"
+  printf '{"totalOut":%d,"apiDurationMs":%d,"lastSpeed":"%s"}' \
+    "$total_out" "$api_duration_ms" "${speed_display:-$last_speed}" > "$_speed_cache"
 
   if [ -n "$speed_display" ]; then
     _sec "speed" "$speed_display"
@@ -345,22 +245,15 @@ section_duration() {
   _sec "time" "$(fmt_duration "$duration_ms")"
 }
 
+
 section_quota_5h() {
-  # Show 5h regardless of base URL; only skip if there is no token at all.
-  [ -z "$_quota_token" ] && return
-  if [ "$_quota_ready" = "1" ]; then
-    printf '%b' "${DIM}5h:...${RESET}"
-    return
-  fi
-  [ -z "$_quota_five_h" ] && return
+  [ -z "$rl_5h_pct" ] && return
   local pct pct_c reset_part=""
-  pct=$(printf "%.0f" "$_quota_five_h")
-  pct_c=$([ "$_quota_stale" = "1" ] && printf '%b' "$DIM" || pct_color "$pct")
-  local resets_at
-  resets_at=$(printf '%s' "$_quota_json" | jq -r '.five_hour.resets_at // empty' 2>/dev/null)
-  if [ -n "$resets_at" ]; then
+  pct=$(printf "%.0f" "$rl_5h_pct")
+  pct_c=$(pct_color "$pct")
+  if [ -n "$rl_5h_resets" ]; then
     local reset_epoch secs_left tlabel mins hrs
-    reset_epoch=$(date -d "$resets_at" +%s 2>/dev/null)
+    reset_epoch="$rl_5h_resets"
     if [ -n "$reset_epoch" ]; then
       secs_left=$(( reset_epoch - $(date +%s) ))
       if [ "$secs_left" -le 0 ]; then
@@ -376,14 +269,9 @@ section_quota_5h() {
 }
 
 section_quota_7d() {
-  [ "$_quota_ready" = "0" ] && return
-  if [ "$_quota_ready" = "1" ]; then
-    printf '%b' "${DIM}7d:...${RESET}"
-    return
-  fi
-  [ -z "$_quota_seven_d" ] && return
-  local pct; pct=$(printf "%.0f" "$_quota_seven_d")
-  local pct_c; pct_c=$([ "$_quota_stale" = "1" ] && printf '%b' "$DIM" || pct_color "$pct")
+  [ -z "$rl_7d_pct" ] && return
+  local pct; pct=$(printf "%.0f" "$rl_7d_pct")
+  local pct_c; pct_c=$(pct_color "$pct")
   _sec "7d" "${pct}%" "$pct_c"
 }
 

@@ -13,5 +13,5 @@ paths:
 - Axum: single `Arc<AppState>`; handlers return `impl IntoResponse`, never panic; separate DTOs from domain models
 - sqlx: `PgPoolOptions` has `acquire_timeout()` for pool acquisition timeout; connection timeout via `DATABASE_URL?connect_timeout=10` or `PgConnectOptions::from_str().connect_timeout()`
 - Quality: `cargo fmt --check && cargo clippy -- -D warnings && cargo test`
-- Format: After finishing development work, run `cargo fmt` to format the code before committing.
+- Format: Run `cargo fmt` immediately after every `cargo clippy` pass, not just before committing.
 
