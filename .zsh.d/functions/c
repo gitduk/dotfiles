@@ -16,7 +16,7 @@ if [[ $# -eq 1 && "$1" = "add" ]]; then
     local abs_path="$HOME/$file_path"
     if [[ "$worktree_status" = "D" ]]; then
       printf '\033[31mdel %s\033[0m\n' "$file_path"
-      "${git_cmd[@]}" rm -- "$abs_path" &>/dev/null
+      "${git_cmd[@]}" rm --cached -- "$abs_path" &>/dev/null
     else
       printf '\033[32madd %s\033[0m\n' "$file_path"
       "${git_cmd[@]}" add -- "$abs_path" 2>/dev/null

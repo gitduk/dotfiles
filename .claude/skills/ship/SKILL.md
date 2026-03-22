@@ -1,5 +1,7 @@
 ---
-description: Release workflow — version bump, changelog, git tag, push to trigger CI/CD
+name: ship
+description: Release workflow — version bump, changelog, git tag, push to trigger CI/CD. Use when ready to cut a release after all features/fixes are merged and tests pass. Trigger: /ship command.
+allowed-tools: Bash
 ---
 
 # Ship Release

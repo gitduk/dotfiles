@@ -78,10 +78,14 @@ CONVERSATION=$(jq -cn '
   if (.assistant | length) == 1 then {user, assistant: .assistant[0]} else . end
 ' "$TRANSCRIPT_PATH" 2>&1 | { grep -v '\[Request interrupted by user\]' || true; })
 
-# Frequency control: trigger every N conversation pairs
+# Frequency control: trigger every N Stop events via persistent counter
 PAIR_COUNT=$(echo "$CONVERSATION" | wc -l)
 [ "$PAIR_COUNT" -eq 0 ] && exit 0
-[ $((PAIR_COUNT % FREQUENCY)) -ne 0 ] && exit 0
+COUNTER_FILE="$HOME/.cache/claude/.session-reflect-count"
+COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
+COUNT=$((COUNT + 1))
+echo "$COUNT" > "$COUNTER_FILE"
+[ $((COUNT % FREQUENCY)) -ne 0 ] && exit 0
 
 # Limit to last N pairs for prompt
 CONVERSATION=$(echo "$CONVERSATION" | tail -$WINDOW_SIZE)
