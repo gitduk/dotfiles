@@ -1,13 +1,3 @@
----
-paths:
-  - "**/*.sql"
-  - "**/migrations/**"
-  - "**/repository/**"
-  - "**/models/**"
-  - "**/db/**"
-  - "**/docker-compose*.yml"
----
-
 # Database
 
 - All DB access through repository layer; map errors at boundary; never log PII

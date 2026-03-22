@@ -14,7 +14,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/wukaige/.claude/hooks/rtk-rewrite.sh"
+            "command": "~/.claude/hooks/rtk-rewrite.sh"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | grep -qP '(?<!\\S)cargo\\s+build\\b' && echo '{\"decision\":\"block\",\"reason\":\"Use `cargo fmt && cargo clippy` instead of bare `cargo build`. Clippy already compiles the code.\"}' || true"
           }
         ]
       }
@@ -47,6 +51,11 @@
           {
             "type": "command",
             "command": "notify-send 'Claude Code' '任务完成，请查看结果'"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-reflect.sh",
+            "async": true
           }
         ]
       }

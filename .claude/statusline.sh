@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Claude Code status line script
 # Each section is a function — reorder the sections array to change layout.
-# No caching: all data is either read from the JSON input or computed directly.
 
 input=$(cat)
+echo "$input" > /tmp/statusline_debug.json
 
 # ============================================================
 # Data extraction (parsed once, used by section functions)
@@ -11,10 +11,7 @@ input=$(cat)
 eval "$(echo "$input" | jq -r '
   @sh "model=\(.model.display_name // "Unknown")",
   @sh "used_pct=\(.context_window.used_percentage // "")",
-  @sh "ctx_size=\(.context_window.context_window_size // 0)",
-  @sh "total_in=\(.context_window.total_input_tokens // 0)",
   @sh "total_out=\(.context_window.total_output_tokens // 0)",
-  @sh "current_out=\(.context_window.current_usage.output_tokens // 0)",
   @sh "current_in=\(.context_window.current_usage.input_tokens // 0)",
   @sh "cache_read=\(.context_window.current_usage.cache_read_input_tokens // 0)",
   @sh "cache_creation=\(.context_window.current_usage.cache_creation_input_tokens // 0)",
@@ -37,13 +34,12 @@ eval "$(echo "$input" | jq -r '
 RESET='\033[0m'
 BOLD='\033[1m'
 DIM='\033[2m'
-CYAN='\033[36m'
 GREEN='\033[32m'
 YELLOW='\033[33m'
 RED='\033[31m'
 MAGENTA='\033[35m'
 WHITE='\033[37m'
-BLUE='\033[34m'
+CYAN='\033[36m'
 
 pct_color() {
   local pct="${1:-0}"
@@ -59,14 +55,58 @@ _sec() {
   printf '%b' "${DIM}${label}:${RESET}${color}${value}${RESET}"
 }
 
+_pending() {
+  local label="$1"
+  printf '%b' "${DIM}${label}:...${RESET}"
+}
+
+_fmt_speed() {
+  # Format tps100 (tokens/s * 100) into a human-readable speed string.
+  local tps100="$1"
+  [ "$tps100" -le 0 ] && return
+  local t_int=$(( tps100 / 100 )) t_frac=$(( tps100 % 100 ))
+  if [ "$t_int" -ge 1000 ]; then
+    printf '%d.%02dkt/s' $(( t_int / 1000 )) $(( (t_int % 1000) / 10 ))
+  else
+    printf '%d.%02dt/s' "$t_int" "$t_frac"
+  fi
+}
+
+_quota_bar() {
+  # 2D bar: horizontal extent = pct_h, block height = pct_v
+  # Usage: _quota_bar pct_h pct_v [width=8] [color]
+  local pct_h="$1" pct_v="$2" width="${3:-8}" c_override="${4:-}"
+  local active=$(( pct_h > 0 ? (pct_h * width + 99) / 100 : 0 ))
+  local empty=$(( width - active ))
+
+  local v=$(( (pct_v * 7 + 99) / 100 ))
+  (( v > 7 )) && v=7
+  local blocks=('▁' '▂' '▃' '▄' '▅' '▆' '▇' '█')
+  local vert_char="${blocks[$v]}"
+
+  local c
+  if [ -n "$c_override" ]; then
+    c="$c_override"
+  else
+    local worse=$(( pct_v > pct_h ? pct_v : pct_h ))
+    c=$(pct_color "$worse")
+  fi
+
+  local bar="" i
+  for (( i = 0; i < active; i++ )); do bar="${bar}${c}${vert_char}${RESET}"; done
+  for (( i = 0; i < empty;  i++ )); do bar="${bar}\033[2;90m${vert_char}${RESET}"; done
+
+  printf '%b' "$bar"
+}
+
 fmt_tokens() {
   local n="${1:-0}"
   if [ "$n" -ge 1000000 ]; then
-    awk "BEGIN{printf \"%.1fM\", $n/1000000}"
+    printf '%d.%dM' $(( n / 1000000 )) $(( (n % 1000000) / 100000 ))
   elif [ "$n" -ge 1000 ]; then
-    awk "BEGIN{printf \"%.1fk\", $n/1000}"
+    printf '%d.%dk' $(( n / 1000 )) $(( (n % 1000) / 100 ))
   else
-    echo "$n"
+    printf '%d' "$n"
   fi
 }
 
@@ -83,13 +123,13 @@ fmt_duration() {
 }
 
 # ============================================================
-# Session cache (for speed calculation)
+# Top-level setup (computed once per render)
 # ============================================================
 _quota_cache_dir="$HOME/.cache/claude"
 _session_cache_dir="$_quota_cache_dir/${session_id:-default}"
 mkdir -p "$_session_cache_dir" 2>/dev/null
 
-# Detect custom base URL (used by section_model for color)
+# Detect custom base URL (used by section_quota to hide Anthropic-specific rate limits)
 _quota_custom_url=0
 if [ -n "$ANTHROPIC_BASE_URL" ]; then
   case "$ANTHROPIC_BASE_URL" in
@@ -98,9 +138,13 @@ if [ -n "$ANTHROPIC_BASE_URL" ]; then
   esac
 fi
 
-# ============================================================
-# Real-time computed values
-# ============================================================
+# Detect subscription type from credentials (avoids per-render file I/O in section_cost)
+_is_subscription=0
+_creds="$HOME/.claude/.credentials.json"
+if [ -f "$_creds" ]; then
+  _sub=$(jq -r '.claudeAiOauth.subscriptionType // ""' "$_creds" 2>/dev/null)
+  [ -n "$_sub" ] && [ "$_sub" != "null" ] && _is_subscription=1
+fi
 
 # Git
 _git_dir="${project_dir:-$cwd}"
@@ -141,11 +185,7 @@ section_model() {
     *"Opus 4.6"*) display="${model// (1M context)/}"; display="${display/Opus 4.6/Opus 4.6 [1m]}" ;;
     *)            display="$model" ;;
   esac
-  local model_color="$CYAN"
-  if [ "$_quota_custom_url" = "1" ]; then
-    model_color="$GREEN"
-  fi
-  printf '%b' "${BOLD}${model_color}${display}${RESET}"
+  printf '%b' "${BOLD}${GREEN}${display}${RESET}"
 }
 
 section_project() {
@@ -162,24 +202,25 @@ section_git() {
 }
 
 section_context() {
-  local ctx_part cache_part
-  if [ -n "$used_pct" ]; then
-    local pct_int; pct_int=$(printf "%.0f" "$used_pct")
-    ctx_part="${DIM}ctx:${RESET}$(pct_color "$pct_int")${pct_int}%${RESET}"
-  else
-    ctx_part="${DIM}no ctx${RESET}"
+  if [ -z "$used_pct" ]; then
+    printf '%b' "${DIM}no ctx${RESET}"
+    return
   fi
+  local pct_int; pct_int=$(printf "%.0f" "$used_pct")
+  local cache_pct=0
   local total=$(( current_in + cache_read + cache_creation ))
-  if [ "$total" -gt 0 ] && [ "$cache_read" -gt 0 ]; then
-    local cpct=$(( cache_read * 100 / total ))
-    cache_part="${DIM}·${RESET}$(pct_color $(( 100 - cpct )))${cpct}%${RESET}"
-  fi
-  printf '%b' "${ctx_part}${cache_part}"
+  [ "$total" -gt 0 ] && [ "$cache_read" -gt 0 ] && cache_pct=$(( cache_read * 100 / total ))
+  local c; c=$(pct_color "$pct_int")
+  printf '%b' "$(_quota_bar "$pct_int" "$cache_pct" 8 "$c") ${c}${pct_int}%${RESET}"
 }
 
 section_cost() {
+  # Subscription users: cost is shadow-tracked equivalent, not actual billing — always hide
+  if [ "$_quota_custom_url" = "0" ] && { [ -n "$rl_5h_pct" ] || [ -n "$rl_7d_pct" ] || [ "$_is_subscription" = "1" ]; }; then
+    return
+  fi
   if [ "${total_cost:-0}" = "0" ]; then
-    printf '%b' "${DIM}cost:...${RESET}"
+    _pending "cost"
     return
   fi
   printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"
@@ -188,44 +229,32 @@ section_cost() {
 section_tokens_in()  { _sec "in"  "$(fmt_tokens "$total_in")"; }
 section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
 
-# Per-session speed cache: stored in the session's own cache directory.
+# Per-session speed cache
 _speed_cache="$_session_cache_dir/speed.json"
 
 section_speed() {
-  # Speed = delta(total_output_tokens) / delta(total_api_duration_ms)
-  # Output-only: input tokens are batched, not streamed — they skew the number.
+  # Speed = delta(output_tokens) / delta(api_duration_ms); output-only to avoid prefill skew.
   if [ "${total_out:-0}" -le 0 ] 2>/dev/null || [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null; then
-    printf '%b' "${DIM}speed:...${RESET}"
+    _pending "speed"
     return
   fi
   local speed_display="" last_speed=""
 
-  if [ -f "$_speed_cache" ]; then
-    local prev_total_out prev_api_ms prev_speed
-    prev_total_out=$(jq -r '.totalOut // ""' "$_speed_cache" 2>/dev/null)
-    prev_api_ms=$(   jq -r '.apiDurationMs // 0' "$_speed_cache" 2>/dev/null)
-    prev_speed=$(    jq -r '.lastSpeed // ""' "$_speed_cache" 2>/dev/null)
+  if [ ! -f "$_speed_cache" ]; then
+    # First message: fall back to cumulative average as initial estimate
+    speed_display="$(_fmt_speed $(( total_out * 100000 / api_duration_ms )))"
+  else
+    eval "$(jq -r '@sh "prev_total_out=\(.totalOut // "")
+prev_api_ms=\(.apiDurationMs // 0)
+last_speed=\(.lastSpeed // "")"' "$_speed_cache" 2>/dev/null)"
 
     if [ -n "$prev_total_out" ]; then
       local delta_out=$(( total_out - prev_total_out ))
       local delta_ms=$(( api_duration_ms - prev_api_ms ))
-
       if [ "$delta_ms" -gt 0 ] && [ "$delta_out" -gt 0 ]; then
-        # tps100 = tokens/s scaled by 100 (for 2 decimal places)
-        # delta_out * 100000 / delta_ms = delta_out * 100 * (1000/delta_ms) = t/s * 100
-        local tps100=$(( delta_out * 100000 / delta_ms ))
-        if [ "$tps100" -gt 0 ]; then
-          local t_int=$(( tps100 / 100 ))
-          local t_frac=$(( tps100 % 100 ))
-          if [ "$t_int" -ge 1000 ]; then
-            speed_display="$(printf '%d.%02dkt/s' $(( t_int / 1000 )) $(( (t_int % 1000) / 10 )))"
-          else
-            speed_display="$(printf '%d.%02dt/s' "$t_int" "$t_frac")"
-          fi
-        fi
+        speed_display="$(_fmt_speed $(( delta_out * 100000 / delta_ms )))"
       fi
     fi
-    last_speed="$prev_speed"
   fi
 
   printf '{"totalOut":%d,"apiDurationMs":%d,"lastSpeed":"%s"}' \
@@ -234,9 +263,9 @@ section_speed() {
   if [ -n "$speed_display" ]; then
     _sec "speed" "$speed_display"
   elif [ -n "$last_speed" ]; then
-    printf '%b' "${DIM}speed:${RESET}${DIM}${last_speed}${RESET}"
+    _sec "speed" "$last_speed" "$DIM"
   else
-    printf '%b' "${DIM}speed:...${RESET}"
+    _pending "speed"
   fi
 }
 
@@ -245,34 +274,26 @@ section_duration() {
   _sec "time" "$(fmt_duration "$duration_ms")"
 }
 
-
-section_quota_5h() {
-  [ -z "$rl_5h_pct" ] && return
-  local pct pct_c reset_part=""
-  pct=$(printf "%.0f" "$rl_5h_pct")
-  pct_c=$(pct_color "$pct")
+section_quota() {
+  [ "$_quota_custom_url" = "1" ] && return
+  local pct5="" pct7=""
+  [ -n "$rl_5h_pct" ] && pct5=$(printf "%.0f" "$rl_5h_pct")
+  [ -n "$rl_7d_pct" ] && pct7=$(printf "%.0f" "$rl_7d_pct")
+  [ -z "$pct5" ] && [ -z "$pct7" ] && { _pending "rl"; return; }
+  local c; c=$(pct_color "$pct5")
+  local reset_part=""
   if [ -n "$rl_5h_resets" ]; then
-    local reset_epoch secs_left tlabel mins hrs
-    reset_epoch="$rl_5h_resets"
-    if [ -n "$reset_epoch" ]; then
-      secs_left=$(( reset_epoch - $(date +%s) ))
-      if [ "$secs_left" -le 0 ]; then
-        tlabel="now"
-      else
-        mins=$(( secs_left / 60 )); hrs=$(( secs_left / 3600 ))
-        if [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$(( mins % 60 ))m"; else tlabel="${mins}m"; fi
-      fi
-      reset_part="${DIM}·${RESET}${pct_c}${tlabel}${RESET}"
+    local secs_left=$(( rl_5h_resets - EPOCHSECONDS ))
+    if [ "$secs_left" -le 0 ]; then
+      reset_part=" ${DIM}now${RESET}"
+    else
+      local mins=$(( secs_left / 60 )) hrs=$(( secs_left / 3600 ))
+      local tlabel
+      if [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$(( mins % 60 ))m"; else tlabel="${mins}m"; fi
+      reset_part=" ${DIM}${tlabel}${RESET}"
     fi
   fi
-  printf '%b' "${DIM}5h:${RESET}${pct_c}${pct}%${RESET}${reset_part}"
-}
-
-section_quota_7d() {
-  [ -z "$rl_7d_pct" ] && return
-  local pct; pct=$(printf "%.0f" "$rl_7d_pct")
-  local pct_c; pct_c=$(pct_color "$pct")
-  _sec "7d" "${pct}%" "$pct_c"
+  printf '%b' "$(_quota_bar "${pct5:-0}" "${pct7:-0}") ${c}${pct5}%${RESET}${reset_part}"
 }
 
 section_tools() { _sec "tools" "$tool_summary"; }
@@ -286,13 +307,11 @@ SEP="  "
 sections=(
   section_model
   section_context
-  section_quota_5h
-  section_quota_7d
+  section_quota
   section_cost
   section_speed
 )
 
-# Build output
 output=""
 for item in "${sections[@]}"; do
   part=$($item)
@@ -301,8 +320,7 @@ done
 
 printf '%b\n' "$output"
 
-# Clean up session cache directories older than 24 hours.
-find "$_quota_cache_dir" -maxdepth 1 -mindepth 1 -type d -mmin +1440 -exec rm -rf {} + 2>/dev/null || true
+# Clean up session cache dirs older than 24h — probabilistic to avoid fork on every render
+(( RANDOM % 60 == 0 )) && find "$_quota_cache_dir" -maxdepth 1 -mindepth 1 -type d -mmin +1440 -exec rm -rf {} + 2>/dev/null || true
 
 exit 0
-

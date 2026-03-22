@@ -21,6 +21,12 @@ which rtk             # Verify correct binary
 
 ⚠️ **Name collision**: If `rtk gain` fails, you may have reachingforthejack/rtk (Rust Type Kit) installed instead.
 
+## Install
+
+```bash
+cargo install --git https://github.com/rtk-ai/rtk
+```
+
 ## Hook-Based Usage
 
 All other commands are automatically rewritten by the Claude Code hook.
