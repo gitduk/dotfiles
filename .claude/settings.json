@@ -70,6 +70,7 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true
   },
+  "extraKnownMarketplaces": {},
   "effortLevel": "medium",
   "autoUpdatesChannel": "latest",
   "voiceEnabled": true,

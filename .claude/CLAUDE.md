@@ -3,6 +3,7 @@
 - **Root causes**: Find root causes. No temporary fixes. Senior developer standards.
 - **Subagents**: Use liberally — offload research, exploration, and parallel analysis. One tack per subagent.
 - **Meta-rule boundary** — never auto-modify Core Principles; propose to user first. Precedence: project `CLAUDE.md` > `~/.claude/rules/` > `~/.claude/CLAUDE.md`.
+- **Memory hygiene** — when updating any `MEMORY.md`, audit all referenced memory files to ensure pointers are valid and not broken.
 
 ## Preferences
 

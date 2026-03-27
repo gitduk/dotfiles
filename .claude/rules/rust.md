@@ -1,3 +1,10 @@
+---
+paths:
+  - "**/*.rs"
+  - "**/Cargo.toml"
+  - "**/Cargo.lock"
+---
+
 # Rust
 
 - Errors: library use `thiserror`, never expose `anyhow::Error` in public APIs; binary use `anyhow::Result` with `.with_context(|| format!("..."))` on every `?`; no `.unwrap()` in production

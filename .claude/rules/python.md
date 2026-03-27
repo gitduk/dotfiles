@@ -1,3 +1,11 @@
+---
+paths:
+  - "**/*.py"
+  - "**/pyproject.toml"
+  - "**/uv.lock"
+  - "**/requirements*.txt"
+---
+
 # Python
 
 - Project: use `uv` for deps; commit `uv.lock`; `uv run` for scripts; pin `requires-python`
