@@ -14,6 +14,8 @@
 - Bash scripts: 2-space indent; shebang `#!/usr/bin/env bash`
 - Clipboard: use `wl-copy`
 - HTTP client: prefer `xh` over `curl`
+- **Token savings**: prefer `cx` for code navigation (overview → symbols → definition → references → Read as last resort); all shell commands auto-proxied via `rtk` hook
 - **CRITICAL**: Always explain what you did after tool execution. Never output only `.` or stay silent.
 
+@CX.md
 @RTK.md
