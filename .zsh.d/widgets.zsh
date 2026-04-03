@@ -22,38 +22,6 @@ function vi-yank-copy {
 }
 zbindkey -M vicmd 'Y' vi-yank-copy
 
-######################
-### fzf-apt-widget ###
-######################
-
-# fzf pkgs
-function fzf-apt-widget {
-  package=$(
-    apt-cache search . | fzf \
-      --exact \
-      --preview="" \
-      --query=$LBUFFER \
-      --multi \
-      --prompt="pkgs> " \
-      --header="U:upgradable I:installed R:reload Enter:copy" \
-      --bind="U:reload(apt list --upgradable|sed '1d')" \
-      --bind="I:reload(apt list --installed|sed '1d')" \
-      --bind="R:reload(apt-cache search .)"
-  )
-  selected=$(echo $package | awk '{printf $1}' | xargs echo -n)
-  if [[ -n "$selected" ]]; then
-    echo -n $selected | wl-copy
-    if command -v nala &>/dev/null; then
-      BUFFER="sudo nala install -y $selected"
-    else
-      BUFFER="sudo apt install -y $selected"
-    fi
-  fi
-  zle reset-prompt
-  zle vi-add-eol
-}
-zbindkey -M viins '^P' fzf-apt-widget
-
 ###########################
 ### fzf-bindkeys-widget ###
 ###########################

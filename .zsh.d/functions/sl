@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 show_help() {
   cat <<EOF
 Usage: sl [-r] <pattern> [<pattern> ...]
@@ -78,17 +76,17 @@ main() {
   for arg in "${args[@]}"; do
     # Pattern: local_port:host:remote_port  (no comma support here — unambiguous 3-field form)
     if [[ "$arg" =~ ^([0-9]+):([^:,]+):([0-9]+)$ ]]; then
-      local local_port="${BASH_REMATCH[1]}"
-      host="${BASH_REMATCH[2]}"
-      local remote_port="${BASH_REMATCH[3]}"
+      local local_port="${match[1]}"
+      host="${match[2]}"
+      local remote_port="${match[3]}"
       print_mapping "$mode" "$host" "$local_port" "$remote_port"
       forward_flags+=("$(build_forward_flag "$mode" "$bind_addr" "$local_port" "$remote_port")")
 
     # Pattern: host:port[,port,...]
     elif [[ "$arg" =~ ^([^:,]+):([0-9][0-9,]*)$ ]]; then
-      host="${BASH_REMATCH[1]}"
-      local ports_str="${BASH_REMATCH[2]}"
-      IFS=',' read -ra ports <<< "$ports_str"
+      host="${match[1]}"
+      local ports_str="${match[2]}"
+      local -a ports=(${(s:,:)ports_str})
       for port in "${ports[@]}"; do
         [[ "$port" =~ ^[0-9]+$ ]] || { echo "Error: Invalid port '$port' in '$arg'" >&2; return 1; }
         print_mapping "$mode" "$host" "$port" "$port"
