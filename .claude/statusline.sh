@@ -210,8 +210,13 @@ section_context() {
   local cache_pct=0
   local total=$(( current_in + cache_read + cache_creation ))
   [ "$total" -gt 0 ] && [ "$cache_read" -gt 0 ] && cache_pct=$(( cache_read * 100 / total ))
+  local bar_color
+  if [ "$pct_int" -ge 80 ]; then bar_color="$RED"
+  elif [ "$pct_int" -ge 60 ]; then bar_color="$YELLOW"
+  else bar_color="$GREEN"
+  fi
   local c; c=$(pct_color "$pct_int")
-  printf '%b' "$(_quota_bar "$pct_int" "$cache_pct" 8 "$c") ${c}${pct_int}%${RESET}"
+  printf '%b' "$(_quota_bar "$pct_int" "$cache_pct" 8 "$bar_color") ${c}${pct_int}%${RESET}${DIM}/${RESET}${CYAN}${cache_pct}%${RESET}"
 }
 
 section_cost() {
@@ -280,6 +285,11 @@ section_quota() {
   [ -n "$rl_5h_pct" ] && pct5=$(printf "%.0f" "$rl_5h_pct")
   [ -n "$rl_7d_pct" ] && pct7=$(printf "%.0f" "$rl_7d_pct")
   [ -z "$pct5" ] && [ -z "$pct7" ] && { _pending "rl"; return; }
+  local bar_color
+  if [ "${pct5:-0}" -ge 80 ]; then bar_color="$RED"
+  elif [ "${pct5:-0}" -ge 60 ]; then bar_color="$YELLOW"
+  else bar_color="$GREEN"
+  fi
   local c; c=$(pct_color "$pct5")
   local reset_part=""
   if [ -n "$rl_5h_resets" ]; then
@@ -293,7 +303,12 @@ section_quota() {
       reset_part=" ${DIM}${tlabel}${RESET}"
     fi
   fi
-  printf '%b' "$(_quota_bar "${pct5:-0}" "${pct7:-0}") ${c}${pct5}%${RESET}${reset_part}"
+  local pct7_remain="" pct7_display=""
+  if [ -n "$pct7" ]; then
+    pct7_remain=$(( 100 - pct7 ))
+    pct7_display="${DIM}/${RESET}${DIM}${pct7}%${RESET}"
+  fi
+  printf '%b' "$(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color") ${c}${pct5}%${RESET}${pct7_display}${reset_part}"
 }
 
 section_tools() { _sec "tools" "$tool_summary"; }

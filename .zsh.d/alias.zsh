@@ -208,17 +208,6 @@ alias o="open"
 # opencode
 alias ocd="opencode"
 
-# pueue
-alias p="pueue"
-alias pad="pueue add"
-alias prs="pueue restart"
-alias prm="pueue remove"
-alias pkl="pueue kill"
-alias pcl="pueue clean"
-alias plg="pueue log"
-alias ped="pueue edit"
-alias pfl="pueue follow"
-
 # podman
 alias pd="podman"
 alias pdc="podman container"

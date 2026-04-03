@@ -12,6 +12,3 @@ Non-default conventions only — Claude's built-in judgment covers the rest.
 - Audit deps regularly: `cargo audit` (Rust), `uv run pip-audit` (Python)
 - Never `verify=False` or `danger_accept_invalid_certs(true)` on outbound HTTP calls
 
-## Tool Usage
-
-- WebSearch: Use WebFetch as alternative if WebSearch fails to accept query parameter

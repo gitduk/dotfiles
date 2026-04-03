@@ -8,6 +8,16 @@
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/cx-remind.sh"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -18,7 +28,16 @@
           },
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command' | grep -qP '(?<!\\S)cargo\\s+build\\b' && echo '{\"decision\":\"block\",\"reason\":\"Use `cargo fmt && cargo clippy` instead of bare `cargo build`. Clippy already compiles the code.\"}' || true"
+            "command": "~/.claude/hooks/cargo-build-block.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/cx-remind.sh"
           }
         ]
       }
@@ -74,6 +93,7 @@
   "effortLevel": "medium",
   "autoUpdatesChannel": "latest",
   "voiceEnabled": true,
+  "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "packageManager": "bun",
   "hasCompletedOnboarding": true

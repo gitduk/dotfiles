@@ -9,7 +9,8 @@ GROUPED=$(echo "$ACTIVE" | jq '.grouped | length')
 # 统计当前 workspace 的窗口总数
 WIN_COUNT=$(hyprctl clients -j | jq "[.[] | select(.workspace.id == $WORKSPACE_ID and .mapped == true)] | length")
 
-if [ "$WIN_COUNT" -lt 2 ]; then
+if [ "$WIN_COUNT" -eq 1 ] && [ "$GROUPED" -eq 1 ]; then
+  hyprctl dispatch togglegroup
   exit 0
 fi
 
