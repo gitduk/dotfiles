@@ -15,10 +15,11 @@ bindkey -rpM viins "^J"
 # "^[^M" alt+enter
 # "^[\t" alt+tab
 
-# vim ins
 bindkey -M viins "^h" backward-delete-char
 bindkey -M viins "^f" vi-forward-char
 bindkey -M viins "jk" vi-cmd-mode
+bindkey -M viins "^o" clear-screen
+bindkey -M vicmd "^o" clear-screen
 
 # execute command
 # bindkey -s '^semicolon' 'xclip -selection clipboard <<< "$(greenclip print|fzf --prompt="clipboard> ")"^M'

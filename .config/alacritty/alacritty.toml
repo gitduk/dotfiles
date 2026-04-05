@@ -43,7 +43,7 @@ hyperlinks = true
 post_processing = true
 persist = false
 mouse.enabled = true
-binding = { key = "U", mods = "Control" }
+binding = { key = "Y", mods = "Control" }
 regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-<>\"\\s{-}\\^⟨⟩`]+"
 
 [mouse]

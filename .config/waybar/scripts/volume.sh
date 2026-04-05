@@ -18,6 +18,11 @@ declare -A CONFIG=(
   [limit]=60
 )
 
+# Returns 0 (true) if running on a laptop (battery detected)
+is_laptop() {
+  compgen -G "/sys/class/power_supply/BAT*" &>/dev/null
+}
+
 usage() {
   cat <<EOF
 Usage: $SCRIPT_NAME [OPTIONS]
@@ -118,12 +123,12 @@ main() {
   while [[ $# -gt 0 ]]; do
     case $1 in
       --get)        get_volume; shift ;;
-      --inc)        inc_volume; shift ;;
-      --dec)        dec_volume; shift ;;
+      --inc)        is_laptop && dec_volume || inc_volume; shift ;;
+      --dec)        is_laptop && inc_volume || dec_volume; shift ;;
       --toggle)     toggle_mute; shift ;;
       --toggle-mic) toggle_mic; shift ;;
-      --mic-inc)    inc_mic_volume; shift ;;
-      --mic-dec)    dec_mic_volume; shift ;;
+      --mic-inc)    is_laptop && dec_mic_volume || inc_mic_volume; shift ;;
+      --mic-dec)    is_laptop && inc_mic_volume || dec_mic_volume; shift ;;
       -h|--help)    usage; exit 0 ;;
       -v|--version) echo "$VERSION"; exit 0 ;;
       *)

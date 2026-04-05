@@ -12,14 +12,12 @@ declare -A CONFIG=(
   [cache_dir]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
   [token_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/poetry.token"
   [cache_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/poetry.json"
-  [last_request_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/poetry.last"
   [history_file]="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/poetry.history"
   [curl_timeout]=10
   [token_expire_hours]=24
   [max_content_length]=50
-  [min_request_interval]=60
+  [cache_ttl]=1800
   [max_history_size]=1000
-  # [retry_delay]=3600  # 保留配置项，将来可用于失败重试间隔
 )
 
 mkdir -p "${CONFIG[cache_dir]}" 2>/dev/null || {
@@ -70,7 +68,7 @@ EOF
 
 error() { echo -e "\e[31mERROR:\e[0m $*" >&2; }
 warn()  { echo -e "\e[33mWARN:\e[0m  $*" >&2; }
-info()  { echo -e "\e[34mINFO:\e[0m  $*"; }
+info()  { echo -e "\e[34mINFO:\e[0m  $*" >&2; }
 
 show_status() {
   echo "=== 诗词模块状态 ==="
@@ -78,7 +76,7 @@ show_status() {
   echo "Token文件: ${CONFIG[token_file]}"
   echo "缓存文件: ${CONFIG[cache_file]}"
   echo "历史文件: ${CONFIG[history_file]}"
-  echo "最小请求间隔: ${CONFIG[min_request_interval]} 秒"
+  echo "缓存 TTL: ${CONFIG[cache_ttl]} 秒"
   [[ -f "${CONFIG[token_file]}" ]] && echo "Token: 存在" || echo "Token: 不存在"
   [[ -f "${CONFIG[cache_file]}" ]] && echo "缓存: 存在" || echo "缓存: 不存在"
 
@@ -95,15 +93,15 @@ show_status() {
     echo "历史记录: 不存在"
   fi
 
-  if [[ -f "${CONFIG[last_request_file]}" ]]; then
-    local last_req now elapsed wait
-    last_req=$(cat "${CONFIG[last_request_file]}" 2>/dev/null || echo 0)
+  if [[ -f "${CONFIG[cache_file]}" ]]; then
+    local mtime now age ttl_remaining
+    mtime=$(stat -c %Y "${CONFIG[cache_file]}" 2>/dev/null || echo 0)
     now=$(date +%s)
-    elapsed=$((now - last_req))
-    wait=$(( CONFIG[min_request_interval] - elapsed ))
-    [[ $wait -lt 0 ]] && wait=0
-    echo "上次请求: ${elapsed} 秒前"
-    echo "可再次请求: ${wait} 秒后"
+    age=$(( now - mtime ))
+    ttl_remaining=$(( CONFIG[cache_ttl] - age ))
+    [[ $ttl_remaining -lt 0 ]] && ttl_remaining=0
+    echo "缓存年龄: ${age} 秒"
+    echo "距下次更新: ${ttl_remaining} 秒"
   fi
 }
 
@@ -116,31 +114,14 @@ truncate_text() {
   fi
 }
 
-# 检查是否可以发起新请求（防止频繁请求）
-can_make_request() {
-  local force_update="${1:-false}"
-
-  # 强制更新时跳过检查
-  [[ "$force_update" == "true" ]] && return 0
-
-  [[ ! -f "${CONFIG[last_request_file]}" ]] && return 0
-
-  local last_request_time current_time elapsed
-  last_request_time=$(cat "${CONFIG[last_request_file]}" 2>/dev/null || echo 0)
-  current_time=$(date +%s)
-  elapsed=$((current_time - last_request_time))
-
-  if [[ $elapsed -lt ${CONFIG[min_request_interval]} ]]; then
-    local wait_time=$((CONFIG[min_request_interval] - elapsed))
-    return 1
-  fi
-
-  return 0
-}
-
-# 记录请求时间
-record_request_time() {
-  date +%s > "${CONFIG[last_request_file]}"
+# 检查缓存是否在 TTL 内（返回 0 表示新鲜，1 表示已过期）
+is_cache_fresh() {
+  [[ ! -f "${CONFIG[cache_file]}" ]] && return 1
+  local mtime now age
+  mtime=$(stat -c %Y "${CONFIG[cache_file]}" 2>/dev/null || echo 0)
+  now=$(date +%s)
+  age=$(( now - mtime ))
+  [[ $age -lt ${CONFIG[cache_ttl]} ]]
 }
 
 is_token_expired() {
@@ -357,16 +338,6 @@ format_output() {
 
 create_fallback_poetry() {
   local content author title dynasty tooltip display_text class
-  local wait_time_info=""
-  if [[ -f "${CONFIG[last_request_file]}" ]]; then
-    local last_req now elapsed wait
-    last_req=$(cat "${CONFIG[last_request_file]}" 2>/dev/null || echo 0)
-    now=$(date +%s)
-    elapsed=$((now - last_req))
-    wait=$(( CONFIG[min_request_interval] - elapsed ))
-    [[ $wait -lt 0 ]] && wait=0
-    wait_time_info=" 请 ${wait} 秒后重试"
-  fi
 
   # 首先尝试从历史记录中随机选择
   if [[ -f "${CONFIG[history_file]}" ]] && command -v jq >/dev/null 2>&1; then
@@ -389,7 +360,7 @@ create_fallback_poetry() {
           display_text=$(truncate_text "$content" "${CONFIG[max_content_length]}")
           tooltip=""
           [[ -n "$title" && -n "$author" ]] && tooltip="󱉟 ${dynasty:+$dynasty·}$author·$title"
-          tooltip="$tooltip"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"$'\n'"$wait_time_info"
+          tooltip="$tooltip"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"
           class="history"
 
           jq -n -c --arg text "$display_text" --arg tooltip "$tooltip" --arg class "$class" \
@@ -421,7 +392,7 @@ create_fallback_poetry() {
   local idx=$(( ( $(date +%s) + RANDOM ) % ${#poems[@]} ))
   content="${poems[$idx]%%|*}"
   local info="${poems[$idx]##*|}"
-  tooltip="󱉟 $info"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"$'\n'"$wait_time_info"
+  tooltip="󱉟 $info"$'\n\n'" 离线模式 $(date '+%H:%M:%S')"
 
   class="offline"
   if command -v jq >/dev/null 2>&1; then
@@ -437,26 +408,18 @@ create_fallback_poetry() {
 update_poetry() {
   local force_update="${1:-false}"
 
-  # 检查请求频率限制
-  if ! can_make_request "$force_update"; then
-    # 如果缓存存在，继续使用旧缓存
-    if [[ -f "${CONFIG[cache_file]}" ]]; then
-      info "使用现有缓存"
-      return 0
-    else
-      # 没有缓存时使用离线模式
-      create_fallback_poetry >"${CONFIG[cache_file]}"
-      return 0
-    fi
+  # 缓存新鲜且不强制刷新：直接输出缓存
+  if [[ "$force_update" != "true" ]] && is_cache_fresh; then
+    cat "${CONFIG[cache_file]}"
+    return 0
   fi
 
-  # 记录本次请求时间（尽早记录以避免并发重复请求）
-  record_request_time
-
-  local token poetry_data
+  local token poetry_data result
   if ! token=$(get_token); then
     warn "Token 获取失败，使用离线模式"
-    create_fallback_poetry >"${CONFIG[cache_file]}"
+    result=$(create_fallback_poetry)
+    echo "$result" > "${CONFIG[cache_file]}"
+    echo "$result"
     return 0
   fi
 
@@ -466,20 +429,25 @@ update_poetry() {
   poetry_data=$(get_poetry "$token") || poetry_data=""
   if [[ -z "$poetry_data" ]]; then
     error "数据为空，使用离线模式"
-    create_fallback_poetry >"${CONFIG[cache_file]}"
+    result=$(create_fallback_poetry)
+    echo "$result" > "${CONFIG[cache_file]}"
+    echo "$result"
     return 0
   fi
 
-  # 如果有 jq 做验证和格式化，否则直接写回
   if command -v jq >/dev/null 2>&1; then
     if ! jq . <<<"$poetry_data" &>/dev/null; then
       error "返回数据不是有效 JSON，使用离线模式"
-      create_fallback_poetry >"${CONFIG[cache_file]}"
+      result=$(create_fallback_poetry)
+      echo "$result" > "${CONFIG[cache_file]}"
+      echo "$result"
       return 0
     fi
   fi
 
-  format_output "$poetry_data" >"${CONFIG[cache_file]}"
+  result=$(format_output "$poetry_data")
+  echo "$result" > "${CONFIG[cache_file]}"
+  echo "$result"
 }
 
 show_loading_state() {
@@ -501,10 +469,11 @@ show_loading_state() {
 }
 
 handle_click() {
-  # 点击时强制尝试刷新（但仍保留 can_make_request 的提示行为）
-  if ! can_make_request "false"; then
-    # 过于频繁时显示随机诗词（临时）
-    create_fallback_poetry >"${CONFIG[cache_file]}"
+  # 缓存新鲜时点击展示随机历史诗词
+  if is_cache_fresh; then
+    local result
+    result=$(create_fallback_poetry)
+    echo "$result" > "${CONFIG[cache_file]}"
     return 0
   fi
 
@@ -515,7 +484,7 @@ handle_click() {
   (
     set +e
     sleep 0.1
-    update_poetry "false"
+    update_poetry "true"
   ) &
   disown
 }
@@ -534,7 +503,7 @@ handle_force() {
 }
 
 clean_cache() {
-  rm -f "${CONFIG[token_file]}" "${CONFIG[cache_file]}" "${CONFIG[last_request_file]}" "${CONFIG[history_file]}" || true
+  rm -f "${CONFIG[token_file]}" "${CONFIG[cache_file]}" "${CONFIG[history_file]}" || true
   echo "缓存已清理"
 }
 

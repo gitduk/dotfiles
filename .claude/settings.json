@@ -1,8 +1,8 @@
 {
   "permissions": {
     "deny": [
-      "Read(./.envrc)",
       "Read(./.env)",
+      "Read(./.env*)",
       "Read(./.env.*)"
     ],
     "defaultMode": "bypassPermissions"
@@ -70,11 +70,6 @@
           {
             "type": "command",
             "command": "notify-send 'Claude Code' '任务完成，请查看结果'"
-          },
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/session-reflect.sh",
-            "async": true
           }
         ]
       }
@@ -90,6 +85,7 @@
     "context7@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
+  "outputStyle": "Explanatory",
   "effortLevel": "medium",
   "autoUpdatesChannel": "latest",
   "voiceEnabled": true,

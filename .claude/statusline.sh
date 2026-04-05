@@ -73,28 +73,22 @@ _fmt_speed() {
 }
 
 _quota_bar() {
-  # 2D bar: horizontal extent = pct_h, block height = pct_v
+  # Horizontal progress bar. pct_v is accepted but ignored (kept for call-site compat).
   # Usage: _quota_bar pct_h pct_v [width=8] [color]
   local pct_h="$1" pct_v="$2" width="${3:-8}" c_override="${4:-}"
   local active=$(( pct_h > 0 ? (pct_h * width + 99) / 100 : 0 ))
   local empty=$(( width - active ))
 
-  local v=$(( (pct_v * 7 + 99) / 100 ))
-  (( v > 7 )) && v=7
-  local blocks=('▁' '▂' '▃' '▄' '▅' '▆' '▇' '█')
-  local vert_char="${blocks[$v]}"
-
   local c
   if [ -n "$c_override" ]; then
     c="$c_override"
   else
-    local worse=$(( pct_v > pct_h ? pct_v : pct_h ))
-    c=$(pct_color "$worse")
+    c=$(pct_color "$pct_h")
   fi
 
   local bar="" i
-  for (( i = 0; i < active; i++ )); do bar="${bar}${c}${vert_char}${RESET}"; done
-  for (( i = 0; i < empty;  i++ )); do bar="${bar}\033[2;90m${vert_char}${RESET}"; done
+  for (( i = 0; i < active; i++ )); do bar="${bar}${c}█${RESET}"; done
+  for (( i = 0; i < empty;  i++ )); do bar="${bar}\033[38;2;130;130;130m░${RESET}"; done
 
   printf '%b' "$bar"
 }
@@ -127,7 +121,30 @@ fmt_duration() {
 # ============================================================
 _quota_cache_dir="$HOME/.cache/claude"
 _session_cache_dir="$_quota_cache_dir/${session_id:-default}"
+_global_cache="$_quota_cache_dir/global.json"
 mkdir -p "$_session_cache_dir" 2>/dev/null
+
+# Load global persistent cache (populated by previous renders)
+_gc_rl_5h_pct="" _gc_rl_7d_pct="" _gc_rl_5h_resets="" _gc_rl_7d_resets=""
+_gc_cost="" _gc_speed=""
+if [ -f "$_global_cache" ]; then
+  eval "$(jq -r '@sh "
+_gc_rl_5h_pct=\(.rl_5h_pct // "")
+_gc_rl_7d_pct=\(.rl_7d_pct // "")
+_gc_rl_5h_resets=\(.rl_5h_resets // "")
+_gc_rl_7d_resets=\(.rl_7d_resets // "")
+_gc_cost=\(.cost // "")
+_gc_speed=\(.speed // "")
+"' "$_global_cache" 2>/dev/null)" 2>/dev/null || true
+fi
+
+# Write fresh data into global cache whenever we have real values
+_gc_needs_write=0
+_gc_new_rl_5h_pct="${rl_5h_pct:-$_gc_rl_5h_pct}"
+_gc_new_rl_7d_pct="${rl_7d_pct:-$_gc_rl_7d_pct}"
+_gc_new_rl_5h_resets="${rl_5h_resets:-$_gc_rl_5h_resets}"
+_gc_new_rl_7d_resets="${rl_7d_resets:-$_gc_rl_7d_resets}"
+{ [ -n "$rl_5h_pct" ] || [ -n "$rl_7d_pct" ]; } && _gc_needs_write=1 || true
 
 # Detect custom base URL (used by section_quota to hide Anthropic-specific rate limits)
 _quota_custom_url=0
@@ -203,7 +220,10 @@ section_git() {
 
 section_context() {
   if [ -z "$used_pct" ]; then
-    printf '%b' "${DIM}no ctx${RESET}"
+    # Show an empty progress bar (all dim blocks) with no text
+    local empty_bar="" i
+    for (( i = 0; i < 8; i++ )); do empty_bar="${empty_bar}\033[38;2;130;130;130m░${RESET}"; done
+    printf '%b' "$empty_bar"
     return
   fi
   local pct_int; pct_int=$(printf "%.0f" "$used_pct")
@@ -225,9 +245,17 @@ section_cost() {
     return
   fi
   if [ "${total_cost:-0}" = "0" ]; then
-    _pending "cost"
+    # Show last known cost from global cache as a stale hint
+    if [ -n "$_gc_cost" ] && [ "$_gc_cost" != "0" ]; then
+      printf '%b' "${DIM}${MAGENTA}$(printf "\$%s" "$_gc_cost")${RESET}"
+    else
+      _pending "cost"
+    fi
     return
   fi
+  # Persist to global cache
+  _gc_new_cost="$(printf "%.2f" "$total_cost")"
+  _gc_needs_write=1
   printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"
 }
 
@@ -240,7 +268,12 @@ _speed_cache="$_session_cache_dir/speed.json"
 section_speed() {
   # Speed = delta(output_tokens) / delta(api_duration_ms); output-only to avoid prefill skew.
   if [ "${total_out:-0}" -le 0 ] 2>/dev/null || [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null; then
-    _pending "speed"
+    # No live data yet — show last known speed from global cache (dimmed)
+    if [ -n "$_gc_speed" ]; then
+      _sec "speed" "$_gc_speed" "$DIM"
+    else
+      _pending "speed"
+    fi
     return
   fi
   local speed_display="" last_speed=""
@@ -265,6 +298,13 @@ last_speed=\(.lastSpeed // "")"' "$_speed_cache" 2>/dev/null)"
   printf '{"totalOut":%d,"apiDurationMs":%d,"lastSpeed":"%s"}' \
     "$total_out" "$api_duration_ms" "${speed_display:-$last_speed}" > "$_speed_cache"
 
+  # Persist best known speed to global cache
+  local _best_speed="${speed_display:-$last_speed}"
+  if [ -n "$_best_speed" ]; then
+    _gc_new_speed="$_best_speed"
+    _gc_needs_write=1
+  fi
+
   if [ -n "$speed_display" ]; then
     _sec "speed" "$speed_display"
   elif [ -n "$last_speed" ]; then
@@ -281,10 +321,21 @@ section_duration() {
 
 section_quota() {
   [ "$_quota_custom_url" = "1" ] && return
-  local pct5="" pct7=""
+  local pct5="" pct7="" _stale=0
   [ -n "$rl_5h_pct" ] && pct5=$(printf "%.0f" "$rl_5h_pct")
   [ -n "$rl_7d_pct" ] && pct7=$(printf "%.0f" "$rl_7d_pct")
-  [ -z "$pct5" ] && [ -z "$pct7" ] && { _pending "rl"; return; }
+  # Fall back to global cache when no live data yet
+  if [ -z "$pct5" ] && [ -z "$pct7" ]; then
+    if [ -n "$_gc_rl_5h_pct" ] || [ -n "$_gc_rl_7d_pct" ]; then
+      [ -n "$_gc_rl_5h_pct" ] && pct5=$(printf "%.0f" "$_gc_rl_5h_pct")
+      [ -n "$_gc_rl_7d_pct" ] && pct7=$(printf "%.0f" "$_gc_rl_7d_pct")
+      rl_5h_resets="${_gc_rl_5h_resets:-}"
+      _stale=1
+    else
+      _pending "rl"
+      return
+    fi
+  fi
   local bar_color
   if [ "${pct5:-0}" -ge 80 ]; then bar_color="$RED"
   elif [ "${pct5:-0}" -ge 60 ]; then bar_color="$YELLOW"
@@ -307,6 +358,14 @@ section_quota() {
   if [ -n "$pct7" ]; then
     pct7_remain=$(( 100 - pct7 ))
     pct7_display="${DIM}/${RESET}${DIM}${pct7}%${RESET}"
+  fi
+  # Mark global cache for update when we have live (non-stale) data
+  if [ "$_stale" = "0" ]; then
+    _gc_new_rl_5h_pct="${rl_5h_pct:-}"
+    _gc_new_rl_7d_pct="${rl_7d_pct:-}"
+    _gc_new_rl_5h_resets="${rl_5h_resets:-}"
+    _gc_new_rl_7d_resets="${rl_7d_resets:-}"
+    _gc_needs_write=1
   fi
   printf '%b' "$(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color") ${c}${pct5}%${RESET}${pct7_display}${reset_part}"
 }
@@ -334,6 +393,25 @@ for item in "${sections[@]}"; do
 done
 
 printf '%b\n' "$output"
+
+# Persist global cache if any new data was collected this render
+if [ "$_gc_needs_write" = "1" ]; then
+  jq -n \
+    --arg rl_5h_pct    "${_gc_new_rl_5h_pct:-$_gc_rl_5h_pct}" \
+    --arg rl_7d_pct    "${_gc_new_rl_7d_pct:-$_gc_rl_7d_pct}" \
+    --arg rl_5h_resets "${_gc_new_rl_5h_resets:-$_gc_rl_5h_resets}" \
+    --arg rl_7d_resets "${_gc_new_rl_7d_resets:-$_gc_rl_7d_resets}" \
+    --arg cost         "${_gc_new_cost:-$_gc_cost}" \
+    --arg speed        "${_gc_new_speed:-$_gc_speed}" \
+    '{
+      rl_5h_pct:    (if $rl_5h_pct    != "" then ($rl_5h_pct    | tonumber) else null end),
+      rl_7d_pct:    (if $rl_7d_pct    != "" then ($rl_7d_pct    | tonumber) else null end),
+      rl_5h_resets: (if $rl_5h_resets != "" then ($rl_5h_resets | tonumber) else null end),
+      rl_7d_resets: (if $rl_7d_resets != "" then ($rl_7d_resets | tonumber) else null end),
+      cost:  (if $cost  != "" then $cost  else null end),
+      speed: (if $speed != "" then $speed else null end)
+    }' > "$_global_cache" 2>/dev/null || true
+fi
 
 # Clean up session cache dirs older than 24h — probabilistic to avoid fork on every render
 (( RANDOM % 60 == 0 )) && find "$_quota_cache_dir" -maxdepth 1 -mindepth 1 -type d -mmin +1440 -exec rm -rf {} + 2>/dev/null || true
