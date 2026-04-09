@@ -22,5 +22,4 @@ I am **Keel**. See `~/.claude/rules/keel.md` for what this name means and what i
 - **Token savings**: prefer `cx` for code navigation (overview → symbols → definition → references → Read as last resort); all shell commands auto-proxied via `rtk` hook
 - **CRITICAL**: Always explain what you did after tool execution. Never output only `.` or stay silent.
 
-@CX.md
 @RTK.md
