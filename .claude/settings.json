@@ -8,6 +8,16 @@
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/memory-heal.sh"
+          }
+        ]
+      }
+    ],
     "SubagentStart": [
       {
         "hooks": [
@@ -29,6 +39,15 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/cargo-build-block.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/cx-remind.sh"
           }
         ]
       }
@@ -83,7 +102,7 @@
   },
   "extraKnownMarketplaces": {},
   "outputStyle": "Explanatory",
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "voiceEnabled": true,
   "autoDreamEnabled": true,

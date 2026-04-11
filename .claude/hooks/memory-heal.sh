@@ -57,7 +57,8 @@ if [ -d "$MEMORY_DIR" ] && [ ! -L "$MEMORY_DIR" ]; then
     ((file_count++)) || true
 
     # Check 1.5: type placement
-    mem_type=$(sed -n '/^---$/,/^---$/p' "$file" 2>/dev/null | grep "^type:" | awk '{print $2}' | head -1)
+    # `|| true` guards against pipefail when file has no frontmatter (grep exits 1)
+    mem_type=$(sed -n '/^---$/,/^---$/p' "$file" 2>/dev/null | grep "^type:" | awk '{print $2}' | head -1 || true)
     if [ "$mem_type" = "user" ] || [ "$mem_type" = "feedback" ]; then
       misplaced+="$basename_file (type: $mem_type), "
     fi
@@ -168,13 +169,21 @@ if [ -d "$MEMORY_DIR" ]; then
 fi
 
 # --- Check 5: Rules file size ---
+# keel_origin.md is narrative documentation, exempt from size limit.
+RULES_SIZE_LIMIT=50
+RULES_EXEMPT=("keel_origin.md")
 if [ -d "$RULES_DIR" ]; then
   for file in "$RULES_DIR"/*.md; do
     [ -f "$file" ] || continue
+    basename=$(basename "$file")
+    skip=false
+    for exempt in "${RULES_EXEMPT[@]}"; do
+      [ "$basename" = "$exempt" ] && skip=true && break
+    done
+    [ "$skip" = true ] && continue
     lines=$(wc -l < "$file")
-    if [ "$lines" -gt 30 ]; then
-      basename=$(basename "$file")
-      issues+=("RULES_OVERSIZE: $basename has $lines lines, limit 30")
+    if [ "$lines" -gt "$RULES_SIZE_LIMIT" ]; then
+      issues+=("RULES_OVERSIZE: $basename has $lines lines, limit $RULES_SIZE_LIMIT")
     fi
   done
 fi
