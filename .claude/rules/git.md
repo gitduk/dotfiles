@@ -3,6 +3,7 @@
 ## Commits
 
 - Commit atomically: one logical change per commit, all tests passing at each commit; batch all edits for a single feature/fix into one commit — do not commit after each individual file edit
+  - *Clarification*: For Rust projects, `cargo fmt` + `cargo clippy` cycles within a single logical change are **preparation steps**, not separate commits. Commit only after the full logical change is complete and verified.
 - Before committing, check unpushed commits (`git log @{u}..HEAD` — if `@{u}` fails, use `git log origin/master..HEAD` or `git log origin/main..HEAD`) and squash any that belong to the same logical change as the new commit
 - Message format: `<type>[optional scope]: <imperative summary>` (max 72 chars)
   - Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `style`, `build`, `ci`, `revert`
