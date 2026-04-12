@@ -25,8 +25,11 @@ fi
 PROJECT_SLUG=$(echo "$NORMALIZED_PWD" | sed 's|[/.]|-|g; s|^-||')
 MEMORY_DIR="$HOME/.claude/projects/-${PROJECT_SLUG}/memory"
 RULES_DIR="$HOME/.claude/rules"
+CACHE_DIR="$HOME/.cache/claude"
 
-LOCK_FILE="$HOME/.claude/hooks/.memory-heal.lock"
+mkdir -p "$CACHE_DIR"
+
+LOCK_FILE="$CACHE_DIR/memory-heal.lock"
 exec 201>"$LOCK_FILE"
 if ! flock -n 201; then
   echo "ERROR: Another health check in progress" >&2
@@ -114,7 +117,7 @@ if [ -d "$MEMORY_DIR" ] && [ ! -L "$MEMORY_DIR" ]; then
   fi
 
   # Check 3: Staleness with 24h cache (avoid find every invocation)
-  STALE_CACHE="$HOME/.claude/hooks/.stale-cache-${PROJECT_SLUG}"
+  STALE_CACHE="$CACHE_DIR/stale-cache-${PROJECT_SLUG}"
   CACHE_TTL=86400
   now=$(date +%s)
   stale_loaded=false
