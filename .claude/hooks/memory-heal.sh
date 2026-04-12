@@ -169,9 +169,8 @@ if [ -d "$MEMORY_DIR" ]; then
 fi
 
 # --- Check 5: Rules file size ---
-# keel_origin.md is narrative documentation, exempt from size limit.
 RULES_SIZE_LIMIT=50
-RULES_EXEMPT=("keel_origin.md")
+RULES_EXEMPT=()
 if [ -d "$RULES_DIR" ]; then
   for file in "$RULES_DIR"/*.md; do
     [ -f "$file" ] || continue

@@ -94,11 +94,11 @@
     "code-review@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": false,
     "github@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {},
   "outputStyle": "Explanatory",

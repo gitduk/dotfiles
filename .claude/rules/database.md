@@ -1,3 +1,9 @@
+---
+paths:
+  - "**/*.sql"
+  - "**/migrations/**"
+---
+
 # Database
 
 - All DB access through repository layer; map errors at boundary; never log PII

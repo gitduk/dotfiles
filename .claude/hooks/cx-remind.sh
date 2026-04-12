@@ -41,9 +41,20 @@ case "$EVENT" in
         ;;
       Grep)
         PATTERN=$(echo "$INPUT" | jq -r '.tool_input.pattern // empty')
+        # Skip patterns unlikely to be symbol searches:
+        # contains spaces (phrase), very long (complex regex), starts with non-identifier char
+        if [[ "$PATTERN" =~ [[:space:]] ]] || [[ ${#PATTERN} -gt 60 ]] || [[ ! "$PATTERN" =~ ^[a-zA-Z_] ]]; then
+          exit 0
+        fi
         MSG="[cx-remind] You are using Grep to search: \"$PATTERN\". Prefer cx: use \`cx symbols --name \"<glob>\"\` to find symbols, or \`cx references --name <name>\` to find usages. Grep is fine for non-symbol text searches."
         ;;
       Glob)
+        GLOB_PATTERN=$(echo "$INPUT" | jq -r '.tool_input.pattern // empty')
+        # Only remind for source code file patterns
+        case "$GLOB_PATTERN" in
+          *".rs"|*".py"|*".ts"|*".tsx"|*".js"|*".jsx"|*".go"|*".c"|*".cpp"|*".h"|*".java"|*".rb"|*".swift"|*".kt") ;;
+          *) exit 0 ;;
+        esac
         MSG="[cx-remind] You are using Glob. If you are looking for where a symbol/function is defined, prefer \`cx symbols\` instead. Glob is fine for file discovery."
         ;;
       *) exit 0 ;;
