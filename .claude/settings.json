@@ -1,10 +1,5 @@
 {
   "permissions": {
-    "deny": [
-      "Read(./.env)",
-      "Read(./.env*)",
-      "Read(./.env.*)"
-    ],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -35,10 +30,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/rtk-rewrite.sh"
-          },
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/cargo-build-block.sh"
           }
         ]
       },

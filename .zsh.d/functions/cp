@@ -1,5 +1,9 @@
 if [[ $# -eq 0 ]]; then
   # 读取标准输入，去掉尾部换行符后复制
+  if [[ -t 0 ]]; then
+    echo "Error: No input provided (stdin is a terminal)" >&2
+    return 1
+  fi
   content=$(cat | sed ':a;N;$!ba;s/\n$//')
   echo -n "$content" | wl-copy
 else

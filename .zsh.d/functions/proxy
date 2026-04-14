@@ -1,13 +1,13 @@
 local proxy_host="127.0.0.1"
 local proxy_port="7890"
-local slient="false"
+local silent="false"
 local action="set"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     -h|--host) proxy_host="$2"; shift 2 ;;
     -p|--port) proxy_port="$2"; shift 2 ;;
-    -s|--slient) slient="true"; shift ;;
+    -s|--silent) silent="true"; shift ;;
     -u|--unset) action="unset"; shift ;;
     *) break ;;
   esac
@@ -24,5 +24,5 @@ export https_proxy="http://${proxy_host}:${proxy_port}"
 export HTTPS_PROXY="$https_proxy"
 export no_proxy="localhost,127.0.0.1"
 export NO_PROXY="$no_proxy"
-[[ "$slient" == "false" ]] && echo "✓ Proxy set: ${proxy_host}:${proxy_port}"
+[[ "$silent" == "false" ]] && echo "✓ Proxy set: ${proxy_host}:${proxy_port}"
 

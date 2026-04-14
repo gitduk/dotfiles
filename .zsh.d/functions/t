@@ -27,7 +27,7 @@ local api_url="https://api-free.deepl.com/v2/translate"
 
 local response=$(curl -s -X POST "$api_url" \
   -H "Authorization: DeepL-Auth-Key $DEEPL_API_KEY" \
-  -d "text=$text" \
+  --data-urlencode "text=$text" \
   -d "target_lang=$target_lang")
 
 # Extract translated text from JSON response

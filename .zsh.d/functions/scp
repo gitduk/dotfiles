@@ -1,5 +1,5 @@
 # 参数数量为 2 且第二个参数包含冒号：上传场景
-if [[ $# -eq 2 && "$2" == *:* ]]; then
+if [[ $# -eq 2 && "$1" != *:* && "$2" == *:* ]]; then
   src="$1"
   url="$2"
 
@@ -25,8 +25,7 @@ if [[ $# -eq 2 && "$2" == *:* ]]; then
     ssh "$host" "mkdir -p \"$parent\""
   fi
 
-  # 显示并执行上传
-  echo -e "\033[1;32m→ scp $src $url\033[0m"
+  # 执行上传（命令未改写，不显示提示）
   /usr/bin/scp "$src" "$url"
   return $?
 fi
@@ -40,18 +39,24 @@ fi
 # 参数数量为 1：下载场景
 url="$1"
 
+# 验证参数包含冒号，否则透传
+if [[ "$url" != *:* ]]; then
+  /usr/bin/scp "$@"
+  return $?
+fi
+
 # 按冒号分割 "host:path"
 IFS=: read -r _ pth <<< "$url"
 
-# 空路径默认为当前目录
+# 构建目标路径
 if [[ -z "$pth" ]]; then
-  pth="."
-fi
-
-# 构建目标路径（相对路径 → 放到 $HOME 下）
-if [[ "$pth" = /* ]]; then
+  # 空路径 → 当前目录
+  dst="$(pwd)"
+elif [[ "$pth" = /* ]]; then
+  # 绝对路径 → 直接使用
   dst="$pth"
 else
+  # 相对路径 → 放到 $HOME 下
   dst="$HOME/$pth"
 fi
 

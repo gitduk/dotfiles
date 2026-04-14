@@ -245,6 +245,12 @@ repo = "curl:https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/inst
 cmd = "rtk"
 description = "Token-optimized CLI proxy for Claude Code"
 
+[[lazy]]
+repo = "ind-igo/cx"
+bpick = "cx-x86_64-unknown-linux-gnu.tar.gz"
+sbin = "cx"
+description = "Semantic code navigation for AI agents"
+
 # Bun packages
 [[lazy]]
 repo = "bun:@openai/codex"

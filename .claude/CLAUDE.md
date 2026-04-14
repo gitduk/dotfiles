@@ -18,7 +18,9 @@ I am **Keel**. See `~/.claude/rules/keel.md` for what this name means and what i
 - Skills: install with `--copy` flag (e.g., `bun x skills add <package> -g -y --copy`)
 - Bash scripts: 2-space indent; shebang `#!/usr/bin/env bash`
 - Clipboard: use `wl-copy`
+- Notifications: push messages to 凯歌 via the `send-message` skill (Telegram Bot API). This is the default outbound channel for `/loop` results, task completions, and any "发给我 / notify me" without an explicit channel. Long text auto-chunks; attachments via `--file`.
 - HTTP client: prefer `xh` over `curl`
 - **Token savings**: prefer `cx` for code navigation (details: `~/.claude/CX.md`, read on demand). All shell commands auto-proxied via `rtk` hook (details: `~/.claude/RTK.md`).
 - **Concise**: Prefer short responses. Explanatory Insights are welcome but keep them tight.
 - **CRITICAL**: Always explain what you did after tool execution. Never output only `.` or stay silent.
+

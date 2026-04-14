@@ -56,15 +56,21 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -z "$REMOTE_HOST" ]] && print_error "缺少远程主机" && return 1
-[[ ! -f "$CONFIG_FILE" ]] && print_error "配置文件不存在" && return 1
+if [[ -z "$REMOTE_HOST" ]]; then
+  print_error "缺少远程主机"
+  return 1
+fi
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  print_error "配置文件不存在"
+  return 1
+fi
 
 SUCCESS=0
 FAIL=0
 SKIP=0
 
-print_info "开始同步文件到 $REMOTE_HOST ..."
-[[ -n "$FILTER" ]] && print_info "已启用筛选器: $FILTER"
+print_info "开始同步文件到 $REMOTE_HOST"
 echo "----------------------------------------"
 
 while read -r f; do
@@ -74,8 +80,9 @@ while read -r f; do
   fi
 
   if [[ "$f" == "$HOME"* ]]; then
-    rel="${f#$HOME/}"
-    dest="~/$rel"
+    rel="${f#$HOME}"
+    rel="${rel#/}"
+    dest="~${rel:+/$rel}"
   else
     dest="$f"
   fi
@@ -95,7 +102,7 @@ while read -r f; do
   if [[ ! "$remote_parent" = "~" ]]; then
     # 模拟运行时不执行远程创建目录
     if ! $DRY_RUN; then
-      ssh "$REMOTE_HOST" "mkdir -p $remote_parent" </dev/null 2>&1
+      ssh "$REMOTE_HOST" "mkdir -p \"$remote_parent\"" </dev/null 2>&1
     fi
   fi
 
@@ -104,16 +111,26 @@ while read -r f; do
   src="$f"
   [[ -d "$f" ]] && src="$f/"
 
-  # 打印同步信息（不换行）
-  echo -ne "${GREEN}[INFO]${NC} $f → $REMOTE_HOST:$dest "
-
-  if rsync "${rsync_opts[@]}" "$src" "$REMOTE_HOST:$dest"; then
-    ((SUCCESS++))
-    echo -e "${GREEN}✓${NC}"
+  if $VERBOSE; then
+    # verbose 模式：先打印完整信息，让 rsync 自由输出
+    print_info "$f → $REMOTE_HOST:$dest"
+    if rsync "${rsync_opts[@]}" "$src" "$REMOTE_HOST:$dest"; then
+      ((SUCCESS++))
+    else
+      print_error "同步失败: $f"
+      ((FAIL++))
+    fi
   else
-    echo -e "${RED}✗${NC}"
-    print_error "同步失败: $f"
-    ((FAIL++))
+    # 非 verbose 模式：单行输出带状态符号
+    echo -ne "${GREEN}[INFO]${NC} $f → $REMOTE_HOST:$dest "
+    if rsync "${rsync_opts[@]}" "$src" "$REMOTE_HOST:$dest"; then
+      ((SUCCESS++))
+      echo -e "${GREEN}✓${NC}"
+    else
+      echo -e "${RED}✗${NC}"
+      print_error "同步失败: $f"
+      ((FAIL++))
+    fi
   fi
 
 done < <(

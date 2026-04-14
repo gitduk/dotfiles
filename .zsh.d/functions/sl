@@ -101,8 +101,7 @@ main() {
   done
 
   # All patterns must target the same host (ssh only accepts one destination)
-  # shellcheck disable=SC2086
-  ssh -N ${forward_flags[*]} "$host"
+  ssh -N "${forward_flags[@]}" "$host"
 }
 
 main "$@"

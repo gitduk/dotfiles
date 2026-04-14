@@ -65,14 +65,14 @@ editor() {
 ### main ###
 ############
 
-if [[ -z "$EDITOR" ]]; then
-  set_default_editor
-  verify_editor
-fi
-
 if (($# > 1)); then
   echo "Error: Too many arguments. Usage: ${0:t} [FILE]" >&2
   return 2
+fi
+
+if [[ -z "$EDITOR" ]]; then
+  set_default_editor || return 1
+  verify_editor || return 1
 fi
 
 editor "${@}"
