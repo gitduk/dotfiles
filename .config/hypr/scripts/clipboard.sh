@@ -10,9 +10,9 @@ selection=$(cliphist list \
     --expect=ctrl-y)
 
 # 提取查询和键
-query=$(echo "$selection" | sed -n '1p')
-key=$(echo "$selection" | sed -n '2p')
-result=$(echo "$selection" | sed -n '3p')
+query="$(printf '%s\n' "$selection" | sed -n '1p')"
+key="$(printf '%s\n' "$selection" | sed -n '2p')"
+result="$(printf '%s\n' "$selection" | sed -n '3p')"
 
 if [[ "$key" == "ctrl-y" ]]; then
   # 用户按了 ctrl-y，使用输入的查询文本，并去掉前后换行符

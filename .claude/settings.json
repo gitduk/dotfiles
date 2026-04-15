@@ -87,17 +87,15 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": false,
-    "github@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "playwright@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {},
-  "outputStyle": "Explanatory",
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
-  "voiceEnabled": true,
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
+  "voiceEnabled": true,
   "packageManager": "bun",
   "hasCompletedOnboarding": true
 }
