@@ -73,9 +73,9 @@ _fmt_speed() {
 }
 
 _quota_bar() {
-  # Horizontal progress bar. pct_v is accepted but ignored (kept for call-site compat).
-  # Usage: _quota_bar pct_h pct_v [width=8] [color]
-  local pct_h="$1" pct_v="$2" width="${3:-8}" c_override="${4:-}"
+  # Horizontal progress bar with optional pace marker.
+  # Usage: _quota_bar pct_h pct_v [width=8] [color] [pace_pct]
+  local pct_h="$1" pct_v="$2" width="${3:-8}" c_override="${4:-}" pace_pct="${5:-}"
   local active=$(( pct_h > 0 ? (pct_h * width + 99) / 100 : 0 ))
   local empty=$(( width - active ))
 
@@ -86,9 +86,28 @@ _quota_bar() {
     c=$(pct_color "$pct_h")
   fi
 
+  # Calculate pace marker position (if provided)
+  local pace_pos=-1
+  if [ -n "$pace_pct" ] && [ "$pace_pct" -ge 0 ] && [ "$pace_pct" -le 100 ]; then
+    pace_pos=$(( pace_pct * width / 100 ))
+  fi
+
   local bar="" i
-  for (( i = 0; i < active; i++ )); do bar="${bar}${c}█${RESET}"; done
-  for (( i = 0; i < empty;  i++ )); do bar="${bar}\033[38;2;130;130;130m░${RESET}"; done
+  for (( i = 0; i < width; i++ )); do
+    local char
+    if [ "$i" -lt "$active" ]; then
+      char="${c}█${RESET}"
+    else
+      char="\033[38;2;130;130;130m░${RESET}"
+    fi
+
+    # Overlay pace marker at the calculated position (replaces the bar char)
+    if [ "$i" -eq "$pace_pos" ]; then
+      bar="${bar}${DIM}|${RESET}"
+    else
+      bar="${bar}${char}"
+    fi
+  done
 
   printf '%b' "$bar"
 }
@@ -336,6 +355,19 @@ section_quota() {
       return
     fi
   fi
+
+  # Calculate ideal pace percentage for 5h window
+  local pace_pct="" overpace_warn=""
+  if [ -n "$rl_5h_resets" ] && [ "$rl_5h_resets" -gt 0 ]; then
+    local window_total=18000  # 5h = 5 * 3600 seconds
+    local secs_left=$(( rl_5h_resets - EPOCHSECONDS ))
+    # Only calculate pace if we're within a valid window (0 <= secs_left <= window_total)
+    if [ "$secs_left" -ge 0 ] && [ "$secs_left" -le "$window_total" ]; then
+      local secs_elapsed=$(( window_total - secs_left ))
+      pace_pct=$(( secs_elapsed * 100 / window_total ))
+    fi
+  fi
+
   local bar_color
   if [ "${pct5:-0}" -ge 80 ]; then bar_color="$RED"
   elif [ "${pct5:-0}" -ge 60 ]; then bar_color="$YELLOW"
@@ -343,7 +375,20 @@ section_quota() {
   fi
   local c; c=$(pct_color "$pct5")
   local reset_part=""
-  if [ -n "$rl_5h_resets" ]; then
+  # When 7d quota is exhausted, show 7d reset time instead of 5h
+  if [ "${pct7:-0}" -ge 100 ] && [ -n "$rl_7d_resets" ]; then
+    local secs_left=$(( rl_7d_resets - EPOCHSECONDS ))
+    if [ "$secs_left" -le 0 ]; then
+      reset_part=" ${DIM}now${RESET}"
+    else
+      local mins=$(( secs_left / 60 )) hrs=$(( secs_left / 3600 )) days=$(( secs_left / 86400 ))
+      local tlabel
+      if [ "$days" -gt 0 ]; then tlabel="${days}d$(( hrs % 24 ))h"
+      elif [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$(( mins % 60 ))m"
+      else tlabel="${mins}m"; fi
+      reset_part=" ${DIM}${tlabel}${RESET}"
+    fi
+  elif [ -n "$rl_5h_resets" ]; then
     local secs_left=$(( rl_5h_resets - EPOCHSECONDS ))
     if [ "$secs_left" -le 0 ]; then
       reset_part=" ${DIM}now${RESET}"
@@ -367,7 +412,7 @@ section_quota() {
     _gc_new_rl_7d_resets="${rl_7d_resets:-}"
     _gc_needs_write=1
   fi
-  printf '%b' "$(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color") ${c}${pct5}%${RESET}${pct7_display}${reset_part}"
+  printf '%b' "$(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color" "$pace_pct") ${c}${pct5}%${RESET}${pct7_display}${reset_part}${overpace_warn}"
 }
 
 section_tools() { _sec "tools" "$tool_summary"; }
@@ -384,6 +429,7 @@ sections=(
   section_quota
   section_cost
   section_speed
+  section_duration
 )
 
 output=""

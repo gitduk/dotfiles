@@ -30,6 +30,10 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/rtk-rewrite.sh"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/qa-gate.sh"
           }
         ]
       },
@@ -39,6 +43,26 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/cx-remind.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/qa-gate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/qa-gate.sh"
           }
         ]
       }
@@ -97,5 +121,6 @@
   "skipDangerousModePermissionPrompt": true,
   "voiceEnabled": true,
   "packageManager": "bun",
-  "hasCompletedOnboarding": true
+  "hasCompletedOnboarding": true,
+  "model": "opus"
 }
