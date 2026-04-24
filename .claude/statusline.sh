@@ -50,14 +50,14 @@ pct_color() {
 }
 
 _sec() {
-  local label="$1" value="$2" color="${3:-$WHITE}"
+  local label="$1" value="$2" color="${3:-$WHITE}" sep="${4:- }"
   [ -z "$value" ] && return
-  printf '%b' "${DIM}${label}:${RESET}${color}${value}${RESET}"
+  printf '%b' "${DIM}${label}${sep}${RESET}${color}${value}${RESET}"
 }
 
 _pending() {
   local label="$1"
-  printf '%b' "${DIM}${label}:...${RESET}"
+  printf '%b' "${DIM}${label} -${RESET}"
 }
 
 _fmt_speed() {
@@ -90,22 +90,26 @@ _quota_bar() {
   local pace_pos=-1
   if [ -n "$pace_pct" ] && [ "$pace_pct" -ge 0 ] && [ "$pace_pct" -le 100 ]; then
     pace_pos=$(( pace_pct * width / 100 ))
+    # Clamp to valid range [0, width-1]
+    [ "$pace_pos" -ge "$width" ] && pace_pos=$(( width - 1 ))
   fi
 
   local bar="" i
-  for (( i = 0; i < width; i++ )); do
-    local char
-    if [ "$i" -lt "$active" ]; then
-      char="${c}█${RESET}"
-    else
-      char="\033[38;2;130;130;130m░${RESET}"
-    fi
+  # Whether actual usage has exceeded ideal pace (marker would be inside filled region)
+  local overpaced=0
+  [ "$pace_pos" -ge 0 ] && [ "$active" -gt "$pace_pos" ] && overpaced=1
 
-    # Overlay pace marker at the calculated position (replaces the bar char)
-    if [ "$i" -eq "$pace_pos" ]; then
-      bar="${bar}${DIM}|${RESET}"
+  for (( i = 0; i < width; i++ )); do
+    if [ "$i" -lt "$active" ]; then
+      bar="${bar}${c}█${RESET}"
     else
-      bar="${bar}${char}"
+      # Insert pace marker at the boundary in the empty region.
+      # Only render when pace_pos is in the empty region (active <= pace_pos < width).
+      if [ "$pace_pos" -ge 0 ] && [ -n "$pace_pct" ] && [ "$i" -eq "$pace_pos" ] && [ "$overpaced" -eq 0 ]; then
+        bar="${bar}${DIM}|${RESET}"
+      else
+        bar="${bar}\033[38;2;130;130;130m░${RESET}"
+      fi
     fi
   done
 
@@ -227,7 +231,7 @@ section_model() {
 section_project() {
   local dir="${project_dir:-$cwd}"
   [ -z "$dir" ] && return
-  printf '%b' "${WHITE}${dir##*/}${RESET}"
+  printf '%b' "${DIM}${dir##*/}${RESET}"
 }
 
 section_git() {
@@ -242,7 +246,7 @@ section_context() {
     # Show an empty progress bar (all dim blocks) with no text
     local empty_bar="" i
     for (( i = 0; i < 8; i++ )); do empty_bar="${empty_bar}\033[38;2;130;130;130m░${RESET}"; done
-    printf '%b' "$empty_bar"
+    printf '%b' "${DIM}ctx${RESET} ${empty_bar} ${DIM}-${RESET}"
     return
   fi
   local pct_int; pct_int=$(printf "%.0f" "$used_pct")
@@ -255,7 +259,7 @@ section_context() {
   else bar_color="$GREEN"
   fi
   local c; c=$(pct_color "$pct_int")
-  printf '%b' "$(_quota_bar "$pct_int" "$cache_pct" 8 "$bar_color") ${c}${pct_int}%${RESET}${DIM}/${RESET}${CYAN}${cache_pct}%${RESET}"
+  printf '%b' "${DIM}ctx${RESET} $(_quota_bar "$pct_int" "$cache_pct" 8 "$bar_color") ${c}${pct_int}%${RESET}${DIM}/${RESET}${CYAN}${cache_pct}%${RESET}"
 }
 
 section_cost() {
@@ -289,9 +293,9 @@ section_speed() {
   if [ "${total_out:-0}" -le 0 ] 2>/dev/null || [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null; then
     # No live data yet — show last known speed from global cache (dimmed)
     if [ -n "$_gc_speed" ]; then
-      _sec "speed" "$_gc_speed" "$DIM"
+      _sec "spd" "$_gc_speed" "$DIM" " "
     else
-      _pending "speed"
+      _pending "spd"
     fi
     return
   fi
@@ -325,11 +329,11 @@ last_speed=\(.lastSpeed // "")"' "$_speed_cache" 2>/dev/null)"
   fi
 
   if [ -n "$speed_display" ]; then
-    _sec "speed" "$speed_display"
+    _sec "spd" "$speed_display" "$WHITE" " "
   elif [ -n "$last_speed" ]; then
-    _sec "speed" "$last_speed" "$DIM"
+    _sec "spd" "$last_speed" "$DIM" " "
   else
-    _pending "speed"
+    _pending "spd"
   fi
 }
 
@@ -402,7 +406,9 @@ section_quota() {
   local pct7_remain="" pct7_display=""
   if [ -n "$pct7" ]; then
     pct7_remain=$(( 100 - pct7 ))
-    pct7_display="${DIM}/${RESET}${DIM}${pct7}%${RESET}"
+    local c7; c7=$(pct_color "$pct7")
+    [ "$_stale" = "1" ] && c7="$DIM"
+    pct7_display="${DIM}/${RESET}${c7}${pct7}%${RESET}"
   fi
   # Mark global cache for update when we have live (non-stale) data
   if [ "$_stale" = "0" ]; then
@@ -412,7 +418,8 @@ section_quota() {
     _gc_new_rl_7d_resets="${rl_7d_resets:-}"
     _gc_needs_write=1
   fi
-  printf '%b' "$(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color" "$pace_pct") ${c}${pct5}%${RESET}${pct7_display}${reset_part}${overpace_warn}"
+  [ "$_stale" = "1" ] && c="$DIM"
+  printf '%b' "${DIM}qta${RESET} $(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color" "$pace_pct") ${c}${pct5}%${RESET}${pct7_display}${reset_part}${overpace_warn}"
 }
 
 section_tools() { _sec "tools" "$tool_summary"; }
@@ -430,6 +437,7 @@ sections=(
   section_cost
   section_speed
   section_duration
+  section_project
 )
 
 output=""

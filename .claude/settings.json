@@ -122,5 +122,5 @@
   "voiceEnabled": true,
   "packageManager": "bun",
   "hasCompletedOnboarding": true,
-  "model": "opus"
+  "agentPushNotifEnabled": true
 }

@@ -67,13 +67,14 @@ Runtime files that must NEVER be staged (even if tracked):
 
 ```bash
 # For each modified file from Step 1, check if it matches allowlist patterns:
-# - .claude/CLAUDE.md, .claude/RTK.md, .claude/CX.md, .claude/settings.json
+# - .claude/settings.json
+# - .claude/*.md
 # - .claude/rules/*.md
 # - .claude/hooks/*.sh (but NOT .claude/hooks/.*.sha256)
 # - .claude/commands/*.md
 # - .claude/skills/*/SKILL.md, .claude/skills/*/scripts/*
 # - .zsh.d/functions/*, .zsh.d/*.toml, .zsh.d/*.zsh
-# - .config/hypr/, .config/kitty/, .config/nvim/ (but NOT Cache subdirs)
+# - .config/hypr/, .config/kitty/
 # - .tmux.conf, .syc.cfg, .gitignore, .gitconfig
 
 # Stage each allowlisted file individually:

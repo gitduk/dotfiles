@@ -33,6 +33,12 @@ digraph commit_flow {
     "Check project requirements" [shape=box];
     "Missing version bump?" [shape=diamond];
     "Bump version + update lock" [shape=box];
+    "Has CLAUDE.md?" [shape=diamond];
+    "Check CLAUDE.md consistency" [shape=box];
+    "Inconsistent?" [shape=diamond];
+    "Draft CLAUDE.md updates" [shape=box];
+    "User confirms update?" [shape=diamond];
+    "Update CLAUDE.md + stage" [shape=box];
     "Analyze change type" [shape=box];
     "Draft commit message" [shape=box];
     "Run quality checks" [shape=box];
@@ -48,8 +54,17 @@ digraph commit_flow {
     "Squash first" -> "Check project requirements";
     "Check project requirements" -> "Missing version bump?";
     "Missing version bump?" -> "Bump version + update lock" [label="yes"];
-    "Missing version bump?" -> "Analyze change type" [label="no"];
-    "Bump version + update lock" -> "Analyze change type";
+    "Missing version bump?" -> "Has CLAUDE.md?" [label="no"];
+    "Bump version + update lock" -> "Has CLAUDE.md?";
+    "Has CLAUDE.md?" -> "Check CLAUDE.md consistency" [label="yes"];
+    "Has CLAUDE.md?" -> "Analyze change type" [label="no"];
+    "Check CLAUDE.md consistency" -> "Inconsistent?";
+    "Inconsistent?" -> "Draft CLAUDE.md updates" [label="yes"];
+    "Inconsistent?" -> "Analyze change type" [label="no"];
+    "Draft CLAUDE.md updates" -> "User confirms update?";
+    "User confirms update?" -> "Update CLAUDE.md + stage" [label="yes"];
+    "User confirms update?" -> "Analyze change type" [label="no, manual"];
+    "Update CLAUDE.md + stage" -> "Analyze change type";
     "Analyze change type" -> "Draft commit message";
     "Draft commit message" -> "Run quality checks";
     "Run quality checks" -> "Stage files + commit";
@@ -88,6 +103,34 @@ If unpushed commits exist and belong to same logical change → squash before ne
 - Python: `uv run ruff format . && uv run ruff check . && uv run basedpyright .`
 - JS/TS: `npm run lint` or `bun run lint` (if lint script exists)
 - Mixed: run checks for all detected languages
+
+### 3.5. CLAUDE.md Consistency Check
+
+**If project has CLAUDE.md at repo root:**
+
+1. Read current CLAUDE.md content
+2. Analyze staged changes (from `git diff --cached`):
+   - Look for public interface changes: new/removed/modified functions, classes, types, exports
+   - Look for behavior changes: new features, removed features, changed logic
+   - Look for architecture changes: new dependencies, service integrations, data flow changes
+3. Compare CLAUDE.md description against staged changes:
+   - Does CLAUDE.md describe the interfaces/features being added/removed?
+   - Does CLAUDE.md reflect the current architecture after these changes?
+   - Are there new public APIs that CLAUDE.md doesn't mention?
+   - Are there removed features that CLAUDE.md still describes?
+
+**If inconsistency detected:**
+- Show specific examples of what's inconsistent (e.g., "CLAUDE.md says vector model loads locally, but code now calls external service")
+- Draft suggested CLAUDE.md updates to match the code changes
+- Ask user: "CLAUDE.md 需要更新。我已经起草了建议的修改，要我直接更新吗？"
+- If user confirms: update CLAUDE.md, stage it, continue commit
+- If user declines: explain they should update CLAUDE.md manually before committing
+
+**If consistent or no CLAUDE.md exists:**
+- Continue to next step silently
+
+**Bypass:**
+- If commit message contains `[skip-claudemd]` tag, skip this check entirely
 
 ### 4. Analyze Change Type
 
@@ -189,6 +232,7 @@ After successful commit, display a structured report:
 | Vague commit message | Use conventional commits format with clear summary |
 | Commit with failing tests | Verify tests pass before committing |
 | Missing commit report | Always show structured report after commit |
+| CLAUDE.md out of sync with code | Check CLAUDE.md consistency before commit, update if needed |
 
 ## Red Flags
 
@@ -197,6 +241,7 @@ After successful commit, display a structured report:
 - "Commit message: WIP" → Not a logical unit, don't commit yet
 - "I'll run tests after committing" → Tests must pass before commit
 - "Let me ask user to confirm first" → Commit skill executes directly, no confirmation needed
+- "I'll run quality checks now" (after version bump check) → CLAUDE.md consistency check (Step 3.5) comes BEFORE quality checks; do not skip it when CLAUDE.md exists
 
 ## Project-Specific Checklist
 

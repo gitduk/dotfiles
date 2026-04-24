@@ -50,36 +50,37 @@ detect_lang() {
 }
 
 # Map a bash command to a "lang:category" token, or empty if not a qa command.
+# Emit one line per matched category; compound commands (&&/;) match multiple.
 classify_qa() {
   local cmd="$1"
   local lang="$2"
+  local matched=0
   case "$lang" in
     rust)
-      [[ "$cmd" =~ cargo[[:space:]]+fmt ]]                  && { echo "rust:fmt"; return; }
-      [[ "$cmd" =~ cargo[[:space:]]+clippy ]]               && { echo "rust:clippy"; return; }
-      [[ "$cmd" =~ cargo[[:space:]]+(test|nextest) ]]       && { echo "rust:test"; return; }
+      [[ "$cmd" =~ cargo[[:space:]]+fmt ]]             && { echo "rust:fmt";    matched=1; }
+      [[ "$cmd" =~ cargo[[:space:]]+clippy ]]          && { echo "rust:clippy"; matched=1; }
+      [[ "$cmd" =~ cargo[[:space:]]+(test|nextest) ]]  && { echo "rust:test";   matched=1; }
       ;;
     python)
-      [[ "$cmd" =~ ruff[[:space:]]+format ]]                && { echo "python:fmt"; return; }
-      [[ "$cmd" =~ ruff[[:space:]]+check ]]                 && { echo "python:check"; return; }
-      [[ "$cmd" =~ (basedpyright|pyright|mypy) ]]           && { echo "python:typecheck"; return; }
-      [[ "$cmd" =~ (^|[^[:alnum:]_])pytest([^[:alnum:]_]|$) ]] && { echo "python:test"; return; }
+      [[ "$cmd" =~ ruff[[:space:]]+format ]]           && { echo "python:fmt";      matched=1; }
+      [[ "$cmd" =~ ruff[[:space:]]+check ]]            && { echo "python:check";    matched=1; }
+      [[ "$cmd" =~ (basedpyright|pyright|mypy) ]]      && { echo "python:typecheck"; matched=1; }
+      [[ "$cmd" =~ (^|[^[:alnum:]_])pytest([^[:alnum:]_]|$) ]] && { echo "python:test"; matched=1; }
       ;;
     js)
-      [[ "$cmd" =~ (^|[[:space:]])(bun|npm|pnpm|yarn)[[:space:]]+(run[[:space:]]+)?test ]] && { echo "js:test"; return; }
+      [[ "$cmd" =~ (^|[[:space:]])(bun|npm|pnpm|yarn)[[:space:]]+(run[[:space:]]+)?test ]] && { echo "js:test"; matched=1; }
       ;;
     unknown)
-      # Fallback: any recognizable qa command qualifies.
       if [[ "$cmd" =~ cargo[[:space:]]+(clippy|fmt|test|check) ]] \
          || [[ "$cmd" =~ ruff[[:space:]]+(check|format) ]] \
          || [[ "$cmd" =~ (basedpyright|pyright|mypy) ]] \
          || [[ "$cmd" =~ (^|[^[:alnum:]_])pytest([^[:alnum:]_]|$) ]] \
          || [[ "$cmd" =~ (^|[[:space:]])(bun|npm|pnpm|yarn)[[:space:]]+(run[[:space:]]+)?test ]]; then
-        echo "any:qa"; return
+        echo "any:qa"; matched=1
       fi
       ;;
   esac
-  echo ""
+  [ "$matched" -eq 0 ] && echo ""; return 0
 }
 
 required_for() {
@@ -140,8 +141,9 @@ case "$EVENT" in
         IS_ERR=$(echo "$INPUT" | jq -r '(.tool_response.is_error // .tool_response.interrupted // false) | tostring')
         [ "$IS_ERR" = "true" ] && exit 0
         LANG=$(detect_lang "$CWD")
-        CAT=$(classify_qa "$CMD" "$LANG")
-        [ -n "$CAT" ] && add_passed "$CAT"
+        while IFS= read -r CAT; do
+          [ -n "$CAT" ] && add_passed "$CAT"
+        done < <(classify_qa "$CMD" "$LANG")
         ;;
     esac
     ;;

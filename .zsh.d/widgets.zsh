@@ -22,18 +22,6 @@ function vi-yank-copy {
 }
 zbindkey -M vicmd 'Y' vi-yank-copy
 
-###########################
-### fzf-bindkeys-widget ###
-###########################
-
-# list Keybindings
-function fzf-bindkeys-widget {
-  fzf --prompt="bindkeys> " --query=$LBUFFER <<<"$(bindkey | tr -d '"' | awk '{printf "%-12s| %s\n",$1,$2}')"
-  zle reset-prompt
-  zle end-of-line
-}
-zbindkey -M viins '^B' fzf-bindkeys-widget
-
 ##########################
 ### fzf-crontab-widget ###
 ##########################
@@ -65,6 +53,7 @@ zbindkey -M viins '^W' backward-delete-widget
 function space-widget() {
   zle _expand_alias
   zle self-insert
+  zle autosuggest-fetch
 }
 zbindkey ' ' space-widget
 

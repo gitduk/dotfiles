@@ -260,3 +260,6 @@ alias suef="systemctl --user edit --force --full"
 alias wi="witr"
 alias wip="witr --port"
 
+# xh
+alias x="xh"
+
