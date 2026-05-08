@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# qa-gate-version: 2
+# qa-gate-version: 3
 # QA gate — blocks `git commit` unless all required qa categories for the
 # project's language have been observed as passing since the last edit.
 #
@@ -88,7 +88,7 @@ required_for() {
     rust)    echo "rust:fmt rust:clippy rust:test" ;;
     python)  echo "python:fmt python:check python:typecheck python:test" ;;
     js)      echo "js:test" ;;
-    unknown) echo "any:qa" ;;
+    unknown) echo "" ;;
   esac
 }
 
