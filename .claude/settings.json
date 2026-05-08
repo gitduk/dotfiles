@@ -107,20 +107,20 @@
   "enabledPlugins": {
     "code-simplifier@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": false,
     "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": false
+    "playwright@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
+  "agentPushNotifEnabled": true,
   "voiceEnabled": true,
   "packageManager": "bun",
-  "hasCompletedOnboarding": true,
-  "agentPushNotifEnabled": true
+  "hasCompletedOnboarding": true
 }

@@ -11,8 +11,8 @@
 
 /* Waybar 窗口 */
 window#waybar {
-  border-radius: 1px;
-  background: transparent;
+  border-radius: 5px;
+  background: alpha(@background, 0.1);
   color: @foreground;
 }
 
@@ -111,14 +111,14 @@ window#waybar.empty #window {
 #taskbar button:hover {
   padding: 0 3px;
   animation: gradient_f 20s ease-in infinite;
-  transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
+  transition: all 0.3s cubic-bezier(0.55, -0.68, 0.48, 1.682);
 }
 
 #taskbar button.active {
   background-color: #7f849c;
   padding: 0 12px;
   animation: gradient_f 20s ease-in infinite;
-  transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
+  transition: all 0.3s cubic-bezier(0.55, -0.68, 0.48, 1.682);
 }
 
 /* 滑块样式 */
@@ -160,6 +160,6 @@ window#waybar.empty #window {
 
 /* 诗词模块样式 */
 #custom-poetry {
-  font-family: 'Source Han Sans CN', 'Noto Sans CJK SC', sans-serif;
+  font-family: "Source Han Sans CN", "Noto Sans CJK SC", sans-serif;
   font-size: 11px;
 }

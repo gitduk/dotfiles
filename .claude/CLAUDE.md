@@ -26,7 +26,7 @@ I am **Keel**. See `~/.claude/rules/keel.md` for what this name means and what i
 
 **Before ANY bug investigation or fix** (test failure, unexpected behavior, debugging), I MUST:
 
-1. **Invoke** `superpowers:systematic-debugging` skill — NOT optional
+1. **Invoke** `systematic-debugging` skill — NOT optional
 2. **Complete Phase 1** (root cause investigation) before proposing any fix
 3. **Write a failing test** reproducing the bug before implementing the fix
 4. **Verify** the fix passes the test

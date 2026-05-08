@@ -73,11 +73,10 @@ _fmt_speed() {
 }
 
 _quota_bar() {
-  # Horizontal progress bar with optional pace marker.
-  # Usage: _quota_bar pct_h pct_v [width=8] [color] [pace_pct]
-  local pct_h="$1" pct_v="$2" width="${3:-8}" c_override="${4:-}" pace_pct="${5:-}"
+  # Horizontal progress bar.
+  # Usage: _quota_bar pct_h pct_v [width=8] [color]
+  local pct_h="$1" pct_v="$2" width="${3:-8}" c_override="${4:-}"
   local active=$(( pct_h > 0 ? (pct_h * width + 99) / 100 : 0 ))
-  local empty=$(( width - active ))
 
   local c
   if [ -n "$c_override" ]; then
@@ -86,30 +85,12 @@ _quota_bar() {
     c=$(pct_color "$pct_h")
   fi
 
-  # Calculate pace marker position (if provided)
-  local pace_pos=-1
-  if [ -n "$pace_pct" ] && [ "$pace_pct" -ge 0 ] && [ "$pace_pct" -le 100 ]; then
-    pace_pos=$(( pace_pct * width / 100 ))
-    # Clamp to valid range [0, width-1]
-    [ "$pace_pos" -ge "$width" ] && pace_pos=$(( width - 1 ))
-  fi
-
   local bar="" i
-  # Whether actual usage has exceeded ideal pace (marker would be inside filled region)
-  local overpaced=0
-  [ "$pace_pos" -ge 0 ] && [ "$active" -gt "$pace_pos" ] && overpaced=1
-
   for (( i = 0; i < width; i++ )); do
     if [ "$i" -lt "$active" ]; then
       bar="${bar}${c}█${RESET}"
     else
-      # Insert pace marker at the boundary in the empty region.
-      # Only render when pace_pos is in the empty region (active <= pace_pos < width).
-      if [ "$pace_pos" -ge 0 ] && [ -n "$pace_pct" ] && [ "$i" -eq "$pace_pos" ] && [ "$overpaced" -eq 0 ]; then
-        bar="${bar}${DIM}|${RESET}"
-      else
-        bar="${bar}\033[38;2;130;130;130m░${RESET}"
-      fi
+      bar="${bar}\033[38;2;130;130;130m░${RESET}"
     fi
   done
 
@@ -189,9 +170,10 @@ fi
 # Git
 _git_dir="${project_dir:-$cwd}"
 _git_branch="" _git_dirty="no"
-if [ -n "$_git_dir" ] && [ -d "$_git_dir/.git" ]; then
+if [ -n "$_git_dir" ] && git --no-optional-locks -C "$_git_dir" rev-parse --git-dir >/dev/null 2>&1; then
   _git_branch=$(git --no-optional-locks -C "$_git_dir" branch --show-current 2>/dev/null)
-  git --no-optional-locks -C "$_git_dir" diff --quiet 2>/dev/null || _git_dirty="yes"
+  git --no-optional-locks -C "$_git_dir" diff --quiet 2>/dev/null && \
+    git --no-optional-locks -C "$_git_dir" diff --cached --quiet 2>/dev/null || _git_dirty="yes"
 fi
 
 # Transcript: tool-use and todo summaries read directly from the transcript file
@@ -282,7 +264,6 @@ section_cost() {
   printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"
 }
 
-section_tokens_in()  { _sec "in"  "$(fmt_tokens "$total_in")"; }
 section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
 
 # Per-session speed cache
@@ -353,22 +334,11 @@ section_quota() {
       [ -n "$_gc_rl_5h_pct" ] && pct5=$(printf "%.0f" "$_gc_rl_5h_pct")
       [ -n "$_gc_rl_7d_pct" ] && pct7=$(printf "%.0f" "$_gc_rl_7d_pct")
       rl_5h_resets="${_gc_rl_5h_resets:-}"
+      rl_7d_resets="${_gc_rl_7d_resets:-}"
       _stale=1
     else
       _pending "rl"
       return
-    fi
-  fi
-
-  # Calculate ideal pace percentage for 5h window
-  local pace_pct="" overpace_warn=""
-  if [ -n "$rl_5h_resets" ] && [ "$rl_5h_resets" -gt 0 ]; then
-    local window_total=18000  # 5h = 5 * 3600 seconds
-    local secs_left=$(( rl_5h_resets - EPOCHSECONDS ))
-    # Only calculate pace if we're within a valid window (0 <= secs_left <= window_total)
-    if [ "$secs_left" -ge 0 ] && [ "$secs_left" -le "$window_total" ]; then
-      local secs_elapsed=$(( window_total - secs_left ))
-      pace_pct=$(( secs_elapsed * 100 / window_total ))
     fi
   fi
 
@@ -419,7 +389,7 @@ section_quota() {
     _gc_needs_write=1
   fi
   [ "$_stale" = "1" ] && c="$DIM"
-  printf '%b' "${DIM}qta${RESET} $(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color" "$pace_pct") ${c}${pct5}%${RESET}${pct7_display}${reset_part}${overpace_warn}"
+  printf '%b' "${DIM}qta${RESET} $(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color") ${c}${pct5}%${RESET}${pct7_display}${reset_part}"
 }
 
 section_tools() { _sec "tools" "$tool_summary"; }

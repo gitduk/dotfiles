@@ -20,14 +20,14 @@ $ policy: echo "always|unless-stopped|on-failure" | tr "|" "\n"
 
 # postgresql
 mkdir -p ~/.postgres
-podman run -d --name postgres \
+podman run -d --name pgvector \
+  -p 5432:5432 \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=changeme \
-  -e PGDATA=/var/lib/postgresql/data/pgdata \
-  -p 5432:5432 \
-  -v postgres:/var/lib/postgresql/data \
-  --restart=unless-stopped \
-  postgres:latest
+  -e POSTGRES_DB=postgres \
+  -v pgvector-data:/var/lib/postgresql/data \
+  --restart unless-stopped \
+  docker.io/pgvector/pgvector:pg17
 
 # stirling-pdf
 podman run -d --name stirling-pdf \
@@ -39,7 +39,7 @@ podman run -d --name stirling-pdf \
   -v ./configs:/configs \
   -v ./logs:/logs \
   -v ./files:/customFiles \
-  --restart=unless-stopped \
+  --restart unless-stopped \
   frooodle/s-pdf:latest
 
 # pairdrop
@@ -53,13 +53,13 @@ podman run -d --name pairdrop \
   -e DEBUG_MODE=false \
   -e TZ=Etc/UTC \
   -p 0.0.0.0:3000:3000 \
-  --restart=unless-stopped \
+  --restart unless-stopped \
   lscr.io/linuxserver/pairdrop
 
 # uptime-kuma:3001
 podman run -d --name uptime-kuma \
   -v uptime-kuma:/app/data \
-  --network=host \
+  --network host \
   louislam/uptime-kuma:2
 
 # beszel: a lightweight server monitoring
@@ -67,13 +67,13 @@ mkdir -p ~/.beszel_data
 podman run -d --name beszel \
   -p 8090:8090 \
   -v beszel_data:/beszel_data \
-  --restart=unless-stopped \
+  --restart unless-stopped \
   docker.io/henrygd/beszel
 
 # mazanoke: A self-hosted local image optimizer that runs in your browser.
 podman run -d --name mazanoke \
   -p 3474:80 \
-  --restart=unless-stopped \
+  --restart unless-stopped \
   ghcr.io/civilblur/mazanoke:latest
 
 # attu milvus webui
@@ -81,20 +81,20 @@ podman run -d --name attu \
   -e MILVUS_URL=host.containers.internal:19530 \
   -p 3000:3000 \
   --add-host=host.containers.internal:host-gateway \
-  --restart=always \
+  --restart always \
   zilliz/attu:latest
 
 # open-webui
 podman run -d --name open-webui \
   -p 8080:8080 \
   -v open-webui:/app/backend/data \
-  --restart=always \
+  --restart always \
   ghcr.io/open-webui/open-webui:main
 
 # prometheus
 podman run -d --name prometheus \
   -p 127.0.0.1:9090:9090 \
-  --restart=always \
+  --restart always \
   prom/prometheus
 
 # redis
@@ -102,14 +102,14 @@ podman run -d --name redis \
   -e REDIS_PASSWORD=changeme \
   -p 6379:6379 \
   -v redis:/data \
-  --network=redis_net \
+  --network redis_net \
   redis:latest
 
 # redisinsight - redis gui
 podman run -d --name redisinsight \
   -p 5540:5540 \
   -v redisinsight:/data \
-  --network=redis_net \
+  --network redis_net \
   redis/redisinsight:latest
 
 # new-api:3000
@@ -117,15 +117,15 @@ podman run -d --name new-api \
   -e TZ=Asia/Shanghai \
   -v new-api:/data \
   --env-file .env \
-  --network=host \
-  --restart=always \
+  --network host \
+  --restart always \
   calciumion/new-api:latest
 
 # gemini-balance:8000
 podman run -d --name gemini-balance \
   -v gemini-balance:/app/data \
   --env-file .env \
-  --network=host \
+  --network host \
   ghcr.io/snailyp/gemini-balance:latest
 
 # mysql
@@ -148,6 +148,6 @@ podman run -d --name rustfs \
 # bifrost
 podman run -d --name bifrost \
   -v bifrost:/app/data \
-  --network=host \
+  --network host \
   maximhq/bifrost
 
