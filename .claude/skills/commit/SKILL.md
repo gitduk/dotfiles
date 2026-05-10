@@ -164,11 +164,11 @@ Add body (separated by blank line) when WHY isn't obvious from diff.
 
 ### 6. Execute Commit
 
-**Auto-detect project type and run appropriate quality checks:**
+**Auto-detect project type and run ALL quality checks in a single command BEFORE any `git add`:**
 
 ```bash
-# Rust project (has Cargo.toml)
-cargo fmt && cargo clippy
+# Rust project (has Cargo.toml) — must be ONE command so QA gate records all three
+cargo fmt && cargo clippy -- -D warnings && cargo test
 
 # Python project (has pyproject.toml)
 uv run ruff format . && uv run ruff check . && uv run basedpyright .
@@ -176,7 +176,7 @@ uv run ruff format . && uv run ruff check . && uv run basedpyright .
 # JS/TS project (has package.json with lint script)
 npm run lint  # or bun run lint
 
-# Then commit
+# ONLY after all checks pass, stage and commit
 git add <specific files>
 git commit -m "$(cat <<'EOF'
 <commit message>
@@ -185,6 +185,8 @@ Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
 EOF
 )"
 ```
+
+**Critical ordering rule**: quality checks → `git add` → `git commit`. Never run `git add` before quality checks complete. Formatters (e.g. `cargo fmt`) modify files; if you stage first, the staging area will desync from the working tree after formatting runs.
 
 **Detection logic:**
 - Check for `Cargo.toml` → Rust

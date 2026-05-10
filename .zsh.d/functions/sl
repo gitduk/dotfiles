@@ -3,6 +3,7 @@ show_help() {
 Usage: sl [-r] <pattern> [<pattern> ...]
 
 SSH port forwarding wrapper with simplified syntax.
+Multiple hosts spawn parallel SSH sessions; Ctrl-C tears all down.
 
 Patterns:
   <host>:<port>[,<port>...]              Forward local port(s) to remote (same port both sides)
@@ -13,19 +14,14 @@ Options:
   -h    Show this help message
 
 Examples:
-  sl wk:8000                # Local forward: localhost:8000 -> wk:8000
-  sl wk:4000,4001,4002      # Local forward: ports 4000, 4001, 4002 on wk
-  sl 8001:wk:8000           # Local forward: localhost:8001 -> wk:8000
-  sl -r wk:8000             # Remote forward: wk:8000 -> localhost:8000
-  sl -r wk:4000,4001        # Remote forward: wk:4000, wk:4001 -> localhost
+  sl wk:8000                     # Local forward: localhost:8000 -> wk:8000
+  sl wk:4000,4001,4002            # Local forward: ports 4000, 4001, 4002 on wk
+  sl 8001:wk:8000                 # Local forward: localhost:8001 -> wk:8000
+  sl -r wk:8000                   # Remote forward: wk:8000 -> localhost:8000
+  sl wk:4000,9200 8008:ds:8000    # Two hosts: parallel SSH sessions
 EOF
 }
 
-# Build a single -L or -R flag string for one port entry.
-# Usage: build_forward_flags <mode> <bind_addr> <local_port> <remote_port>
-#   mode:      -NL or -NR
-#   bind_addr: "0.0.0.0:" or ""
-#   local_port / remote_port: numeric
 build_forward_flag() {
   local mode="$1" bind_addr="$2" local_port="$3" remote_port="$4"
   if [[ "$mode" == "-NL" ]]; then
@@ -35,7 +31,6 @@ build_forward_flag() {
   fi
 }
 
-# Print a human-readable line for one port mapping.
 print_mapping() {
   local mode="$1" host="$2" local_port="$3" remote_port="$4"
   if [[ "$mode" == "-NL" ]]; then
@@ -48,51 +43,42 @@ print_mapping() {
 }
 
 main() {
+  setopt local_options no_monitor
   local mode="-NL"
   local bind_addr="0.0.0.0:"
-  local host=""
-  local -a forward_flags=()
+  local -A host_flags   # host -> newline-joined flag strings
+  local -a host_order   # hosts in order of first appearance
   local -a args=("$@")
 
-  # Handle options
   case "${args[0]}" in
-    -h|--help)
-      show_help
-      return 0
-      ;;
-    -r)
-      mode="-NR"
-      bind_addr=""
-      args=("${args[@]:1}")
-      ;;
+    -h|--help) show_help; return 0 ;;
+    -r) mode="-NR"; bind_addr=""; args=("${args[@]:1}") ;;
   esac
 
-  if [[ ${#args[@]} -eq 0 ]]; then
-    echo "Error: Missing argument" >&2
-    show_help
-    return 1
-  fi
+  [[ ${#args[@]} -eq 0 ]] && { echo "Error: Missing argument" >&2; show_help; return 1; }
+
+  _sl_add() {
+    local host="$1" lp="$2" rp="$3"
+    print_mapping "$mode" "$host" "$lp" "$rp"
+    local flag
+    flag="$(build_forward_flag "$mode" "$bind_addr" "$lp" "$rp")"
+    if [[ -z "${host_flags[$host]+_}" ]]; then
+      host_order+=("$host")
+      host_flags[$host]="$flag"
+    else
+      host_flags[$host]+=$'\n'"$flag"
+    fi
+  }
 
   for arg in "${args[@]}"; do
-    # Pattern: local_port:host:remote_port  (no comma support here — unambiguous 3-field form)
     if [[ "$arg" =~ ^([0-9]+):([^:,]+):([0-9]+)$ ]]; then
-      local local_port="${match[1]}"
-      host="${match[2]}"
-      local remote_port="${match[3]}"
-      print_mapping "$mode" "$host" "$local_port" "$remote_port"
-      forward_flags+=("$(build_forward_flag "$mode" "$bind_addr" "$local_port" "$remote_port")")
-
-    # Pattern: host:port[,port,...]
+      _sl_add "${match[2]}" "${match[1]}" "${match[3]}"
     elif [[ "$arg" =~ ^([^:,]+):([0-9][0-9,]*)$ ]]; then
-      host="${match[1]}"
-      local ports_str="${match[2]}"
-      local -a ports=(${(s:,:)ports_str})
-      for port in "${ports[@]}"; do
+      local host="${match[1]}" port
+      for port in ${(s:,:)${match[2]}}; do
         [[ "$port" =~ ^[0-9]+$ ]] || { echo "Error: Invalid port '$port' in '$arg'" >&2; return 1; }
-        print_mapping "$mode" "$host" "$port" "$port"
-        forward_flags+=("$(build_forward_flag "$mode" "$bind_addr" "$port" "$port")")
+        _sl_add "$host" "$port" "$port"
       done
-
     else
       echo "Error: Invalid pattern '$arg'" >&2
       show_help
@@ -100,8 +86,29 @@ main() {
     fi
   done
 
-  # All patterns must target the same host (ssh only accepts one destination)
-  ssh -N "${forward_flags[@]}" "$host"
+  if [[ ${#host_order[@]} -eq 1 ]]; then
+    local h="${host_order[1]}"
+    local -a flags=(${(f)host_flags[$h]})
+    ssh -N "${flags[@]}" "$h"
+    return $?
+  fi
+
+  # Multiple hosts: spawn one SSH per host, tear all down together on exit
+  local -a pids=()
+  local h
+  for h in "${host_order[@]}"; do
+    local -a flags=(${(f)host_flags[$h]})
+    ssh -N "${flags[@]}" "$h" &
+    pids+=($!)
+  done
+
+  _sl_cleanup() {
+    kill "${pids[@]}" 2>/dev/null
+    trap - EXIT INT TERM HUP
+  }
+  trap _sl_cleanup EXIT INT TERM HUP
+  wait "${pids[@]}"
+  trap - EXIT INT TERM HUP
 }
 
 main "$@"

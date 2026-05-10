@@ -1,5 +1,10 @@
 {
   "permissions": {
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf /*)",
+      "Read(**/.env*)"
+    ],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -9,6 +14,14 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/memory-heal.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/context-mode-cache-heal.mjs"
           }
         ]
       }
@@ -112,9 +125,17 @@
     "skill-creator@claude-plugins-official": false,
     "context7@claude-plugins-official": true,
     "playwright@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "context-mode@context-mode": true
   },
-  "extraKnownMarketplaces": {},
+  "extraKnownMarketplaces": {
+    "context-mode": {
+      "source": {
+        "source": "github",
+        "repo": "mksglu/context-mode"
+      }
+    }
+  },
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "autoDreamEnabled": true,
