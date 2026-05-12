@@ -2,100 +2,69 @@
   {
     "bindings": {
       "ctrl-`": null,
-      "ctrl-k ctrl-t": null,
-      "ctrl-k ctrl-m": null,
-      "ctrl-k ctrl-down": null,
-      "ctrl-k ctrl-left": null,
-      "ctrl-k ctrl-right": null,
-      "ctrl-k ctrl-up": null,
-      "ctrl-k s": null,
-      "ctrl-k shift-down": null,
-      "ctrl-k shift-left": null,
-      "ctrl-k shift-right": null,
-      "ctrl-k shift-up": null,
-      "ctrl-k ctrl-s": null,
-      "ctrl-k m": null,
-      "ctrl-k ctrl-0": null,
-      "ctrl-k ctrl-1": null,
-      "ctrl-k ctrl-2": null,
-      "ctrl-k ctrl-3": null,
-      "ctrl-k ctrl-4": null,
-      "ctrl-k ctrl-5": null,
-      "ctrl-k ctrl-6": null,
-      "ctrl-k ctrl-7": null,
-      "ctrl-k ctrl-8": null,
-      "ctrl-k ctrl-9": null,
-      "ctrl-k ctrl-b": null,
-      "ctrl-k ctrl-[": null,
-      "ctrl-k ctrl-i": null,
-      "ctrl-k r": null,
-      "ctrl-k ctrl-q": null,
-      "ctrl-k q": null,
-      "ctrl-k ctrl-d": null,
-      "ctrl-k ctrl-shift-d": null,
-      "ctrl-k ctrl-l": null,
-      "ctrl-k ctrl-j": null,
-      "ctrl-k ctrl-]": null,
-      "ctrl-k p": null,
-      "ctrl-k l": null,
-      "ctrl-k c": null,
-      "ctrl-k ctrl-z": null,
-      "ctrl-k z": null,
-      "ctrl-k ctrl-r": null,
-      "ctrl-k v": null,
-      "ctrl-k w": null,
-      "ctrl-k u": null,
-      "ctrl-k e": null,
-      "ctrl-k t": null,
-      "ctrl-k down": null,
-      "ctrl-k left": null,
-      "ctrl-k right": null,
-      "ctrl-k up": null,
-      "ctrl-k shift-enter": null,
-      "ctrl-k ctrl-w": null,
-    },
+      "ctrl-k": null
+    }
   },
   {
     "bindings": {
       "alt-enter": "editor::OpenExcerpts",
       "ctrl-enter": "assistant::InlineAssist",
-      "ctrl-space": "terminal_panel::Toggle",
-    },
+      "ctrl-space": "terminal_panel::Toggle"
+    }
   },
   {
     "context": "Editor && vim_mode == insert",
     "bindings": {
       "j k": "vim::NormalBefore",
       "ctrl-h": "editor::Backspace",
-      "ctrl-shift-v": "editor::Paste",
-    },
+      "ctrl-shift-v": "editor::Paste"
+    }
   },
   {
     "context": "Editor && vim_mode == normal && !menu",
     "bindings": {
       "ctrl-h": "vim::StartOfLine",
-      "ctrl-enter": "assistant::InlineAssist",
-    },
+      "ctrl-enter": "assistant::InlineAssist"
+    }
+  },
+  {
+    "context": "((vim_mode == normal || vim_mode == visual) || vim_mode == operator)",
+    "bindings": {
+      "shift-h": "pane::ActivatePreviousItem",
+      "shift-l": "pane::ActivateNextItem"
+    }
+  },
+  {
+    "context": "vim_mode == literal",
+    "unbind": {
+      "ctrl-k": ["vim::Literal", ["ctrl-k", "\u000b"]]
+    }
+  },
+  {
+    "context": "vim_mode == insert || vim_mode == replace || vim_mode == waiting",
+    "unbind": {
+      "ctrl-k": ["vim::PushDigraph", {}]
+    }
   },
   {
     "context": "Editor && edit_prediction",
     "bindings": {
       "ctrl-f": "editor::AcceptEditPrediction",
       "alt-l": null,
-      "alt-tab": null,
-    },
+      "alt-tab": null
+    }
   },
   {
     "context": "Editor && showing_completions",
     "bindings": {
-      "tab": "editor::ComposeCompletion",
-    },
+      "tab": "editor::ComposeCompletion"
+    }
   },
   {
-    "context": "Editor && edit_prediction_conflict",
+    "context": "Editor && (edit_prediction && (showing_completions || in_leading_whitespace))",
     "bindings": {
-      "ctrl-f": "editor::AcceptEditPrediction",
-    },
+      "ctrl-f": "editor::AcceptEditPrediction"
+    }
   },
   {
     "context": "ProjectPanel",
@@ -106,8 +75,8 @@
       "enter": "project_panel::Rename",
       "space": "project_panel::Open",
       "backspace": "project_panel::Delete",
-      "alt-shift-f": "project_panel::NewSearchInDirectory",
-    },
+      "alt-shift-f": "project_panel::NewSearchInDirectory"
+    }
   },
   {
     "context": "Terminal",
@@ -124,13 +93,25 @@
       "ctrl-c": ["terminal::SendKeystroke", "ctrl-c"],
       "ctrl-w": ["terminal::SendKeystroke", "ctrl-w"],
       "ctrl-j": ["terminal::SendKeystroke", "ctrl-j"],
-    },
+      "ctrl-k": ["terminal::SendKeystroke", "ctrl-k"]
+    }
   },
   {
-    "context": "((vim_mode == normal || vim_mode == visual) || vim_mode == operator)",
-    "bindings": {
-      "shift-h": "pane::ActivatePreviousItem",
-      "shift-l": "pane::ActivateNextItem",
-    },
+    "context": "KeymapEditor",
+    "unbind": {
+      "ctrl-k": "keymap_editor::OpenCreateKeybindingModal"
+    }
   },
+  {
+    "context": "FileFinder || FileFinder > Picker > Editor || FileFinder > Picker > menu",
+    "unbind": {
+      "ctrl-k": "pane::SplitUp"
+    }
+  },
+  {
+    "context": "RecentProjects || RecentProjects > Picker > Editor",
+    "unbind": {
+      "ctrl-k": "recent_projects::ToggleActionsMenu"
+    }
+  }
 ]

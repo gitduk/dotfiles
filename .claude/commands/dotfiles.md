@@ -18,17 +18,12 @@ Run this compound script **in one Bash tool call**:
 export GIT_DIR="$HOME/.dotfiles.git"
 export GIT_WORK_TREE="$HOME"
 
-is_allowed() { case "$1" in
-  .claude/settings.json|.claude/settings.local.json|\
-  .claude/*.md|.claude/rules/*.md|.claude/hooks/*.sh|\
-  .claude/commands/*.md|\
-  .claude/skills/*/SKILL.md|.claude/skills/*/scripts/*)
+is_blocked() { case "$1" in
+  # secrets / credentials — never commit these
+  *token*|*secret*|*password*|*credential*|*.pem|*.key|*.p12|*.env|.env*)
     return 0 ;;
-  .zsh.d/functions/*|.zsh.d/*.toml|.zsh.d/*.zsh)
-    return 0 ;;
-  .config/hypr/*|.config/kitty/*)
-    return 0 ;;
-  .tmux.conf|.syc.cfg|.gitignore|.gitconfig)
+  # auto-generated memory / project-local state
+  .claude/projects/*)
     return 0 ;;
   *) return 1 ;;
 esac; }
@@ -39,14 +34,27 @@ git log @{u}..HEAD --oneline 2>/dev/null \
   || echo "(no upstream)"
 
 echo ""
-echo "=== Modified tracked files → staging ==="
+echo "=== Pre-staged cleanup (unstage blocked files) ==="
+git diff --cached --name-only | while IFS= read -r rel; do
+  if is_blocked "$rel"; then
+    git restore --staged -- "$rel" && echo "  unstaged(blocked): $rel"
+  fi
+done
+
+echo ""
+echo "=== Modified/deleted tracked files → staging ==="
 git status --porcelain | while IFS= read -r line; do
+  xy="${line:0:2}"
   rel="${line:3}"
+  [[ "$xy" == "??" ]] && continue
   [[ "$rel" == *" -> "* ]] && rel="${rel##* -> }"
-  if is_allowed "$rel"; then
+  if is_blocked "$rel"; then
+    echo "  blocked:  $rel"
+  elif [[ -e "$HOME/$rel" ]]; then
     git add "$HOME/$rel" && echo "  staged:   $rel"
   else
-    echo "  skipped:  $rel"
+    git rm --cached -- "$rel" 2>/dev/null && echo "  staged(rm): $rel" \
+      || echo "  skip(already-rm): $rel"
   fi
 done
 
@@ -58,10 +66,10 @@ echo "=== Untracked claude files → staging ==="
 while IFS= read -r -d '' f; do
   rel="${f#$HOME/}"
   git ls-files --error-unmatch "$f" >/dev/null 2>&1 && continue
-  if is_allowed "$rel"; then
-    git add "$f" && echo "  added:    $rel"
+  if is_blocked "$rel"; then
+    echo "  blocked:  $rel"
   else
-    echo "  skipped:  $rel"
+    git add "$f" && echo "  added:    $rel"
   fi
 done
 
@@ -70,7 +78,8 @@ echo "=== Staged diff ==="
 git diff --cached --name-only
 ```
 
-If any unexpected file appears staged in the diff, **STOP and report the error. Do NOT proceed.**
+After the staged diff, verify no blocked file appears in the output.
+If any blocked file is still staged, **STOP and report. Do NOT proceed.**
 
 ---
 

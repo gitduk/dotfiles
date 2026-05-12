@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "notify-send 'Claude Code' '需要你的输入，请切换到终端'",
+            "command": "hyprctl notify 4 5000 0 'Claude Code: 需要你的输入，请切换到终端'",
             "timeout": 5
           }
         ]
@@ -96,7 +96,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "notify-send 'Claude Code' '需要你的授权，请切换到终端'",
+            "command": "hyprctl notify 0 5000 0 'Claude Code: 需要你的授权，请切换到终端'",
             "timeout": 5
           }
         ]
@@ -107,7 +107,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "notify-send 'Claude Code' '任务完成，请查看结果'"
+            "command": "hyprctl notify 5 5000 0 'Claude Code: 任务完成，请查看结果'"
           }
         ]
       }

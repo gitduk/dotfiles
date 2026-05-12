@@ -178,7 +178,7 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
     export NAVI_PATH="$HOME/.config/navi/cheats"
     export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
     eval "$(navi widget zsh)"
-    bindkey "^N" _navi_widget
+    bindkey "^E" _navi_widget
   '
 zinit light denisidoro/navi
 
@@ -202,3 +202,4 @@ if [[ -n "$ZPROF" ]]; then
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
 
+export PKG_CONFIG_PATH="$HOME/.local/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"

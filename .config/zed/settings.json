@@ -1,0 +1,132 @@
+{
+  "proxy": "",
+  "project_panel": {
+    "dock": "right"
+  },
+  "outline_panel": {
+    "dock": "right"
+  },
+  "collaboration_panel": {
+    "dock": "right"
+  },
+  "git_panel": {
+    "dock": "right"
+  },
+  "agent_servers": {
+    "gemini": {
+      "type": "registry"
+    },
+    "github-copilot-cli": {
+      "type": "registry"
+    },
+    "codex-acp": {
+      "type": "registry"
+    },
+    "claude-acp": {
+      "type": "registry",
+    },
+  },
+  "context_servers": {
+    "mcp-server-context7": {
+      "enabled": true,
+      "remote": false,
+      "settings": {
+        "context7_api_key": "",
+      },
+    },
+  },
+  "edit_predictions": {
+    "copilot": {
+      "enable_next_edit_suggestions": true
+    },
+    "provider": "zed",
+  },
+  "languages": {
+    "Python": {
+      "format_on_save": "on",
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true,
+      },
+      "formatter": {
+        "external": {
+          "command": "ruff",
+          "arguments": ["format", "--stdin-filename", "{buffer_path}", "-"],
+        },
+      },
+      "language_servers": ["basedpyright", "ruff"],
+    },
+  },
+  "lsp": {
+    "basedpyright": {
+      "settings": {
+        "basedpyright.analysis.typeCheckingMode": "standard",
+      },
+    },
+  },
+  "language_models": {
+    "anthropic": {
+      "api_url": "http://localhost:7896",
+    },
+  },
+  "agent": {
+    "dock": "left",
+    "inline_assistant_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-5-mini",
+      "enable_thinking": false
+    },
+    "default_profile": "write",
+    "tool_permissions": {
+      "tools": {
+        "mcp:mcp-server-sequential-thinking:sequentialthinking": {
+          "default": "allow",
+        },
+        "save_file": {
+          "default": "allow",
+        },
+        "move_path": {
+          "default": "allow",
+        },
+        "terminal": {
+          "default": "allow",
+        },
+      },
+    },
+    "default_model": {
+      "effort": "high",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6-latest",
+      "enable_thinking": true,
+    },
+    "commit_message_model": {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-latest",
+    },
+    "thread_summary_model": {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-latest",
+    },
+  },
+  "session": {
+    "trust_all_worktrees": true,
+  },
+  "vim_mode": true,
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark Pro",
+  },
+  "git": {
+    "inline_blame": {
+      "enabled": true,
+    },
+  },
+  "terminal": {
+    "shell": {
+      "program": "zsh",
+    },
+  },
+  "autosave": "on_focus_change",
+}
