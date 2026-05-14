@@ -276,11 +276,9 @@ symbol = "zig "
 [custom.direnv]
 command = """
 allowed=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed // empty')
-[ -e .env ] && file=".env"
-[ -e .envrc ] && file=".envrc"
 case "$allowed" in
-  0) echo "\e[1;34m$file\e[0m" ;;
-  2) echo "\e[90m$file\e[0m" ;;
+  0) echo "\e[1;34m󰙴\e[0m" ;;
+  2) echo "\e[90m󰙴\e[0m" ;;
   *) echo "" ;;
 esac
 """

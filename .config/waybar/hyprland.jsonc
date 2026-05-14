@@ -4,6 +4,7 @@
     "all-outputs": true,
     "format": "{icon}",
     "show-special": false,
+    "on-click": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"{name}\" }))'",
     "on-scroll-up": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e-1\" }))'",
     "on-scroll-down": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e+1\" }))'",
     "persistent-workspaces": {
@@ -21,6 +22,7 @@
     "all-outputs": true,
     "format": "{icon}",
     "show-special": false,
+    "on-click": "/tmp/ws_click_test.sh {name}",
     "on-scroll-up": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e-1\" }))'",
     "on-scroll-down": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e+1\" }))'",
     "persistent-workspaces": {
@@ -43,6 +45,7 @@
   "hyprland/workspaces#pacman": {
     "active-only": false,
     "all-outputs": true,
+    "on-click": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"{name}\" }))'",
     "on-scroll-up": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e-1\" }))'",
     "on-scroll-down": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e+1\" }))'",
     "show-special": false,
@@ -84,6 +87,7 @@
   "hyprland/workspaces#4": {
     "format": " {name} {icon} ",
     "show-special": false,
+    "on-click": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"{name}\" }))'",
     "on-scroll-up": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e-1\" }))'",
     "on-scroll-down": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e+1\" }))'",
     "all-outputs": true,
@@ -109,6 +113,7 @@
     "warp-on-scroll": false,
     "sort-by-number": true,
     "show-special": false,
+    "on-click": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"{name}\" }))'",
     "on-scroll-up": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e-1\" }))'",
     "on-scroll-down": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e+1\" }))'",
     "format": "{icon} {windows}",
@@ -142,6 +147,7 @@
     "all-outputs": true,
     "format": "{icon}",
     "show-special": false,
+    "on-click": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"{name}\" }))'",
     "on-scroll-up": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e-1\" }))'",
     "on-scroll-down": "hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = \"e+1\" }))'",
     "persistent-workspaces": {

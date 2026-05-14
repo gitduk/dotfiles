@@ -41,8 +41,8 @@ export MOZ_WEBRENDER=1
 export ELECTRON_OZONE_PLATFORM_HINT=auto
 
 # Fcitx5
-export XMODIFIERS=@im=fcitx5
-export QT_IM_MODULE=fcitx5
-export SDL_IM_MODULE=fcitx5
+export XMODIFIERS=@im=fcitx
+export QT_IM_MODULE=fcitx
+export SDL_IM_MODULE=fcitx
 export GLFW_IM_MODULE=ibus
 

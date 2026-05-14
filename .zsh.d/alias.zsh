@@ -4,7 +4,7 @@
 
 alias e="extract"
 alias bt="bluetoothctl"
-alias chx="sudo chmod +x"
+alias cmx="sudo chmod +x"
 alias cwn='sudo chown -Rv $USER:$USER'
 alias cre="crontab -e"
 alias dis="sudo dpkg -i"

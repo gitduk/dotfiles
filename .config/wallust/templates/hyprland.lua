@@ -1,3 +1,5 @@
+-- Static color palette. Update after running wallust.
+
 $background = rgb({{background | strip}})
 $foreground = rgb({{foreground | strip}})
 $color0 = rgb({{color0 | strip}})

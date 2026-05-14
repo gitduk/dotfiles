@@ -96,26 +96,26 @@ for i = 1, 10 do
 end
 
 -- Relative workspace navigation
-hl.bind(Mod_S .. " + bracketleft",  hl.dsp.window.move({ workspace = "-1" }))
+hl.bind(Mod_S .. " + bracketleft", hl.dsp.window.move({ workspace = "-1" }))
 hl.bind(Mod_S .. " + bracketright", hl.dsp.window.move({ workspace = "+1" }))
-hl.bind(Mod_C .. " + bracketleft",  hl.dsp.window.move({ workspace = "-1", follow = false }))
+hl.bind(Mod_C .. " + bracketleft", hl.dsp.window.move({ workspace = "-1", follow = false }))
 hl.bind(Mod_C .. " + bracketright", hl.dsp.window.move({ workspace = "+1", follow = false }))
 
 -- Workspace cycling
 hl.bind(Mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(Mod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(Mod .. " + period",     hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(Mod .. " + comma",      hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(Mod .. " + p",          hl.dsp.focus({ workspace = "previous" }))
-hl.bind(Mod_C .. " + l",        hl.dsp.focus({ workspace = "m+1" }))
-hl.bind(Mod_C .. " + h",        hl.dsp.focus({ workspace = "m-1" }))
+hl.bind(Mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(Mod .. " + period", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind(Mod .. " + comma", hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(Mod .. " + p", hl.dsp.focus({ workspace = "previous" }))
+hl.bind(Mod_C .. " + l", hl.dsp.focus({ workspace = "m+1" }))
+hl.bind(Mod_C .. " + h", hl.dsp.focus({ workspace = "m-1" }))
 
 -- Mouse move / resize
-hl.bind(Mod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
+hl.bind(Mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(Mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Special workspace (scratchpad)
-hl.bind(Mod .. " + Tab",   hl.dsp.workspace.toggle_special("special"))
+hl.bind(Mod .. " + Tab", hl.dsp.workspace.toggle_special("special"))
 hl.bind(Mod_S .. " + Tab", hl.dsp.window.move({ workspace = "special" }))
 
 -- Master layout helpers
@@ -129,6 +129,14 @@ hl.bind(Mod .. " + o", function()
 end)
 
 -- Submaps ----------------------------------------------------------------
+
+-- Dispatch any action then exit the current submap
+local function with_reset(action)
+	return function()
+		hl.dispatch(action)
+		hl.dispatch(hl.dsp.submap("reset"))
+	end
+end
 
 -- Settings submap
 hl.bind(Mod_S .. " + s", hl.dsp.submap("settings"))
@@ -198,7 +206,9 @@ hl.define_submap("screenshot", function()
 	hl.bind("n", hl.dsp.exec_cmd(scripts .. "/screenshot.sh --now"))
 	hl.bind("s", hl.dsp.exec_cmd(scripts .. "/screenshot.sh --swappy"))
 	hl.bind("w", hl.dsp.exec_cmd(scripts .. "/screenshot.sh --active"))
+	hl.bind("q", hl.dsp.submap("reset"))
 	hl.bind("Escape", hl.dsp.submap("reset"))
+	hl.bind("catchall", hl.dsp.submap("reset"))
 end)
 
 -- Wallpaper submap
@@ -206,13 +216,14 @@ hl.bind(Mod .. " + w", hl.dsp.submap("wallpaper"))
 hl.define_submap("wallpaper", function()
 	hl.bind(
 		"a",
-		hl.dsp.exec_cmd("kitty --title img sh -c '" .. waybar .. "/scripts/wallpaper.sh select " .. wallpapers .. "'")
+		with_reset(
+			hl.dsp.exec_cmd(
+				"kitty --title img sh -c '" .. waybar .. "/scripts/wallpaper.sh select " .. wallpapers .. "'"
+			)
+		)
 	)
-	hl.bind("d", hl.dsp.exec_cmd("pkill hyprpaper"))
-	hl.bind("b", hl.dsp.exec_cmd(waybar .. "/scripts/wallpaper.sh download bing"))
+	hl.bind("d", with_reset(hl.dsp.exec_cmd("pkill hyprpaper")))
 	hl.bind("r", hl.dsp.exec_cmd(waybar .. "/scripts/wallpaper.sh random " .. wallpapers))
-	hl.bind("a", hl.dsp.submap("reset"))
-	hl.bind("d", hl.dsp.submap("reset"))
 	hl.bind("q", hl.dsp.submap("reset"))
 	hl.bind("Escape", hl.dsp.submap("reset"))
 end)
@@ -220,8 +231,7 @@ end)
 -- Input submap
 hl.bind(Mod_S .. " + i", hl.dsp.submap("input"))
 hl.define_submap("input", function()
-	hl.bind("d", hl.dsp.exec_cmd("bash -c \"date '+%F %T' | wl-copy\""))
-	hl.bind("d", hl.dsp.submap("reset"))
+	hl.bind("d", with_reset(hl.dsp.exec_cmd("date '+%F %T' | tr -d '\\n' | wl-copy")))
 	hl.bind("Escape", hl.dsp.submap("reset"))
 end)
 

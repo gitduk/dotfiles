@@ -2,6 +2,31 @@
 hl.env("HYPRCURSOR_SIZE", "16")
 hl.env("HYPRCURSOR_THEME", "Vimix")
 
+-- Autostart
+hl.on("hyprland.start", function()
+	-- cursor
+	hl.exec_cmd("hyprctl setcursor Vimix 16")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-size 16")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme Vimix")
+	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
+
+	-- system env propagation (skip if using HYPRLAND_NO_SD_VARS)
+	hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
+	hl.exec_cmd(
+		"dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE"
+	)
+
+	-- services
+	hl.exec_cmd("mako")
+	hl.exec_cmd("hypridle")
+	hl.exec_cmd("waybar & hyprpaper")
+	hl.exec_cmd("wl-paste --watch cliphist store")
+	hl.exec_cmd("fcitx5 -d")
+
+	-- wallpaper (slight delay so hyprpaper is ready)
+	hl.exec_cmd("sleep 0.2 && " .. waybar .. "/scripts/wallpaper.sh random")
+end)
+
 -- All settings
 hl.config({
 	general = {
@@ -161,26 +186,3 @@ hl.animation({ leaf = "layersIn", enabled = true, speed = 3, bezier = "macOpen",
 hl.animation({ leaf = "layersOut", enabled = true, speed = 2, bezier = "macClose" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 1.5, bezier = "macSwipe", style = "slide" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 3, bezier = "macOpen", style = "slidevert" })
-
--- Autostart
-hl.on("hyprland.start", function()
-	-- cursor
-	hl.exec_cmd("hyprctl setcursor Vimix 16")
-	hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-size 16")
-	hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme Vimix")
-	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
-	-- system env propagation (skip if using HYPRLAND_NO_SD_VARS)
-	hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
-	hl.exec_cmd(
-		"dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE"
-	)
-	-- services
-	hl.exec_cmd("mako")
-	hl.exec_cmd("hypridle")
-	hl.exec_cmd("hyprpaper")
-	hl.exec_cmd("waybar")
-	hl.exec_cmd("wl-paste --watch cliphist store")
-	hl.exec_cmd("fcitx5 -d --disable=xcb")
-	-- wallpaper (slight delay so hyprpaper is ready)
-	hl.exec_cmd("sleep 0.2 && " .. waybar .. "/scripts/wallpaper.sh random")
-end)

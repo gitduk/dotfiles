@@ -28,8 +28,8 @@ palette = "dark16"
 threshold = 10
 
 [templates]
-hypr.template = 'hyprland.conf'
-hypr.target = '~/.config/hypr/configs/colors.conf'
+hypr.template = 'hyprland.lau'
+hypr.target = '~/.config/hypr/configs/colors.lua'
 
 waybar.template = 'waybar.css'
 waybar.target = '~/.config/waybar/colors.css.tmp'

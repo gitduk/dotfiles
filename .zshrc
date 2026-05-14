@@ -93,7 +93,9 @@ zinit ice wait"0b" lucid id-as"fast-syntax-highlighting"
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 zinit ice wait"0c" lucid id-as"fzf-tab" \
-  atload"zstyle ':fzf-tab:*' fzf-flags --ansi"
+  atload"
+    zstyle ':fzf-tab:*' fzf-flags --ansi --layout=reverse
+  "
 zinit light Aloxaf/fzf-tab
 
 zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
@@ -201,5 +203,3 @@ if [[ -n "$ZPROF" ]]; then
   zmodload -u zsh/zprof
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
-
-export PKG_CONFIG_PATH="$HOME/.local/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"

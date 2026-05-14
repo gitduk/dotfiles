@@ -1,4 +1,7 @@
--- Window rules
+--------------------------
+------ Window rules ------
+--------------------------
+
 -- Get window class: `hyprctl clients | grep class`
 
 -- Browser
@@ -20,7 +23,7 @@ hl.window_rule({ match = { class = "(?i)(Yaak-app|Dataflare)" }, float = false }
 hl.window_rule({ match = { title = "^(mpd|nb|clipboard)$" }, tag = "c1" })
 hl.window_rule({ match = { tag = "c1" }, float = true })
 hl.window_rule({ match = { tag = "c1" }, center = true })
-hl.window_rule({ match = { tag = "c1" }, size = { "window_w * 1.2", "window_h" } })
+hl.window_rule({ match = { tag = "c1" }, size = "(window_w*1.2) (window_h)" })
 
 -- Float anonymous / empty-class windows (Chrome notifications, etc.)
 hl.window_rule({ match = { class = "^$" }, float = true })
@@ -28,10 +31,20 @@ hl.window_rule({ match = { title = "^$" }, float = true })
 hl.window_rule({ match = { initial_class = "^$" }, float = true })
 hl.window_rule({ match = { initial_title = "^$" }, float = true })
 
--- Workspace animation overrides (0.55+: per-workspace animation style)
-hl.workspace_rule({ workspace = "special", animation = "fade" }) -- fade feels more overlay-like than slidevert
+-----------------------------
+------ Workspace rules ------
+-----------------------------
 
--- Layer rules
+hl.workspace_rule({ workspace = "1", persistent = true })
+hl.workspace_rule({ workspace = "2", persistent = true })
+hl.workspace_rule({ workspace = "3", persistent = true })
+hl.workspace_rule({ workspace = "special", animation = "fade" })
+hl.workspace_rule({ workspace = "special", gaps_in = 0, gaps_out = 0 })
+
+-------------------------
+------ Layer rules ------
+-------------------------
+
 hl.layer_rule({ match = { namespace = "rofi" }, blur = true })
 hl.layer_rule({ match = { namespace = "waybar" }, blur = true })
 hl.layer_rule({ match = { namespace = "launcher" }, blur = true })

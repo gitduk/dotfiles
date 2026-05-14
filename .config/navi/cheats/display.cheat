@@ -101,12 +101,6 @@ sudo nala install -y libxcursor-dev libre2-dev libxcb-xfixes0-dev \
 git clone --recursive https://github.com/hyprwm/Hyprland /tmp/Hyprland && cd /tmp/Hyprland/
 make all && sudo make install
 
-# 15. Hyprland -- from release
-HYPRLAND_VERSION=$(curl -s https://api.github.com/repos/hyprwm/Hyprland/releases/latest | jq -r .tag_name)
-wget "https://github.com/hyprwm/Hyprland/releases/download/$HYPRLAND_VERSION/source-$HYPRLAND_VERSION.tar.gz" -P /tmp
-cd /tmp && tar -xzvf source-$HYPRLAND_VERSION.tar.gz && cd hyprland-source/
-make all && sudo make install
-
 # 16. hyprpaper
 sudo nala install -y libmagic-dev
 git clone https://github.com/hyprwm/hyprpaper.git /tmp/hyprpaper && cd /tmp/hyprpaper/
@@ -115,7 +109,7 @@ cmake --build ./build --config Release --target hyprpaper -j`nproc 2>/dev/null |
 sudo cmake --install ./build
 
 # 17. hyprlock
-sudo nala install -y libpam0g-dev libdrm-dev 
+sudo nala install -y libpam0g-dev libdrm-dev
 git clone https://github.com/hyprwm/hyprlock.git /tmp/hyprlock && cd /tmp/hyprlock/
 cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -S . -B ./build
 cmake --build ./build --config Release --target hyprlock -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF`

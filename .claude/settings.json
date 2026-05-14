@@ -1,10 +1,6 @@
 {
   "permissions": {
-    "deny": [
-      "Bash(sudo *)",
-      "Bash(rm -rf /*)",
-      "Read(**/.env*)"
-    ],
+    "deny": ["Bash(sudo *)", "Bash(rm -rf /*)", "Read(**/.env*)"],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -14,14 +10,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/memory-heal.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/context-mode-cache-heal.mjs"
           }
         ]
       }
@@ -85,7 +73,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hyprctl notify 4 5000 0 'Claude Code: 需要你的输入，请切换到终端'",
+            "command": "hyprctl notify 4 5000 0 'Claude Code: 需要你的输入，请切换到终端' || true",
             "timeout": 5
           }
         ]
@@ -96,7 +84,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hyprctl notify 0 5000 0 'Claude Code: 需要你的授权，请切换到终端'",
+            "command": "hyprctl notify 0 5000 0 'Claude Code: 需要你的授权，请切换到终端' || true",
             "timeout": 5
           }
         ]
@@ -107,7 +95,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hyprctl notify 5 5000 0 'Claude Code: 任务完成，请查看结果'"
+            "command": "hyprctl notify 5 5000 0 'Claude Code: 任务完成，请查看结果' || true",
+            "timeout": 5
           }
         ]
       }
@@ -125,17 +114,9 @@
     "skill-creator@claude-plugins-official": false,
     "context7@claude-plugins-official": true,
     "playwright@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": true,
-    "context-mode@context-mode": true
+    "frontend-design@claude-plugins-official": true
   },
-  "extraKnownMarketplaces": {
-    "context-mode": {
-      "source": {
-        "source": "github",
-        "repo": "mksglu/context-mode"
-      }
-    }
-  },
+  "extraKnownMarketplaces": {},
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "autoDreamEnabled": true,

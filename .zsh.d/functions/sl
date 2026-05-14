@@ -42,11 +42,24 @@ print_mapping() {
   fi
 }
 
+print_failed_mapping() {
+  local mode="$1" host="$2" local_port="$3" remote_port="$4"
+  if [[ "$mode" == "-NL" ]]; then
+    printf "\e[31m[x]\e[0m \e[31m:%-6s\e[0m ⇒  \e[31m%s:%-6s\e[0m\n" \
+      "$local_port" "$host" "$remote_port" >&2
+  else
+    printf "\e[31m[x]\e[0m \e[31m%s:%-6s\e[0m ⇒  \e[31m:%-6s\e[0m\n" \
+      "$host" "$remote_port" "$local_port" >&2
+  fi
+}
+
 main() {
   setopt local_options no_monitor
   local mode="-NL"
   local bind_addr="0.0.0.0:"
   local -A host_flags   # host -> newline-joined flag strings
+  local -A local_mappings # local port -> host:remote_port
+  local -a mapping_order # host:local_port:remote_port in input order
   local -a host_order   # hosts in order of first appearance
   local -a args=("$@")
 
@@ -59,7 +72,10 @@ main() {
 
   _sl_add() {
     local host="$1" lp="$2" rp="$3"
-    print_mapping "$mode" "$host" "$lp" "$rp"
+    if [[ "$mode" == "-NL" ]]; then
+      local_mappings[$lp]="$host:$rp"
+    fi
+    mapping_order+=("$host:$lp:$rp")
     local flag
     flag="$(build_forward_flag "$mode" "$bind_addr" "$lp" "$rp")"
     if [[ -z "${host_flags[$host]+_}" ]]; then
@@ -86,29 +102,103 @@ main() {
     fi
   done
 
-  if [[ ${#host_order[@]} -eq 1 ]]; then
-    local h="${host_order[1]}"
-    local -a flags=(${(f)host_flags[$h]})
-    ssh -N "${flags[@]}" "$h"
-    return $?
-  fi
+  local tmp_dir
+  tmp_dir="$(mktemp -d -t sl.XXXXXX)" || return 1
 
-  # Multiple hosts: spawn one SSH per host, tear all down together on exit
-  local -a pids=()
-  local h
-  for h in "${host_order[@]}"; do
-    local -a flags=(${(f)host_flags[$h]})
-    ssh -N "${flags[@]}" "$h" &
-    pids+=($!)
-  done
+  _sl_read_ssh_stderr() {
+    local file="$1"
+    local line port
+    while IFS= read -r line; do
+      print -r -- "$line" >&2
+      if [[ "$line" =~ '^bind .+:([0-9]+): ' && -n "${local_mappings[${match[1]}]}" ]]; then
+        print -r -- "${match[1]}" >> "$tmp_dir/failed_ports"
+      fi
+    done < "$file"
+  }
+
+  _sl_print_mappings() {
+    local -A failed_ports
+    local port mapping host local_port remote_port
+    if [[ -f "$tmp_dir/failed_ports" ]]; then
+      while IFS= read -r port; do
+        [[ -n "$port" ]] && failed_ports[$port]=1
+      done < "$tmp_dir/failed_ports"
+    fi
+
+    for mapping in "${mapping_order[@]}"; do
+      host="${mapping%%:*}"
+      local rest="${mapping#*:}"
+      local_port="${rest%%:*}"
+      remote_port="${rest##*:}"
+      if [[ -n "${failed_ports[$local_port]+_}" ]]; then
+        print_failed_mapping "$mode" "$host" "$local_port" "$remote_port"
+      else
+        print_mapping "$mode" "$host" "$local_port" "$remote_port"
+      fi
+    done
+  }
 
   _sl_cleanup() {
-    kill "${pids[@]}" 2>/dev/null
+    local h
+    for h in "${host_order[@]}"; do
+      ssh -S "$tmp_dir/$h.ctl" -O exit "$h" >/dev/null 2>&1
+    done
+    rm -rf "$tmp_dir"
     trap - EXIT INT TERM HUP
   }
-  trap _sl_cleanup EXIT INT TERM HUP
-  wait "${pids[@]}"
-  trap - EXIT INT TERM HUP
+
+  (
+    trap _sl_cleanup EXIT INT TERM HUP
+    local -a launch_pids=()
+    local h
+    for h in "${host_order[@]}"; do
+      (
+        local -a flags=(${(f)host_flags[$h]})
+        ssh -M -S "$tmp_dir/$h.ctl" -f -N -o ExitOnForwardFailure=yes "${flags[@]}" "$h" 2> "$tmp_dir/$h.err"
+        print -r -- "$?" > "$tmp_dir/$h.status"
+      ) &
+      launch_pids+=($!)
+    done
+
+    wait "${launch_pids[@]}"
+
+    local launch_status=0
+    local -a successful_hosts=()
+    local status_file ssh_status
+    for h in "${host_order[@]}"; do
+      _sl_read_ssh_stderr "$tmp_dir/$h.err"
+      status_file="$tmp_dir/$h.status"
+      if [[ -f "$status_file" ]]; then
+        ssh_status="$(<"$status_file")"
+        if (( ssh_status == 0 )); then
+          successful_hosts+=("$h")
+        else
+          launch_status=$ssh_status
+        fi
+      else
+        launch_status=1
+      fi
+    done
+    _sl_print_mappings
+
+    if (( ${#successful_hosts[@]} == 0 )); then
+      _sl_cleanup
+      exit $launch_status
+    fi
+
+    while true; do
+      local alive=0
+      for h in "${successful_hosts[@]}"; do
+        if ssh -S "$tmp_dir/$h.ctl" -O check "$h" >/dev/null 2>&1; then
+          alive=1
+        fi
+      done
+      (( alive )) || break
+      sleep 1
+    done
+    rm -rf "$tmp_dir"
+    trap - EXIT INT TERM HUP
+  )
 }
 
 main "$@"

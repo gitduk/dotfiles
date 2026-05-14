@@ -63,7 +63,7 @@ CustomXkbOption=
 # Force Enabled Addons
 EnabledAddons=
 # Force Disabled Addons
-DisabledAddons=xcb,xim,pinyin,pinyinhelper
+DisabledAddons=pinyin,pinyinhelper
 # Preload input method to be used by default
 PreloadInputMethod=True
 # Allow input method in the password field
