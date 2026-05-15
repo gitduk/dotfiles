@@ -157,11 +157,21 @@ hl.config({
 		cm_auto_hdr = 0,
 	},
 
+	scrolling = {
+		fullscreen_on_one_column = true,
+	},
+
 	debug = {
 		overlay = false,
 		disable_logs = false,
 		vfr = true, -- variable framerate: throttles render when idle, saves power (default true, moved here from misc in 0.55)
 	},
+})
+
+hl.gesture({
+	fingers = 3,
+	direction = "horizontal",
+	action = "workspace",
 })
 
 -- Bezier curves — macOS feel

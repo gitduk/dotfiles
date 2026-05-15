@@ -9,11 +9,17 @@ local Mod_CS = "ALT + CTRL + SHIFT"
 
 local TERM = "alacritty"
 
+-- inline rules
+local popup = "[float; center; size 1000 600]"
+
 -- Window management
 hl.bind(Mod .. " + q", hl.dsp.window.close())
 hl.bind(Mod_S .. " + q", hl.dsp.window.kill())
 hl.bind(Mod .. " + f", hl.dsp.window.fullscreen())
 hl.bind(Mod_S .. " + f", hl.dsp.window.float({ action = "toggle" }))
+
+-- Group management
+hl.bind(Mod .. " + g", hl.dsp.group.toggle())
 
 -- Terminal
 hl.bind(Mod .. " + c", hl.dsp.exec_cmd(TERM .. " --title terminal -e tmux -2 new -ADs " .. os.getenv("USER")))
@@ -28,9 +34,9 @@ hl.bind(Mod_CS .. " + BackSpace", hl.dsp.exec_cmd("shutdown now"))
 
 -- Launcher / clipboard / notebook / password
 hl.bind(Mod .. " + a", hl.dsp.exec_cmd("tofi-drun --drun-launch=true"))
-hl.bind(Mod .. " + semicolon", hl.dsp.exec_cmd("foot -T clipboard sh -c '" .. scripts .. "/clipboard.sh'"))
-hl.bind(Mod_S .. " + semicolon", hl.dsp.exec_cmd("foot -T clipboard bash " .. zdirs .. "/functions/pw -f"))
-hl.bind(Mod .. " + n", hl.dsp.exec_cmd("foot -T nb sh -c 'nvim ~/.nb.md'"))
+hl.bind(Mod .. " + semicolon", hl.dsp.exec_cmd(popup .. "foot sh -c '" .. scripts .. "/clipboard.sh'"))
+hl.bind(Mod_S .. " + semicolon", hl.dsp.exec_cmd(popup .. "foot bash " .. zdirs .. "/functions/pw -f"))
+hl.bind(Mod .. " + n", hl.dsp.exec_cmd(popup .. "foot sh -c 'nvim ~/.nb.md'"))
 
 -- Waybar / mako
 hl.bind(Mod .. " + b", hl.dsp.exec_cmd("killall -SIGUSR1 waybar"))
@@ -60,14 +66,8 @@ hl.bind("xf86Rfkill", hl.dsp.exec_cmd("rfkill toggle wifi"), { locked = true })
 -- Focus (H/L also toggle group)
 hl.bind(Mod .. " + j", hl.dsp.focus({ direction = "d" }))
 hl.bind(Mod .. " + k", hl.dsp.focus({ direction = "u" }))
-hl.bind(Mod .. " + h", function()
-	hl.dispatch(hl.dsp.focus({ direction = "l" }))
-	hl.dispatch(hl.dsp.group.prev()) -- changegroupactive backward
-end)
-hl.bind(Mod .. " + l", function()
-	hl.dispatch(hl.dsp.focus({ direction = "r" }))
-	hl.dispatch(hl.dsp.group.next()) -- changegroupactive forward
-end)
+hl.bind(Mod .. " + h", hl.dsp.focus({ direction = "l" }))
+hl.bind(Mod .. " + l", hl.dsp.focus({ direction = "r" }))
 
 -- Move windows (J/K also manage group membership)
 hl.bind(Mod_S .. " + j", function()
@@ -81,10 +81,12 @@ end)
 hl.bind(Mod_S .. " + h", function()
 	hl.dispatch(hl.dsp.window.move({ direction = "l" }))
 	hl.dispatch(hl.dsp.window.move({ into_group = "r" }))
+	hl.dispatch(hl.dsp.group.prev()) -- changegroupactive backward
 end)
 hl.bind(Mod_S .. " + l", function()
 	hl.dispatch(hl.dsp.window.move({ direction = "r" }))
 	hl.dispatch(hl.dsp.window.move({ into_group = "l" }))
+	hl.dispatch(hl.dsp.group.next()) -- changegroupactive forward
 end)
 
 -- Switch workspaces (code:10 = 1, code:11 = 2, …)
@@ -183,8 +185,8 @@ end)
 -- Music submap
 hl.bind(Mod .. " + u", hl.dsp.submap("music"))
 hl.define_submap("music", function()
-	hl.bind("a", hl.dsp.exec_cmd("foot -T mpd sh -c '" .. waybar .. "/scripts/mpd.sh -s'"))
-	hl.bind("u", hl.dsp.exec_cmd("foot -T mpd sh -c '" .. waybar .. "/scripts/mpd.sh -u'"))
+	hl.bind("a", hl.dsp.exec_cmd(popup .. "foot sh -c '" .. waybar .. "/scripts/mpd.sh -s'"))
+	hl.bind("u", hl.dsp.exec_cmd(popup .. "foot sh -c '" .. waybar .. "/scripts/mpd.sh -u'"))
 	hl.bind("s", hl.dsp.exec_cmd("mpc single"))
 	hl.bind("r", hl.dsp.exec_cmd("mpc random"))
 	hl.bind("c", hl.dsp.exec_cmd("mpc consume"))

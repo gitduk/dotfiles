@@ -19,17 +19,33 @@ hl.window_rule({ match = { tag = "code" }, workspace = "2" })
 hl.window_rule({ match = { class = "(?i)(Yaak-app|Dataflare)" }, workspace = "special" })
 hl.window_rule({ match = { class = "(?i)(Yaak-app|Dataflare)" }, float = false })
 
--- Floating popups (tag c1 = mpd, notebook, clipboard)
-hl.window_rule({ match = { title = "^(mpd|nb|clipboard)$" }, tag = "c1" })
-hl.window_rule({ match = { tag = "c1" }, float = true })
-hl.window_rule({ match = { tag = "c1" }, center = true })
-hl.window_rule({ match = { tag = "c1" }, size = "(window_w*1.2) (window_h)" })
-
 -- Float anonymous / empty-class windows (Chrome notifications, etc.)
 hl.window_rule({ match = { class = "^$" }, float = true })
 hl.window_rule({ match = { title = "^$" }, float = true })
 hl.window_rule({ match = { initial_class = "^$" }, float = true })
 hl.window_rule({ match = { initial_title = "^$" }, float = true })
+
+-- Ignore maximize requests from all apps. You'll probably like this.
+hl.window_rule({
+	name = "suppress-maximize-events",
+	match = { class = ".*" },
+	suppress_event = "maximize",
+})
+
+-- Fix some dragging issues with XWayland
+hl.window_rule({
+	name = "fix-xwayland-drags",
+	match = {
+		class = "^$",
+		title = "^$",
+		xwayland = true,
+		float = true,
+		fullscreen = false,
+		pin = false,
+	},
+
+	no_focus = true,
+})
 
 -----------------------------
 ------ Workspace rules ------
