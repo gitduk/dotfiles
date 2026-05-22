@@ -151,3 +151,9 @@ podman run -d --name bifrost \
   --network host \
   maximhq/bifrost
 
+# numa
+podman run -d --name numa \
+  -v $HOME/.numa.toml:/root/.config/numa/numa.toml \
+  --network host \
+  ghcr.io/razvandimescu/numa
+

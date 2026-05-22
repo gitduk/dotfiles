@@ -1,3 +1,31 @@
+if command -v zellij &>/dev/null; then
+  # Kill mode
+  if [[ "$1" == "-k" || "$1" == "--kill" ]]; then
+    shift
+    if [ -z "$*" ]; then
+      sessions="$(zellij list-sessions --short --no-formatting 2>/dev/null | fzf --preview '')"
+    else
+      sessions="$(echo "$*" | tr ' ' '\n')"
+    fi
+    [[ -n "$sessions" ]] && xargs -I _ zellij kill-session _ <<<"$sessions"
+    return
+  fi
+
+  # Attach mode
+  if [[ $# -eq 1 ]]; then
+    zellij attach --create "$1"
+  else
+    sessions="$(zellij list-sessions --short --no-formatting 2>/dev/null)"
+    if [[ -n "$sessions" ]]; then
+      session_name="$(fzf --preview '' --exit-0 --select-1 <<<"$sessions")"
+      [[ -n "$session_name" ]] && zellij attach "$session_name"
+    else
+      zellij attach --create "$USER"
+    fi
+  fi
+  return
+fi
+
 # Kill mode
 if [[ "$1" == "-k" || "$1" == "--kill" ]]; then
   shift
@@ -14,7 +42,7 @@ fi
 [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
 
 if [[ $# -eq 1 ]]; then
-  tmux $change -t "$1" &>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1")
+  tmux $change -t "$1" &>/dev/null || (tmux new-session -d -s "$1" && tmux $change -t "$1")
 else
   if tmux has-session &>/dev/null; then
     session_name="$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --preview '' --exit-0 --select-1)"

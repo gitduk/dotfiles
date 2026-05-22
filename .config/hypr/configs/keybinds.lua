@@ -22,7 +22,10 @@ hl.bind(Mod_S .. " + f", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(Mod .. " + g", hl.dsp.group.toggle())
 
 -- Terminal
-hl.bind(Mod .. " + c", hl.dsp.exec_cmd(TERM .. " --title terminal -e tmux -2 new -ADs " .. os.getenv("USER")))
+hl.bind(
+	Mod .. " + c",
+	hl.dsp.exec_cmd(TERM .. " --title terminal -e zellij --layout default attach --create " .. os.getenv("USER"))
+)
 hl.bind(Mod .. " + minus", hl.dsp.exec_cmd(TERM))
 hl.bind(Mod .. " + backslash", hl.dsp.exec_cmd(TERM))
 

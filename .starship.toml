@@ -312,7 +312,10 @@ format = "$output "
 
 [custom.git_context]
 command = """
-git worktree list 2>/dev/null | awk '{printf $2}'
+list=$(git worktree list 2>/dev/null)
+hash=$(echo "$list" | awk 'NR==1{print substr($2,1,7)}')
+n=$(echo "$list" | wc -l)
+[ "$n" -gt 1 ] && echo "$hash +$((n-1))wt" || echo "$hash"
 """
 when = "ls .git"
 shell = ["sh"]

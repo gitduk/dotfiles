@@ -1,4 +1,7 @@
 layout {
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
     pane split_direction="vertical" { // first logical container
         // all these panes will be laid out vertically next to each other
         pane
@@ -10,7 +13,7 @@ layout {
         }
     }
     pane size=1 borderless=true {
-        plugin location="zellij:compact-bar"
+        plugin location="zellij:status-bar"
     }
     pane_template name="cargo" {
         command "cargo"

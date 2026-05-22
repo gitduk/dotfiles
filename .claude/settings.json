@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "allow": ["Bash(rtk *)", "Bash(cx *)"],
     "deny": ["Bash(sudo *)", "Bash(rm -rf /*)", "Read(**/.env*)"],
     "defaultMode": "bypassPermissions"
   },

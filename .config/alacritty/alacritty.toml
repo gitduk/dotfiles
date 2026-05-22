@@ -2,8 +2,8 @@
 live_config_reload = true
 import = ["~/.config/alacritty/colors.toml"]
 
+
 [env]
-TERM = "tmux-256color"
 QT_IM_MODULE = "fcitx"
 
 [font]
@@ -45,6 +45,15 @@ persist = false
 mouse.enabled = true
 binding = { key = "Y", mods = "Control" }
 regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-<>\"\\s{-}\\^⟨⟩`]+"
+
+[keyboard]
+bindings = [
+  { key = "Equals", mods = "Control", action = "None" },
+  { key = "Plus", mods = "Control", action = "None" },
+  { key = "Minus", mods = "Control", action = "None" },
+  { key = "NumpadAdd", mods = "Control", action = "None" },
+  { key = "NumpadSubtract", mods = "Control", action = "None" },
+]
 
 [mouse]
 hide_when_typing = true

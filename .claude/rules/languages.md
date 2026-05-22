@@ -12,7 +12,7 @@ Language-specific conventions and data store best practices.
   - **New code**: no `.unwrap()` in production
   - **Existing code**: no refactor mandate for legacy unwraps — fix only if touching that code for other reasons
 - Paths: small files use `include_str!("../../file.txt")` to embed at compile time; dev/test use `env!("CARGO_MANIFEST_DIR")`; production use config file or `current_exe()`; never use `./` relative paths (CWD-dependent)
-- Quality: `cargo fmt --check && cargo clippy -- -D warnings`; only run `cargo test` when the project has tests; no separate `cargo build` — clippy already compiles, so a standalone build is redundant and wastes tokens
+- Quality: `cargo fmt --check && cargo clippy -- -D warnings`; run `cargo test` only when the project has a test suite (clippy handles compilation verification, not test); no separate `cargo build` — clippy already compiles, so a standalone build is redundant and wastes tokens
 - Tests: split Rust tests into two categories. Feature tests can be written directly inside the project test suite; bug reproduction tests should be separate scripts and must not enter project code.
 - Format: Run `cargo fmt` immediately after every `cargo clippy` pass, not just before committing.
 
@@ -28,7 +28,7 @@ Language-specific conventions and data store best practices.
 - Errors: domain exceptions from base `AppError`; catch specific, never bare `except:`; FastAPI global handler
 - Async: never blocking I/O in `async def` without `asyncio.to_thread`; use async libs (`httpx`, `aiosqlite`, `asyncpg`); `asyncio.gather` for concurrent
 - FastAPI: `Annotated` for deps/validation; Pydantic v2; `lifespan` for startup/shutdown; typed responses, never ORM objects
-- Quality: `uv run ruff format --check . && uv run ruff check . && uv run basedpyright . && uv run pytest`
+- Quality: `uv run ruff format --check . && uv run ruff check . && uv run basedpyright .`; run `uv run pytest` only when the project has a test suite
 
 ---
 

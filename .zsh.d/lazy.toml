@@ -261,3 +261,8 @@ description = "OpenAI Codex command-line interface"
 repo = "cargo:bacon"
 env = "BACON_CONFIG=~/.config/bacon/bacon.toml"
 description = "Background rust code checker"
+
+[[lazy]]
+repo = "cargo:numa"
+description = "Portable DNS resolver in Rust"
+

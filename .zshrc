@@ -61,7 +61,7 @@ zinit light zsh-users/zsh-completions
 zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
   atload'!
     ZSH_AUTOSUGGEST_MANUAL_REBIND=1
-    ZSH_AUTOSUGGEST_STRATEGY=(completion match_prev_cmd)
+    ZSH_AUTOSUGGEST_STRATEGY=(match_prev_cmd history)
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
     bindkey -M viins "^ " autosuggest-execute
     bindkey -M vicmd "^ " autosuggest-execute
@@ -203,3 +203,4 @@ if [[ -n "$ZPROF" ]]; then
   zmodload -u zsh/zprof
   echo "Runtime was: $(echo "$(date +%s.%N) - $start" | bc)"
 fi
+

@@ -187,14 +187,13 @@ main() {
     fi
 
     while true; do
-      local alive=0
       for h in "${successful_hosts[@]}"; do
-        if ssh -S "$tmp_dir/$h.ctl" -O check "$h" >/dev/null 2>&1; then
-          alive=1
+        if ! ssh -S "$tmp_dir/$h.ctl" -O check "$h" >/dev/null 2>&1; then
+          local -a flags=(${(f)host_flags[$h]})
+          ssh -M -S "$tmp_dir/$h.ctl" -f -N -o ExitOnForwardFailure=yes "${flags[@]}" "$h" 2>/dev/null
         fi
       done
-      (( alive )) || break
-      sleep 1
+      sleep 5
     done
     rm -rf "$tmp_dir"
     trap - EXIT INT TERM HUP

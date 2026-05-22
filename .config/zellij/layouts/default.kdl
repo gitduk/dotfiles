@@ -1,3 +1,46 @@
 layout {
-    pane split_direction="vertical"
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:compact-bar"
+        }
+    }
+
+    tab_template name="compact_ui" {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:compact-bar"
+        }
+    }
+
+    tab name="main" {
+        pane
+    }
+
+    swap_tiled_layout name="MAIN-SIDE" {
+        compact_ui {
+            pane split_direction="vertical" {
+                pane size="70%" { children; }
+                pane size="30%" { pane; }
+            }
+        }
+    }
+
+    swap_tiled_layout name="TOP-BOTTOM" {
+        compact_ui {
+            pane split_direction="horizontal" {
+                pane size="70%" { children; }
+                pane size="30%" { pane; }
+            }
+        }
+    }
+
+    swap_tiled_layout name="GRID" {
+        compact_ui {
+            pane {
+                pane split_direction="vertical" { children; }
+                pane split_direction="vertical" { pane; pane; pane; pane; }
+            }
+        }
+    }
 }

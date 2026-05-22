@@ -9,9 +9,9 @@ Any code change goes through this workflow; pure research/reading does not trigg
 ### Workflow
 1. Before writing, declare this change's review dimensions; overlay `~/.claude/projects/<CWD>/memory/checklist.md` if it exists.
 2. Implement the change, focused on the current intent.
-3. Before declaring done, perform an adversarial re-read: walk the checklist item by item and find at least one thing to improve; if truly trivial, say so explicitly.
+3. Before declaring done, perform an adversarial re-read: walk the checklist item by item; report only what changed or was rejected — nothing to report means nothing to report. When fixing or improving anything, ask: where else might the same class of problem exist? Scan as wide as the problem's nature warrants — same function, same file, same module, or same conceptual domain. Fix trivial instances, flag non-trivial ones.
 4. If escalation conditions trigger, run an external agent loop: collect findings, sort them into real bugs / accepted improvements / rejected suggestions; fix the first two, reject the third explicitly with reasoning; if this round changed anything, verify once more.
-5. At handoff, report: review dimensions, what the adversarial re-read changed, agent rounds and convergence, rejected items, items needing 凯歌's decision.
+5. At handoff, report: review dimensions, what the adversarial re-read changed, agent rounds and convergence, rejected items, items needing 凯歌's decision. Skip this report if the change is a single file with <30 lines changed.
 
 ### Standard Review Dimensions
 - Correctness: boundaries, null handling, off-by-one, concurrency, type safety
@@ -24,7 +24,7 @@ Any code change goes through this workflow; pure research/reading does not trigg
 
 ### Escalation Triggers
 - ≥3 files or ≥100 lines changed: `code-reviewer` + `simplify`
-- Security-sensitive: `security-auditor`; uncertain design judgment: `code-reviewer`; project has a test framework: `tester`
+- Security-sensitive: `security-auditor`; uncertain design judgment: `code-reviewer`; ≥3 files or ≥100 lines changed AND project has a test framework: `tester`
 - Single small file not meeting the above: adversarial re-read alone is fine
 
 ### Loop Termination
