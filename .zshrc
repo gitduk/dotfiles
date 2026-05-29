@@ -17,7 +17,7 @@ if [[ -n "$ZSH_EXECUTION_STRING" ]] || \
 fi
 
 setopt AUTOCD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT PUSHDMINUS
-setopt AUTO_MENU AUTO_LIST AUTO_PARAM_SLASH COMPLETE_IN_WORD ALWAYS_TO_END LIST_PACKED LIST_TYPES EXTENDED_GLOB
+setopt MENU_COMPLETE AUTO_LIST AUTO_PARAM_SLASH COMPLETE_IN_WORD ALWAYS_TO_END LIST_PACKED LIST_TYPES EXTENDED_GLOB
 setopt HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_VERIFY SHARE_HISTORY
 setopt MAGIC_EQUAL_SUBST PROMPTSUBST NO_BEEP NO_HUP PATH_DIRS NO_CASE_GLOB NO_NOMATCH
 
@@ -92,11 +92,6 @@ zinit light zdharma-continuum/null
 zinit ice wait"0b" lucid id-as"fast-syntax-highlighting"
 zinit light zdharma-continuum/fast-syntax-highlighting
 
-zinit ice wait"0c" lucid id-as"fzf-tab" \
-  atload"
-    zstyle ':fzf-tab:*' fzf-flags --ansi --layout=reverse
-  "
-zinit light Aloxaf/fzf-tab
 
 zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
   atload"
@@ -183,12 +178,6 @@ zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
     bindkey "^E" _navi_widget
   '
 zinit light denisidoro/navi
-
-# direnv
-zinit ice wait"1" lucid as"program" from"gh-r" id-as"direnv" \
-  sbin"direnv* -> direnv" \
-  atload'eval "$(direnv hook zsh)"'
-zinit light direnv/direnv
 
 # fzf
 zinit ice if'[[ ! -x $commands[fzf] ]]' lucid as"program" from"gh-r" id-as"fzf" sbin"fzf"

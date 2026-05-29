@@ -19,8 +19,7 @@ timeout = 10
 
 [source.crates-io]
 registry = "https://github.com/rust-lang/crates.io-index"
-# 指定镜像
-# replace-with = 'sjtu'
+# replace-with = 'ustc'
 
 # 中国科学技术大学
 [source.ustc]

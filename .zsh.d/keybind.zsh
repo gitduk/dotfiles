@@ -16,6 +16,13 @@ bindkey -rpM viins "^J"
 # "^[\t" alt+tab
 
 bindkey -M viins "^h" backward-delete-char
+
+# Completion menu navigation (menuselect keymap)
+zmodload zsh/complist
+bindkey -M menuselect '^k' up-line-or-history
+bindkey -M menuselect '^j' down-line-or-history
+bindkey -M menuselect '^h' backward-char
+bindkey -M menuselect '^l' forward-char
 bindkey -M viins "^f" vi-forward-char
 bindkey -M viins "jk" vi-cmd-mode
 

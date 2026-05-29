@@ -26,7 +26,7 @@ $jobs\
 $cmd_duration\
 $fill\
 ${custom.proxy}\
-${custom.direnv}\
+${custom.mise}\
 ${custom.ai}\
 $time\
 $line_break\
@@ -273,16 +273,15 @@ symbol = "terraform "
 [zig]
 symbol = "zig "
 
-[custom.direnv]
+[custom.mise]
 command = """
-allowed=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed // empty')
-case "$allowed" in
-  0) echo "\e[1;34m󰙴\e[0m" ;;
-  2) echo "\e[90m󰙴\e[0m" ;;
-  *) echo "" ;;
-esac
+if mise trust --show 2>/dev/null | grep -qw "trusted"; then
+  printf "\e[1;34m⚙️\e[0m"
+else
+  printf "\e[90m⚙️\e[0m"
+fi
 """
-when = "direnv status 2>/dev/null"
+when = "test -f mise.toml || test -f .mise.toml"
 shell = ["sh"]
 symbol = ""
 style = ""

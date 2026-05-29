@@ -215,7 +215,13 @@ bpick = "ruff-x86_64-unknown-linux-musl.tar.gz"
 sbin = "ruff"
 description = "An extremely fast Python linter and code formatter"
 
-# APT packages
+[[lazy]]
+repo = "ind-igo/cx"
+bpick = "cx-x86_64-unknown-linux-gnu.tar.gz"
+sbin = "cx"
+description = "Semantic code navigation for AI agents"
+
+# Apt
 [[lazy]]
 repo = "apt:foot"
 description = "A fast, lightweight and minimalistic Wayland terminal emulator"
@@ -224,7 +230,32 @@ description = "A fast, lightweight and minimalistic Wayland terminal emulator"
 repo = "apt:kitty"
 description = "A cross-platform, GPU-accelerated terminal emulator"
 
-# Curl installers
+[[lazy]]
+repo = "deb:t8y2/dbx"
+bpick = "DBX_*_amd64.deb"
+cmd = "dbx"
+description = "lightweight cross-platform database client"
+
+# Bun
+[[lazy]]
+repo = "bun:@openai/codex"
+description = "OpenAI Codex command-line interface"
+
+# Cargo
+[[lazy]]
+repo = "cargo:bacon"
+env = "BACON_CONFIG=~/.config/bacon/bacon.toml"
+description = "Background rust code checker"
+
+[[lazy]]
+repo = "cargo:numa"
+description = "Portable DNS resolver in Rust"
+
+[[lazy]]
+repo = "cargo:doxx"
+description = "Expose the contents of .docx files without leaving your terminal"
+
+# Curl
 [[lazy]]
 repo = "curl:https://raw.githubusercontent.com/lucasgelfond/zerobrew/main/install.sh"
 cmd = "zb"
@@ -246,23 +277,8 @@ cmd = "rtk"
 description = "Token-optimized CLI proxy for Claude Code"
 
 [[lazy]]
-repo = "ind-igo/cx"
-bpick = "cx-x86_64-unknown-linux-gnu.tar.gz"
-sbin = "cx"
-description = "Semantic code navigation for AI agents"
-
-# Bun packages
-[[lazy]]
-repo = "bun:@openai/codex"
-description = "OpenAI Codex command-line interface"
-
-# Cargo packages
-[[lazy]]
-repo = "cargo:bacon"
-env = "BACON_CONFIG=~/.config/bacon/bacon.toml"
-description = "Background rust code checker"
-
-[[lazy]]
-repo = "cargo:numa"
-description = "Portable DNS resolver in Rust"
+repo = "curl:https://mise.run"
+cmd = "mise"
+eval = "~/.local/bin/mise activate zsh"
+description = "dev tools, env vars, task runner"
 

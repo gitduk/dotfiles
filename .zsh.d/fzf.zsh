@@ -2,7 +2,11 @@
 ### fzf ###
 ###########
 
-export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow ..."
+# fzf shell integration (key bindings + path completion via ** trigger)
+eval "$(fzf --zsh)"
+# fzf --zsh overwrites ^R; restore atuin's binding
+bindkey -M emacs '^r' atuin-search
+bindkey -M viins '^r' atuin-search-viins
 
 # fzf default command
 export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow \

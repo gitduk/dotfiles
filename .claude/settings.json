@@ -1,6 +1,16 @@
 {
   "permissions": {
-    "allow": ["Bash(rtk *)", "Bash(cx *)"],
+    "allow": [
+      "Bash(rtk *)",
+      "Bash(cx *)",
+      "mcp__codegraph__codegraph_search",
+      "mcp__codegraph__codegraph_context",
+      "mcp__codegraph__codegraph_callers",
+      "mcp__codegraph__codegraph_callees",
+      "mcp__codegraph__codegraph_impact",
+      "mcp__codegraph__codegraph_node",
+      "mcp__codegraph__codegraph_status"
+    ],
     "deny": ["Bash(sudo *)", "Bash(rm -rf /*)", "Read(**/.env*)"],
     "defaultMode": "bypassPermissions"
   },
@@ -107,11 +117,17 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
+  "mcpServers": {
+    "codegraph": {
+      "type": "stdio",
+      "command": "codegraph",
+      "args": ["serve", "--mcp"]
+    }
+  },
   "enabledPlugins": {
     "code-simplifier@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": false,
     "skill-creator@claude-plugins-official": false,
     "context7@claude-plugins-official": true,
     "playwright@claude-plugins-official": false,

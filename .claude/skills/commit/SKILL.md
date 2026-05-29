@@ -99,7 +99,7 @@ If unpushed commits exist and belong to same logical change → squash before ne
 - Quality checks required? (auto-detect based on project type)
 
 **Quality checks by project type:**
-- Rust: `cargo fmt && cargo clippy`
+- Rust: `cargo fmt && cargo clippy && cargo test`
 - Python: `uv run ruff format . && uv run ruff check . && uv run basedpyright .`
 - JS/TS: `npm run lint` or `bun run lint` (if lint script exists)
 - Mixed: run checks for all detected languages

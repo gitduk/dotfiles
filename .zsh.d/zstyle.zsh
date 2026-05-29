@@ -19,7 +19,7 @@ zstyle ':completion:*' accept-exact false
 # Interactive and display settings
 zstyle ':completion:*' menu select=1
 zstyle ':completion:*' verbose yes
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} 'ln=target' 'or=31' 'mi=31'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS} 'di=01;34' 'ln=target' 'or=31' 'mi=31'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' complete-options true
 
@@ -42,7 +42,7 @@ zstyle ':completion:*:matches' group 'yes'
 zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*:options' auto-description '%d'
 zstyle ':completion:*:messages' format '%F{purple} [ %d ]%f'
-zstyle ':completion:*:descriptions' format '[ %d ]'
+
 zstyle ':completion:*:corrections' format '%F{yellow}![ %d (errors: %e) ]!%f'
 zstyle ':completion:*:warnings' format '%F{red}[ no matches found ]%f'
 

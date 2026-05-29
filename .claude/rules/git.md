@@ -4,6 +4,7 @@
 
 - Commit atomically: one logical change per commit, all tests passing at each commit; batch all edits for a single feature/fix into one commit — do not commit after each individual file edit
   - *Clarification*: For Rust projects, `cargo fmt` + `cargo clippy` cycles within a single logical change are **preparation steps**, not separate commits. Commit only after the full logical change is complete and verified.
+- **Run quality tools before `git add`**: formatting, linting, and tests can modify files (lock files, auto-formatted sources). Always run the full quality toolchain first, then stage — never stage before running tools, or the staged snapshot may be stale.
 - Before committing, check unpushed commits (`git log @{u}..HEAD` — if `@{u}` fails, use `git log origin/main..HEAD` or `git log origin/master..HEAD`) and fold any that belong to the same logical change into the new commit via `git reset --soft HEAD~N` + recommit
 - **Version bumps**: When a project policy requires version bumps on commit (check project CLAUDE.md), treat that as part of the commit workflow rather than an optional release step. Before `git commit`, bump version files and include them in the commit.
 - Message format: `<type>[optional scope]: <imperative summary>` (max 72 chars)

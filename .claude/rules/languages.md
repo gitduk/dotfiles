@@ -12,7 +12,7 @@ Language-specific conventions and data store best practices.
   - **New code**: no `.unwrap()` in production
   - **Existing code**: no refactor mandate for legacy unwraps — fix only if touching that code for other reasons
 - Paths: small files use `include_str!("../../file.txt")` to embed at compile time; dev/test use `env!("CARGO_MANIFEST_DIR")`; production use config file or `current_exe()`; never use `./` relative paths (CWD-dependent)
-- Quality: `cargo fmt --check && cargo clippy -- -D warnings`; run `cargo test` only when the project has a test suite (clippy handles compilation verification, not test); no separate `cargo build` — clippy already compiles, so a standalone build is redundant and wastes tokens
+- Quality: `cargo fmt --check && cargo clippy -- -D warnings`; run `cargo test` only when the project has a test suite (clippy handles compilation verification, not test); no separate `cargo build` — clippy already compiles, so a standalone build is redundant and wastes tokens; never run `cargo generate-lockfile` — clippy/test already update `Cargo.lock` as a side effect
 - Tests: split Rust tests into two categories. Feature tests can be written directly inside the project test suite; bug reproduction tests should be separate scripts and must not enter project code.
 - Format: Run `cargo fmt` immediately after every `cargo clippy` pass, not just before committing.
 

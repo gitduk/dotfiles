@@ -7,7 +7,7 @@ Multiple hosts spawn parallel SSH sessions; Ctrl-C tears all down.
 
 Patterns:
   <host>:<port>[,<port>...]              Forward local port(s) to remote (same port both sides)
-  <local_port>:<host>:<remote_port>      Forward local port to different remote port
+  <port1>:<host>:<port2>                 Different ports: entry port -> exit port (local: :port1->host:port2; -r: host:port1->:port2)
 
 Options:
   -r    Remote forwarding (default: local forwarding)
@@ -18,6 +18,7 @@ Examples:
   sl wk:4000,4001,4002            # Local forward: ports 4000, 4001, 4002 on wk
   sl 8001:wk:8000                 # Local forward: localhost:8001 -> wk:8000
   sl -r wk:8000                   # Remote forward: wk:8000 -> localhost:8000
+  sl -r 5056:wk:8080              # Remote forward: wk:5056 -> localhost:8080
   sl wk:4000,9200 8008:ds:8000    # Two hosts: parallel SSH sessions
 EOF
 }
@@ -27,7 +28,7 @@ build_forward_flag() {
   if [[ "$mode" == "-NL" ]]; then
     printf -- "-L %s%s:localhost:%s" "$bind_addr" "$local_port" "$remote_port"
   else
-    printf -- "-R %s%s:localhost:%s" "$bind_addr" "$remote_port" "$local_port"
+    printf -- "-R %s%s:localhost:%s" "$bind_addr" "$local_port" "$remote_port"
   fi
 }
 
@@ -38,7 +39,7 @@ print_mapping() {
       "$local_port" "$host" "$remote_port" >&2
   else
     printf "\e[34m[R]\e[0m \e[34m%s:%-6s\e[0m ⇒  \e[32m:%-6s\e[0m\n" \
-      "$host" "$remote_port" "$local_port" >&2
+      "$host" "$local_port" "$remote_port" >&2
   fi
 }
 
@@ -49,7 +50,7 @@ print_failed_mapping() {
       "$local_port" "$host" "$remote_port" >&2
   else
     printf "\e[31m[x]\e[0m \e[31m%s:%-6s\e[0m ⇒  \e[31m:%-6s\e[0m\n" \
-      "$host" "$remote_port" "$local_port" >&2
+      "$host" "$local_port" "$remote_port" >&2
   fi
 }
 
@@ -63,7 +64,7 @@ main() {
   local -a host_order   # hosts in order of first appearance
   local -a args=("$@")
 
-  case "${args[0]}" in
+  case "${args[1]}" in
     -h|--help) show_help; return 0 ;;
     -r) mode="-NR"; bind_addr=""; args=("${args[@]:1}") ;;
   esac

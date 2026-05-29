@@ -1,0 +1,34 @@
+[tasks]
+run = "pkill sing-box; sing-box run -c ./config.json"
+
+[tasks.update]
+usage = '''
+arg <url>
+'''
+run = '''
+wget "https://subc.wukaige.com/sub?urls={{usage.url}}&config=https://raw.wukaige.com/sing-box/config.json" -O config.json
+sing-box check -c config.json && systemctl --user restart sing-box.service && echo sing-box reloaded
+'''
+
+[tasks.add]
+usage = '''
+arg <url>
+arg <name>
+'''
+run = '''
+wget "https://subc.wukaige.com/sub?urls={{usage.url}}&config=https://raw.wukaige.com/sing-box/config.json" -O {{usage.name}}.json
+'''
+
+[tasks.use]
+usage = '''
+arg <name>
+'''
+run = '''
+ln -sf {{usage.name}}.json config.json
+sing-box check -c config.json && systemctl --user restart sing-box.service
+'''
+
+[tasks.reload]
+run = '''
+sing-box check -c config.json && systemctl --user restart sing-box.service
+'''

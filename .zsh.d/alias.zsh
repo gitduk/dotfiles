@@ -71,10 +71,6 @@ alias cpl="c pull --rebase"
 alias cps="c push"
 alias cls="c ls-files"
 
-# direnv
-alias dia="direnv allow"
-alias did="direnv deny"
-
 # cargo
 alias ca="cargo"
 alias cai="cargo init"
@@ -146,11 +142,10 @@ alias ela="v ~/.zsh.d/lazy.toml && source ~/.zsh.d/lazy.zsh"
 alias eas="v ~/.zsh.d/alias.zsh && source ~/.zsh.d/alias.zsh"
 alias epw="v ~/.pw.json"
 alias ecl="v ~/.claude/settings.json"
-alias ejs="v .justfile"
+alias ems="v .mise.toml"
 alias eis="v ~/.config/navi/cheats/install.cheat"
 alias epd="v ~/.config/navi/cheats/podman.cheat"
 alias ehs="v /etc/hosts"
-alias eenv="v .envrc"
 
 # easytier
 alias epr="easytier-cli peer"
@@ -178,16 +173,14 @@ alias g="git"
 # hyprland
 alias hc="hyprctl"
 
-# just
-alias js="just"
-alias jse="just --edit"
-alias jsl="just --list"
-
 # json-server
 alias jss="json-server"
 
 # ls
 alias ls="eza"
+
+# mise
+alias ms="mise"
 
 # nala
 alias nai="sudo nala install -y"

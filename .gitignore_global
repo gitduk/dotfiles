@@ -145,3 +145,7 @@ cython_debug/
 # dotfiles
 .dotfiles/
 
+# claude code
+.codegraph/
+.playwright-cli/
+
