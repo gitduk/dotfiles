@@ -21,6 +21,12 @@ Structured git commit workflow that enforces project-specific requirements (vers
 - Tests failing
 - Quality checks not passing
 
+## Commit Granularity
+
+- One logical change per commit; all tests passing at each commit
+- Batch all edits for a single feature/fix into one commit — never commit after each individual file edit
+- Rust: `cargo fmt` + `cargo clippy` cycles within a single logical change are **preparation steps**, not separate commits. Commit only after the full logical change is complete and verified.
+
 ## Workflow
 
 ```dot
@@ -98,11 +104,7 @@ If unpushed commits exist and belong to same logical change → squash before ne
 - Lock file must be included? (`Cargo.lock`, `package-lock.json`, `uv.lock`)
 - Quality checks required? (auto-detect based on project type)
 
-**Quality checks by project type:**
-- Rust: `cargo fmt && cargo clippy && cargo test`
-- Python: `uv run ruff format . && uv run ruff check . && uv run basedpyright .`
-- JS/TS: `npm run lint` or `bun run lint` (if lint script exists)
-- Mixed: run checks for all detected languages
+**Quality checks:** run the per-language QA chain defined in `~/.claude/rules/languages.md` — that file is the canonical definition (always loaded in context); do not restate commands here. At commit time use the applying variants (`cargo fmt`, `uv run ruff format .`), not `--check`. Mixed projects: run chains for all detected languages.
 
 ### 3.5. CLAUDE.md Consistency Check
 
@@ -164,24 +166,19 @@ Add body (separated by blank line) when WHY isn't obvious from diff.
 
 ### 6. Execute Commit
 
-**Auto-detect project type and run ALL quality checks in a single command BEFORE any `git add`:**
+**Run the full QA chain (commands per `rules/languages.md`) BEFORE any `git add`:**
 
 ```bash
-# Rust project (has Cargo.toml) — must be ONE command so QA gate records all three
-cargo fmt && cargo clippy -- -D warnings && cargo test
-
-# Python project (has pyproject.toml)
-uv run ruff format . && uv run ruff check . && uv run basedpyright .
-
-# JS/TS project (has package.json with lint script)
-npm run lint  # or bun run lint
+# QA commands: see ~/.claude/rules/languages.md (canonical, always in context).
+# Separate commands are fine — the QA gate accumulates each passing check.
+<per-language QA chain>
 
 # ONLY after all checks pass, stage and commit
 git add <specific files>
 git commit -m "$(cat <<'EOF'
 <commit message>
 
-Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+<Co-Authored-By trailer — use the one the current harness specifies; never hardcode a model name here>
 EOF
 )"
 ```
@@ -223,6 +220,12 @@ After successful commit, display a structured report:
 - Quality check results
 - Commit hash for reference
 
+## Branches
+
+- Naming: `feat/description`, `fix/description`, `chore/description`
+- Rebase feature branches onto main before merging; keep history linear
+- Never force-push to main; force-push to personal feature branches is fine
+
 ## Common Mistakes
 
 | Mistake | Fix |
@@ -244,12 +247,3 @@ After successful commit, display a structured report:
 - "I'll run tests after committing" → Tests must pass before commit
 - "Let me ask user to confirm first" → Commit skill executes directly, no confirmation needed
 - "I'll run quality checks now" (after version bump check) → CLAUDE.md consistency check (Step 3.5) comes BEFORE quality checks; do not skip it when CLAUDE.md exists
-
-## Project-Specific Checklist
-
-**Before committing to ccs project:**
-- [ ] Version bumped in `Cargo.toml`
-- [ ] `Cargo.lock` updated and included
-- [ ] `cargo clippy` passes
-- [ ] All changed files belong to same logical change
-- [ ] Commit message follows conventional commits format

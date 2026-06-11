@@ -3,10 +3,6 @@
 SCRIPT_NAME=$(basename "$0")
 VERSION="1.0.0"
 
-##############
-### config ###
-##############
-
 declare -A CONFIG=(
     [wallpaper_dir]="${HOME}/Pictures/wallpapers"
     [interval]="1800"
@@ -44,7 +40,7 @@ warn()  { echo -e "\e[33mWARN:\e[0m $*" >&2; }
 info()  { echo -e "\e[34mINFO:\e[0m $*"; }
 
 get_focused_monitor() {
-  hyprctl monitors | awk '/^Monitor/{name=$2} /focused: yes/{print name}'
+  hyprctl -j monitors | jq -r 'first((.[] | select(.focused) | .name), (.[0].name))'
 }
 
 toggle_foreground() {
@@ -78,11 +74,24 @@ find_wallpapers() {
 
 set_wallpaper() {
   local wallpaper=$1
-  local monitor=$(get_focused_monitor)
   [[ -f $wallpaper ]] || error "File not found: $wallpaper"
 
+  local focused
+  focused=$(get_focused_monitor)
+
+  local -a monitors
+  if [[ -n $focused ]]; then
+    monitors=("$focused")
+  else
+    mapfile -t monitors < <(hyprctl -j monitors 2>/dev/null | jq -r '.[].name' 2>/dev/null)
+    [[ ${#monitors[@]} -gt 0 ]] || error "No monitors found"
+  fi
+
   info "Setting wallpaper: ${wallpaper##*/}"
-  hyprctl hyprpaper wallpaper "$monitor,$wallpaper" &>/dev/null
+  local preload_out; preload_out=$(hyprctl hyprpaper preload "$wallpaper" 2>&1)
+  for monitor in "${monitors[@]}"; do
+    local wp_out; wp_out=$(hyprctl hyprpaper wallpaper "$monitor,$wallpaper" 2>&1)
+  done
   echo "$wallpaper" > "$HOME/.cache/waybar/current_wallpaper"
 
   if ! command -v wallust >/dev/null; then

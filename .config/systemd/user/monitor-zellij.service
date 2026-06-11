@@ -1,0 +1,12 @@
+[Unit]
+Description=Zellij resource monitor (mem/cpu/temp/disk)
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.config/zellij/scripts/monitor.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

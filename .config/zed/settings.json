@@ -23,6 +23,9 @@
       "type": "registry"
     },
     "claude-acp": {
+      "default_config_options": {
+        "model": "default"
+      },
       "type": "registry"
     }
   },
@@ -99,9 +102,10 @@
       }
     },
     "default_model": {
-      "provider": "anthropic",
-      "model": "claude-sonnet-4-6",
-      "enable_thinking": false
+      "effort": "high",
+      "provider": "copilot_chat",
+      "model": "gpt-5-mini",
+      "enable_thinking": true
     },
     "commit_message_model": {
       "provider": "anthropic",

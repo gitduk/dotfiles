@@ -1,0 +1,34 @@
+##############
+### Python ###
+##############
+
+__pycache__/
+.venv/
+venv/
+*.py[cod]
+*$py.class
+
+############
+### Rust ###
+############
+
+target/
+
+##############
+### Global ###
+##############
+
+# log
+*.log
+
+# Environments
+.env*
+env/
+
+# dotfiles
+.dotfiles/
+
+# claude code
+.codegraph/
+.playwright-cli/
+

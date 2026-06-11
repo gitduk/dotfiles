@@ -2,7 +2,6 @@
 live_config_reload = true
 import = ["~/.config/alacritty/colors.toml"]
 
-
 [env]
 QT_IM_MODULE = "fcitx"
 

@@ -18,11 +18,6 @@ Address as **凯歌** 日常场景 / **吴凯歌** 正式场景。
 - **Rust proficiency**: Learning, not yet proficient — provide detailed explanations for Rust concepts, idioms, and best practices
 - **Other languages**: JS/TS (occasional use)
 
-## Work Context
-
-- Uses Claude Code for: personal projects, work projects, and learning/exploration
-- Currently learning Rust language
-
 ## Communication Preferences
 
 - **Learning scenarios**: Provide detailed explanations, teach concepts, explain why not just what

@@ -11,20 +11,24 @@ keybinds clear-defaults=true {
         bind "Ctrl z" { ToggleFocusFullscreen; }
         bind "Ctrl ]" { NewPane "right"; }
         bind "Ctrl [" { NewPane "down"; }
-        bind "Ctrl o" { ToggleFloatingPanes; SwitchToMode "normal"; }
-    }
-    locked {
-        bind "Ctrl g" { SwitchToMode "normal"; }
+        bind "Ctrl P" { SwitchToMode "pane"; }
+        bind "Ctrl G" { TogglePaneInGroup; }
     }
     pane {
-        bind "c" { SwitchToMode "renamepane"; PaneNameInput 0; }
+        bind "r" { SwitchToMode "renamepane"; PaneNameInput 0; }
         bind "d" { NewPane "down"; SwitchToMode "normal"; }
-        bind "e" { TogglePaneEmbedOrFloating; SwitchToMode "normal"; }
-        bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "f" { TogglePaneFrames; }
         bind "n" { NewPane "right"; SwitchToMode "normal"; }
-        bind "p" { SwitchFocus; }
-        bind "Ctrl p" { SwitchToMode "normal"; }
+        bind "[" { BreakPaneLeft; SwitchToMode "normal"; }
+        bind "]" { BreakPaneRight; SwitchToMode "normal"; }
+        bind "b" { BreakPane; SwitchToMode "normal"; }
+        bind "H" { MovePane "left"; }
+        bind "J" { MovePane "down"; }
+        bind "K" { MovePane "up"; }
+        bind "L" { MovePane "right"; }
+        bind "p" { TogglePanePinned; }
         bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
+        bind "Ctrl p" { SwitchToMode "normal"; }
     }
     tab {
         bind "left" { GoToPreviousTab; }
@@ -40,50 +44,17 @@ keybinds clear-defaults=true {
         bind "7" { GoToTab 7; SwitchToMode "normal"; }
         bind "8" { GoToTab 8; SwitchToMode "normal"; }
         bind "9" { GoToTab 9; SwitchToMode "normal"; }
-        bind "[" { BreakPaneLeft; SwitchToMode "normal"; }
-        bind "]" { BreakPaneRight; SwitchToMode "normal"; }
-        bind "b" { BreakPane; SwitchToMode "normal"; }
         bind "h" { GoToPreviousTab; }
         bind "j" { GoToNextTab; }
         bind "k" { GoToPreviousTab; }
         bind "l" { GoToNextTab; }
+        bind "H" { MoveTab "left"; }
+        bind "L" { MoveTab "right"; }
         bind "n" { NewTab; SwitchToMode "normal"; }
-        bind "r" { SwitchToMode "renametab"; TabNameInput 0; }
         bind "s" { ToggleActiveSyncTab; SwitchToMode "normal"; }
         bind "Ctrl t" { SwitchToMode "normal"; }
         bind "x" { CloseTab; SwitchToMode "normal"; }
         bind "tab" { ToggleTab; }
-    }
-    resize {
-        bind "left" { Resize "Increase left"; }
-        bind "down" { Resize "Increase down"; }
-        bind "up" { Resize "Increase up"; }
-        bind "right" { Resize "Increase right"; }
-        bind "+" { Resize "Increase"; }
-        bind "-" { Resize "Decrease"; }
-        bind "=" { Resize "Increase"; }
-        bind "H" { Resize "Decrease left"; }
-        bind "J" { Resize "Decrease down"; }
-        bind "K" { Resize "Decrease up"; }
-        bind "L" { Resize "Decrease right"; }
-        bind "h" { Resize "Increase left"; }
-        bind "j" { Resize "Increase down"; }
-        bind "k" { Resize "Increase up"; }
-        bind "l" { Resize "Increase right"; }
-        bind "Ctrl n" { SwitchToMode "normal"; }
-    }
-    move {
-        bind "left" { MovePane "left"; }
-        bind "down" { MovePane "down"; }
-        bind "up" { MovePane "up"; }
-        bind "right" { MovePane "right"; }
-        bind "h" { MovePane "left"; }
-        bind "j" { MovePane "down"; }
-        bind "k" { MovePane "up"; }
-        bind "l" { MovePane "right"; }
-        bind "n" { MovePane; }
-        bind "p" { MovePaneBackwards; }
-        bind "tab" { MovePane; }
     }
     scroll {
         bind "e" { EditScrollback; SwitchToMode "normal"; }
@@ -112,43 +83,40 @@ keybinds clear-defaults=true {
     }
     tmux {
         bind "space" { NextSwapLayout; }
-        bind "," { SwitchToMode "renametab"; }
-        bind "-"     { NewPane "down";  SwitchToMode "normal"; }
-        bind "\\"    { NewPane "right"; SwitchToMode "normal"; }
-        bind "c"     { NewTab; SwitchToMode "normal"; }
-        bind "n"     { GoToNextTab;     SwitchToMode "normal"; }
-        bind "p"     { GoToPreviousTab; SwitchToMode "normal"; }
-        bind "tab"   { ToggleTab;       SwitchToMode "normal"; }
-        bind "o"     { FocusNextPane;   SwitchToMode "normal"; }
-        bind "z"     { ToggleFocusFullscreen;    SwitchToMode "normal"; }
-        bind "b"     { BreakPane;               SwitchToMode "normal"; }
-        bind "["     { MovePane;                SwitchToMode "normal"; }
-        bind "e"     { TogglePaneEmbedOrFloating; SwitchToMode "normal"; }
-        bind "P"     { SwitchToMode "renamepane"; PaneNameInput 0; }
+        bind "-" { NewPane "down"; SwitchToMode "normal"; }
+        bind "\\" { NewPane "right"; SwitchToMode "normal"; }
+        bind "c" { NewTab; SwitchToMode "normal"; }
+        bind "tab" { ToggleTab; SwitchToMode "normal"; }
+        bind "b" { BreakPane; SwitchToMode "normal"; }
+        bind "[" { MovePane; SwitchToMode "normal"; }
+        bind "y" { ToggleActiveSyncTab; SwitchToMode "normal"; }
+        bind "r" { SwitchToMode "renametab"; TabNameInput 0; }
         bind "enter" { SwitchToMode "scroll"; }
-        bind "1"     { GoToTab 1; SwitchToMode "normal"; }
-        bind "2"     { GoToTab 2; SwitchToMode "normal"; }
-        bind "3"     { GoToTab 3; SwitchToMode "normal"; }
-        bind "4"     { GoToTab 4; SwitchToMode "normal"; }
-        bind "5"     { GoToTab 5; SwitchToMode "normal"; }
-        bind "6"     { GoToTab 6; SwitchToMode "normal"; }
-        bind "7"     { GoToTab 7; SwitchToMode "normal"; }
-        bind "8"     { GoToTab 8; SwitchToMode "normal"; }
-        bind "9"     { GoToTab 9; SwitchToMode "normal"; }
-        bind "H"     { Resize "Increase left"; }
-        bind "J"     { Resize "Increase down"; }
-        bind "K"     { Resize "Increase up"; }
-        bind "L"     { Resize "Increase right"; }
-        bind "Ctrl j" { MovePane "Down"; }
-        bind "Ctrl k" { MovePane "Up"; }
-        bind "Ctrl h" { MovePane "Left"; }
-        bind "Ctrl l" { MovePane "Right"; }
-        bind "Ctrl r" { SwitchToMode "resize"; }
+        bind "H" { Resize "increase left"; }
+        bind "J" { Resize "increase down"; }
+        bind "K" { Resize "increase up"; }
+        bind "L" { Resize "increase right"; }
+        bind "Ctrl j" { MovePane "down"; }
+        bind "Ctrl k" { MovePane "up"; }
+        bind "Ctrl h" { MovePane "left"; }
+        bind "Ctrl l" { MovePane "right"; }
+        bind "b" {
+          Run "btop" {
+            floating true
+            x "10%"
+            y "10%"
+            width "80%"
+            height "80%"
+          }
+        }
+    }
+    locked {
+        bind "Ctrl g" { SwitchToMode "normal"; }
     }
     shared_except "normal" {
         bind "q" { SwitchToMode "normal"; }
     }
-    shared_among "normal" "locked" {
+    shared_among "normal" {
         bind "Ctrl x" { CloseFocus; SwitchToMode "normal"; }
     }
     shared_except "locked" {
@@ -176,11 +144,10 @@ keybinds clear-defaults=true {
         bind "k" { MoveFocus "up"; SwitchToMode "normal"; }
         bind "l" { MoveFocus "right"; SwitchToMode "normal"; }
         bind "x" { CloseFocus; SwitchToMode "normal"; }
-        bind "Ctrl x" { CloseFocus; SwitchToMode "normal"; }
     }
     shared_among "scroll" "search" {
-        bind "PageDown" { PageScrollDown; }
-        bind "PageUp" { PageScrollUp; }
+        bind "pagedown" { PageScrollDown; }
+        bind "pageup" { PageScrollUp; }
         bind "left" { PageScrollUp; }
         bind "down" { ScrollDown; }
         bind "up" { ScrollUp; }
@@ -228,6 +195,7 @@ plugins {
     welcome-screen location="zellij:session-manager" {
         welcome_screen true
     }
+    zjstatus location="file:~/.config/zellij/plugins/zjstatus.wasm"
 }
 
 // Plugins to load in the background when a new session starts
@@ -277,7 +245,7 @@ theme "catppuccin-mocha"
 // Choose the path to the default shell that zellij will use for opening new panes
 // Default: $SHELL
 //
-// default_shell "fish"
+default_shell "zsh"
 
 // Choose the path to override cwd that zellij will use for opening new panes
 //

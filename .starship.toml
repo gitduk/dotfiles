@@ -60,7 +60,7 @@ style = "bold blue"
 
 [direnv]
 disabled = true
-detect_files = [".env", ".envrc"]
+detect_files = [".env"]
 symbol = "direnv "
 style = "bold green"
 format = "[$symbol]($style) "
@@ -276,9 +276,9 @@ symbol = "zig "
 [custom.mise]
 command = """
 if mise trust --show 2>/dev/null | grep -qw "trusted"; then
-  printf "\e[1;34m⚙️\e[0m"
+  printf "\e[1;34m⚙\e[0m"
 else
-  printf "\e[90m⚙️\e[0m"
+  printf "\e[90m⚙\e[0m"
 fi
 """
 when = "test -f mise.toml || test -f .mise.toml"

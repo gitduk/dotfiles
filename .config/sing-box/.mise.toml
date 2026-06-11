@@ -1,5 +1,5 @@
 [tasks]
-run = "pkill sing-box; sing-box run -c ./config.json"
+start = "pkill sing-box; sing-box run -c ./config.json"
 
 [tasks.update]
 usage = '''

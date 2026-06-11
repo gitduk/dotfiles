@@ -11,8 +11,8 @@ alias dis="sudo dpkg -i"
 alias dim='echo $(tput cols)x$(tput lines)'
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 alias jcl="journalctl"
-alias jcu="journalctl -u"
-alias jcuu="journalctl --user -u"
+alias jcu="journalctl -xeu"
+alias jcuu="journalctl --user -xeu"
 alias lv="lnav"
 alias mk="mkdir -p"
 alias nsl="nslookup"
@@ -146,6 +146,7 @@ alias ems="v .mise.toml"
 alias eis="v ~/.config/navi/cheats/install.cheat"
 alias epd="v ~/.config/navi/cheats/podman.cheat"
 alias ehs="v /etc/hosts"
+alias eig="v .gitignore"
 
 # easytier
 alias epr="easytier-cli peer"
@@ -237,6 +238,7 @@ alias scrs="sudo systemctl restart"
 alias scdr="sudo systemctl daemon-reload"
 alias sce="sudo systemctl enable"
 alias scd="sudo systemctl disable"
+alias sced="sudo systemctl edit"
 
 # systemctl --user
 alias sus="systemctl --user status"

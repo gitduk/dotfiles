@@ -1,6 +1,6 @@
 ---
 name: send-message
-description: Send a message to a Telegram chat via the Bot API directly. Self-contained — reads its own .env at the skill root and has no dependency on any Telegram plugin. Use when the user asks to push a Telegram notification to their phone, test the bot token, send from a hook or one-shot script, or 给 telegram 发消息 / 推送消息到手机.
+description: Send a message to a Telegram chat via the Bot API directly. Self-contained — reads its own .env at the skill root and has no dependency on any Telegram plugin. Use when the user asks to push a Telegram notification to their phone, test the bot token, send from a hook or one-shot script, or 给 telegram 发消息 / 推送消息到手机. Push policy — default is NO push (terminal output is the notification); push ONLY for /loop or /schedule task results, explicit requests ("发给我" / "notify me"), or completion of long tasks (>5 min). Never push for routine replies, errors/permission prompts (hooks handle those), or intermediate progress. When unsure, don't push.
 ---
 
 # send-message — Telegram Bot API sender
@@ -11,17 +11,34 @@ credentials in `.env` at the skill root.
 
 ## When to use this skill
 
-- Push a notification ("build done", "task finished") to the user's phone
+默认假设：凯歌在电脑边，终端里的文字就是通知。仅以下场景推 Telegram：
+
+- **`/loop` 或 `/schedule` 任务的结果** — 这些任务设计上就是脱离终端的，完成时必须推
+- **显式要求** — "发给我"、"notify me"、"推一下"、"告诉我一声"；没指定渠道时默认 Telegram
+- **长耗时任务完成** — 单次任务预期运行 >5 分钟（大型构建、批量处理、长测试套件），收尾推一条简短摘要
+- **btc-watch 等明确走 Telegram 的 skill** — 按各 skill 自己的规则
 - Send a screenshot or file attachment from a script
 - Test that the bot token still works
 - Send from a hook or one-shot task (no long-running MCP channel needed)
 
 ## When NOT to use it
 
+- **常规对话收尾 / 秒级任务** — 结果在终端里，不再重复推
+- **错误/权限请求** — 由 `hyprctl notify` hooks 负责（`settings.json` 的 Notification / PermissionRequest），不要 Telegram 重复
+- **任务完成横幅** — Stop hook 走 `hooks/notify-unfocused.sh`，终端聚焦时自动抑制，同样不要重复
+- **中间进度更新** — 除非凯歌显式要求进度推送，否则不要骚扰
+- **不确定时默认不推** — 拿不准是否属于"脱离终端"场景就不推，凯歌可以手动说"发给我"。过度推送比偶尔漏推更讨厌。
 - You need to *receive* messages — this skill is send-only. Receiving requires
   a Telegram `getUpdates` poller, which is a long-running job, not a skill.
 - You need access/allowlist management — this skill doesn't manage who can
   reach the bot, only what this skill sends out of it.
+
+## Message content guidelines
+
+- 简短：Telegram 消息不是会话 transcript，是**摘要**。一句话能讲完就一句话。
+- 包含结论：成功/失败、关键数字、下一步是否需要凯歌介入。
+- 不包含：工具调用细节、思考过程、完整 diff。
+- 超长（>几百字）用 `--file` 附件，不刷屏。
 
 ## Setup
 

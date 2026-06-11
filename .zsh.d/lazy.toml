@@ -248,8 +248,8 @@ env = "BACON_CONFIG=~/.config/bacon/bacon.toml"
 description = "Background rust code checker"
 
 [[lazy]]
-repo = "cargo:numa"
-description = "Portable DNS resolver in Rust"
+repo = "cargo:zellij"
+description = "A terminal workspace with batteries included"
 
 [[lazy]]
 repo = "cargo:doxx"

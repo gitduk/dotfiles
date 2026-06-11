@@ -19,12 +19,10 @@ hl.on("hyprland.start", function()
 	-- services
 	hl.exec_cmd("mako")
 	hl.exec_cmd("hypridle")
-	hl.exec_cmd("waybar & hyprpaper")
 	hl.exec_cmd("wl-paste --watch cliphist store")
 	hl.exec_cmd("fcitx5 -d")
-
-	-- wallpaper (slight delay so hyprpaper is ready)
-	hl.exec_cmd("sleep 0.2 && " .. waybar .. "/scripts/wallpaper.sh random")
+	hl.exec_cmd("waybar")
+	hl.exec_cmd("hyprpaper")
 end)
 
 -- All settings

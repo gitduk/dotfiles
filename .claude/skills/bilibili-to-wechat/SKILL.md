@@ -10,6 +10,8 @@ user-invocable: true
 - 视频链接 → 字幕提取 → 文章生成 → 质量审核 → 人工确认 → 排版 → 发布
 - 现成 Markdown → 排版 → 预览 / 发布
 
+> **排版前必读** `~/.claude/skills/aesthetics/SKILL.md` —— 凯歌的视觉偏好（中式雅、青绿主色、中文排版标准）。所有样式决策以它为准。
+
 这个 skill 只有一个主入口，但支持两类输入：
 1. **视频模式**：用户提供 Bilibili / YouTube 链接，生成公众号文章并发布
 2. **Markdown 模式**：用户提供现成 `.md` 文件或直接粘贴 Markdown，只做公众号排版、HTML 生成、预览、发布

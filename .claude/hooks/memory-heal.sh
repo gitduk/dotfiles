@@ -45,10 +45,9 @@ if [[ "$MEMORY_DIR" != "$EXPECTED_PREFIX"* ]]; then
   exit 1
 fi
 
-# --- Checks 1, 1.5, 3: Single-pass traversal (merged for I/O efficiency) ---
+# --- Checks 1, 3: Single-pass traversal (merged for I/O efficiency) ---
 if [ -d "$MEMORY_DIR" ] && [ ! -L "$MEMORY_DIR" ]; then
   actual=""
-  misplaced=""
   file_count=0
   for file in "$MEMORY_DIR"/*.md; do
     [ -f "$file" ] || continue
@@ -58,13 +57,6 @@ if [ -d "$MEMORY_DIR" ] && [ ! -L "$MEMORY_DIR" ]; then
 
     actual+="$basename_file"$'\n'
     ((file_count++)) || true
-
-    # Check 1.5: type placement
-    # `|| true` guards against pipefail when file has no frontmatter (grep exits 1)
-    mem_type=$(sed -n '/^---$/,/^---$/p' "$file" 2>/dev/null | grep "^type:" | awk '{print $2}' | head -1 || true)
-    if [ "$mem_type" = "user" ] || [ "$mem_type" = "feedback" ]; then
-      misplaced+="$basename_file (type: $mem_type), "
-    fi
   done
   actual=$(echo "$actual" | sort)
 
@@ -103,12 +95,6 @@ if [ -d "$MEMORY_DIR" ] && [ ! -L "$MEMORY_DIR" ]; then
         issues+=("$issue")
       done <<< "$index_issues"
     fi
-  fi
-
-  # Check 1.5 result: misplaced memory type
-  if [ -n "$misplaced" ]; then
-    misplaced=${misplaced%, }
-    issues+=("MISPLACED_MEMORY: $misplaced should be in ~/.claude/rules/ (cross-project)")
   fi
 
   # Check 3 result: file count

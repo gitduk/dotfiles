@@ -1,0 +1,12 @@
+[tools]
+usage = "latest"
+
+[settings]
+trusted_config_paths = ["/"]
+env_file = ".env"
+raw = true
+env_shell_expand = true
+
+[settings.npm]
+package_manager = "bun"
+

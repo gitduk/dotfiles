@@ -1,18 +1,27 @@
 #!/usr/bin/env bash
-# qa-gate-version: 3
+# qa-gate-version: 4
 # QA gate — blocks `git commit` unless all required qa categories for the
-# project's language have been observed as passing since the last edit.
+# project's language have been observed as passing since the last code edit.
+#
+# rules/languages.md is the canonical QA definition; this script can't read
+# prose, so required_for/hint_for_cat duplicate it — keep them in sync.
 #
 # Required categories per language (aligned with rules/languages.md):
-#   rust    -> fmt, clippy, test
-#   python  -> fmt, check, typecheck, test
+#   rust    -> fmt, clippy (+ test only when a test suite is detected)
+#   python  -> fmt, check, typecheck (+ test only when a test suite is detected)
 #   js      -> test   (lint/typecheck enforced per-project via project CLAUDE.md)
-#   unknown -> any single qa command (fallback for non-standard projects)
+#   unknown -> not gated
+#
+# Categories accumulate across separate Bash commands — checks do NOT need
+# to be chained into one command.
 #
 # Events:
 #   PostToolUse Edit|Write|MultiEdit|NotebookEdit -> clear accumulated state
+#       (doc-only edits .md/.txt/.rst exempt; caveat: a Rust doctest reading
+#        docs via include_str! won't be re-gated — cargo test still covers it)
 #   PostToolUse Bash (qa cmd, not errored)        -> record category passed
-#   PreToolUse  Bash (git commit)                 -> deny if any required missing
+#   PreToolUse  Bash (git commit)                 -> deny if any required missing;
+#                                                    hint lists only what's missing
 #
 # Escape: include literal token `QA-SKIP` anywhere in the bash command.
 #
@@ -35,18 +44,34 @@ STATE_DIR="$HOME/.claude/session-env/qa-gate"
 mkdir -p "$STATE_DIR"
 STATE_FILE="$STATE_DIR/${SESSION_ID}.state"
 
-# Walk up from $1 looking for a project marker; echo rust|python|js|unknown.
+# Walk up from $1 looking for a project marker; echo "<lang> <root>".
 detect_lang() {
   local cur="$1"
   local i
   for i in 1 2 3 4 5 6 7 8; do
-    if [ -f "$cur/Cargo.toml" ]; then echo rust; return; fi
-    if [ -f "$cur/pyproject.toml" ] || [ -f "$cur/uv.lock" ] || [ -f "$cur/requirements.txt" ]; then echo python; return; fi
-    if [ -f "$cur/package.json" ]; then echo js; return; fi
+    if [ -f "$cur/Cargo.toml" ]; then echo "rust $cur"; return; fi
+    if [ -f "$cur/pyproject.toml" ] || [ -f "$cur/uv.lock" ] || [ -f "$cur/requirements.txt" ]; then echo "python $cur"; return; fi
+    if [ -f "$cur/package.json" ]; then echo "js $cur"; return; fi
     [ "$cur" = "/" ] && break
     cur=$(dirname "$cur")
   done
-  echo unknown
+  echo "unknown $1"
+}
+
+# Does the project at $2 (lang $1) have a test suite? Cheap heuristics only.
+has_tests() {
+  local lang="$1" root="$2"
+  case "$lang" in
+    rust)
+      [ -d "$root/tests" ] && return 0
+      grep -rqm1 --include='*.rs' --exclude-dir=target -e '#\[test\]' -e '#\[cfg(test)' "$root" 2>/dev/null
+      ;;
+    python)
+      [ -d "$root/tests" ] && return 0
+      [ -n "$(find "$root" -maxdepth 3 \( -name 'test_*.py' -o -name '*_test.py' \) -not -path '*/.venv/*' -print -quit 2>/dev/null)" ]
+      ;;
+    *) return 0 ;;
+  esac
 }
 
 # Map a bash command to a "lang:category" token, or empty if not a qa command.
@@ -84,11 +109,30 @@ classify_qa() {
 }
 
 required_for() {
-  case "$1" in
-    rust)    echo "rust:fmt rust:clippy rust:test" ;;
-    python)  echo "python:fmt python:check python:typecheck python:test" ;;
+  local lang="$1" root="$2"
+  case "$lang" in
+    rust)
+      if has_tests rust "$root"; then echo "rust:fmt rust:clippy rust:test"
+      else echo "rust:fmt rust:clippy"; fi ;;
+    python)
+      if has_tests python "$root"; then echo "python:fmt python:check python:typecheck python:test"
+      else echo "python:fmt python:check python:typecheck"; fi ;;
     js)      echo "js:test" ;;
     unknown) echo "" ;;
+  esac
+}
+
+# Suggested command for one missing category.
+hint_for_cat() {
+  case "$1" in
+    rust:fmt)         echo "cargo fmt" ;;
+    rust:clippy)      echo "cargo clippy -- -D warnings" ;;
+    rust:test)        echo "cargo test" ;;
+    python:fmt)       echo "uv run ruff format --check ." ;;
+    python:check)     echo "uv run ruff check ." ;;
+    python:typecheck) echo "uv run basedpyright ." ;;
+    python:test)      echo "uv run pytest" ;;
+    js:test)          echo "bun test (or npm/pnpm/yarn test)" ;;
   esac
 }
 
@@ -111,8 +155,8 @@ clear_state() { : >"$STATE_FILE"; }
 
 # Echo space-separated missing categories; empty if all required are present.
 missing_required() {
-  local lang="$1"
-  local required; required=$(required_for "$lang")
+  local lang="$1" root="$2"
+  local required; required=$(required_for "$lang" "$root")
   local missing="" cat
   for cat in $required; do
     if ! has_passed "$cat"; then
@@ -134,16 +178,21 @@ case "$EVENT" in
   PostToolUse)
     case "$TOOL" in
       Edit|Write|MultiEdit|NotebookEdit)
-        clear_state
+        FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.notebook_path // empty')
+        case "$FILE" in
+          *.md|*.txt|*.rst) ;;  # doc-only edits can't break compile/lint/test state
+          *) clear_state ;;
+        esac
         ;;
       Bash)
         CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
         IS_ERR=$(echo "$INPUT" | jq -r '(.tool_response.is_error // .tool_response.interrupted // false) | tostring')
         [ "$IS_ERR" = "true" ] && exit 0
-        LANG=$(detect_lang "$CWD")
+        DETECTED=$(detect_lang "$CWD")
+        PROJ_LANG=${DETECTED%% *}
         while IFS= read -r CAT; do
           [ -n "$CAT" ] && add_passed "$CAT"
-        done < <(classify_qa "$CMD" "$LANG")
+        done < <(classify_qa "$CMD" "$PROJ_LANG")
         ;;
     esac
     ;;
@@ -154,18 +203,20 @@ case "$EVENT" in
     is_git_commit "$CMD" || exit 0
     has_skip_token "$CMD" && exit 0
 
-    LANG=$(detect_lang "$CWD")
-    MISSING=$(missing_required "$LANG")
+    DETECTED=$(detect_lang "$CWD")
+    PROJ_LANG=${DETECTED%% *}
+    PROJ_ROOT=${DETECTED#* }
+    MISSING=$(missing_required "$PROJ_LANG" "$PROJ_ROOT")
     [ -z "$MISSING" ] && exit 0
 
     HINT=""
-    case "$LANG" in
-      rust)    HINT="cargo fmt && cargo clippy -- -D warnings && cargo test" ;;
-      python)  HINT="uv run ruff format --check . && uv run ruff check . && uv run basedpyright . && uv run pytest" ;;
-      js)      HINT="bun test  (or npm/pnpm/yarn test)" ;;
-      unknown) HINT="run any recognized qa command (cargo clippy / ruff / pytest / bun test ...)" ;;
-    esac
-    REASON="QA gate [${LANG}]: 缺少通过记录 -> ${MISSING}. 请先跑: ${HINT}. 紧急跳过在命令里加 QA-SKIP (例: git commit -m 'msg  QA-SKIP')."
+    for CAT in $MISSING; do
+      C=$(hint_for_cat "$CAT")
+      [ -z "$C" ] && continue
+      [ -n "$HINT" ] && HINT+=" && "
+      HINT+="$C"
+    done
+    REASON="QA gate [${PROJ_LANG}]: 缺少通过记录 -> ${MISSING}. 只需补跑: ${HINT}. 紧急跳过在命令里加 QA-SKIP (例: git commit -m 'msg  QA-SKIP')."
 
     jq -n --arg r "$REASON" '{
       "hookSpecificOutput": {

@@ -2,45 +2,56 @@ layout {
     default_tab_template {
         children
         pane size=1 borderless=true {
-            plugin location="zellij:compact-bar"
-        }
-    }
+            plugin location="file:~/.config/zellij/plugins/zjstatus.wasm" {
 
-    tab_template name="compact_ui" {
-        children
-        pane size=1 borderless=true {
-            plugin location="zellij:compact-bar"
+                format_left                           "{mode} #[fg=blue,bold]{session} {tabs}"
+                format_center                         ""
+                format_right                          "{notifications}"
+                format_space                          ""
+
+                border_enabled                        "false"
+                border_char                           "-"
+                border_format                         "#[fg=#6C7086]{char}"
+                border_position                       "top"
+
+                mode_normal                           "#[bg=blue,fg=#181825,bold] N "
+                mode_locked                           "#[bg=blue,fg=#181825,bold] B "
+                mode_resize                           "#[bg=blue,fg=#181825,bold] R "
+                mode_pane                             "#[bg=blue,fg=#181825,bold] P "
+                mode_tab                              "#[bg=blue,fg=#181825,bold] T "
+                mode_scroll                           "#[bg=blue,fg=#181825,bold] S "
+                mode_enter_search                     "#[bg=blue,fg=#181825,bold] Search "
+                mode_search                           "#[bg=blue,fg=#181825,bold] Search "
+                mode_session                          "#[bg=blue,fg=#181825,bold] Session "
+                mode_move                             "#[bg=blue,fg=#181825,bold] Move "
+                mode_prompt                           "#[bg=blue,fg=#181825,bold] Prompt "
+                mode_tmux                             "#[bg=blue,fg=#181825,bold] M "
+
+                tab_normal                            "#[fg=#6C7086] {name} "
+
+                tab_active                            "#[fg=blue,bold] {name} "
+                tab_active_sync                       "#[fg=red,bold] {name} "
+                tab_active_fullscreen                 "#[fg=red,bold] {name} "
+
+                tab_rename                            "#[fg=blue,bold] {name} "
+
+                // tab_display_count                     "3"
+                // tab_truncate_start_format             "#[fg=#6C7086] +{count}"
+                // tab_truncate_end_format               "#[fg=#6C7086] +{count}"
+
+                command_git_branch_command            "git rev-parse --abbrev-ref HEAD"
+                command_git_branch_format             "#[fg=blue] {stdout} "
+                command_git_branch_interval           "10"
+                command_git_branch_rendermode         "static"
+
+                notification_format_unread            "#[fg=blue,bold]  #[fg=blue] {message} "
+                notification_format_no_notifications  "#[fg=blue,bold]   "
+                notification_show_interval            "5"
+            }
         }
     }
 
     tab name="main" {
         pane
-    }
-
-    swap_tiled_layout name="MAIN-SIDE" {
-        compact_ui {
-            pane split_direction="vertical" {
-                pane size="70%" { children; }
-                pane size="30%" { pane; }
-            }
-        }
-    }
-
-    swap_tiled_layout name="TOP-BOTTOM" {
-        compact_ui {
-            pane split_direction="horizontal" {
-                pane size="70%" { children; }
-                pane size="30%" { pane; }
-            }
-        }
-    }
-
-    swap_tiled_layout name="GRID" {
-        compact_ui {
-            pane {
-                pane split_direction="vertical" { children; }
-                pane split_direction="vertical" { pane; pane; pane; pane; }
-            }
-        }
     }
 }

@@ -204,8 +204,8 @@ fi
 section_model() {
   local display
   case "$model" in
-    *"Opus 4.6"*) display="${model// (1M context)/}"; display="${display/Opus 4.6/Opus 4.6 [1m]}" ;;
-    *)            display="$model" ;;
+    *" (1M context)"*) display="${model/ (1M context)/ [1m]}" ;;
+    *)                 display="$model" ;;
   esac
   printf '%b' "${BOLD}${GREEN}${display}${RESET}"
 }

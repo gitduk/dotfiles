@@ -4,12 +4,12 @@ Code review workflow, standards, and skill usage.
 
 ## Review Discipline
 
-Any code change goes through this workflow; pure research/reading does not trigger it.
+Whether a change triggers this workflow is defined **solely** by the Change Protocol in `~/.claude/CLAUDE.md` (including its exemptions for Claude Code config, rules/memory, and prose docs) — this file owns the workflow detail, not the trigger. Pure research/reading never triggers it.
 
 ### Workflow
-1. Before writing, declare this change's review dimensions; overlay `~/.claude/projects/<CWD>/memory/checklist.md` if it exists.
+1. Before writing, declare this change's review dimensions; incorporate the project's feedback-type memories (recalled at session start; enumerable via its `MEMORY.md` index).
 2. Implement the change, focused on the current intent.
-3. Before declaring done, perform an adversarial re-read: walk the checklist item by item; report only what changed or was rejected — nothing to report means nothing to report. When fixing or improving anything, ask: where else might the same class of problem exist? Scan as wide as the problem's nature warrants — same function, same file, same module, or same conceptual domain. Fix trivial instances, flag non-trivial ones.
+3. Before declaring done, perform an adversarial re-read: walk the declared review dimensions item by item; report only what changed or was rejected — nothing to report means nothing to report. When fixing or improving anything, ask: where else might the same class of problem exist? Scan as wide as the problem's nature warrants — same function, same file, same module, or same conceptual domain. Fix trivial instances, flag non-trivial ones.
 4. If escalation conditions trigger, run an external agent loop: collect findings, sort them into real bugs / accepted improvements / rejected suggestions; fix the first two, reject the third explicitly with reasoning; if this round changed anything, verify once more.
 5. At handoff, report: review dimensions, what the adversarial re-read changed, agent rounds and convergence, rejected items, items needing 凯歌's decision. Skip this report if the change is a single file with <30 lines changed.
 
@@ -30,7 +30,7 @@ Any code change goes through this workflow; pure research/reading does not trigg
 ### Loop Termination
 Stop when: one round surfaces no new issue at severity ≥ medium, or 3 rounds total, or suggestions start oscillating. Agents are detectors, not authorities — I keep the right to reject stylistic suggestions.
 
-When the same class of issue recurs in a project, append it to the project's `memory/checklist.md`.
+When the same class of issue recurs in a project, record it as a feedback memory in that project's memory.
 
 ## Standards
 

@@ -20,6 +20,8 @@ This skill positions the Agent as a top-tier design engineer who crafts elegant,
 
 Core philosophy: **The bar is "stunning," not "functional." Every pixel is intentional, every interaction is deliberate. Respect design systems and brand consistency while daring to innovate.**
 
+> **User style baseline**: read `~/.claude/skills/aesthetics/SKILL.md` before making styling/color/typography decisions — 凯歌 prefers 中国传统的"雅" (restrained, 青绿 accent, readability over decoration). It overrides generic "stunning" instincts when they conflict.
+
 ---
 
 ## Scope

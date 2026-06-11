@@ -70,6 +70,12 @@ SUCCESS=0
 FAIL=0
 SKIP=0
 
+remote_home=$(ssh "$REMOTE_HOST" 'printf "%s" "$HOME"' </dev/null 2>/dev/null)
+if [[ -z "$remote_home" ]]; then
+  print_error "无法获取远程主机 home 目录"
+  return 1
+fi
+
 print_info "开始同步文件到 $REMOTE_HOST"
 echo "----------------------------------------"
 
@@ -79,12 +85,14 @@ while read -r f; do
     continue
   fi
 
-  if [[ "$f" == "$HOME"* ]]; then
+  if [[ "$f" == "$HOME" || "$f" == "$HOME/"* ]]; then
     rel="${f#$HOME}"
     rel="${rel#/}"
-    dest="~${rel:+/$rel}"
+    dest="$remote_home${rel:+/$rel}"
+    dest_display="~${rel:+/$rel}"
   else
     dest="$f"
+    dest_display="$f"
   fi
 
   # 构建 rsync 选项（使用数组避免空格问题）
@@ -94,15 +102,15 @@ while read -r f; do
   $DRY_RUN && rsync_opts+=(--dry-run)
 
   if $DRY_RUN; then
-    print_warning "[模拟] rsync ${rsync_opts[*]} \"$f\" \"$REMOTE_HOST:$dest\""
+    print_warning "[模拟] rsync ${rsync_opts[*]} \"$f\" \"$REMOTE_HOST:$dest_display\""
   fi
 
   # 确保远程父目录存在
   remote_parent=$(dirname "$dest")
-  if [[ ! "$remote_parent" = "~" ]]; then
+  if [[ "$remote_parent" != "$remote_home" ]]; then
     # 模拟运行时不执行远程创建目录
     if ! $DRY_RUN; then
-      ssh "$REMOTE_HOST" "mkdir -p \"$remote_parent\"" </dev/null 2>&1
+      ssh "$REMOTE_HOST" "mkdir -p '$remote_parent'" </dev/null
     fi
   fi
 
@@ -113,7 +121,7 @@ while read -r f; do
 
   if $VERBOSE; then
     # verbose 模式：先打印完整信息，让 rsync 自由输出
-    print_info "$f → $REMOTE_HOST:$dest"
+    print_info "$f → $REMOTE_HOST:$dest_display"
     if rsync "${rsync_opts[@]}" "$src" "$REMOTE_HOST:$dest"; then
       ((SUCCESS++))
     else
@@ -122,7 +130,7 @@ while read -r f; do
     fi
   else
     # 非 verbose 模式：单行输出带状态符号
-    echo -ne "${GREEN}[INFO]${NC} $f → $REMOTE_HOST:$dest "
+    echo -ne "${GREEN}[INFO]${NC} $f → $REMOTE_HOST:$dest_display "
     if rsync "${rsync_opts[@]}" "$src" "$REMOTE_HOST:$dest"; then
       ((SUCCESS++))
       echo -e "${GREEN}✓${NC}"

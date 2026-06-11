@@ -1,0 +1,13 @@
+[Unit]
+Description=Start atuin daemon service
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/atuin daemon
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

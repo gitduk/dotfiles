@@ -3,7 +3,7 @@ if command -v zellij &>/dev/null; then
   if [[ "$1" == "-k" || "$1" == "--kill" ]]; then
     shift
     if [ -z "$*" ]; then
-      sessions="$(zellij list-sessions --short --no-formatting 2>/dev/null | fzf --preview '')"
+      sessions="$(zellij list-sessions --no-formatting | grep current | cut -d' ' -f1)"
     else
       sessions="$(echo "$*" | tr ' ' '\n')"
     fi
@@ -11,9 +11,21 @@ if command -v zellij &>/dev/null; then
     return
   fi
 
+  # Delete mode
+  if [[ "$1" == "-d" || "$1" == "--delete" ]]; then
+    shift
+    if [ -z "$*" ]; then
+      sessions="$(zellij list-sessions --no-formatting | fzf --preview '' | cut -d' ' -f1)"
+    else
+      sessions="$(echo "$*" | tr ' ' '\n')"
+    fi
+    [[ -n "$sessions" ]] && xargs -I _ zellij delete-session _ --force <<<"$sessions"
+    return
+  fi
+
   # Attach mode
   if [[ $# -eq 1 ]]; then
-    zellij attach --create "$1"
+    zellij attach "$1" 2>/dev/null || zellij --session "$1"
   else
     sessions="$(zellij list-sessions --short --no-formatting 2>/dev/null)"
     if [[ -n "$sessions" ]]; then
