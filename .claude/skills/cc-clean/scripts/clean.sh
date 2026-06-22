@@ -2,10 +2,13 @@
 #
 # cc-clean: reclaim space from accumulated junk in ~/.claude/
 #
-# Three targets, all safe:
+# Six targets, all safe:
 #   1. telemetry/1p_failed_events.*.json   (failed upload queue, no TTL)
 #   2. plans/<adj>-<verb>-<noun>.md        (auto-named, >N days)
 #   3. file-history/<uuid>/                (edit snapshots, >N days)
+#   4. session-env/<uuid>/                 (per-session env snapshots, >N days)
+#   5. paste-cache/<hash>.txt              (pasted-content cache, >N days)
+#   6. jobs/<id>/                          (cloud agent job artifacts, >N days)
 #
 # Dry-runs by default. Pass --execute to actually delete.
 
@@ -30,6 +33,9 @@ Targets (never touches projects/, named plans, or recent files):
   1. telemetry/1p_failed_events.*.json  — always fully cleared
   2. plans/<adj>-<verb>-<noun>.md        — older than --days
   3. file-history/<uuid>/                — older than --days
+  4. session-env/<uuid>/                 — older than --days
+  5. paste-cache/<hash>.txt              — older than --days
+  6. jobs/<id>/                          — older than --days
 
 Override base directory with CLAUDE_DIR env var (default: \$HOME/.claude).
 EOF
@@ -77,10 +83,16 @@ fi
 telemetry_dir="$CLAUDE_DIR/telemetry"
 plans_dir="$CLAUDE_DIR/plans"
 history_dir="$CLAUDE_DIR/file-history"
+sessionenv_dir="$CLAUDE_DIR/session-env"
+pastecache_dir="$CLAUDE_DIR/paste-cache"
+jobs_dir="$CLAUDE_DIR/jobs"
 
 telemetry=()
 plans=()
 history=()
+session_env=()
+paste_cache=()
+jobs=()
 
 if [[ -d "$telemetry_dir" ]]; then
   readarray -d '' telemetry < <(find "$telemetry_dir" -maxdepth 1 -type f \
@@ -101,6 +113,21 @@ fi
 
 if [[ -d "$history_dir" ]]; then
   readarray -d '' history < <(find "$history_dir" -mindepth 1 -maxdepth 1 \
+    -type d -mtime "+$DAYS" -print0 2>/dev/null || true)
+fi
+
+if [[ -d "$sessionenv_dir" ]]; then
+  readarray -d '' session_env < <(find "$sessionenv_dir" -mindepth 1 -maxdepth 1 \
+    -type d -mtime "+$DAYS" -print0 2>/dev/null || true)
+fi
+
+if [[ -d "$pastecache_dir" ]]; then
+  readarray -d '' paste_cache < <(find "$pastecache_dir" -mindepth 1 -maxdepth 1 \
+    -type f -mtime "+$DAYS" -print0 2>/dev/null || true)
+fi
+
+if [[ -d "$jobs_dir" ]]; then
+  readarray -d '' jobs < <(find "$jobs_dir" -mindepth 1 -maxdepth 1 \
     -type d -mtime "+$DAYS" -print0 2>/dev/null || true)
 fi
 
@@ -152,15 +179,20 @@ section() {
 section "telemetry (all failed events)" "${telemetry[@]}"
 section "plans (auto-named, >${DAYS}d)  " "${plans[@]}"
 section "file-history (>${DAYS}d)       " "${history[@]}"
+section "session-env (>${DAYS}d)        " "${session_env[@]}"
+section "paste-cache (>${DAYS}d)        " "${paste_cache[@]}"
+section "jobs (>${DAYS}d)               " "${jobs[@]}"
 echo
 
-total_count=$((${#telemetry[@]} + ${#plans[@]} + ${#history[@]}))
+total_count=$((${#telemetry[@]} + ${#plans[@]} + ${#history[@]} \
+  + ${#session_env[@]} + ${#paste_cache[@]} + ${#jobs[@]}))
 if [[ "$total_count" -eq 0 ]]; then
   echo "${GREEN}nothing to reclaim — you are already clean${RESET}"
   exit 0
 fi
 
-total_size=$(size_of "${telemetry[@]}" "${plans[@]}" "${history[@]}")
+total_size=$(size_of "${telemetry[@]}" "${plans[@]}" "${history[@]}" \
+  "${session_env[@]}" "${paste_cache[@]}" "${jobs[@]}")
 echo "${BOLD}total reclaimable:${RESET} $total_size  (${total_count} items)"
 echo
 
@@ -171,9 +203,12 @@ fi
 
 before=$(du -sh "$CLAUDE_DIR" 2>/dev/null | cut -f1)
 
-[[ ${#telemetry[@]} -gt 0 ]] && rm -f   -- "${telemetry[@]}"
-[[ ${#plans[@]}     -gt 0 ]] && rm -f   -- "${plans[@]}"
-[[ ${#history[@]}   -gt 0 ]] && rm -rf  -- "${history[@]}"
+[[ ${#telemetry[@]}   -gt 0 ]] && rm -f   -- "${telemetry[@]}"
+[[ ${#plans[@]}       -gt 0 ]] && rm -f   -- "${plans[@]}"
+[[ ${#history[@]}     -gt 0 ]] && rm -rf  -- "${history[@]}"
+[[ ${#session_env[@]} -gt 0 ]] && rm -rf  -- "${session_env[@]}"
+[[ ${#paste_cache[@]} -gt 0 ]] && rm -f   -- "${paste_cache[@]}"
+[[ ${#jobs[@]}        -gt 0 ]] && rm -rf  -- "${jobs[@]}"
 
 after=$(du -sh "$CLAUDE_DIR" 2>/dev/null | cut -f1)
 echo "${GREEN}done.${RESET} $CLAUDE_DIR: $before → $after"

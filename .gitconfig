@@ -78,7 +78,7 @@
   # proxy = http://127.0.0.1:7890
 
 [core]
-  excludesfile = ~/.gitignore
+  excludesfile = ~/.config/git/ignore
   quotepath = false
   longpaths = true
   autocrlf = input
@@ -87,6 +87,7 @@
   editor = nvim
   sparsecheckout = true
   pager = delta
+  hooksPath = ~/.config/git/hooks
 
 # Allow local customizations in the .gitconfig_local file
 [include]

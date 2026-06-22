@@ -25,7 +25,7 @@ Structured git commit workflow that enforces project-specific requirements (vers
 
 - One logical change per commit; all tests passing at each commit
 - Batch all edits for a single feature/fix into one commit — never commit after each individual file edit
-- Rust: `cargo fmt` + `cargo clippy` cycles within a single logical change are **preparation steps**, not separate commits. Commit only after the full logical change is complete and verified.
+- Rust: `cargo clippy` cycles within a single logical change are **preparation steps**, not separate commits (formatting is handled automatically by the git pre-commit hook). Commit only after the full logical change is complete and verified.
 
 ## Workflow
 
@@ -166,7 +166,7 @@ Add body (separated by blank line) when WHY isn't obvious from diff.
 
 ### 6. Execute Commit
 
-**Run the full QA chain (commands per `rules/languages.md`) BEFORE any `git add`:**
+**Run the verification QA chain — `cargo clippy` / `cargo test` (commands per `rules/languages.md`) — BEFORE any `git add`. Do NOT run `cargo fmt` / `ruff format` manually: the global git pre-commit hook formats staged files and re-stages them automatically at commit time.**
 
 ```bash
 # QA commands: see ~/.claude/rules/languages.md (canonical, always in context).
@@ -183,7 +183,7 @@ EOF
 )"
 ```
 
-**Critical ordering rule**: quality checks → `git add` → `git commit`. Never run `git add` before quality checks complete. Formatters (e.g. `cargo fmt`) modify files; if you stage first, the staging area will desync from the working tree after formatting runs.
+**Critical ordering rule**: run verification (`cargo clippy`, plus `cargo test` when a suite exists — the qa-gate requires these, no longer fmt) BEFORE `git add`. These compile and rewrite `Cargo.lock`, so staging before they finish desyncs the index. **After QA passes**, run `git diff --name-only` to check which lock files changed (`Cargo.lock`, `uv.lock`, etc.) and include every changed lock file in `git add` — failing to do so leaves a dirty working tree after commit. **Formatting is not your job at commit time**: the global git pre-commit hook (`~/.config/git/hooks/pre-commit`) runs `cargo fmt` / `ruff format` on the staged files and re-stages them during `git commit`. So the flow is: clippy/test → check for changed lock files → `git add <files + lock files>` → `git commit` (hook formats). Never run `cargo fmt` before `git add` — that reintroduces the exact desync this hook exists to remove.
 
 **Detection logic:**
 - Check for `Cargo.toml` → Rust
@@ -233,6 +233,7 @@ After successful commit, display a structured report:
 | Commit without checking unpushed commits | Always check `git log @{u}..HEAD` first |
 | Forget version bump | Check project `CLAUDE.md` for requirements |
 | Commit unrelated changes | Explicitly list files to stage, not `git add .` |
+| QA updated lock file but wasn't staged | After clippy/test, run `git diff --name-only` and include any changed lock files in `git add` |
 | Skip quality checks | Run project-specific checks before commit |
 | Vague commit message | Use conventional commits format with clear summary |
 | Commit with failing tests | Verify tests pass before committing |

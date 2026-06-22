@@ -3,6 +3,11 @@ layout {
         children
         pane size=1 borderless=true {
             plugin location="file:~/.config/zellij/plugins/zjstatus.wasm" {
+                grant_permissions {
+                    RunCommands
+                    ReadApplicationState
+                    MessageAndLaunchOtherPlugins
+                }
 
                 format_left                           "{mode} #[fg=blue,bold]{session} {tabs}"
                 format_center                         ""
@@ -28,21 +33,10 @@ layout {
                 mode_tmux                             "#[bg=blue,fg=#181825,bold] M "
 
                 tab_normal                            "#[fg=#6C7086] {name} "
-
+                tab_rename                            "#[fg=blue,bold] {name} "
                 tab_active                            "#[fg=blue,bold] {name} "
                 tab_active_sync                       "#[fg=red,bold] {name} "
                 tab_active_fullscreen                 "#[fg=red,bold] {name} "
-
-                tab_rename                            "#[fg=blue,bold] {name} "
-
-                // tab_display_count                     "3"
-                // tab_truncate_start_format             "#[fg=#6C7086] +{count}"
-                // tab_truncate_end_format               "#[fg=#6C7086] +{count}"
-
-                command_git_branch_command            "git rev-parse --abbrev-ref HEAD"
-                command_git_branch_format             "#[fg=blue] {stdout} "
-                command_git_branch_interval           "10"
-                command_git_branch_rendermode         "static"
 
                 notification_format_unread            "#[fg=blue,bold]  #[fg=blue] {message} "
                 notification_format_no_notifications  "#[fg=blue,bold]   "

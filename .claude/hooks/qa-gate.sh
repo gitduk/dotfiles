@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# qa-gate-version: 4
+# qa-gate-version: 6
 # QA gate — blocks `git commit` unless all required qa categories for the
 # project's language have been observed as passing since the last code edit.
 #
@@ -7,10 +7,16 @@
 # prose, so required_for/hint_for_cat duplicate it — keep them in sync.
 #
 # Required categories per language (aligned with rules/languages.md):
-#   rust    -> fmt, clippy (+ test only when a test suite is detected)
-#   python  -> fmt, check, typecheck (+ test only when a test suite is detected)
+#   rust    -> clippy (+ test only when a test suite is detected)
+#   python  -> check, typecheck (+ test only when a test suite is detected)
 #   js      -> test   (lint/typecheck enforced per-project via project CLAUDE.md)
 #   unknown -> not gated
+#
+# NOTE: fmt is intentionally NOT required here. Formatting is owned by the
+# global git pre-commit hook (~/.config/git/hooks/pre-commit), which runs
+# cargo fmt / ruff format on staged files at commit time. Gating fmt here would
+# block `git commit` before that hook ever runs. classify_qa still RECORDS a
+# fmt run if one happens (harmless); it is simply never in required_for.
 #
 # Categories accumulate across separate Bash commands — checks do NOT need
 # to be chained into one command.
@@ -112,11 +118,11 @@ required_for() {
   local lang="$1" root="$2"
   case "$lang" in
     rust)
-      if has_tests rust "$root"; then echo "rust:fmt rust:clippy rust:test"
-      else echo "rust:fmt rust:clippy"; fi ;;
+      if has_tests rust "$root"; then echo "rust:clippy rust:test"
+      else echo "rust:clippy"; fi ;;
     python)
-      if has_tests python "$root"; then echo "python:fmt python:check python:typecheck python:test"
-      else echo "python:fmt python:check python:typecheck"; fi ;;
+      if has_tests python "$root"; then echo "python:check python:typecheck python:test"
+      else echo "python:check python:typecheck"; fi ;;
     js)      echo "js:test" ;;
     unknown) echo "" ;;
   esac
@@ -174,6 +180,24 @@ has_skip_token() {
   [[ "$1" == *"QA-SKIP"* ]]
 }
 
+# Returns 0 (true) if no staged file is a code file for the given language.
+# Rust  -> *.rs; Python -> *.py; JS -> *.js *.ts *.jsx *.tsx; unknown -> always has code.
+has_no_code_staged() {
+  local lang="$1" root="$2"
+  local staged
+  staged=$(git -C "$root" diff --cached --name-only 2>/dev/null) || return 1
+  [ -z "$staged" ] && return 1
+  local pat
+  case "$lang" in
+    rust)   pat='\.rs$' ;;
+    python) pat='\.py$' ;;
+    js)     pat='\.\(js\|ts\|jsx\|tsx\|mjs\|cjs\)$' ;;
+    *)      return 1 ;;  # unknown lang: don't skip gate
+  esac
+  grep -qm1 "$pat" <<< "$staged" && return 1
+  return 0
+}
+
 case "$EVENT" in
   PostToolUse)
     case "$TOOL" in
@@ -206,6 +230,7 @@ case "$EVENT" in
     DETECTED=$(detect_lang "$CWD")
     PROJ_LANG=${DETECTED%% *}
     PROJ_ROOT=${DETECTED#* }
+    has_no_code_staged "$PROJ_LANG" "$PROJ_ROOT" && exit 0
     MISSING=$(missing_required "$PROJ_LANG" "$PROJ_ROOT")
     [ -z "$MISSING" ] && exit 0
 
@@ -216,8 +241,7 @@ case "$EVENT" in
       [ -n "$HINT" ] && HINT+=" && "
       HINT+="$C"
     done
-    REASON="QA gate [${PROJ_LANG}]: 缺少通过记录 -> ${MISSING}. 只需补跑: ${HINT}. 紧急跳过在命令里加 QA-SKIP (例: git commit -m 'msg  QA-SKIP')."
-
+    REASON="QA gate [${PROJ_LANG}]: 缺少通过记录 -> ${MISSING}. 只需补跑: ${HINT}. 紧急跳过在命令里加 QA-SKIP (例: git commit -m 'msg  QA-SKIP').\n被拦截的完整命令（需重跑）:\n${CMD}"
     jq -n --arg r "$REASON" '{
       "hookSpecificOutput": {
         "hookEventName": "PreToolUse",

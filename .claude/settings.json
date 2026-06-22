@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
+  },
   "permissions": {
     "allow": [
       "Bash(rtk *)",
@@ -13,7 +16,9 @@
       "mcp__codegraph__codegraph_explore",
       "mcp__codegraph__codegraph_files"
     ],
-    "deny": ["Bash(sudo:*)"],
+    "deny": [
+      "Bash(sudo:*)"
+    ],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -23,6 +28,14 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/memory-heal.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/souls-nudge.sh"
           }
         ]
       }
@@ -106,13 +119,8 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
-    "code-simplifier@claude-plugins-official": false,
-    "code-review@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": false,
-    "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": false
+    "context7@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
   "effortLevel": "high",
@@ -125,10 +133,15 @@
     "codegraph": {
       "type": "stdio",
       "command": "codegraph",
-      "args": ["serve", "--mcp"]
+      "args": [
+        "serve",
+        "--mcp"
+      ]
+    },
+    "dbx": {
+      "command": "dbx-mcp-server"
     }
   },
   "packageManager": "bun",
-  "hasCompletedOnboarding": true,
-  "model": "claude-fable-5[1m]"
+  "hasCompletedOnboarding": true
 }

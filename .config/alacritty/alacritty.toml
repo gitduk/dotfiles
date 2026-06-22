@@ -70,8 +70,7 @@ args = ["--login"]
 program = "/usr/bin/zsh"
 
 [window]
-blur = true
-opacity = 0.85
+opacity = 1.0
 
 [window.dimensions]
 columns = 0

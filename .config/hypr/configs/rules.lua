@@ -4,6 +4,9 @@
 
 -- Get window class: `hyprctl clients | grep class`
 
+-- opacity
+hl.window_rule({ match = { fullscreen = true }, opacity = "1.0" })
+
 -- Browser
 hl.window_rule({ match = { class = "(?i)(google-chrome|chromium)" }, workspace = "1" })
 

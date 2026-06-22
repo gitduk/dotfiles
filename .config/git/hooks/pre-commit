@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Global git pre-commit hook (enabled via core.hooksPath = ~/.config/git/hooks).
+#
+# Owns ONE job: mechanical formatting of staged code, so formatting can never
+# desync the index during the manual commit flow. Verification (clippy/test)
+# stays with the caller and the Claude Code qa-gate; this hook does not lint,
+# does not test, and never blocks a commit on formatting.
+#
+# Per-repo opt-out (e.g. a project that ships husky / pre-commit):
+#   git config --local core.hooksPath .git/hooks
+
+set -uo pipefail
+
+# --- Rust ------------------------------------------------------------------
+# cargo fmt is run over the whole crate (not per-file) so it picks up the
+# crate's edition from Cargo.toml; `cargo fmt -- <file>` bypasses that and
+# mis-formats edition-2024 syntax. We then re-stage only the files that were
+# already staged, so fmt changes to unstaged files are never silently committed.
+if [ -f Cargo.toml ] && command -v cargo &>/dev/null; then
+  mapfile -d '' -t staged_rs < <(
+    git diff --cached --name-only --diff-filter=ACM -z -- '*.rs')
+  if [ "${#staged_rs[@]}" -gt 0 ]; then
+    echo "[fmt] cargo fmt..."
+    if cargo fmt; then
+      git add -- "${staged_rs[@]}"
+    else
+      echo "[warn] cargo fmt failed; committing unformatted" >&2
+    fi
+  fi
+fi
+
+# --- Python ----------------------------------------------------------------
+# ruff format accepts explicit file paths safely (no edition pitfall), so we
+# format exactly the staged files and re-stage them.
+if { [ -f pyproject.toml ] || [ -f setup.py ] || [ -f requirements.txt ]; } \
+   && command -v ruff &>/dev/null; then
+  mapfile -d '' -t staged_py < <(
+    git diff --cached --name-only --diff-filter=ACM -z -- '*.py')
+  if [ "${#staged_py[@]}" -gt 0 ]; then
+    echo "[fmt] ruff format..."
+    if ruff format -- "${staged_py[@]}"; then
+      git add -- "${staged_py[@]}"
+    else
+      echo "[warn] ruff format failed; committing unformatted" >&2
+    fi
+  fi
+fi
+
+exit 0

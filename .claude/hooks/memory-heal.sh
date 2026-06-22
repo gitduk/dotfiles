@@ -169,9 +169,9 @@ if [ -d "$RULES_DIR" ]; then
       [ "$basename" = "$exempt" ] && skip=true && break
     done
     [ "$skip" = true ] && continue
-    lines=$(wc -l < "$file")
+    lines=$(grep -c '[^[:space:]]' "$file" || true)
     if [ "$lines" -gt "$RULES_SIZE_LIMIT" ]; then
-      issues+=("RULES_OVERSIZE: $basename has $lines lines, limit $RULES_SIZE_LIMIT")
+      issues+=("RULES_OVERSIZE: $basename has $lines non-blank lines, limit $RULES_SIZE_LIMIT")
     fi
   done
 fi

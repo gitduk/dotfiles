@@ -259,6 +259,7 @@ description = "Expose the contents of .docx files without leaving your terminal"
 [[lazy]]
 repo = "curl:https://raw.githubusercontent.com/lucasgelfond/zerobrew/main/install.sh"
 cmd = "zb"
+env = "ZEROBREW_PREFIX=~/.local"
 description = "A fast Homebrew-compatible package installer"
 
 [[lazy]]

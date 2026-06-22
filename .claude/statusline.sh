@@ -3,7 +3,7 @@
 # Each section is a function — reorder the sections array to change layout.
 
 input=$(cat)
-echo "$input" > /tmp/statusline_debug.json
+[ -n "$STATUSLINE_DEBUG" ] && echo "$input" > /tmp/statusline_debug.json
 
 # ============================================================
 # Data extraction (parsed once, used by section functions)
@@ -20,7 +20,6 @@ eval "$(echo "$input" | jq -r '
   @sh "api_duration_ms=\(.cost.total_api_duration_ms // 0)",
   @sh "cwd=\(.workspace.current_dir // "")",
   @sh "project_dir=\(.workspace.project_dir // "")",
-  @sh "transcript_path=\(.transcript_path // "")",
   @sh "session_id=\(.session_id // "")",
   @sh "rl_5h_pct=\(.rate_limits.five_hour.used_percentage // "")",
   @sh "rl_5h_resets=\(.rate_limits.five_hour.resets_at // "")",
@@ -64,18 +63,18 @@ _fmt_speed() {
   # Format tps100 (tokens/s * 100) into a human-readable speed string.
   local tps100="$1"
   [ "$tps100" -le 0 ] && return
-  local t_int=$(( tps100 / 100 )) t_frac=$(( tps100 % 100 ))
+  local t_int=$(( tps100 / 100 ))
   if [ "$t_int" -ge 1000 ]; then
-    printf '%d.%02dkt/s' $(( t_int / 1000 )) $(( (t_int % 1000) / 10 ))
+    printf '%dkt/s' $(( t_int / 1000 ))
   else
-    printf '%d.%02dt/s' "$t_int" "$t_frac"
+    printf '%dt/s' "$t_int"
   fi
 }
 
 _quota_bar() {
   # Horizontal progress bar.
-  # Usage: _quota_bar pct_h pct_v [width=8] [color]
-  local pct_h="$1" pct_v="$2" width="${3:-8}" c_override="${4:-}"
+  # Usage: _quota_bar pct [width=8] [color]
+  local pct_h="$1" width="${2:-8}" c_override="${3:-}"
   local active=$(( pct_h > 0 ? (pct_h * width + 99) / 100 : 0 ))
 
   local c
@@ -88,9 +87,9 @@ _quota_bar() {
   local bar="" i
   for (( i = 0; i < width; i++ )); do
     if [ "$i" -lt "$active" ]; then
-      bar="${bar}${c}█${RESET}"
+      bar="${bar}${c}▰${RESET}"
     else
-      bar="${bar}\033[38;2;130;130;130m░${RESET}"
+      bar="${bar}\033[38;2;130;130;130m▱${RESET}"
     fi
   done
 
@@ -120,6 +119,18 @@ fmt_duration() {
   fi
 }
 
+fmt_reset() {
+  # Human-readable countdown from a reset-time delta (seconds). Days only show
+  # when present, so this serves both the 7d and 5h quota windows.
+  local secs_left="$1"
+  [ "$secs_left" -le 0 ] && { printf 'now'; return; }
+  local mins=$(( secs_left / 60 )) hrs=$(( secs_left / 3600 )) days=$(( secs_left / 86400 ))
+  if [ "$days" -gt 0 ]; then printf '%dd%dh' "$days" $(( hrs % 24 ))
+  elif [ "$hrs" -gt 0 ]; then printf '%dh%dm' "$hrs" $(( mins % 60 ))
+  else printf '%dm' "$mins"
+  fi
+}
+
 # ============================================================
 # Top-level setup (computed once per render)
 # ============================================================
@@ -140,6 +151,14 @@ _gc_rl_7d_resets=\(.rl_7d_resets // "")
 _gc_cost=\(.cost // "")
 _gc_speed=\(.speed // "")
 "' "$_global_cache" 2>/dev/null)" 2>/dev/null || true
+
+  # Discard stale quota cache: if the 5h reset time has already passed,
+  # the cached percentages are from a completed window and meaningless.
+  # (The 7d window is long-lived enough that mid-window stale is still useful.)
+  if [ -n "$_gc_rl_5h_resets" ] && [ "$_gc_rl_5h_resets" -lt "$EPOCHSECONDS" ] 2>/dev/null; then
+    _gc_rl_5h_pct="" _gc_rl_5h_resets=""
+    _gc_rl_7d_pct="" _gc_rl_7d_resets=""
+  fi
 fi
 
 # Write fresh data into global cache whenever we have real values
@@ -150,51 +169,34 @@ _gc_new_rl_5h_resets="${rl_5h_resets:-$_gc_rl_5h_resets}"
 _gc_new_rl_7d_resets="${rl_7d_resets:-$_gc_rl_7d_resets}"
 { [ -n "$rl_5h_pct" ] || [ -n "$rl_7d_pct" ]; } && _gc_needs_write=1 || true
 
-# Detect custom base URL (used by section_quota to hide Anthropic-specific rate limits)
-_quota_custom_url=0
+# Detect whether we're actually using the subscription channel this session.
+# When ANTHROPIC_BASE_URL is set (third-party API), only trust live rate_limits
+# from the current session — cached data from previous subscription sessions
+# must not bleed through. Without ANTHROPIC_BASE_URL, allow cached data so
+# subscription users see stale quota immediately on session start.
+_use_subscription=0
 if [ -n "$ANTHROPIC_BASE_URL" ]; then
-  case "$ANTHROPIC_BASE_URL" in
-    *api.anthropic.com*) ;;
-    *) _quota_custom_url=1 ;;
-  esac
+  { [ -n "$rl_5h_pct" ] || [ -n "$rl_7d_pct" ]; } && _use_subscription=1 || true
+else
+  { [ -n "$rl_5h_pct" ] || [ -n "$rl_7d_pct" ] || \
+    [ -n "$_gc_rl_5h_pct" ] || [ -n "$_gc_rl_7d_pct" ]; } && _use_subscription=1 || true
 fi
 
-# Detect subscription type from credentials (avoids per-render file I/O in section_cost)
-_is_subscription=0
-_creds="$HOME/.claude/.credentials.json"
-if [ -f "$_creds" ]; then
-  _sub=$(jq -r '.claudeAiOauth.subscriptionType // ""' "$_creds" 2>/dev/null)
-  [ -n "$_sub" ] && [ "$_sub" != "null" ] && _is_subscription=1
-fi
+# Resolved project directory (project_dir, falling back to cwd) — used by Git
+# and the project/settings/mcp sections.
+_proj="${project_dir:-$cwd}"
 
 # Git
-_git_dir="${project_dir:-$cwd}"
-_git_branch="" _git_dirty="no"
-if [ -n "$_git_dir" ] && git --no-optional-locks -C "$_git_dir" rev-parse --git-dir >/dev/null 2>&1; then
-  _git_branch=$(git --no-optional-locks -C "$_git_dir" branch --show-current 2>/dev/null)
-  git --no-optional-locks -C "$_git_dir" diff --quiet 2>/dev/null && \
-    git --no-optional-locks -C "$_git_dir" diff --cached --quiet 2>/dev/null || _git_dirty="yes"
-fi
-
-# Transcript: tool-use and todo summaries read directly from the transcript file
-tool_summary="" todo_summary=""
-if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
-  tool_summary=$(jq -r '
-    [.. | objects | select(.type == "tool_use")] as $uses |
-    [.. | objects | select(.type == "tool_result")] as $results |
-    ($results | map(.tool_use_id) | unique) as $done_ids |
-    ($uses | map(select(.id as $id | ($done_ids | index($id)) == null)) | length) as $running |
-    ($results | length) as $completed |
-    if ($running > 0) then "\($running) running"
-    elif ($completed > 0) then "\($completed) done"
-    else empty end
-  ' "$transcript_path" 2>/dev/null)
-  todo_summary=$(jq -r '
-    [.. | objects | select(.type == "tool_use" and .name == "TaskCreate")] as $creates |
-    [.. | objects | select(.type == "tool_use" and .name == "TaskUpdate" and .input.status == "completed")] as $completes |
-    if ($creates | length) > 0 then "\($completes | length)/\($creates | length)"
-    else empty end
-  ' "$transcript_path" 2>/dev/null)
+_git_branch="" _git_dirty="no" _git_ins=0 _git_del=0
+if [ -n "$_proj" ] && git --no-optional-locks -C "$_proj" rev-parse --git-dir >/dev/null 2>&1; then
+  _git_branch=$(git --no-optional-locks -C "$_proj" branch --show-current 2>/dev/null)
+  _shortstat=$(git --no-optional-locks -C "$_proj" diff --shortstat HEAD 2>/dev/null)
+  if [ -n "$_shortstat" ]; then
+    _git_dirty="yes"
+    _git_ins=$(echo "$_shortstat" | grep -o '[0-9]* insertion' | grep -o '[0-9]*' || echo 0)
+    _git_del=$(echo "$_shortstat" | grep -o '[0-9]* deletion' | grep -o '[0-9]*' || echo 0)
+    _git_ins="${_git_ins:-0}"; _git_del="${_git_del:-0}"
+  fi
 fi
 
 # ============================================================
@@ -210,45 +212,55 @@ section_model() {
   printf '%b' "${BOLD}${GREEN}${display}${RESET}"
 }
 
-section_project() {
-  local dir="${project_dir:-$cwd}"
+section_mem() {
+  local dir="$_proj"
   [ -z "$dir" ] && return
-  printf '%b' "${DIM}${dir##*/}${RESET}"
+  # Claude Code encodes project paths by replacing non-alphanumeric chars
+  # with "-" (e.g. /home/wukaige/.claude -> -home-wukaige--claude)
+  local encoded="${dir//[^a-zA-Z0-9]/-}"
+  local mem_file="$HOME/.claude/projects/$encoded/memory/MEMORY.md"
+  [ -f "$mem_file" ] || return
+  local count
+  count=$(grep -cE '^(- |# [a-z])' "$mem_file" 2>/dev/null || true)
+  [ "${count:-0}" -gt 0 ] && _sec "mem" "$count" "$CYAN"
 }
 
-section_git() {
-  [ -z "$_git_branch" ] && return
-  local dirty=""
-  [ "$_git_dirty" = "yes" ] && dirty="${YELLOW}*${RESET}"
-  printf '%b' "${CYAN}${_git_branch}${RESET}${dirty}"
+section_project() {
+  local dir="$_proj"
+  [ -z "$dir" ] && return
+  local name="${dir##*/}"
+  # Inline git branch when available
+  local git_part=""
+  if [ -n "$_git_branch" ]; then
+    local dirty=""
+    if [ "$_git_dirty" = "yes" ]; then
+      local stat_ins="${_git_ins:-0}" stat_del="${_git_del:-0}"
+      local stat_str=""
+      [ "$stat_ins" -gt 0 ] && stat_str="${stat_str}${GREEN}+${stat_ins}${RESET}"
+      [ "$stat_ins" -gt 0 ] && [ "$stat_del" -gt 0 ] && stat_str="${stat_str}${DIM}/${RESET}"
+      [ "$stat_del" -gt 0 ] && stat_str="${stat_str}${RED}-${stat_del}${RESET}"
+      [ -n "$stat_str" ] && dirty=" ${stat_str}"
+    fi
+    git_part=" ${CYAN}${_git_branch}${RESET}${dirty}"
+  fi
+  printf '%b' "\033[34m󰏗 ${name}${RESET}${git_part}"
 }
 
 section_context() {
   if [ -z "$used_pct" ]; then
-    # Show an empty progress bar (all dim blocks) with no text
-    local empty_bar="" i
-    for (( i = 0; i < 8; i++ )); do empty_bar="${empty_bar}\033[38;2;130;130;130m░${RESET}"; done
-    printf '%b' "${DIM}ctx${RESET} ${empty_bar} ${DIM}-${RESET}"
+    # No context data yet (initialization) — show empty bar
+    printf '%b' "${DIM}ctx${RESET} $(_quota_bar 0 10) ${DIM}-${RESET}"
     return
   fi
   local pct_int; pct_int=$(printf "%.0f" "$used_pct")
   local cache_pct=0
   local total=$(( current_in + cache_read + cache_creation ))
   [ "$total" -gt 0 ] && [ "$cache_read" -gt 0 ] && cache_pct=$(( cache_read * 100 / total ))
-  local bar_color
-  if [ "$pct_int" -ge 80 ]; then bar_color="$RED"
-  elif [ "$pct_int" -ge 60 ]; then bar_color="$YELLOW"
-  else bar_color="$GREEN"
-  fi
   local c; c=$(pct_color "$pct_int")
-  printf '%b' "${DIM}ctx${RESET} $(_quota_bar "$pct_int" "$cache_pct" 8 "$bar_color") ${c}${pct_int}%${RESET}${DIM}/${RESET}${CYAN}${cache_pct}%${RESET}"
+  printf '%b' "${DIM}ctx${RESET} $(_quota_bar "$pct_int" 10 "$c") ${c}${pct_int}%${RESET}${DIM}/${RESET}${CYAN}${cache_pct}%${RESET}"
 }
 
 section_cost() {
-  # Subscription users: cost is shadow-tracked equivalent, not actual billing — always hide
-  if [ "$_quota_custom_url" = "0" ] && { [ -n "$rl_5h_pct" ] || [ -n "$rl_7d_pct" ] || [ "$_is_subscription" = "1" ]; }; then
-    return
-  fi
   if [ "${total_cost:-0}" = "0" ]; then
     # Show last known cost from global cache as a stale hint
     if [ -n "$_gc_cost" ] && [ "$_gc_cost" != "0" ]; then
@@ -264,8 +276,6 @@ section_cost() {
   printf '%b' "${MAGENTA}$(printf "\$%.2f" "$total_cost")${RESET}"
 }
 
-section_tokens_out() { _sec "out" "$(fmt_tokens "$total_out")"; }
-
 # Per-session speed cache
 _speed_cache="$_session_cache_dir/speed.json"
 
@@ -274,9 +284,9 @@ section_speed() {
   if [ "${total_out:-0}" -le 0 ] 2>/dev/null || [ "${api_duration_ms:-0}" -le 0 ] 2>/dev/null; then
     # No live data yet — show last known speed from global cache (dimmed)
     if [ -n "$_gc_speed" ]; then
-      _sec "spd" "$_gc_speed" "$DIM" " "
+      printf '%b' "${DIM}spd ${_gc_speed}${RESET}"
     else
-      _pending "spd"
+      printf '%b' "${DIM}spd -${RESET}"
     fi
     return
   fi
@@ -310,11 +320,11 @@ last_speed=\(.lastSpeed // "")"' "$_speed_cache" 2>/dev/null)"
   fi
 
   if [ -n "$speed_display" ]; then
-    _sec "spd" "$speed_display" "$WHITE" " "
+    printf '%b' "${DIM}spd ${speed_display}${RESET}"
   elif [ -n "$last_speed" ]; then
-    _sec "spd" "$last_speed" "$DIM" " "
+    printf '%b' "${DIM}spd ${last_speed}${RESET}"
   else
-    _pending "spd"
+    printf '%b' "${DIM}spd -${RESET}"
   fi
 }
 
@@ -324,58 +334,47 @@ section_duration() {
 }
 
 section_quota() {
-  [ "$_quota_custom_url" = "1" ] && return
   local pct5="" pct7="" _stale=0
-  [ -n "$rl_5h_pct" ] && pct5=$(printf "%.0f" "$rl_5h_pct")
-  [ -n "$rl_7d_pct" ] && pct7=$(printf "%.0f" "$rl_7d_pct")
-  # Fall back to global cache when no live data yet
+  if [ "$_use_subscription" = "1" ]; then
+    [ -n "$rl_5h_pct" ] && pct5=$(printf "%.0f" "$rl_5h_pct")
+    [ -n "$rl_7d_pct" ] && pct7=$(printf "%.0f" "$rl_7d_pct")
+  fi
+  # Fall back to global cache when no live data yet (subscription users only)
   if [ -z "$pct5" ] && [ -z "$pct7" ]; then
-    if [ -n "$_gc_rl_5h_pct" ] || [ -n "$_gc_rl_7d_pct" ]; then
+    if [ "$_use_subscription" = "1" ] && { [ -n "$_gc_rl_5h_pct" ] || [ -n "$_gc_rl_7d_pct" ]; }; then
       [ -n "$_gc_rl_5h_pct" ] && pct5=$(printf "%.0f" "$_gc_rl_5h_pct")
       [ -n "$_gc_rl_7d_pct" ] && pct7=$(printf "%.0f" "$_gc_rl_7d_pct")
       rl_5h_resets="${_gc_rl_5h_resets:-}"
       rl_7d_resets="${_gc_rl_7d_resets:-}"
       _stale=1
     else
-      _pending "rl"
+      # Non-subscription (or no cached quota data): show cost instead of quota bar
+      local _cost_val=""
+      if [ "${total_cost:-0}" != "0" ] 2>/dev/null; then
+        _cost_val="$(printf "%.2f" "$total_cost")\$"
+      elif [ -n "$_gc_cost" ] && [ "$_gc_cost" != "0" ]; then
+        _cost_val="${_gc_cost}\$"
+      fi
+      if [ -n "$_cost_val" ]; then
+        printf '%b' "${DIM}qta${RESET} $(_quota_bar 0 10) ${GREEN}${_cost_val}${RESET}"
+      else
+        printf '%b' "${DIM}qta${RESET} $(_quota_bar 0 10) ${DIM}-${RESET}"
+      fi
       return
     fi
   fi
 
-  local bar_color
-  if [ "${pct5:-0}" -ge 80 ]; then bar_color="$RED"
-  elif [ "${pct5:-0}" -ge 60 ]; then bar_color="$YELLOW"
-  else bar_color="$GREEN"
-  fi
-  local c; c=$(pct_color "$pct5")
+  local c; c=$(pct_color "${pct5:-0}")
+  [ "$_stale" = "1" ] && c="$DIM"
   local reset_part=""
   # When 7d quota is exhausted, show 7d reset time instead of 5h
   if [ "${pct7:-0}" -ge 100 ] && [ -n "$rl_7d_resets" ]; then
-    local secs_left=$(( rl_7d_resets - EPOCHSECONDS ))
-    if [ "$secs_left" -le 0 ]; then
-      reset_part=" ${DIM}now${RESET}"
-    else
-      local mins=$(( secs_left / 60 )) hrs=$(( secs_left / 3600 )) days=$(( secs_left / 86400 ))
-      local tlabel
-      if [ "$days" -gt 0 ]; then tlabel="${days}d$(( hrs % 24 ))h"
-      elif [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$(( mins % 60 ))m"
-      else tlabel="${mins}m"; fi
-      reset_part=" ${DIM}${tlabel}${RESET}"
-    fi
+    reset_part=" ${DIM}$(fmt_reset $(( rl_7d_resets - EPOCHSECONDS )))${RESET}"
   elif [ -n "$rl_5h_resets" ]; then
-    local secs_left=$(( rl_5h_resets - EPOCHSECONDS ))
-    if [ "$secs_left" -le 0 ]; then
-      reset_part=" ${DIM}now${RESET}"
-    else
-      local mins=$(( secs_left / 60 )) hrs=$(( secs_left / 3600 ))
-      local tlabel
-      if [ "$hrs" -gt 0 ]; then tlabel="${hrs}h$(( mins % 60 ))m"; else tlabel="${mins}m"; fi
-      reset_part=" ${DIM}${tlabel}${RESET}"
-    fi
+    reset_part=" ${DIM}$(fmt_reset $(( rl_5h_resets - EPOCHSECONDS )))${RESET}"
   fi
-  local pct7_remain="" pct7_display=""
+  local pct7_display=""
   if [ -n "$pct7" ]; then
-    pct7_remain=$(( 100 - pct7 ))
     local c7; c7=$(pct_color "$pct7")
     [ "$_stale" = "1" ] && c7="$DIM"
     pct7_display="${DIM}/${RESET}${c7}${pct7}%${RESET}"
@@ -388,35 +387,105 @@ section_quota() {
     _gc_new_rl_7d_resets="${rl_7d_resets:-}"
     _gc_needs_write=1
   fi
-  [ "$_stale" = "1" ] && c="$DIM"
-  printf '%b' "${DIM}qta${RESET} $(_quota_bar "${pct5:-0}" "${pct7_remain:-0}" 8 "$bar_color") ${c}${pct5}%${RESET}${pct7_display}${reset_part}"
+  printf '%b' "${DIM}qta${RESET} $(_quota_bar "${pct5:-0}" 10 "$c") ${c}${pct5}%${RESET}${pct7_display}${reset_part}"
 }
 
-section_tools() { _sec "tools" "$tool_summary"; }
-section_todos() { _sec "todo"  "$todo_summary" "$GREEN"; }
+section_rules() {
+  local n; n=$(find "$HOME/.claude/rules" -maxdepth 1 -name '*.md' -type f 2>/dev/null | wc -l)
+  [ "$n" -gt 0 ] && _sec "rules" "$n" "$CYAN"
+}
+
+section_skills() {
+  local n; n=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) 2>/dev/null | wc -l)
+  [ "$n" -gt 0 ] && _sec "skills" "$n" "$CYAN"
+}
+
+# Merge a JSON field from global + project settings.json (project overrides global).
+# Approximation: real Claude Code config resolution has more layers than this.
+_merged_settings_field() {
+  local field="$1" proj="$_proj"
+  local g p
+  g=$(jq -c --arg f "$field" '.[$f] // {}' "$HOME/.claude/settings.json" 2>/dev/null)
+  [ -z "$g" ] && g='{}'
+  p='{}'
+  [ -f "$proj/.claude/settings.json" ] && p=$(jq -c --arg f "$field" '.[$f] // {}' "$proj/.claude/settings.json" 2>/dev/null)
+  [ -z "$p" ] && p='{}'
+  jq -n --argjson g "$g" --argjson p "$p" '$g * $p'
+}
+
+_active_plugin_names() {
+  local merged; merged=$(_merged_settings_field "enabledPlugins")
+  jq -r '[to_entries[] | select(.value == true) | .key] | .[]' <<< "$merged" 2>/dev/null
+}
+
+section_mcp() {
+  local names=""
+
+  # Native servers: settings.json (global+project) and the legacy ~/.claude.json mcpServers
+  local merged; merged=$(_merged_settings_field "mcpServers")
+  names="$names $(jq -r 'keys[]' <<< "$merged" 2>/dev/null)"
+  if [ -f "$HOME/.claude.json" ]; then
+    names="$names $(jq -r --arg p "$_proj" '
+      ((.mcpServers // {}) + (.projects[$p].mcpServers // {})) | keys[]
+    ' "$HOME/.claude.json" 2>/dev/null)"
+  fi
+
+  # Servers contributed by plugins enabled via enabledPlugins=true (their own .mcp.json)
+  local plugins_cfg="$HOME/.claude/plugins/installed_plugins.json"
+  if [ -f "$plugins_cfg" ]; then
+    local plugin_name install_path
+    while IFS= read -r plugin_name; do
+      [ -z "$plugin_name" ] && continue
+      install_path=$(jq -r --arg n "$plugin_name" '.plugins[$n][0].installPath // ""' "$plugins_cfg" 2>/dev/null)
+      [ -n "$install_path" ] && [ -f "$install_path/.mcp.json" ] || continue
+      names="$names $(jq -r 'if has("mcpServers") then .mcpServers else . end | keys[]' "$install_path/.mcp.json" 2>/dev/null)"
+    done < <(_active_plugin_names)
+  fi
+
+  local n; n=$(printf '%s\n' $names | sort -u | grep -c .)
+  [ "${n:-0}" -gt 0 ] && _sec "mcp" "$n" "$CYAN"
+}
+
+section_plugins() {
+  local n; n=$(_active_plugin_names | grep -c .)
+  [ "${n:-0}" -gt 0 ] && _sec "plugins" "$n" "$CYAN"
+}
 
 # ============================================================
-# Render — single line, all left-aligned
+# Render — two lines, all left-aligned
 # ============================================================
 SEP="  "
 
-sections=(
+line1_sections=(
   section_model
   section_context
   section_quota
-  section_cost
   section_speed
-  section_duration
-  section_project
 )
 
-output=""
-for item in "${sections[@]}"; do
-  part=$($item)
-  [ -n "$part" ] && output="${output:+${output}${SEP}}${part}"
-done
+line2_sections=(
+  section_project
+  section_rules
+  section_skills
+  section_mcp
+  section_plugins
+  section_mem
+)
 
-printf '%b\n' "$output"
+_render_line() {
+  local -n _items="$1"
+  local out="" item part
+  for item in "${_items[@]}"; do
+    part=$($item)
+    [ -n "$part" ] && out="${out:+${out}${SEP}}${part}"
+  done
+  printf '%s' "$out"
+}
+
+line1=$(_render_line line1_sections)
+line2=$(_render_line line2_sections)
+
+printf '%b\n%b\n' "$line1" "$line2"
 
 # Persist global cache if any new data was collected this render
 if [ "$_gc_needs_write" = "1" ]; then

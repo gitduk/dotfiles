@@ -27,7 +27,6 @@ keybinds clear-defaults=true {
         bind "K" { MovePane "up"; }
         bind "L" { MovePane "right"; }
         bind "p" { TogglePanePinned; }
-        bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
         bind "Ctrl p" { SwitchToMode "normal"; }
     }
     tab {
@@ -100,13 +99,14 @@ keybinds clear-defaults=true {
         bind "Ctrl k" { MovePane "up"; }
         bind "Ctrl h" { MovePane "left"; }
         bind "Ctrl l" { MovePane "right"; }
-        bind "b" {
-          Run "btop" {
-            floating true
-            x "10%"
-            y "10%"
-            width "80%"
-            height "80%"
+        bind "h" {
+          SwitchSession {
+            name "home"
+          }
+        }
+        bind "m" {
+          SwitchSession {
+            name "wukaige"
           }
         }
     }
@@ -204,6 +204,7 @@ plugins {
 load_plugins {
     zellij:link
 }
+
 web_client {
     font "monospace"
 }
