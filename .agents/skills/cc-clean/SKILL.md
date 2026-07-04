@@ -17,7 +17,7 @@ Six targets, chosen because each has **clearly bounded value** (none of them are
 
 3. **`file-history/<uuid>/` directories** older than `--days` (default 14) — Pre-edit snapshots that back the Edit tool's undo capability. After two weeks there's essentially zero chance anyone will undo an edit, so these become dead weight.
 
-4. **`session-env/<uuid>/` directories** older than `--days` (default 14) — Per-session environment snapshots Claude Code captures at startup. Bound to a session that is long over after two weeks; nothing reads them back.
+4. **`session-env/<uuid>/` directories** older than `--days` (default 14) — Per-session environment snapshots Claude Code captures at startup, plus `hooks/qa-gate.sh`'s per-session QA state (`session-env/<uuid>/qa-gate.state`). Bound to a session that is long over after two weeks; nothing reads them back.
 
 5. **`paste-cache/<hash>.txt`** older than `--days` (default 14) — Cached pasted-content blobs, keyed by content hash. Regenerated on demand when content is re-referenced; stale entries are pure dead weight.
 

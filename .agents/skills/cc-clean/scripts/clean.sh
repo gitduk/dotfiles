@@ -10,6 +10,10 @@
 #   5. paste-cache/<hash>.txt              (pasted-content cache, >N days)
 #   6. jobs/<id>/                          (cloud agent job artifacts, >N days)
 #
+# hooks/qa-gate.sh writes its per-session state into session-env/<uuid>/
+# (the same per-session dir Claude Code already scaffolds), so target 4
+# sweeps it for free — no separate handling needed here.
+#
 # Dry-runs by default. Pass --execute to actually delete.
 
 set -euo pipefail

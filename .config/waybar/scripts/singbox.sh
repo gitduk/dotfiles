@@ -110,10 +110,19 @@ output_json() {
   echo "{\"text\":\"$current\",\"tooltip\":\"$tooltip\"}"
 }
 
+singbox() {
+  if pidof -q sing-box; then
+    systemctl --user stop sing-box.service
+  else
+    systemctl --user start sing-box.service
+  fi
+}
+
 main() {
   case "$1" in
     --next) switch_config next ;;
     --prev) switch_config prev ;;
+    --toggle) singbox ;;
     *) output_json ;;
   esac
 }

@@ -1,124 +1,157 @@
 {
+  "cli_default_open_behavior": "existing_window",
   "diff_view_style": "unified",
   "proxy": "",
   "project_panel": {
-    "dock": "left"
+    "dock": "left",
   },
   "outline_panel": {
-    "dock": "right"
+    "dock": "left",
   },
   "collaboration_panel": {
-    "dock": "right"
+    "dock": "right",
   },
   "git_panel": {
-    "dock": "right"
+    "dock": "right",
   },
   "agent_servers": {
     "gemini": {
-      "type": "registry"
+      "type": "registry",
     },
     "github-copilot-cli": {
-      "type": "registry"
+      "type": "registry",
     },
     "codex-acp": {
-      "type": "registry"
+      "type": "registry",
     },
     "claude-acp": {
       "default_config_options": {
-        "model": "default"
+        "model": "default",
       },
-      "type": "registry"
-    }
+      "type": "registry",
+    },
   },
   "context_servers": {
+    "dbx": {
+      "enabled": true,
+      "remote": false,
+      "command": "dbx-mcp-server",
+      "args": [],
+      "env": {},
+    },
     "mcp-server-context7": {
       "enabled": true,
       "remote": false,
       "settings": {
-        "context7_api_key": ""
-      }
-    }
+        "context7_api_key": "",
+      },
+    },
   },
   "edit_predictions": {
     "copilot": {
-      "enable_next_edit_suggestions": true
+      "enable_next_edit_suggestions": true,
     },
-    "provider": "zed"
+    "provider": "zed",
   },
   "languages": {
     "Python": {
       "format_on_save": "on",
       "code_actions_on_format": {
-        "source.organizeImports.ruff": true
+        "source.organizeImports.ruff": true,
       },
       "formatter": {
         "external": {
           "command": "ruff",
-          "arguments": ["format", "--stdin-filename", "{buffer_path}", "-"]
-        }
+          "arguments": ["format", "--stdin-filename", "{buffer_path}", "-"],
+        },
       },
-      "language_servers": ["basedpyright", "ruff"]
-    }
+      "language_servers": ["basedpyright", "ruff"],
+    },
   },
   "lsp": {
     "basedpyright": {
       "settings": {
-        "basedpyright.analysis.typeCheckingMode": "standard"
-      }
-    }
+        "basedpyright.analysis.typeCheckingMode": "standard",
+      },
+    },
   },
   "language_models": {
     "openai_compatible": {},
     "anthropic": {
-      "api_url": "http://localhost:7896"
-    }
+      "api_url": "http://localhost:7896",
+    },
   },
   "agent": {
+    "favorite_models": [
+      {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-pro",
+        "enable_thinking": true,
+      },
+      {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash",
+        "enable_thinking": true,
+      },
+      {
+        "provider": "opencode",
+        "model": "go/deepseek-v4-pro",
+        "enable_thinking": true,
+        "effort": "xhigh",
+      },
+      {
+        "provider": "opencode",
+        "model": "go/deepseek-v4-flash",
+        "enable_thinking": true,
+        "effort": "xhigh",
+      },
+    ],
     "flexible": false,
     "sidebar_side": "right",
     "max_content_width": 1000.0,
     "button": true,
     "single_file_review": false,
     "dock": "right",
-    "inline_assistant_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-5-mini",
-      "enable_thinking": false
-    },
     "default_profile": "write",
     "tool_permissions": {
       "tools": {
-        "mcp:mcp-server-sequential-thinking:sequentialthinking": {
+        "fetch": {
           "default": "allow"
+        },
+        "skill": {
+          "default": "allow"
+        },
+        "mcp:mcp-server-sequential-thinking:sequentialthinking": {
+          "default": "allow",
         },
         "save_file": {
-          "default": "allow"
+          "default": "allow",
         },
         "move_path": {
-          "default": "allow"
+          "default": "allow",
         },
         "terminal": {
-          "default": "allow"
-        }
-      }
+          "default": "allow",
+        },
+      },
     },
     "default_model": {
-      "effort": "high",
-      "provider": "copilot_chat",
-      "model": "gpt-5-mini",
-      "enable_thinking": true
+      "effort": "xhigh",
+      "provider": "opencode",
+      "model": "go/deepseek-v4-pro",
+      "enable_thinking": true,
     },
     "commit_message_model": {
-      "provider": "anthropic",
-      "model": "claude-haiku-4-5-latest"
+      "provider": "opencode",
+      "model": "go/deepseek-v4-flash",
     },
     "thread_summary_model": {
-      "provider": "anthropic",
-      "model": "claude-haiku-4-5-latest"
-    }
+      "provider": "opencode",
+      "model": "go/deepseek-v4-flash",
+    },
   },
   "session": {
-    "trust_all_worktrees": true
+    "trust_all_worktrees": true,
   },
   "vim_mode": true,
   "ui_font_size": 16,
@@ -126,17 +159,17 @@
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "One Dark Pro"
+    "dark": "One Dark Pro",
   },
   "git": {
     "inline_blame": {
-      "enabled": true
-    }
+      "enabled": true,
+    },
   },
   "terminal": {
     "shell": {
-      "program": "zsh"
-    }
+      "program": "zsh",
+    },
   },
-  "autosave": "on_focus_change"
+  "autosave": "on_focus_change",
 }

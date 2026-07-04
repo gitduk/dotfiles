@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# qa-gate-version: 6
+# qa-gate-version: 7
 # QA gate — blocks `git commit` unless all required qa categories for the
 # project's language have been observed as passing since the last code edit.
 #
-# rules/languages.md is the canonical QA definition; this script can't read
-# prose, so required_for/hint_for_cat duplicate it — keep them in sync.
+# rules/{rust,python}.md are the canonical QA definitions; this script can't
+# read prose, so required_for/hint_for_cat duplicate them — keep in sync.
 #
-# Required categories per language (aligned with rules/languages.md):
+# Required categories per language (aligned with rules/{rust,python}.md):
 #   rust    -> clippy (+ test only when a test suite is detected)
 #   python  -> check, typecheck (+ test only when a test suite is detected)
 #   js      -> test   (lint/typecheck enforced per-project via project CLAUDE.md)
@@ -31,9 +31,14 @@
 #
 # Escape: include literal token `QA-SKIP` anywhere in the bash command.
 #
-# State file: ~/.claude/session-env/qa-gate/<session_id>.state
+# State file: ~/.claude/session-env/<session_id>/qa-gate.state
 # Contents  : space-separated "lang:category" tokens, e.g. "rust:fmt rust:clippy"
 # Absent/empty: nothing has passed since last edit.
+#
+# Lives inside the per-session dir Claude Code already scaffolds at
+# session-env/<session_id>/ (not a separate shared session-env/qa-gate/ dir)
+# so it ages out naturally with cc-clean's existing session-env sweep —
+# a shared directory touched by every session never goes stale on its own.
 
 set -euo pipefail
 
@@ -46,9 +51,9 @@ SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // "default"')
 CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
 [ -z "$CWD" ] && CWD="$PWD"
 
-STATE_DIR="$HOME/.claude/session-env/qa-gate"
+STATE_DIR="$HOME/.claude/session-env/${SESSION_ID}"
 mkdir -p "$STATE_DIR"
-STATE_FILE="$STATE_DIR/${SESSION_ID}.state"
+STATE_FILE="$STATE_DIR/qa-gate.state"
 
 # Walk up from $1 looking for a project marker; echo "<lang> <root>".
 detect_lang() {

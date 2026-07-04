@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# notify-unfocused-version: 2
+# notify-unfocused-version: 6
 # Hyprland banner, suppressed when the terminal hosting this session is focused.
 # Usage: notify-unfocused.sh <icon> <message>
 #
@@ -7,10 +7,10 @@
 #   1. Ancestor chain — hooks run as descendants of the terminal process, so if
 #      the focused window's PID is an ancestor of this process, the user is
 #      already looking at this session. Works for plain terminals.
-#   2. Zellij fallback — inside zellij the ancestor chain dead-ends at the mux
-#      server (ppid 1), so instead check whether the focused window has a
-#      descendant zellij client attached to $ZELLIJ_SESSION_NAME.
-# tmux/screen are not handled and fail open (always notify).
+#   2. tmux fallback — inside tmux the ancestor chain dead-ends at the tmux
+#      server (ppid 1), so instead check whether any tmux client of this
+#      session is a descendant of the focused window's PID.
+# Other multiplexers are not handled and fail open (always notify).
 
 ICON="${1:-5}"
 MSG="${2:-Claude Code}"
@@ -20,37 +20,30 @@ command -v jq &>/dev/null || exit 0
 
 ACTIVE_PID=$(hyprctl activewindow -j 2>/dev/null | jq -r '.pid // empty')
 
-if [[ -n "$ACTIVE_PID" ]]; then
-  pid=$$
-  for _ in $(seq 1 30); do
-    [[ "$pid" -le 1 ]] && break
-    if [[ "$pid" == "$ACTIVE_PID" ]]; then
-      exit 0
-    fi
-    pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ') || break
-    [[ -n "$pid" ]] || break
+# Returns 0 if ACTIVE_PID is an ancestor of $1 (within 30 hops).
+is_focused_ancestor() {
+  local pid=$1
+  for ((i = 0; i < 30; i++)); do
+    [[ "$pid" -le 1 ]] && return 1
+    [[ "$pid" == "$ACTIVE_PID" ]] && return 0
+    read -r pid < <(ps -o ppid= -p "$pid" 2>/dev/null) || return 1
+    [[ -n "$pid" ]] || return 1
   done
+  return 1
+}
 
-  if [[ -n "${ZELLIJ:-}" ]]; then
-    if ps -e -o pid=,ppid=,args= | awk -v root="$ACTIVE_PID" -v sess="${ZELLIJ_SESSION_NAME:-}" '
-      { pid[NR]=$1; ppid[NR]=$2; $1=""; $2=""; cmd[NR]=$0 }
-      END {
-        seen[root]=1; changed=1
-        while (changed) {
-          changed=0
-          for (i=1; i<=NR; i++)
-            if (!(pid[i] in seen) && (ppid[i] in seen)) { seen[pid[i]]=1; changed=1 }
-        }
-        for (i=1; i<=NR; i++) {
-          if (!(pid[i] in seen)) continue
-          if (cmd[i] !~ /(^|[ \/])zellij( |$)/ || cmd[i] ~ /--server/) continue
-          # client with an explicit session arg must match ours; bare client assumed ours
-          if (sess == "" || cmd[i] !~ /attach/ || index(cmd[i], sess) > 0) { found=1; break }
-        }
-        exit found ? 0 : 1
-      }'; then
-      exit 0
-    fi
+if [[ -n "$ACTIVE_PID" ]]; then
+  is_focused_ancestor $$ && exit 0
+
+  if [[ -n "${TMUX:-}" ]]; then
+    # List clients attached to THIS session only, then walk each client's
+    # ancestor chain upward — tmux client is a direct child of the terminal,
+    # so ACTIVE_PID will appear within a few hops if the user is looking here.
+    cur_session=$(tmux display-message -p '#S' 2>/dev/null)
+    mapfile -t client_pids < <(tmux list-clients -t "$cur_session" -F '#{client_pid}' 2>/dev/null)
+    for cpid in "${client_pids[@]}"; do
+      is_focused_ancestor "$cpid" && exit 0
+    done
   fi
 fi
 

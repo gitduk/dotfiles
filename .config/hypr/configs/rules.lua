@@ -7,9 +7,6 @@
 -- opacity
 hl.window_rule({ match = { fullscreen = true }, opacity = "1.0" })
 
--- Browser
-hl.window_rule({ match = { class = "(?i)(google-chrome|chromium)" }, workspace = "1" })
-
 -- WeChat
 hl.window_rule({ match = { title = "(?i)(weixin)" }, workspace = "3" })
 hl.window_rule({ match = { title = "(?i)(weixin)" }, center = true })
@@ -17,10 +14,6 @@ hl.window_rule({ match = { title = "(?i)(weixin)" }, center = true })
 -- Code editors (tag then assign workspace)
 hl.window_rule({ match = { class = "(?i)(zed|dev.zed.Zed|dev.zed.Zed-Preview|Code)" }, tag = "code" })
 hl.window_rule({ match = { tag = "code" }, workspace = "2" })
-
--- Special workspace apps
-hl.window_rule({ match = { class = "(?i)(Yaak-app|Dataflare)" }, workspace = "special" })
-hl.window_rule({ match = { class = "(?i)(Yaak-app|Dataflare)" }, float = false })
 
 -- Float anonymous / empty-class windows (Chrome notifications, etc.)
 hl.window_rule({ match = { class = "^$" }, float = true })

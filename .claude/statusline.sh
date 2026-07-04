@@ -396,7 +396,7 @@ section_rules() {
 }
 
 section_skills() {
-  local n; n=$(find "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) 2>/dev/null | wc -l)
+  local n; n=$(find -L "$HOME/.claude/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l)
   [ "$n" -gt 0 ] && _sec "skills" "$n" "$CYAN"
 }
 

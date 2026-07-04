@@ -4,20 +4,10 @@
   },
   "permissions": {
     "allow": [
-      "Bash(rtk *)",
-      "mcp__codegraph__codegraph_search",
-      "mcp__codegraph__codegraph_context",
-      "mcp__codegraph__codegraph_callers",
-      "mcp__codegraph__codegraph_callees",
-      "mcp__codegraph__codegraph_impact",
-      "mcp__codegraph__codegraph_node",
-      "mcp__codegraph__codegraph_status",
-      "mcp__codegraph__codegraph_trace",
-      "mcp__codegraph__codegraph_explore",
-      "mcp__codegraph__codegraph_files"
+      "Bash(rtk *)"
     ],
     "deny": [
-      "Bash(sudo:*)"
+      "Bash(sudo *)"
     ],
     "defaultMode": "bypassPermissions"
   },
@@ -30,14 +20,6 @@
             "command": "~/.claude/hooks/memory-heal.sh"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/souls-nudge.sh"
-          }
-        ]
       }
     ],
     "PreToolUse": [
@@ -47,12 +29,7 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/qa-gate.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "rtk hook claude"
@@ -62,16 +39,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/qa-gate.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
+        "matcher": "Edit|Write|NotebookEdit|Bash",
         "hooks": [
           {
             "type": "command",
@@ -122,9 +90,9 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true
   },
-  "extraKnownMarketplaces": {},
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
+  "tui": "fullscreen",
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "agentPushNotifEnabled": true,
