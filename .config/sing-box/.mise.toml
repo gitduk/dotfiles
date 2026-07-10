@@ -12,14 +12,14 @@ sing-box check -c config.json && systemctl --user restart sing-box.service && ec
 
 [tasks.add]
 usage = '''
-arg <url>
 arg <name>
+arg <url>
 '''
 run = '''
 wget "https://subc.wukaige.com/sub?urls={{usage.url}}&config=https://raw.wukaige.com/sing-box/config.json" -O {{usage.name}}.json
 '''
 
-[tasks.use]
+[tasks.us]
 usage = '''
 arg <name>
 '''

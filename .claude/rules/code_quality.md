@@ -24,9 +24,32 @@ Whether a change triggers this workflow is defined **solely** by the Change Prot
 - Tests (only when the user asked for tests): golden path + at least one edge case
 
 ### Escalation Triggers
-- ≥3 files or ≥100 lines changed: `/simplify` then `/code-review` — simplify mutates the tree, so code-review must run last to audit the final shipping code and catch anything simplify introduced
-- Security-sensitive: `/security-review`; uncertain design judgment: `/code-review` (high effort)
-- Single small file not meeting the above: adversarial re-read alone is fine
+Impact-based, not size-based. No quantitative threshold — the fallback judgment (e.g. "this sprawled wider than expected") belongs to the user, who orders escalation manually.
+
+**Must escalate** — the trigger domain decides *whether*, the intensity ladder decides *how hard*; two independent judgments:
+
+Trigger domains:
+- Security / permission boundaries: auth, validation, key management — additionally run `/security-review`
+- Public API / CLI contract changes: params, return values, protocol behavior
+- Core business logic: algorithms, state-transition logic, core data transformations
+- Critical dependency upgrades or swaps (ORM, web framework, crypto)
+- Uncertain design judgment: `/code-review high` alone is enough
+
+Intensity ladder — pick by the change's logic complexity, never by file/line count:
+- **Light** — domain hit, but the logic is a single obvious transformation (no new invariants, no concurrency, no subtle boundaries): `/code-review medium` only. Skip `/simplify` — code-review already reports reuse/simplification findings, and simplify has no effort knob (always full multi-agent), so it is the expensive step to drop.
+- **Standard** (default when unsure) — `/simplify` then `/code-review high`. Simplify mutates the tree, so code-review must run last to audit the final shipping code and catch anything simplify introduced.
+- **Heavy** — security boundaries, crypto, algorithms with subtle invariants, or changes that couldn't be fully verified by exercising: `/simplify` then `/code-review xhigh` (plus `/security-review` when the security domain fired).
+
+When the diff sprawls but the logic concentrates in a few files, scope simplify with `/simplify <paths>` — all four of its agents read the target, so narrowing it saves 4× the reading cost.
+
+State the chosen tier and its rationale in the handoff; the user can order a re-run at a higher tier.
+
+**Exempt** — adversarial re-read alone is fine:
+- Mechanical changes: renames, formatting, import updates, generated files, lockfiles
+- Documentation / comment-only updates
+- Test-file-only changes that don't alter production logic
+
+Between must-escalate and exempt: default to no escalation, but name the change's risk surface in the handoff so the user can order escalation.
 
 ### Loop Termination
 Stop when: one round surfaces no new issue at severity ≥ medium, or 3 rounds total, or suggestions start oscillating. Agents are detectors, not authorities — I keep the right to reject stylistic suggestions.

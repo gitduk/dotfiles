@@ -8,7 +8,7 @@
 hl.window_rule({ match = { fullscreen = true }, opacity = "1.0" })
 
 -- WeChat
-hl.window_rule({ match = { title = "(?i)(weixin)" }, workspace = "3" })
+hl.window_rule({ match = { title = "(?i)(weixin)" }, workspace = "9" })
 hl.window_rule({ match = { title = "(?i)(weixin)" }, center = true })
 
 -- Code editors (tag then assign workspace)
