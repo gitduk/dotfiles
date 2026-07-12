@@ -1,0 +1,4 @@
+interface:
+  display_name: "Inversion"
+  short_description: "Solve problems by flipping them around"
+  default_prompt: "Use $inversion to identify what could cause this to fail:"

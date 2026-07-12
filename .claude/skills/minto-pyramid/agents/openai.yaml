@@ -1,0 +1,4 @@
+interface:
+  display_name: "Minto Pyramid"
+  short_description: "Structure communication conclusion-first"
+  default_prompt: "Use $minto-pyramid to structure this into a clear, conclusion-first message:"

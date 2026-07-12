@@ -111,6 +111,5 @@
     }
   },
   "packageManager": "bun",
-  "hasCompletedOnboarding": true,
-  "model": "claude-fable-5[1m]"
+  "hasCompletedOnboarding": true
 }
