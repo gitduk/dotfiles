@@ -1,4 +1,0 @@
-interface:
-  display_name: "Ladder of Inference"
-  short_description: "Trace reasoning back to raw data"
-  default_prompt: "Use $ladder-of-inference to check the reasoning behind this conclusion:"

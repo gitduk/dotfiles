@@ -1,8 +1,3 @@
----
-name: ladder-of-inference
-description: "Apply the Ladder of Inference to trace a conclusion, judgment, or decision back to its raw data — exposing the assumptions and interpretations that may have been skipped. Use when the user wants to check whether a conclusion is well-grounded, examine a snap judgment, avoid acting on incomplete reasoning, or understand why two people reach different conclusions from the same situation. Triggers: 'ladder of inference', '推理阶梯', 'check my reasoning', '检查推理', 'why did I conclude', 'am I jumping to conclusions', 'is this assumption valid'."
----
-
 # Ladder of Inference
 
 ## The seven rungs (bottom to top)

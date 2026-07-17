@@ -1,4 +1,0 @@
-interface:
-  display_name: "First Principles"
-  short_description: "Break problems to fundamentals, rebuild"
-  default_prompt: "Use $first-principles to break down this problem from the ground up:"

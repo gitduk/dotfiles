@@ -23,10 +23,4 @@ MUST, whenever an edit changes executable project behavior (bug fixes included):
     if escalation triggers: run agent review loops
     write the handoff report
 
-## Preferences
-
-- Language: respond in Chinese (中文) unless the context is English-only code/docs
-- Clipboard: use `wl-copy`
-- HTTP client: prefer `xh` over `curl`
-
 @RTK.md

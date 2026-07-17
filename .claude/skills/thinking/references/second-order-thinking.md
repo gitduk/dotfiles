@@ -1,8 +1,3 @@
----
-name: second-order-thinking
-description: "Apply second-order thinking to analyze decisions by tracing consequences beyond the immediate outcome. Use when the user wants to evaluate a decision, choice, or action by asking 'and then what?' — mapping first-order effects through to second- and third-order consequences across short, medium, and long time horizons. Triggers: '用二阶思维分析', '帮我做决策', '这个决定的长期影响', 'second-order thinking', 'analyze consequences of'."
----
-
 # Second-Order Thinking
 
 ## Workflow

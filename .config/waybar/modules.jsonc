@@ -223,7 +223,7 @@
     "format": "{ifname}",
     "format-wifi": "{icon}{bandwidthTotalBytes:<5}",
     "format-ethernet": "󰣺 {bandwidthTotalBytes:<5}",
-    "format-disconnected": "󰣻",
+    "format-disconnected": "󰣻 Offline",
     "tooltip-format": "{ipaddr}",
     "format-linked": "󰈁 {ifname} (No IP)",
     "tooltip-format-wifi": "{icon} {signalStrength}% {essid} \n\nIP {ipaddr} \nGateway {gwaddr}",

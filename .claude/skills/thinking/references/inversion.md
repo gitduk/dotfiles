@@ -1,8 +1,3 @@
----
-name: inversion
-description: "Apply inversion thinking to a problem, decision, or goal by flipping it around — asking what would cause failure instead of success. Use when the user wants to stress-test a plan, identify hidden risks, run a pre-mortem, or approach a stuck problem from the opposite direction. Triggers: 'inversion', '反演', 'pre-mortem', '预死亡分析', 'what could go wrong', '怎么会失败', 'stress-test this plan'."
----
-
 # Inversion
 
 ## Workflow

@@ -1,8 +1,3 @@
----
-name: first-principles
-description: "Apply first-principles thinking to break a complex problem down to its fundamental truths, then rebuild a solution from the ground up — bypassing assumptions and analogies. Use when the user faces a problem where conventional solutions feel unsatisfying, wants to find genuinely novel approaches, or needs to challenge inherited assumptions. Triggers: 'first principles', '第一性原理', 'break this down', '从根本上分析', 'why do we assume', 'challenge assumptions', 'rebuild from scratch'."
----
-
 # First Principles
 
 ## Workflow

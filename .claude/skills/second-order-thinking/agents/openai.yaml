@@ -1,4 +1,0 @@
-interface:
-  display_name: "Second-Order Thinking"
-  short_description: "Analyze decisions by tracing consequences"
-  default_prompt: "Use $second-order-thinking to analyze the long-term consequences of this decision:"

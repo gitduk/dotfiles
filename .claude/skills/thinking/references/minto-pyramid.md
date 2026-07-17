@@ -1,8 +1,3 @@
----
-name: minto-pyramid
-description: "Structure a message, document, or presentation using the Minto Pyramid (SCQA or conclusion-first format) — leading with the answer, then supporting it with key arguments, then backing each with evidence. Use when the user needs to write a report, proposal, design doc, PR description, email, or any communication where clarity and respect for the reader's time matter. Triggers: 'minto pyramid', '明托金字塔', 'structure this', 'conclusion first', 'pyramid principle', 'write this as a doc', 'help me communicate this clearly', '帮我写清楚'."
----
-
 # Minto Pyramid
 
 ## Structure
