@@ -3,8 +3,12 @@
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
   },
   "permissions": {
-    "allow": ["Bash(rtk *)"],
-    "deny": ["Bash(sudo *)"],
+    "allow": [
+      "Bash(rtk *)"
+    ],
+    "deny": [
+      "Bash(sudo *)"
+    ],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -85,8 +89,10 @@
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true
   },
+  "extraKnownMarketplaces": {},
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
@@ -95,11 +101,6 @@
   "agentPushNotifEnabled": true,
   "voiceEnabled": true,
   "mcpServers": {
-    "codegraph": {
-      "type": "stdio",
-      "command": "codegraph",
-      "args": ["serve", "--mcp"]
-    },
     "dbx": {
       "command": "dbx-mcp-server"
     }

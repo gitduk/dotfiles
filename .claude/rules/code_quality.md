@@ -8,7 +8,7 @@ Whether a change triggers this workflow is defined **solely** by the Change Prot
 
 ### Workflow
 1. Before writing, declare this change's review dimensions; incorporate the project's feedback-type memories.
-1a. Before writing code that calls an external library's API, check context7 (`resolve-library-id` → `query-docs`) if: the library iterates quickly (e.g. Prisma, Next.js, Pydantic, axum), or I'm uncertain about the current API. Skip for standard libraries and stable primitives.
+1a. Check context7 (`resolve-library-id` → `query-docs`) only at self-announcing moments: adding a new dependency, a major-version upgrade/migration, or a compiler/LSP error against a library API that I can't explain. Routine calls into known deps: LSP diagnostics already catch stale-API mistakes — no pre-check.
 2. Implement the change, focused on the current intent; then verify it works by exercising the changed behavior, not just static checks.
 3. Before declaring done, perform an adversarial re-read: walk the declared review dimensions item by item; report only what changed or was rejected — nothing to report means nothing to report. When fixing or improving anything, ask: where else might the same class of problem exist? Scan as wide as the problem's nature warrants — same function, same file, same module, or same conceptual domain. Fix trivial instances, flag non-trivial ones.
 4. If escalation conditions trigger, run an external agent loop: collect findings, sort them into real bugs / accepted improvements / rejected suggestions; fix the first two, reject the third explicitly with reasoning; if this round changed anything, verify once more.

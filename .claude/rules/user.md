@@ -26,7 +26,14 @@ Address as **凯歌** 日常场景 / **吴凯歌** 正式场景。
 ## Tooling Preferences
 
 - **Clipboard**: use `wl-copy`
+- **JS package manager**: prefer `bun` over `npm`
 - **HTTP client**: prefer `xh` over `curl`
+- **Shell history**: atuin — when the environment may have drifted from my in-session knowledge
+  (user ran commands outside the session), verify instead of guessing from file state:
+  `atuin search --filter-mode global --include-duplicates --cmd-only <keyword>`.
+  Silent-failure pitfalls: flags MUST precede the query (trailing flags are eaten as search terms);
+  omitting `--filter-mode global` scopes to cwd (config default is directory); dedup is on by default;
+  `--after`/`--before` parse as UTC (local +8). `^atuin`/`^ls`/`^cd` are never recorded (history_filter)
 
 ## Chinese Typography (punctuation width)
 
