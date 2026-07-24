@@ -43,7 +43,12 @@ post_processing = true
 persist = false
 mouse.enabled = true
 binding = { key = "Y", mods = "Control" }
-regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-<>\"\\s{-}\\^⟨⟩`]+"
+# Differences from the upstream default regex:
+# - the raw (invisible) U+009F control character is now written as an escape
+# - excluded CJK/full-width punctuation: U+2014 em dash, U+2018-201D curly quotes,
+#   U+2026 ellipsis, U+3000-303F (、。《》【】…), U+FF01-FF65 fullwidth forms
+#   (！（），：；？), so URLs inside Chinese text stop at the punctuation.
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩`\u2014\u2018-\u201D\u2026\u3000-\u303F\uFF01-\uFF65]+"
 
 [keyboard]
 bindings = [

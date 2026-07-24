@@ -28,6 +28,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "~/.claude/hooks/cmd-gate.sh"
+          },
+          {
+            "type": "command",
             "command": "~/.claude/hooks/qa-gate.sh"
           },
           {

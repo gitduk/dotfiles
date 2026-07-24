@@ -139,11 +139,6 @@ atclone = "./bin/gh completion -s zsh > _gh"
 description = "Work seamlessly with GitHub from the command line"
 
 [[lazy]]
-repo = "EasyTier/EasyTier"
-sbin = "easytier-cli; easytier-core"
-description = "A full meshed p2p VPN, connecting all your devices in one network"
-
-[[lazy]]
 repo = "Nukesor/pueue"
 bpick = ["pueue-x86_64-unknown-linux-musl", "pueued-x86_64-unknown-linux-musl"]
 sbin = "pueue*-musl -> pueue; pueued*-musl -> pueued"
@@ -282,4 +277,9 @@ repo = "curl:https://mise.run"
 cmd = "mise"
 eval = "~/.local/bin/mise activate zsh"
 description = "dev tools, env vars, task runner"
+
+[[lazy]]
+repo = "curl:https://github.com/EasyTier/EasyTier/blob/main/script/install.sh?raw=true"
+cmd = "easytier"
+description = "A simple, decentralized mesh VPN with WireGuard support."
 

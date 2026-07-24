@@ -1,0 +1,77 @@
+# News skill sources — curated, keyless, cheap to fetch.
+# topics: tools | startup | crypto | ai
+# method: json (parse directly) | rss (XML feed) | webfetch (HTML page, use WebFetch tool)
+
+sources:
+  - name: Hacker News front page
+    topics: [tools, startup, ai]
+    method: json
+    url: "https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=30"
+    notes: Backbone source; covers tool launches, startup signals, AI news.
+
+  - name: Lobsters hottest
+    topics: [tools]
+    method: json
+    url: "https://lobste.rs/hottest.json"
+    notes: Programming-focused, high signal for CLI/dev tools.
+
+  - name: GitHub Trending (daily)
+    topics: [tools]
+    method: webfetch
+    url: "https://github.com/trending?since=daily"
+    notes: HTML page; extract repo name, stars-today, one-line description.
+
+  - name: Simon Willison
+    topics: [ai]
+    method: rss
+    url: "https://simonwillison.net/atom/everything/"
+    notes: Best single AI curation feed; skip short link-posts unless notable.
+
+  - name: Product Hunt
+    topics: [startup]
+    method: rss
+    url: "https://www.producthunt.com/feed"
+    notes: What people are launching; scan for patterns, not individual products.
+
+  - name: CoinDesk
+    topics: [crypto]
+    method: rss
+    url: "https://www.coindesk.com/arc/outboundfeeds/rss/"
+    notes: >
+      HARD CAP: max 2 crypto news items per digest. Structural news only
+      (regulation, hacks, protocol changes) — never price commentary.
+
+  - name: CoinGecko prices
+    topics: [crypto]
+    method: json
+    url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true"
+    notes: Snapshot only — one line in the digest footer, never a news item.
+
+  # X/Twitter KOLs — via Nitter RSS (X has no free read API; x.com is a login wall).
+  # nitter.net is the only reliably-working public instance as of 2026-07.
+  # Fallback when it fails: https://twiiit.com/<handle>/rss (redirects to a random
+  # live instance). KOL selection/cap rules live in SKILL.md, not here.
+  - name: "X KOL: Trader_XO"
+    topics: [kol]
+    method: rss
+    url: "https://nitter.net/Trader_XO/rss"
+    notes: Crypto trader — technical analysis and market-structure takes.
+
+  - name: "X KOL: IncomeSharks"
+    topics: [kol]
+    method: rss
+    url: "https://nitter.net/IncomeSharks/rss"
+    notes: Crypto/stocks trading analysis — charts, market timing, sector rotation.
+
+  - name: "X KOL: lanhubiji"
+    topics: [kol]
+    method: rss
+    url: "https://nitter.net/lanhubiji/rss"
+    notes: >
+      蓝狐笔记 — Chinese crypto/blockchain commentary. Timeline mixes in
+      football and daily-life posts; the substantive-only filter matters here.
+
+# Deliberately excluded:
+# - Mental/physical health: daily health "news" is study-of-the-week churn;
+#   the right medium for this topic is long-form articles and books, not feeds.
+# - Reddit: returns 403 from datacenter IPs; HN/Lobsters cover the same ground.

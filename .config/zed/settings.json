@@ -9,10 +9,10 @@
     "dock": "left",
   },
   "collaboration_panel": {
-    "dock": "right",
+    "dock": "left",
   },
   "git_panel": {
-    "dock": "right",
+    "dock": "left",
   },
   "agent_servers": {
     "gemini": {
@@ -136,9 +136,9 @@
       },
     },
     "default_model": {
-      "effort": "xhigh",
+      "effort": "max",
       "provider": "opencode",
-      "model": "go/deepseek-v4-flash",
+      "model": "go/deepseek-v4-pro",
       "enable_thinking": true,
     },
     "commit_message_model": {

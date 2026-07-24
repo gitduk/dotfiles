@@ -59,3 +59,4 @@ When the same class of issue recurs, pick the intervention surface by its signat
 ## Standards
 
 - Security: never `verify=False` / `danger_accept_invalid_certs(true)`
+- Comments: default to none; when the WHY is genuinely non-obvious, compress it to one short line, target under ~80 chars — a single clause, not a compound sentence. If it needs line-wrapping to fit, it's too long: cut it further or move the fuller explanation to the commit message.
