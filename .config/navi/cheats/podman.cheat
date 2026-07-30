@@ -157,3 +157,13 @@ podman run -d --name numa \
   --network host \
   ghcr.io/razvandimescu/numa
 
+
+# karakeep
+podman run -d --name karakeep \
+  -e DATA_DIR=/data \
+  -e NEXTAUTH_SECRET=changeme \
+  -p 8000:3000 \
+  -v karakeep:/data \
+  --restart unless-stopped \
+  ghcr.io/karakeep-app/karakeep:release
+

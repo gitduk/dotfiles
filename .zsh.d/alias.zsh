@@ -3,6 +3,7 @@
 #############
 
 alias e="extract"
+alias y="yazi"
 alias bt="bluetoothctl"
 alias cmx="sudo chmod +x"
 alias cwn='sudo chown -Rv $USER:$USER'

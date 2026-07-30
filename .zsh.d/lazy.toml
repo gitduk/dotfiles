@@ -150,7 +150,7 @@ repo = "sxyazi/yazi"
 bpick = "yazi-x86_64-unknown-linux-musl.zip"
 sbin = "yazi; ya"
 completions = true
-atclone = "mv comp*/_ya .; mv comp*/_yazi ."
+atclone = "mv */comp*/_ya .; mv */comp*/_yazi ."
 description = "Blazing fast terminal file manager written in Rust"
 
 [[lazy]]

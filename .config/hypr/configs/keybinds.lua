@@ -7,7 +7,7 @@ local Mod_C = "ALT + CTRL"
 local Mod_S = "ALT + SHIFT"
 local Mod_CS = "ALT + CTRL + SHIFT"
 
-local TERM = "alacritty"
+local TERM = "foot"
 
 -- inline rules
 local popup = "[float; center; size 1000 600]"
@@ -33,11 +33,13 @@ hl.bind(Mod_S .. " + BackSpace", hl.dsp.exec_cmd("systemctl suspend"))
 hl.bind(Mod_C .. " + BackSpace", hl.dsp.exit())
 hl.bind(Mod_CS .. " + BackSpace", hl.dsp.exec_cmd("shutdown now"))
 
--- Launcher / clipboard / notebook / password
+-- Term Launcher
 hl.bind(Mod .. " + a", hl.dsp.exec_cmd("tofi-drun --drun-launch=true"))
 hl.bind(Mod .. " + semicolon", hl.dsp.exec_cmd(popup .. "foot sh -c '" .. scripts .. "/clipboard.sh'"))
 hl.bind(Mod_S .. " + semicolon", hl.dsp.exec_cmd(popup .. "foot bash " .. zdirs .. "/functions/pw -f"))
 hl.bind(Mod .. " + n", hl.dsp.exec_cmd(popup .. "foot sh -c 'nvim ~/.nb.md'"))
+hl.bind(Mod .. " + o", hl.dsp.exec_cmd(popup .. "foot sh -c 'ANTHROPIC_BASE_URL=http://127.0.0.1:7896 claude'"))
+hl.bind(Mod_S .. " + o", hl.dsp.exec_cmd(popup .. "foot sh -c 'claude'"))
 
 -- Waybar / mako
 hl.bind(Mod .. " + b", hl.dsp.exec_cmd("killall -SIGUSR1 waybar"))
@@ -124,10 +126,6 @@ hl.bind(Mod_S .. " + Tab", hl.dsp.window.move({ workspace = "special" }))
 -- Master layout helpers
 hl.bind(Mod .. " + i", function()
 	hl.dispatch(hl.dsp.layout("rollnext"))
-	hl.dispatch(hl.dsp.layout("focusmaster master"))
-end)
-hl.bind(Mod .. " + o", function()
-	hl.dispatch(hl.dsp.layout("rollprev"))
 	hl.dispatch(hl.dsp.layout("focusmaster master"))
 end)
 

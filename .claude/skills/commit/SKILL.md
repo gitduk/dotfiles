@@ -45,6 +45,11 @@ digraph commit_flow {
     "Draft CLAUDE.md updates" [shape=box];
     "User confirms update?" [shape=diamond];
     "Update CLAUDE.md + stage" [shape=box];
+    "Check comment compliance" [shape=box];
+    "Comment violations found?" [shape=diamond];
+    "Draft comment fixes" [shape=box];
+    "User confirms comment fix?" [shape=diamond];
+    "Apply comment fixes + restage" [shape=box];
     "Analyze change type" [shape=box];
     "Draft commit message" [shape=box];
     "Run quality checks" [shape=box];
@@ -63,14 +68,21 @@ digraph commit_flow {
     "Missing version bump?" -> "Has CLAUDE.md?" [label="no"];
     "Bump version + update lock" -> "Has CLAUDE.md?";
     "Has CLAUDE.md?" -> "Check CLAUDE.md consistency" [label="yes"];
-    "Has CLAUDE.md?" -> "Analyze change type" [label="no"];
+    "Has CLAUDE.md?" -> "Check comment compliance" [label="no"];
     "Check CLAUDE.md consistency" -> "Inconsistent?";
     "Inconsistent?" -> "Draft CLAUDE.md updates" [label="yes"];
-    "Inconsistent?" -> "Analyze change type" [label="no"];
+    "Inconsistent?" -> "Check comment compliance" [label="no"];
     "Draft CLAUDE.md updates" -> "User confirms update?";
     "User confirms update?" -> "Update CLAUDE.md + stage" [label="yes"];
-    "User confirms update?" -> "Analyze change type" [label="no, manual"];
-    "Update CLAUDE.md + stage" -> "Analyze change type";
+    "User confirms update?" -> "Check comment compliance" [label="no, manual"];
+    "Update CLAUDE.md + stage" -> "Check comment compliance";
+    "Check comment compliance" -> "Comment violations found?";
+    "Comment violations found?" -> "Draft comment fixes" [label="yes"];
+    "Comment violations found?" -> "Analyze change type" [label="no"];
+    "Draft comment fixes" -> "User confirms comment fix?";
+    "User confirms comment fix?" -> "Apply comment fixes + restage" [label="yes"];
+    "User confirms comment fix?" -> "Analyze change type" [label="no, manual"];
+    "Apply comment fixes + restage" -> "Analyze change type";
     "Analyze change type" -> "Draft commit message";
     "Draft commit message" -> "Run quality checks";
     "Run quality checks" -> "Stage files + commit";
@@ -133,6 +145,26 @@ If unpushed commits exist and belong to same logical change → squash before ne
 
 **Bypass:**
 - If commit message contains `[skip-claudemd]` tag, skip this check entirely
+
+### 3.6 Comment Check
+
+**Review new/modified comments in the diff against the project comment policy (`~/.claude/rules/code_quality.md`, `~/.claude/rules/user.md`):**
+
+- WHAT not WHY: comment restates what well-named code already shows → flag, suggest removal
+- Too long: WHY comment exceeds ~80 chars or is a compound sentence rather than one short clause → flag, suggest tightening
+- Wrong language: code comment not in English → flag, suggest translation
+- Doc bloat: multi-line/docstring block where a one-line WHY suffices → flag, suggest collapsing
+
+**If violations found:**
+- List each as `file:line — rule violated`
+- Ask user once, batched: "发现 N 处注释不符合规范，要我直接精简/翻译/删除吗？"
+- If confirmed: edit the flagged lines, re-stage affected files
+- If declined: proceed, note the skipped violations in the commit report
+
+**If clean:** continue to next step silently.
+
+**Bypass:**
+- If commit message contains `[skip-comments]` tag, skip this check entirely
 
 ### 4. Analyze Change Type
 
@@ -239,6 +271,7 @@ After successful commit, display a structured report:
 | Commit with failing tests | Verify tests pass before committing |
 | Missing commit report | Always show structured report after commit |
 | CLAUDE.md out of sync with code | Check CLAUDE.md consistency before commit, update if needed |
+| Comments violate WHAT/length/language policy | Run Comment Check (Step 3.6) before drafting commit message |
 
 ## Red Flags
 

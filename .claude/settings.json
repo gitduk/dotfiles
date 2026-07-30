@@ -3,12 +3,8 @@
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
   },
   "permissions": {
-    "allow": [
-      "Bash(rtk *)"
-    ],
-    "deny": [
-      "Bash(sudo *)"
-    ],
+    "allow": ["Bash(rtk *)"],
+    "deny": ["Bash(sudo *)"],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -48,6 +44,15 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/qa-gate.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/comment-gate.sh"
           }
         ]
       }
@@ -94,9 +99,17 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "chrome-devtools-mcp@chrome-devtools-plugins": true
   },
-  "extraKnownMarketplaces": {},
+  "extraKnownMarketplaces": {
+    "chrome-devtools-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "ChromeDevTools/chrome-devtools-mcp"
+      }
+    }
+  },
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
@@ -104,11 +117,6 @@
   "skipDangerousModePermissionPrompt": true,
   "agentPushNotifEnabled": true,
   "voiceEnabled": true,
-  "mcpServers": {
-    "dbx": {
-      "command": "dbx-mcp-server"
-    }
-  },
   "packageManager": "bun",
   "hasCompletedOnboarding": true
 }
