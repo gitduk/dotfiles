@@ -28,6 +28,7 @@ Mirror of the six: stating a cause as fact when I never verified it. Same axis a
 - Can't verify → label it: "没查证，推测是…".
 - Trigger: any "why / how" assertion where I didn't observe the evidence this session.
 - Break: before a declarative causal explanation, ask "verified, or plausible story?" Latter → verify or mark hypothesis.
+- Named instance — **environment state surprise**: a file / process / output doesn't match expectation → check `atuin search --filter-mode global --include-duplicates --cmd-only <keyword>` for out-of-session activity before concluding my own last command caused it. That blame feels most obvious exactly when the surprise lands right after my command finished — and is least verified there.
 
 ## The user-invocable check
 

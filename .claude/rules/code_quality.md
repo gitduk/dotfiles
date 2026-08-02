@@ -1,15 +1,18 @@
 # Code Quality
 
-Code review workflow, standards, and skill usage.
+When the review workflow fires, what it consists of, and how far to escalate.
+
+## Change Protocol (CRITICAL)
+
+MUST, whenever an edit changes executable project behavior (bug fixes included): run the review workflow below, from root-cause identification through the handoff report. Pure research/reading never triggers it.
 
 ## Review Discipline
 
-Whether a change triggers this workflow is defined **solely** by the Change Protocol in `~/.claude/CLAUDE.md` — this file owns the workflow detail, not the trigger. Pure research/reading never triggers it.
-
 ### Workflow
+0. If addressing a bug / test failure / unexpected behavior: identify the root cause first — start at investigation, not at the edit; skip only if unambiguous from the description.
 1. Before writing, declare this change's review dimensions; incorporate the project's feedback-type memories.
 1a. Check context7 (`resolve-library-id` → `query-docs`) only at self-announcing moments: adding a new dependency, a major-version upgrade/migration, or a compiler/LSP error against a library API that I can't explain. Routine calls into known deps: LSP diagnostics already catch stale-API mistakes — no pre-check.
-2. Implement the change, focused on the current intent; then verify it works by exercising the changed behavior, not just static checks.
+2. Implement the change, focused on the current intent; if the user asked for tests, write them (recommend one when warranted even unasked); then verify it works by exercising the changed behavior, not just static checks — run tests if present.
 3. Before declaring done, perform an adversarial re-read: walk the declared review dimensions item by item; report only what changed or was rejected — nothing to report means nothing to report. When fixing or improving anything, ask: where else might the same class of problem exist? Scan as wide as the problem's nature warrants — same function, same file, same module, or same conceptual domain. Fix trivial instances, flag non-trivial ones.
 4. If escalation conditions trigger, run an external agent loop: collect findings, sort them into real bugs / accepted improvements / rejected suggestions; fix the first two, reject the third explicitly with reasoning; if this round changed anything, verify once more.
 5. At handoff, report: review dimensions, what the adversarial re-read changed, agent rounds and convergence, rejected items, items needing the user's decision. Skip this report if the change is a single file with <30 lines changed. **If any skill ran (`/code-review`, `/simplify`, `/security-review`, …), lead with a `Skills invoked:` line — each skill + one-line verdict; mandatory even when the report is otherwise skipped.**
@@ -18,7 +21,7 @@ Whether a change triggers this workflow is defined **solely** by the Change Prot
 - Correctness: boundaries, null handling, off-by-one, concurrency, type safety
 - Simplicity: duplication, over-abstraction, dead code, unused parameters
 - Security: input validation, secrets, injection, permission checks
-- Readability: naming, structural consistency, comments that explain WHY
+- Readability: naming, structural consistency, comments that explain WHY, comments that no longer match the code
 - Performance (hot paths only): N+1, unnecessary allocation/copying, blocking in async
 - Interface contracts: compatibility, breaking changes
 - Tests (only when the user asked for tests): golden path + at least one edge case
@@ -40,6 +43,8 @@ Intensity ladder — pick by the change's logic complexity, never by file/line c
 - **Standard** (default when unsure) — `/simplify` then `/code-review high`. Simplify mutates the tree, so code-review must run last to audit the final shipping code and catch anything simplify introduced.
 - **Heavy** — security boundaries, crypto, algorithms with subtle invariants, or changes that couldn't be fully verified by exercising: `/simplify` then `/code-review xhigh` (plus `/security-review` when the security domain fired).
 
+`/code-review` cannot be model-invoked (disabled since Claude Code v2.1.215) and needs a git repo — when a tier calls for it, prompt the user to run it at the stated level, then audit the findings. `/simplify` and `/security-review` remain model-invocable.
+
 When the diff sprawls but the logic concentrates in a few files, scope simplify with `/simplify <paths>` — all four of its agents read the target, so narrowing it saves 4× the reading cost.
 
 State the chosen tier and its rationale in the handoff; the user can order a re-run at a higher tier.
@@ -53,10 +58,3 @@ Between must-escalate and exempt: default to no escalation, but name the change'
 
 ### Loop Termination
 Stop when: one round surfaces no new issue at severity ≥ medium, or 3 rounds total, or suggestions start oscillating. Agents are detectors, not authorities — I keep the right to reject stylistic suggestions.
-
-When the same class of issue recurs, pick the intervention surface by its signature: a missing fact → feedback/project memory; a reusable procedure → skill (functionality sinks to skills, not rules); a working-discipline gap → propose a rule edit. Cheapest surface that stops the recurrence wins.
-
-## Standards
-
-- Security: never `verify=False` / `danger_accept_invalid_certs(true)`
-- Comments: default to none; when the WHY is genuinely non-obvious, compress it to one short line, target under ~80 chars — a single clause, not a compound sentence. If it needs line-wrapping to fit, it's too long: cut it further or move the fuller explanation to the commit message.

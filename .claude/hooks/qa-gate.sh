@@ -22,7 +22,7 @@
 # to be chained into one command.
 #
 # Events:
-#   PostToolUse Edit|Write|MultiEdit|NotebookEdit -> clear accumulated state
+#   PostToolUse Edit|Write|NotebookEdit           -> clear accumulated state
 #       (doc-only edits .md/.txt/.rst exempt; caveat: a Rust doctest reading
 #        docs via include_str! won't be re-gated — cargo test still covers it)
 #   PostToolUse Bash (qa cmd, not errored)        -> record category passed
@@ -45,10 +45,11 @@ set -euo pipefail
 command -v jq &>/dev/null || exit 0
 
 INPUT=$(cat)
-EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // empty')
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // "default"')
-CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+# one jq spawn for all four: newline-delimited, not @tsv, so a value that
+# happens to contain a tab survives intact
+{ read -r EVENT; read -r TOOL; read -r SESSION_ID; read -r CWD; } <<<"$(
+  jq -r '.hook_event_name // "", .tool_name // "", (.session_id // "default"), (.cwd // "")' <<<"$INPUT"
+)"
 [ -z "$CWD" ] && CWD="$PWD"
 
 STATE_DIR="$HOME/.claude/session-env/${SESSION_ID}"
@@ -206,7 +207,7 @@ has_no_code_staged() {
 case "$EVENT" in
   PostToolUse)
     case "$TOOL" in
-      Edit|Write|MultiEdit|NotebookEdit)
+      Edit|Write|NotebookEdit)
         FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.notebook_path // empty')
         case "$FILE" in
           *.md|*.txt|*.rst) ;;  # doc-only edits can't break compile/lint/test state
@@ -214,8 +215,10 @@ case "$EVENT" in
         esac
         ;;
       Bash)
-        CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
-        IS_ERR=$(echo "$INPUT" | jq -r '(.tool_response.is_error // .tool_response.interrupted // false) | tostring')
+        # is_error first because it is single-line; the command may span lines
+        { read -r IS_ERR; CMD=$(cat); } <<<"$(
+          jq -r '((.tool_response.is_error // .tool_response.interrupted // false) | tostring), (.tool_input.command // "")' <<<"$INPUT"
+        )"
         [ "$IS_ERR" = "true" ] && exit 0
         DETECTED=$(detect_lang "$CWD")
         PROJ_LANG=${DETECTED%% *}

@@ -1,128 +1,136 @@
 #!/usr/bin/env bash
 # comment-gate: flags long runs of plain comments added via Edit/Write.
+# Design rationale: ~/.claude/plans/comment-gate-hook.md
 #
-# rules/code_quality.md says comments default to none; a genuine WHY gets
-# compressed to one line. That's a prose rule the model competes against its
-# own generation prior on, and loses (see memory tool-pref-enforcement-via-hook
-# for the same failure mode with tool preferences). This hook gives it a
-# mechanical nudge at write time instead.
-#
-# Detection: a run of >= THRESHOLD consecutive plain-comment lines in the
-# newly-written text triggers a PostToolUse "block" (advisory, not a real
-# block — it just re-injects the reason for the model to act on). Run-length,
-# not comment/code ratio, so a long comment block can't be diluted by pairing
-# it with a big pile of unrelated code in the same Edit/Write call.
-#
-# Exemptions (checked per run, not per file):
-#   - doc comments (rust /// //! , JS/TS /** */) — transparent, don't count
-#   - shebang line (sh/bash/zsh line 1)
-#   - license/header blocks (Copyright / SPDX-License-Identifier)
-#   - Write calls, run starting within the first 5 lines (file header)
-#   - escape hatch: literal token comment-gate:allow anywhere in the run
-#
+# For Edit, lines already in old_string are subtracted — only fresh output is judged.
 # Unknown file extensions are not gated (miss over false-positive).
 
 set -euo pipefail
 
 command -v jq &>/dev/null || exit 0
 
-THRESHOLD=4
+THRESHOLD=3
+# position alone isn't proof of a real header — raise the room, keep a cap.
+HEADER_THRESHOLD=9
 
 INPUT=$(cat)
-EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // empty')
+IFS=$'\t' read -r EVENT TOOL FILE \
+  <<<"$(jq -r '[.hook_event_name, .tool_name, .tool_input.file_path] | @tsv' <<<"$INPUT")"
 [ "$EVENT" = "PostToolUse" ] || exit 0
 
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+# resolve the family before reading the payload text: most writes are to
+# ungated extensions and can bail here without a second jq spawn
+case "${FILE##*/}" in
+  Dockerfile|Dockerfile.*|Containerfile|Makefile|makefile|GNUmakefile|.env|.env.*|.gitignore|.dockerignore) FAMILY=hash ;;
+  *.rs) FAMILY=rust ;;
+  *.html|*.htm|*.xml|*.svg|*.vue|*.svelte) FAMILY=html ;;
+  *.css|*.scss|*.sass|*.less) FAMILY=css ;;
+  *.sql|*.lua) FAMILY=dash ;;
+  *.php) FAMILY=php ;;
+  *.tf|*.tfvars|*.hcl) FAMILY=hcl ;;
+  *.conf|*.ini|*.cfg) FAMILY=ini ;;
+  *.js|*.ts|*.jsx|*.tsx|*.mjs|*.cjs|*.c|*.h|*.cpp|*.cc|*.hpp|*.go|*.java) FAMILY=cstyle ;;
+  *.py|*.sh|*.bash|*.zsh|*.toml|*.yaml|*.yml|*.rb|*.fish|*.nix) FAMILY=hash ;;
+  *) exit 0 ;;
+esac
+
 case "$TOOL" in
-  Edit)  TEXT=$(echo "$INPUT" | jq -r '.tool_input.new_string // empty') ;;
-  Write) TEXT=$(echo "$INPUT" | jq -r '.tool_input.content // empty') ;;
+  Edit)  TEXT=$(jq -r '.tool_input.new_string // empty' <<<"$INPUT")
+         PRIOR=$(jq -r '.tool_input.old_string // empty' <<<"$INPUT") ;;
+  Write) TEXT=$(jq -r '.tool_input.content // empty' <<<"$INPUT")
+         PRIOR="" ;;
   *) exit 0 ;;
 esac
 [ -z "$TEXT" ] && exit 0
 
-FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
-
-case "$FILE" in
-  *.rs) FAMILY=rust ;;
-  *.js|*.ts|*.jsx|*.tsx|*.mjs|*.cjs|*.c|*.h|*.cpp|*.cc|*.hpp|*.go|*.java|*.html|*.htm) FAMILY=cstyle ;;
-  *.py|*.sh|*.bash|*.zsh|*.toml|*.yaml|*.yml) FAMILY=hash ;;
-  *) exit 0 ;;
-esac
-
-RESULT=$(printf '%s\n' "$TEXT" | awk -v family="$FAMILY" -v tool="$TOOL" -v threshold="$THRESHOLD" '
-  function eval_run() {
-    if (count >= threshold) {
-      header_exempt = (tool == "Write" && run_start <= 5) ? 1 : 0
-      if (!run_license && !run_allow && !header_exempt && !triggered) {
-        triggered = 1; trig_line = run_start; trig_count = count
-      }
+RESULT=$(awk -v family="$FAMILY" -v tool="$TOOL" -v threshold="$THRESHOLD" -v header_threshold="$HEADER_THRESHOLD" '
+  function eval_run(   eff) {
+    eff = (run_is_header ? header_threshold : threshold)
+    if (count >= eff && !run_exempt && !triggered) {
+      triggered = 1; trig_line = run_start; trig_count = count
     }
-    count = 0; run_license = 0; run_allow = 0
+    count = 0; run_exempt = 0; run_is_header = 0
   }
+  function nopen(s) { return gsub(/\/\*/, "", s) }
+  function nclose(s) { return gsub(/\*\//, "", s) }
+  function close_block(s) {
+    if (blk == BLK_ALT) {
+      if (s ~ curclose) blk = 0
+    } else if (nest) {
+      depth += nopen(s) - nclose(s)
+      if (depth <= 0) blk = 0
+    } else if (nclose(s) > 0) blk = 0
+  }
+  BEGIN {
+    BLK_PLAIN = 1; BLK_ALT = 2
+    linecmt = "^//"
+    if (family == "rust")        { nest = 1 }
+    # php and hcl take # as a line comment too; C-family does not (#include)
+    # php8 attributes start #[ and must not read as comments
+    else if (family == "php")    { linecmt = "^(//|#($|[^[]))" }
+    else if (family == "hcl")    { linecmt = "^(#|//)" }
+    else if (family == "hash")   { linecmt = "^#" }
+    else if (family == "ini")    { linecmt = "^(#|;)" }
+    else if (family == "html")   { altopen = "^<!--"; altclose = "-->" }
+    # lua long brackets carry a variable = run that the closer must mirror
+    else if (family == "dash")   { linecmt = "^--"
+                                   altopen = "^--\\[=*\\["; altvar = 1 }
+  }
+  NR == FNR { if ($0 != "") prior[$0]++; next }
   {
-    line = $0
-    t = line
-    sub(/^[ \t]+/, "", t)
+    # a preserved line is real content, so it breaks any run it sits between
+    if (($0 in prior) && prior[$0] > 0) { prior[$0]--; eval_run(); next }
 
-    if (line ~ /Copyright/ || line ~ /SPDX-License-Identifier/) run_license_line = 1
-    else run_license_line = 0
-    if (line ~ /comment-gate:allow/) run_allow_line = 1
-    else run_allow_line = 0
+    t = $0
+    sub(/^[ \t]+/, "", t)
 
     is_comment = 0
     is_transparent = 0
+    entering = !blk
 
-    if (family == "rust") {
-      if (t ~ /^\/\/\// || t ~ /^\/\/!/) is_transparent = 1
-      else if (t ~ /^\/\//) is_comment = 1
-    } else if (family == "cstyle") {
-      if (in_docblock) {
-        is_transparent = 1
-        if (line ~ /\*\//) in_docblock = 0
-      } else if (in_block) {
+    if (t == "" || (FNR == 1 && t ~ /^#!/)) {
+      is_transparent = 1
+    } else if (family == "hash" || family == "ini") {
+      if (t ~ linecmt) is_comment = 1
+    } else {
+      if (blk) {
         is_comment = 1
-        if (line ~ /\*\//) in_block = 0
-      } else if (t ~ /^\/\*\*/) {
-        is_transparent = 1
-        in_docblock = 1
-        if (line ~ /\*\//) in_docblock = 0
       } else if (t ~ /^\/\*/) {
         is_comment = 1
-        in_block = 1
-        if (line ~ /\*\//) in_block = 0
-      } else if (t ~ /^\/\//) {
+        blk = BLK_PLAIN
+      } else if (altopen != "" && t ~ altopen) {
+        is_comment = 1
+        blk = BLK_ALT
+        curclose = altclose
+        # RLENGTH spans --[ and [ around the = run the closer has to mirror
+        if (altvar) { match(t, altopen); curclose = "\\]" substr(t, RSTART + 3, RLENGTH - 4) "\\]" }
+      } else if (t ~ linecmt) {
         is_comment = 1
       }
-    } else if (family == "hash") {
-      if (NR == 1 && t ~ /^#!/) is_transparent = 1
-      else if (t ~ /^#/) is_comment = 1
+      if (blk) { if (entering) depth = 0; close_block($0) }
     }
 
     if (is_transparent) next
 
     if (is_comment) {
-      if (count == 0) run_start = NR
+      if (count == 0) { run_start = FNR; run_is_header = (tool == "Write" && !seen_content) }
       count++
-      if (run_license_line) run_license = 1
-      if (run_allow_line) run_allow = 1
+      if ($0 ~ /Copyright|SPDX-License-Identifier|comment-gate:allow/) run_exempt = 1
     } else {
       eval_run()
+      seen_content = 1
     }
   }
   END {
     eval_run()
-    if (triggered) print "BLOCK\t" trig_line "\t" trig_count
-    else print "OK"
+    if (triggered) print trig_line "\t" trig_count
   }
-')
+' <(printf '%s\n' "$PRIOR") <(printf '%s\n' "$TEXT"))
 
-STATUS="${RESULT%%$'\t'*}"
-[ "$STATUS" = "OK" ] && exit 0
+[ -z "$RESULT" ] && exit 0
+IFS=$'\t' read -r LINE CNT <<<"$RESULT"
 
-LINE=$(echo "$RESULT" | cut -f2)
-CNT=$(echo "$RESULT" | cut -f3)
-
-REASON="comment-gate: 检测到连续 ${CNT} 行注释块（${FILE}:${LINE} 起）。规则（code_quality.md）：注释默认不写；确属 non-obvious 的 WHY 压缩为一行（<80 chars 单子句）；完整推理写进 commit message，不留在代码里。请把该注释块改写为至多一行，或确认属豁免场景（doc comment / license / 用户明确要求，则在块内加 comment-gate:allow）。"
+REASON="comment-gate: this write to ${FILE} added a ${CNT}-line comment run (from line ${LINE} of the written text). Rule (comments.md): default to none; public API doc comments are interface contract and exempt from the default, but long runs still get trimmed. File-header docs (script/module level) get a relaxed threshold of ${HEADER_THRESHOLD} lines — not unlimited. Test each line: would refactoring the adjacent code force this comment to change? Yes → it restates the implementation, drop it. No → it describes a constraint outside the code — compress to at most two short lines, each a single clause under ~80 chars; move the fuller explanation to the commit message. Legitimate exemptions (real file-header docs / license / explicit user request): add comment-gate:allow inside the block."
 
 jq -n --arg r "$REASON" '{
   hookSpecificOutput: {

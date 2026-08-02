@@ -148,12 +148,16 @@ If unpushed commits exist and belong to same logical change → squash before ne
 
 ### 3.6 Comment Check
 
-**Review new/modified comments in the diff against the project comment policy (`~/.claude/rules/code_quality.md`, `~/.claude/rules/user.md`):**
+**Review comments in and around the diff against the project comment policy (`~/.claude/rules/comments.md`, `~/.claude/rules/user.md`):**
 
-- WHAT not WHY: comment restates what well-named code already shows → flag, suggest removal
+Read the diff with `git diff --cached -U10` for this step. The default 3 lines of context routinely hides the comment sitting just above a changed function — which is exactly what the Stale rule has to see.
+
+- Restates implementation: would refactoring the adjacent code force this comment to change? Yes → it describes the implementation, not a constraint outside it → flag, suggest removal
 - Too long: WHY comment exceeds ~80 chars or is a compound sentence rather than one short clause → flag, suggest tightening
-- Wrong language: code comment not in English → flag, suggest translation
-- Doc bloat: multi-line/docstring block where a one-line WHY suffices → flag, suggest collapsing
+- Stale: code changed in this diff but an adjacent unchanged comment still describes the old behavior → flag, suggest fixing or deleting
+- Wrong language: code comment not in English, unless the project `CLAUDE.md` requires Chinese → flag, suggest translation
+
+Doc comments (`///`, `//!`, `/** */`, docstrings) on public API are interface contract, not commentary — out of scope for this check. A rustdoc with `# Examples` and a doctest is legitimately long; do not flag it for length.
 
 **If violations found:**
 - List each as `file:line — rule violated`
@@ -271,7 +275,7 @@ After successful commit, display a structured report:
 | Commit with failing tests | Verify tests pass before committing |
 | Missing commit report | Always show structured report after commit |
 | CLAUDE.md out of sync with code | Check CLAUDE.md consistency before commit, update if needed |
-| Comments violate WHAT/length/language policy | Run Comment Check (Step 3.6) before drafting commit message |
+| Comments restate implementation, run long, went stale, or wrong language | Run Comment Check (Step 3.6) before drafting commit message |
 
 ## Red Flags
 

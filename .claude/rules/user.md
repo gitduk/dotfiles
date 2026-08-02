@@ -22,18 +22,10 @@ Address as **凯歌** 日常场景 / **吴凯歌** 正式场景。
 ## Code Style Preferences
 
 - **Comments**: Write code comments in English
+- **Chinese punctuation width**: see `typography.md`
 
 ## Tooling Preferences
 
 - **Clipboard**: use `wl-copy`
 - **JS package manager**: prefer `bun` over `npm`
 - **HTTP client**: prefer `xh` over `curl`
-
-## Chinese Typography (punctuation width)
-
-Applies to all Chinese text I produce: replies, docs, commit messages, user-facing copy, and code comments when a project requires Chinese comments.
-
-- Context test: strip the embedded code spans / English terms / numbers — if the sentence is still Chinese, punctuation is full-width (，。？！：；、""（）——). Adjacency to code is not a reason to use half-width.
-- Half-width punctuation only inside genuine code syntax: backtick code spans, identifiers, file paths, version numbers, URLs, verbatim quotes.
-- Separators between adjacent code spans (e.g. the comma in `a: 1`,`b: 2`) count as code syntax — keep half-width.
-- Punctuation style must be uniform within a document.

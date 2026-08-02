@@ -3,8 +3,12 @@
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
   },
   "permissions": {
-    "allow": ["Bash(rtk *)"],
-    "deny": ["Bash(sudo *)"],
+    "allow": [
+      "Bash(rtk *)"
+    ],
+    "deny": [
+      "Bash(sudo *)"
+    ],
     "defaultMode": "bypassPermissions"
   },
   "hooks": {
@@ -118,5 +122,6 @@
   "agentPushNotifEnabled": true,
   "voiceEnabled": true,
   "packageManager": "bun",
-  "hasCompletedOnboarding": true
+  "hasCompletedOnboarding": true,
+  "model": "opus"
 }

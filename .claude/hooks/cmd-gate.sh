@@ -53,7 +53,7 @@ while IFS= read -r LINE; do
     if [ -n "$COND" ] && (cd "$CWD" 2>/dev/null && eval "$COND") 2>/dev/null; then
       continue
     fi
-    REASON="命令别名策略: 用 \`${TO}\` 代替 \`${FROM}\`.\n拦截的命令: ${CMD}\n临时跳过在命令里加 ALIAS-SKIP."
+    REASON="命令偏好: 用 \`${TO}\` 代替 \`${FROM}\`.\n拦截的命令: ${CMD}\n临时跳过在命令里加 ALIAS-SKIP."
     jq -n --arg r "$REASON" '{
       "hookSpecificOutput": {
         "hookEventName": "PreToolUse",

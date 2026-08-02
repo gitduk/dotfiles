@@ -451,6 +451,45 @@ section_plugins() {
   [ "${n:-0}" -gt 0 ] && _sec "plugins" "$n" "$CYAN"
 }
 
+_ccscore_maybe_refresh() {
+  # Background refresh, fire-and-forget: skip if already running (pidfile).
+  # Also skip if refreshed <60s ago — avoids rerunning on every render.
+  local script="$HOME/.claude/scripts/cc-score.sh" log="$HOME/.claude/cc-score.log"
+  local lock="$HOME/.cache/claude/cc-score.lock"
+  [ -x "$script" ] || return
+  mkdir -p "${lock%/*}" 2>/dev/null
+  if [ -f "$lock" ]; then
+    local pid; pid=$(cat "$lock" 2>/dev/null)
+    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && return
+  fi
+  if [ -f "$log" ]; then
+    local age=$(( $(date +%s) - $(stat -c %Y "$log" 2>/dev/null || echo 0) ))
+    [ "$age" -lt 60 ] && return
+  fi
+  ( "$script" >/dev/null 2>&1; rm -f "$lock" ) &
+  echo $! > "$lock"
+}
+
+section_ccscore() {
+  _ccscore_maybe_refresh
+  # Displays the last cached line; the refresh above updates it out-of-band.
+  local log="$HOME/.claude/cc-score.log"
+  [ -f "$log" ] || return
+  local last; last=$(tail -1 "$log" 2>/dev/null)
+  [ -z "$last" ] && return
+  local d pct frac
+  read -r d pct frac <<< "$last"
+  pct="${pct%\%}"
+  [ -z "$pct" ] && return
+  local c
+  if   [ "$pct" -ge 95 ] 2>/dev/null; then c="$GREEN"
+  elif [ "$pct" -ge 80 ] 2>/dev/null; then c="$YELLOW"
+  else c="$RED"
+  fi
+  [ "$d" != "$(date +%F)" ] && c="$DIM"
+  _sec "cc" "$frac" "$c"
+}
+
 # ============================================================
 # Render — two lines, all left-aligned
 # ============================================================
@@ -470,6 +509,7 @@ line2_sections=(
   section_mcp
   section_plugins
   section_mem
+  section_ccscore
 )
 
 _render_line() {

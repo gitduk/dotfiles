@@ -138,7 +138,7 @@
     "default_model": {
       "effort": "max",
       "provider": "opencode",
-      "model": "go/deepseek-v4-pro",
+      "model": "go/deepseek-v4-flash",
       "enable_thinking": true,
     },
     "commit_message_model": {

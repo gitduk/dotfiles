@@ -1,9 +1,0 @@
-{
-  "python": {
-    "command": "basedpyright-langserver",
-    "args": ["--stdio"],
-    "extensionToLanguage": {
-      ".py": "python"
-    }
-  }
-}
