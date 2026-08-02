@@ -4,7 +4,7 @@ When the review workflow fires, what it consists of, and how far to escalate.
 
 ## Change Protocol (CRITICAL)
 
-MUST, whenever an edit changes executable project behavior (bug fixes included): run the review workflow below, from root-cause identification through the handoff report. Pure research/reading never triggers it.
+MUST, whenever an edit changes executable behavior — project code, or anything under `~/.claude` that runs (hooks, scripts, statusline) — bug fixes included: run the review workflow below, from root-cause identification through the handoff report. Prose-only files, including rule files, are exempt. Pure research/reading never triggers it.
 
 ## Review Discipline
 
@@ -21,7 +21,7 @@ MUST, whenever an edit changes executable project behavior (bug fixes included):
 - Correctness: boundaries, null handling, off-by-one, concurrency, type safety
 - Simplicity: duplication, over-abstraction, dead code, unused parameters
 - Security: input validation, secrets, injection, permission checks
-- Readability: naming, structural consistency, comments that explain WHY, comments that no longer match the code
+- Readability: naming, structural consistency, comments that survive the `comments.md` test (default none; WHY-only), comments that no longer match the code
 - Performance (hot paths only): N+1, unnecessary allocation/copying, blocking in async
 - Interface contracts: compatibility, breaking changes
 - Tests (only when the user asked for tests): golden path + at least one edge case

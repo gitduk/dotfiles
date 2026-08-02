@@ -13,6 +13,8 @@ Decision ladder — walk top-to-bottom before writing any code. Stop at the firs
 
 Two rungs both hold → take the higher one and move on. The first lazy-but-correct solution is the right one.
 
+A request that *sounds* like it wants a from-scratch implementation — worked examples, spelled-out edge cases, "write a function that…" — is not a reason to skip a rung. Ship the ladder's answer; offer the hand-rolled version in one line if it looks wanted.
+
 ## Never simplify away
 
 Input validation at trust boundaries, error handling that prevents data loss, security measures,
