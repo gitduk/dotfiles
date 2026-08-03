@@ -62,7 +62,32 @@ done <<'EOF'
 default to none|rules/comments.md|hooks/comment-gate.sh
 would refactoring the adjacent code force this comment to change|rules/comments.md|hooks/comment-gate.sh
 compress to at most two short lines|rules/comments.md|hooks/comment-gate.sh
+name which of the four homes|CLAUDE.md|skills/rule-audit/SKILL.md
+Stdlib does it|rules/simplicity.md|skills/rule-audit/SKILL.md
+≥2 variants or any variant carries a|rules/rust.md|skills/rule-audit/SKILL.md
 EOF
+
+echo "== rules: rule IDs resolve and stay unique"
+ID_SRC=("$CLAUDE_DIR/rules" "$CLAUDE_DIR/CLAUDE.md")
+# A definition is the ID at the end of a heading, or one glued to a bold marker.
+# Anything else on the same line is a reference — extract by position, not per line.
+id_defs=$( { grep -rhE '^#{2,3} ' "${ID_SRC[@]}" 2>/dev/null | grep -oE '\[[A-Z]+-[0-9]+\]$'
+             grep -rhoE '\*\*\[[A-Z]+-[0-9]+\]' "${ID_SRC[@]}" 2>/dev/null \
+               | grep -oE '\[[A-Z]+-[0-9]+\]'
+           } | sort)
+for id in $(grep -rhoE '\[[A-Z]+-[0-9]+\]' "${ID_SRC[@]}" 2>/dev/null | sort -u); do
+  if echo "$id_defs" | grep -qxF "$id"; then
+    pass rules "ID resolves: $id"
+  else
+    fail rules "ID referenced but never defined: $id"
+  fi
+done
+dupe_ids=$(echo "$id_defs" | uniq -d | tr '\n' ' ')
+if [ -n "${dupe_ids// /}" ]; then
+  fail rules "duplicate ID definition: $dupe_ids"
+else
+  pass rules "no duplicate ID definitions"
+fi
 
 echo "== hooks: commands wired in settings.json exist"
 while IFS= read -r cmd; do

@@ -1,7 +1,36 @@
-# Code Navigation
+## Picking the tool [NAV-1]
 
-Prefer the LSP tool for symbol queries — findReferences, incomingCalls/outgoingCalls, goToDefinition, workspaceSymbol. Structural shape queries ("all code shaped like `$X.unwrap()`") → ast-grep (installed at `~/.local/bin`). Grep is for plain-text search only (string literals, comments, config keys).
+| Query | Tool |
+|---|---|
+| Semantic relations of a symbol (definition, references, call chain, trait impls) | LSP |
+| Structural shape (`$X.unwrap()` and friends) | `ast-grep` — **not `sg`**, that is the system setgid binary |
+| Plain text (string literals, comments, config keys, log formats) | Grep |
 
-    if LSP returns empty: verify a server is running AND its cwd is this project (pgrep the server — name in each language rules file; readlink /proc/<pid>/cwd)  # both failure modes look identical to "no usages"; never silently fall back to grep
+LSP operations: `goToDefinition` `findReferences` `hover` `documentSymbol` `workspaceSymbol`
+`goToImplementation` `prepareCallHierarchy` `incomingCalls` `outgoingCalls`.
+`goToImplementation` answers "who implements this trait"; `documentSymbol` maps a file
+without reading it.
 
-Language rules files add the server process name and any language-specific caveats.
+## Grep feeds LSP, it does not compete with it [NAV-2]
+
+Every LSP operation needs `filePath` + `line` + `character`. Except for `workspaceSymbol`,
+you must already know where the symbol sits — grep or Read locates it, LSP then answers the
+semantic question. They chain; they are not alternatives.
+
+Renaming a symbol needs both: `findReferences` for semantic uses, grep for the ones living
+in strings, comments, macros and dynamic lookups. [CFG-4] Split/rename coupling asks
+for the union, not either half.
+
+## When LSP returns nothing [NAV-3]
+
+An empty result has two causes that look identical from the outside: there really are no
+usages, or the server is not serving this project. Falling back to grep without checking
+dresses "I could not look" up as "it does not exist" — so verify before believing the
+emptiness:
+
+1. Is a server running — `pgrep`, process name in each language rules file
+2. Is its cwd this project — `readlink /proc/<pid>/cwd`
+
+Trust "no usages" only after both check out.
+
+Language rules files add the server process name and language-specific caveats.

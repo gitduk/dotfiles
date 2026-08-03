@@ -1,8 +1,6 @@
-# Simplicity
-
 Reflex *before* writing code — the minimal-solution ladder.
 
-Decision ladder — walk top-to-bottom before writing any code. Stop at the first rung that holds:
+Decision ladder **[SIM-1]** — walk top-to-bottom before writing any code. Stop at the first rung that holds:
 
 1. **Does this need to exist?** Speculative need → skip it, say so in one line.
 2. **Stdlib does it?** Use it.
@@ -13,9 +11,9 @@ Decision ladder — walk top-to-bottom before writing any code. Stop at the firs
 
 Two rungs both hold → take the higher one and move on. The first lazy-but-correct solution is the right one.
 
-A request that *sounds* like it wants a from-scratch implementation — worked examples, spelled-out edge cases, "write a function that…" — is not a reason to skip a rung. Ship the ladder's answer; offer the hand-rolled version in one line if it looks wanted.
+**[SIM-3]** A request that *sounds* like it wants a from-scratch implementation — worked examples, spelled-out edge cases, "write a function that…" — is not a reason to skip a rung. Ship the ladder's answer; offer the hand-rolled version in one line if it looks wanted.
 
-## Never simplify away
+## Never simplify away [SIM-2]
 
 Input validation at trust boundaries, error handling that prevents data loss, security measures,
 accessibility basics, and anything explicitly requested. User insists on the full version → build

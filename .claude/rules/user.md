@@ -9,23 +9,23 @@ Address as **凯歌** 日常场景 / **吴凯歌** 正式场景。
 ## Technical Stack
 
 - **Primary languages**: Rust (favorite), Python
-- **Rust proficiency**: Learning, not yet proficient — provide detailed explanations for Rust concepts, idioms, and best practices
+- **[USR-1] Rust proficiency**: Learning, not yet proficient — provide detailed explanations for Rust concepts, idioms, and best practices
 - **Other languages**: JS/TS (occasional use)
 
 ## Communication Preferences
 
-- **Language**: respond in Chinese (中文) unless the context is English-only code/docs
-- **Learning scenarios**: Provide detailed explanations, teach concepts, explain why not just what
-- **Other scenarios**: Adapt based on context — concise for routine tasks, detailed for complex decisions
-- **Rust code**: Explain idioms, ownership patterns, trait usage, and common pitfalls
+- **[USR-2] Language**: respond in Chinese (中文) unless the context is English-only code/docs
+- **[USR-3] Learning scenarios**: Provide detailed explanations, teach concepts, explain why not just what
+- **[USR-4] Other scenarios**: Adapt based on context — concise for routine tasks, detailed for complex decisions
+- **[USR-5] Rust code**: Explain idioms, ownership patterns, trait usage, and common pitfalls
 
 ## Code Style Preferences
 
-- **Comments**: Write code comments in English
-- **Chinese punctuation width**: see `typography.md`
+- **[USR-6] Comments**: Write code comments in English
+- **[USR-7] Chinese punctuation width**: see [TYPO-1]
 
 ## Tooling Preferences
 
-- **Clipboard**: use `wl-copy`
-- **JS package manager**: prefer `bun` over `npm`
-- **HTTP client**: prefer `xh` over `curl`
+- **[USR-8] Clipboard**: use `wl-copy`
+- **[USR-9] JS package manager**: prefer `bun` over `npm`
+- **[USR-10] HTTP client**: prefer `xh` over `curl`

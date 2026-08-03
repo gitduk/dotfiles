@@ -9,7 +9,7 @@ paths:
 
 # JS/TS
 
-## Code navigation
+## Code navigation [JS-1]
 
 See `code_navigation.md`; LSP server check: `pgrep -f typescript-language-server`.
 
