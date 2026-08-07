@@ -1,6 +1,7 @@
 {
   "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-6"
   },
   "permissions": {
     "allow": [
@@ -17,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/memory-heal.sh"
+            "command": "~/.claude/hooks/cc-score.sh --hook"
           }
         ]
       }
@@ -122,6 +123,5 @@
   "agentPushNotifEnabled": true,
   "voiceEnabled": true,
   "packageManager": "bun",
-  "hasCompletedOnboarding": true,
-  "model": "opus"
+  "hasCompletedOnboarding": true
 }

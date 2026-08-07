@@ -26,162 +26,59 @@ bindkey -v
 zmodload zsh/zle
 autoload -Uz add-zsh-hook edit-command-line
 
-###################
-### Zinit Setup ###
-###################
+###########
+### rig ###
+###########
 
-# zinit
-command -v git &>/dev/null || sudo apt install git
-command -v curl &>/dev/null || sudo apt install curl
-ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
-[[ ! -d "$ZINIT_HOME" ]] && mkdir -p "$(dirname $ZINIT_HOME)"
-[[ ! -d "$ZINIT_HOME/.git" ]] && git clone "https://github.com/zdharma-continuum/zinit.git" "$ZINIT_HOME"
-export ZPFX="$HOME/.local"
-source "${ZINIT_HOME}/zinit.zsh"
-zinit light-mode for zdharma-continuum/zinit-annex-bin-gem-node
+# bootstrap
+_rig_zsh=$HOME/.local/share/rig/rig.zsh
+_rig="https://github.com/gitduk/rig/releases/latest/download/rig.zsh"
+[[ -f $_rig_zsh ]] || curl -fsSL -o $_rig_zsh $_rig
+source $_rig_zsh
 
-# prompt
-zinit ice lucid as"program" from"gh-r" id-as"starship" \
-  atclone"./starship completions zsh > _starship" \
-  atpull"%atclone" \
-  atload'
-    export STARSHIP_CONFIG=~/.starship.toml
-    eval "$(starship init zsh)"
-  '
-zinit light starship/starship
+# completions
+fpath+=~/.zsh.d/completions
+autoload -Uz compinit
+ZCD="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump"
+if [[ -n ${ZCD}(#qN.mh+24) ]]; then
+  compinit -d $ZCD
+else
+  compinit -C -d $ZCD
+fi
 
-##################################
-### Main Plugins (Lazy Loaded) ###
-##################################
+#####################
+### Local Scripts ###
+#####################
 
-zinit ice wait"0" blockf lucid id-as"zsh-completions" \
-  atpull"zinit creinstall -q ."
-zinit light zsh-users/zsh-completions
+fpath+=~/.zsh.d/functions
+autoload -Uz ~/.zsh.d/functions/**/*(:t)
+for script (~/.zsh.d/*.zsh(N)) source $script
 
-zinit ice wait"0" lucid id-as"zsh-autosuggestions" \
-  atload'!
-    ZSH_AUTOSUGGEST_STRATEGY=(match_prev_cmd history)
-    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
-    bindkey -M viins "^ " autosuggest-execute
-    bindkey -M vicmd "^ " autosuggest-execute
-    _zsh_autosuggest_start
-  '
-zinit light zsh-users/zsh-autosuggestions
+#######################################################
+### rig 不管的两个（见迁移说明，不建模成 rig 类型） ###
+#######################################################
 
-zinit ice wait"0a" lucid nocompile id-as"compinit" \
-  atinit'
-    fpath+=~/.zsh.d/completions
-    _zcd="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump"
-    if [[ ! -s "$_zcd" || -n ${_zcd}(N.mh+24) ]]; then
-      ZINIT[COMPINIT_OPTS]="-i -d $_zcd"
-    else
-      ZINIT[COMPINIT_OPTS]="-C -d $_zcd"
-    fi
-    zicompinit; zicdreplay
-  '
-zinit light zdharma-continuum/null
+# rustup — curl 自安装 + 往 /usr/bin 建系统软链，不适合 rig 的 [[curl]] 模型
+if [[ ! -x "$HOME/.cargo/bin/rustup" ]]; then
+  curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  $HOME/.cargo/bin/rustup completions zsh > ~/.zsh.d/completions/_rustup
+  $HOME/.cargo/bin/rustup completions zsh cargo > ~/.zsh.d/completions/_cargo
+  sudo ln -sf ~/.cargo/bin/cargo /usr/bin/cargo
+fi
+export CARGO_INSTALL_ROOT=$HOME/.local
+export PATH=$HOME/.cargo/bin:$PATH
+command -v sccache &>/dev/null && export RUSTC_WRAPPER="$(command -v sccache)"
 
-zinit ice wait"0b" lucid as"program" id-as"autoload" \
-  atinit"fpath+=~/.zsh.d/functions" \
-  atload'
-    autoload -Uz ~/.zsh.d/functions/**/*(:t)
-    for script (~/.zsh.d/*.zsh(N)) source $script
-  '
-zinit light zdharma-continuum/null
-
-zinit ice wait"0b" lucid id-as"fast-syntax-highlighting"
-zinit light zdharma-continuum/fast-syntax-highlighting
-
-
-zinit ice wait"1" lucid id-as"zsh-history-substring-search" \
-  atload"
-    export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=''
-    bindkey '^k' history-substring-search-up
-    bindkey '^j' history-substring-search-down
-  "
-zinit light zsh-users/zsh-history-substring-search
-
-# snippets
-zinit ice wait"1" lucid; zinit snippet OMZP::sudo
-
-####################
-### Binary Tools ###
-####################
-
-# rustup
-zinit ice wait"1" lucid as"program" run-atpull id-as"rustup" \
-  atclone'
-    curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    $HOME/.cargo/bin/rustup completions zsh > _rustup
-    $HOME/.cargo/bin/rustup completions zsh cargo > _cargo
-    sudo ln -sf ~/.cargo/bin/cargo /usr/bin/cargo
-  ' \
-  atpull"%atclone" \
-  atload'
-    export CARGO_INSTALL_ROOT=$HOME/.local
-    export PATH=$HOME/.cargo/bin:$PATH
-    command -v sccache &>/dev/null && export RUSTC_WRAPPER="$(command -v sccache)"
-  '
-zinit light zdharma-continuum/null
-
-# golang
-zinit ice wait"1" lucid as"program" run-atpull id-as"golang" \
-  atclone'
-    version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json|jq -r ".[0].version")
-    wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
-    [[ -d /usr/local/go ]] && sudo rm -rf /usr/local/go
-    sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
-  ' \
-  atpull"%atclone" \
-  atload'
-    export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
-    export GOPRIVATE="*.corp.example.com,rsc.io/private"
-    export GOSUMDB="sum.golang.org"
-    export GO111MODULE=on
-  '
-zinit light zdharma-continuum/null
-
-# tmux
-zinit ice if'[[ ! -x $commands[tmux] ]]' lucid as"program" from"gh-r" id-as"tmux" sbin"tmux"
-zinit light tmux/tmux-builds
-
-# zoxide
-zinit ice wait"0" lucid as"program" from"gh-r" id-as"zoxide" \
-  sbin"zoxide" \
-  atload'eval "$(zoxide init zsh --cmd j)"'
-zinit light ajeetdsouza/zoxide
-
-# atuin
-zinit ice wait"0" lucid as"program" from"gh-r" id-as"atuin" \
-  bpick"atuin-x86_64-unknown-linux-musl.tar.gz" \
-  extract"!" sbin"atuin" \
-  atclone'
-    ./atuin gen-completions --shell zsh > _atuin
-    ./atuin init zsh > init.zsh
-  ' \
-  atpull"%atclone" \
-  src"init.zsh" \
-  atload"export ATUIN_TMUX_POPUP=false"
-zinit light atuinsh/atuin
-
-# navi
-zinit ice wait"0" lucid as"program" from"gh-r" id-as"navi" \
-  atclone'
-    mkdir -p "$HOME/.config/navi/cheats"
-    navi info config-example > "$HOME/.config/navi/config.yaml"
-  ' \
-  atpull"%atclone" \
-  atload'
-    export NAVI_PATH="$HOME/.config/navi/cheats"
-    export NAVI_CONFIG="$HOME/.config/navi/config.yaml"
-    eval "$(navi widget zsh)"
-    bindkey "^E" _navi_widget
-  '
-zinit light denisidoro/navi
-
-# fzf
-zinit ice if'[[ ! -x $commands[fzf] ]]' lucid as"program" from"gh-r" id-as"fzf" sbin"fzf"
-zinit light junegunn/fzf
+# golang — 系统级 sudo 安装到 /usr/local，不适合 rig 的类型
+if [[ ! -d /usr/local/go ]]; then
+  version=$(curl -s https://raw.githubusercontent.com/actions/go-versions/main/versions-manifest.json | jq -r ".[0].version")
+  wget -c https://go.dev/dl/go${version}.linux-amd64.tar.gz -P /tmp
+  sudo tar -C /usr/local -xzf /tmp/go$version.linux-amd64.tar.gz
+fi
+export GOPROXY="https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct"
+export GOPRIVATE="*.corp.example.com,rsc.io/private"
+export GOSUMDB="sum.golang.org"
+export GO111MODULE=on
 
 #############
 ### Zprof ###

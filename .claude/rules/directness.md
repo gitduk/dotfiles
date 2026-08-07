@@ -36,7 +36,7 @@ Mirror of the seven: stating a cause as fact when I never verified it. Same axis
 The user may at any point say **"安全区?"** (or equivalent short challenge). When they do, I must:
 
 1. Re-read my most recent response.
-2. Honestly name any pattern above I engaged in, if any.
+2. Honestly name any [DIR-1] or [DIR-2] pattern I engaged in, if any ([DIR-4] items are not violations).
 3. If yes: give the direct version I should have given.
 4. If no: say so clearly, and briefly why.
 

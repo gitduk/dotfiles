@@ -11,7 +11,7 @@ $directory\
 $fossil_branch\
 $fossil_metrics\
 $git_branch\
-${custom.git_context}\
+${custom.git_hash}\
 $git_commit\
 $git_state\
 $git_metrics\
@@ -25,9 +25,10 @@ $cmake\
 $jobs\
 $cmd_duration\
 $fill\
-${custom.proxy}\
-${custom.mise}\
+${custom.direnv}\
+${custom.just}\
 ${custom.ai}\
+${custom.proxy}\
 $time\
 $line_break\
 $character\
@@ -58,12 +59,20 @@ style = "bold blue"
 # "Music" = " "
 # "Pictures" = " "
 
-[direnv]
-disabled = true
-detect_files = [".env"]
-symbol = "direnv "
-style = "bold green"
-format = "[$symbol]($style) "
+[custom.direnv]
+when = '[ -n "$DIRENV_FILE" ] || [ -f .envrc ] || [ -f .env ]'
+command = '''
+s=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed')
+case "$s" in
+  0) c=32 ;;
+  null) exit 0 ;;
+  *) c=90 ;;
+esac
+printf "\e[${c}m󰡱 \e[0m"
+'''
+shell = ["sh"]
+style = ""
+format = '[$output]($style)'
 
 [git_commit]
 tag_symbol = " tag "
@@ -273,15 +282,11 @@ symbol = "terraform "
 [zig]
 symbol = "zig "
 
-[custom.mise]
+[custom.just]
 command = """
-if mise trust --show 2>/dev/null | grep -qw "trusted"; then
-  printf "\e[1;34m⚙\e[0m"
-else
-  printf "\e[90m⚙\e[0m"
-fi
+printf "\e[1;34m\e[0m"
 """
-when = "test -f mise.toml || test -f .mise.toml"
+when = "test -f .justfile || test -f justfile"
 shell = ["sh"]
 symbol = ""
 style = ""
@@ -309,7 +314,7 @@ shell = ["sh"]
 style = ""
 format = "$output "
 
-[custom.git_context]
+[custom.git_hash]
 command = """
 list=$(git worktree list 2>/dev/null)
 hash=$(echo "$list" | awk 'NR==1{print substr($2,1,7)}')

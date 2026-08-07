@@ -6,8 +6,8 @@ paths:
 ---
 
 - **[RUST-1]** Errors: libraries use `thiserror` once the type has ≥2 variants or any variant carries a `source` — hand-writing `Display`+`Error`+`source` runs ~40 lines and is easy to get subtly wrong, so this deliberately overrides [SIM-1] rung 4; single-variant wrappers may stay hand-rolled. Never expose `anyhow::Error` in public APIs; binaries use `anyhow::Result` with `.with_context(|| format!("..."))` on every `?`
-  - **[RUST-2] New code**: no `.unwrap()` in production
-  - **[RUST-3] Existing code**: no refactor mandate for legacy unwraps — fix only if touching that code for other reasons
+- **[RUST-2]** `.unwrap()` — new code: none in production
+- **[RUST-3]** `.unwrap()` — existing code: no refactor mandate for legacy unwraps; fix only if touching that code for other reasons
 - **[RUST-4]** Paths: never `./` relative paths (CWD-dependent)
   - small files: `include_str!("../../file.txt")` embeds at compile time
   - dev/test: `env!("CARGO_MANIFEST_DIR")`

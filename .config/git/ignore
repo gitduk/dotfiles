@@ -32,3 +32,6 @@ env/
 .codegraph/
 .playwright-cli/
 
+# dev
+.justfile
+

@@ -2,7 +2,7 @@ When the review workflow fires, what it consists of, and how far to escalate.
 
 ## Change Protocol (CRITICAL) [CQ-1]
 
-MUST, whenever an edit changes executable behavior — project code, or anything under `~/.claude` that runs (hooks, scripts, statusline) — bug fixes included: run the review workflow below, from root-cause identification through the handoff report. Prose-only files, including rule files, are exempt. Pure research/reading never triggers it.
+MUST, whenever an edit changes executable behavior — project code, or anything under `~/.claude` that runs (hooks, scripts, statusline) — bug fixes included: run the review workflow ([CQ-2]), from root-cause identification through the handoff report. Prose-only files, including rule files, are exempt. Pure research/reading never triggers it.
 
 ## Review Discipline
 
@@ -13,7 +13,7 @@ MUST, whenever an edit changes executable behavior — project code, or anything
 2. Implement the change, focused on the current intent; if the user asked for tests, write them (recommend one when warranted even unasked); then verify it works by exercising the changed behavior, not just static checks — run tests if present.
 3. Before declaring done, perform an adversarial re-read (blind spots are densest in code I just wrote): walk the declared review dimensions item by item; report only what changed or was rejected — nothing to report means nothing to report. When fixing or improving anything, ask: where else might the same class of problem exist? Scan as wide as the problem's nature warrants — same function, same file, same module, or same conceptual domain. Fix trivial instances, flag non-trivial ones.
 4. If escalation conditions trigger, run an external agent loop: collect findings, sort them into real bugs / accepted improvements / rejected suggestions; fix the first two, reject the third explicitly with reasoning; if this round changed anything, verify once more.
-5. At handoff, report: review dimensions, what the adversarial re-read changed, agent rounds and convergence, rejected items, items needing the user's decision, and a `Rules applied:` line listing the rule IDs actually activated — IDs belong in this report, not scattered through the prose. Skip this report if the change is a single file with <30 lines changed. **If any skill ran (`/code-review`, `/simplify`, `/security-review`, …), lead with a `Skills invoked:` line — each skill + one-line verdict; mandatory even when the report is otherwise skipped.**
+5. At handoff, report: review dimensions, what the adversarial re-read changed, agent rounds and convergence, rejected items, items needing the user's decision, and a `Rules applied:` line listing the rule IDs actually activated — IDs belong in this report, not scattered through the prose. Section-level IDs carry their sub-reference (`[DIR-1] #2`), never bare. Skip this report if the change is a single file with <30 lines changed. **If any skill ran (`/code-review`, `/simplify`, `/security-review`, …), lead with a `Skills invoked:` line — each skill + one-line verdict; mandatory even when the report is otherwise skipped.**
 
 ### Standard Review Dimensions [CQ-3]
 - Correctness: boundaries, null handling, off-by-one, concurrency, type safety
@@ -47,12 +47,13 @@ When the diff sprawls but the logic concentrates in a few files, scope simplify 
 
 State the chosen tier and its rationale in the handoff; the user can order a re-run at a higher tier.
 
-**[CQ-6] Exempt** — adversarial re-read alone is fine:
+### Exempt from Escalation [CQ-6]
+Adversarial re-read alone is fine:
 - Mechanical changes: renames, formatting, import updates, generated files, lockfiles
 - Documentation / comment-only updates
 - Test-file-only changes that don't alter production logic
 
-Between must-escalate and exempt: default to no escalation, but name the change's risk surface in the handoff so the user can order escalation.
+Between must-escalate ([CQ-4]) and exempt: default to no escalation, but name the change's risk surface in the handoff so the user can order escalation.
 
 ### Loop Termination [CQ-5]
 Stop when: one round surfaces no new issue at severity ≥ medium, or 3 rounds total, or suggestions start oscillating. Agents are detectors, not authorities — I keep the right to reject stylistic suggestions.

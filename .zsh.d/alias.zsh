@@ -3,7 +3,6 @@
 #############
 
 alias e="extract"
-alias y="yazi"
 alias bt="bluetoothctl"
 alias cmx="sudo chmod +x"
 alias cwn='sudo chown -Rv $USER:$USER'
@@ -12,8 +11,8 @@ alias dis="sudo dpkg -i"
 alias dim='echo $(tput cols)x$(tput lines)'
 alias fds="sudo fdisk -l | sed -e '/Disk \/dev\/loop/,+5d'"
 alias jcl="journalctl"
-alias jcu="journalctl -xeu"
-alias jcuu="journalctl --user -xeu"
+alias jcu="journalctl -u"
+alias jcuu="journalctl --user-unit"
 alias lv="lnav"
 alias mk="mkdir -p"
 alias nsl="nslookup"
@@ -37,22 +36,6 @@ alias wic="which"
 alias wch="watch -c -n 1"
 alias li="sudo lsof -i:"
 alias mt="sudo mount /dev/sd"
-
-# atuin
-alias asy="atuin sync"
-
-# bun
-alias b="bun"
-alias bx="bun x"
-alias br="bun run"
-alias bad="bun add"
-alias bis="bun install"
-alias brm="bun remove"
-alias brs="bun run serve"
-
-# bacon
-alias bac="bacon"
-alias bai="bacon --init"
 
 # dotfiles
 alias cs="c status"
@@ -78,6 +61,7 @@ alias cai="cargo init"
 alias can="cargo new"
 alias caad="cargo add"
 alias cab="cargo build"
+alias cabr="cargo build --release"
 alias car="cargo run"
 alias carb="cargo run --bin"
 alias caf="cargo fmt"
@@ -91,22 +75,6 @@ alias cas="cargo sync"
 alias cau="cargo update"
 alias cais="cargo install"
 alias caui="cargo uninstall"
-
-# claude
-alias cld="claude"
-alias cldr="claude --resume"
-alias cldc="claude --continue"
-alias ccc='claude -p "commit my dotfiles changes"'
-alias ccm='claude -p "/git-commit"'
-
-# dust
-alias du="dust"
-
-# dysk
-alias ds="dysk"
-
-# direnv
-alias di="direnv"
 
 # docker
 alias dcv="docker volume"
@@ -139,69 +107,22 @@ alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{
 
 # edit
 alias ezs="v ~/.zshrc && source ~/.zshrc"
-alias ela="v ~/.zsh.d/lazy.toml && source ~/.zsh.d/lazy.zsh"
 alias eas="v ~/.zsh.d/alias.zsh && source ~/.zsh.d/alias.zsh"
 alias epw="v ~/.pw.json"
 alias ecl="v ~/.claude/settings.json"
-alias ems="v .mise.toml"
 alias eis="v ~/.config/navi/cheats/install.cheat"
 alias epd="v ~/.config/navi/cheats/podman.cheat"
 alias ehs="v /etc/hosts"
 alias eig="v .gitignore"
-
-# easytier
-alias epr="easytier-cli peer"
-
-# fnm
-alias f="fnm"
-
-# fscan
-alias fs="fscan"
-
-# fastfetch
-alias ff="fastfetch"
-
-# gmini
-alias gm="gemini"
+alias ejs="v .justfile"
 
 # go
 alias gomi="go mod init"
 alias gomt="go mod tidy"
 alias gor="go run ."
 
-# git
-alias g="git"
-
-# hyprland
-alias hc="hyprctl"
-
-# json-server
-alias jss="json-server"
-
-# ls
-alias ls="eza"
-
-# mise
-alias ms="mise"
-
-# nala
-alias nai="sudo nala install -y"
-alias nar="sudo nala remove"
-alias nap="sudo nala purge"
-alias nau="sudo nala update"
-alias naug="sudo nala upgrade"
-alias naf="sudo nala fetch"
-alias nafx="sudo nala --fix-broken"
-alias nas="sudo nala show"
-alias nasc="sudo nala search"
-alias nah="sudo nala history"
-alias nac="sudo nala clean"
-
 # open
 alias o="open"
-
-# opencode
-alias ocd="opencode"
 
 # podman
 alias pd="podman"
@@ -225,12 +146,6 @@ alias pdis="podman inspect"
 alias pdv="podman volume"
 alias pdn="podman network"
 
-# sttr
-alias sr="sttr"
-
-# snitch
-alias sn="snitch"
-
 # systemctl
 alias scs="sudo systemctl status"
 alias scst="sudo systemctl start"
@@ -251,11 +166,4 @@ alias sue="systemctl --user enable"
 alias sud="systemctl --user disable"
 alias sued="systemctl --user edit"
 alias suef="systemctl --user edit --force --full"
-
-# witr
-alias wi="witr"
-alias wip="witr --port"
-
-# xh
-alias x="xh"
 

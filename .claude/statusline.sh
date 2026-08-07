@@ -186,6 +186,12 @@ fi
 # and the project/settings/mcp sections.
 _proj="${project_dir:-$cwd}"
 
+# cc-score log is per-project; derive the same slug cc-score.sh computes so the
+# statusline reads this project's own health, not another pane's last run.
+_cc_proj="${_proj:-$PWD}"
+_cc_slug="${_cc_proj//[^a-zA-Z0-9]/-}"
+_cc_slug="${_cc_slug#-}"
+
 # Git
 _git_branch="" _git_dirty="no" _git_ins=0 _git_del=0
 if [ -n "$_proj" ] && git --no-optional-locks -C "$_proj" rev-parse --git-dir >/dev/null 2>&1; then
@@ -454,8 +460,8 @@ section_plugins() {
 _ccscore_maybe_refresh() {
   # Background refresh, fire-and-forget: skip if already running (pidfile).
   # Also skip if refreshed <60s ago — avoids rerunning on every render.
-  local script="$HOME/.claude/scripts/cc-score.sh" log="$HOME/.claude/cc-score.log"
-  local lock="$HOME/.cache/claude/cc-score.lock"
+  local script="$HOME/.claude/hooks/cc-score.sh" log="$HOME/.claude/projects/-${_cc_slug}/cc-score.log"
+  local lock="$HOME/.claude/projects/-${_cc_slug}/cc-score.lock"
   [ -x "$script" ] || return
   mkdir -p "${lock%/*}" 2>/dev/null
   if [ -f "$lock" ]; then
@@ -466,15 +472,16 @@ _ccscore_maybe_refresh() {
     local age=$(( $(date +%s) - $(stat -c %Y "$log" 2>/dev/null || echo 0) ))
     [ "$age" -lt 60 ] && return
   fi
-  ( "$script" >/dev/null 2>&1; rm -f "$lock" ) &
+  ( "$script" --hook "$_cc_proj" >/dev/null 2>&1; rm -f "$lock" ) &
   echo $! > "$lock"
 }
 
 section_ccscore() {
   _ccscore_maybe_refresh
-  # Displays the last cached line; the refresh above updates it out-of-band.
-  local log="$HOME/.claude/cc-score.log"
-  [ -f "$log" ] || return
+  # First render races the background refresh — the log lands only after it
+  # finishes, so show a pending marker instead of dropping the section.
+  local log="$HOME/.claude/projects/-${_cc_slug}/cc-score.log"
+  [ -f "$log" ] || { _pending "cc"; return; }
   local last; last=$(tail -1 "$log" 2>/dev/null)
   [ -z "$last" ] && return
   local d pct frac

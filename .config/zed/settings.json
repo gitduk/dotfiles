@@ -76,6 +76,9 @@
     },
   },
   "language_models": {
+    "opencode": {
+      "show_zen_models": false
+    },
     "openai_compatible": {},
     "anthropic": {
       "api_url": "http://localhost:7896",

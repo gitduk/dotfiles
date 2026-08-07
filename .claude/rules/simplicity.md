@@ -1,6 +1,6 @@
 Reflex *before* writing code — the minimal-solution ladder.
 
-Decision ladder **[SIM-1]** — walk top-to-bottom before writing any code. Stop at the first rung that holds:
+**[SIM-1]** Decision ladder — walk top-to-bottom before writing any code. Stop at the first rung that holds:
 
 1. **Does this need to exist?** Speculative need → skip it, say so in one line.
 2. **Stdlib does it?** Use it.
