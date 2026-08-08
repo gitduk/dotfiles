@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # cc-score: the single health check for the Claude Code environment.
-# Score = passed/total binary assertions, no weights. Trend: per-project log
-# alongside its memory dir: ~/.claude/projects/<project>/cc-score.log.
+# Score = layers passed/6 for the statusline; assertion detail in interactive dump.
+# Trend: per-project log in the cache dir: ~/.cache/claude/cc-score-<slug>.log.
 # Manifests (TOOLS, phrase pairs, duplicate stacks) are contract — update on dependency changes.
 #
 # Usage: cc-score.sh [--hook] [project_dir]  (project_dir default: $PWD)
@@ -18,11 +18,11 @@ if [ "${1:-}" = "--hook" ]; then HOOK=1; shift; fi
 PROJECT_DIR="${1:-$PWD}"
 
 # Project slug: same encoding statusline.sh uses (alnum kept, rest -> '-'), so
-# log keys align with the memory dir and with what the statusline reads back.
+# the log key matches what statusline.sh reads back for its refresh throttle.
 ENC=$(printf '%s' "$PROJECT_DIR" | sed 's|[^a-zA-Z0-9]|-|g')
 SLUG="${ENC#-}"
-SCORE_LOG="$CLAUDE_DIR/projects/-${SLUG}/cc-score.log"
-mkdir -p "${SCORE_LOG%/*}" 2>/dev/null
+SCORE_LOG="$CACHE_DIR/cc-score-${SLUG}.log"
+mkdir -p "$CACHE_DIR" 2>/dev/null
 
 pass() { [ "$HOOK" = 1 ] || printf '  ok  [%s] %s\n' "$1" "$2"; LP[$1]=$(( ${LP[$1]:-0} + 1 )); }
 fail() { printf 'FAIL  [%s] %s\n' "$1" "$2"; LF[$1]=$(( ${LF[$1]:-0} + 1 )); }
@@ -30,14 +30,34 @@ sect() { [ "$HOOK" = 1 ] || echo "$1"; }
 info() { [ "$HOOK" = 1 ] || echo "  info: $1"; }
 
 sect "== rules: referenced tools installed and still mentioned"
-TOOLS="rtk atuin xh wl-copy bun uv cargo jq podman ast-grep basedpyright ruff git pgrep"
+TOOLS="rtk atuin xh wl-copy bun uv cargo jq podman basedpyright ruff git pgrep"
+# Machine-local exceptions: TOOLS entries this host legitimately lacks.
+# Untracked by dotfiles, so each machine states its own.
+TOOLS_SKIP=""
+[ -f "$CLAUDE_DIR/cc-score.local" ] && . "$CLAUDE_DIR/cc-score.local"
+# Which rules cite this tool — empty means the manifest entry has gone orphan.
+tool_citers() {
+  grep -rlFw "$1" "$CLAUDE_DIR/rules" "$CLAUDE_DIR/CLAUDE.md" "$CLAUDE_DIR/RTK.md" 2>/dev/null \
+    | sed "s|^$CLAUDE_DIR/||" | sort | paste -sd' ' - || true
+}
 for t in $TOOLS; do
+  skipped=0
+  case " $TOOLS_SKIP " in *" $t "*) skipped=1 ;; esac
+  citers=$(tool_citers "$t")
   if ! command -v "$t" >/dev/null 2>&1; then
-    fail rules "tool not installed: $t"
-  elif ! grep -rqFw "$t" "$CLAUDE_DIR/rules" "$CLAUDE_DIR/CLAUDE.md" "$CLAUDE_DIR/RTK.md"; then
-    fail rules "manifest entry no longer mentioned in any rule: $t (drop it here)"
+    if [ "$skipped" = 1 ]; then
+      info "absent by local policy: $t (cc-score.local)"
+    else
+      fail rules "tool not installed: $t — cited in ${citers:-nothing; drop it here}"
+    fi
   else
-    pass rules "tool: $t"
+    # A skip whose tool is present rots exactly like a stale TOOLS entry.
+    [ "$skipped" = 1 ] && info "stale local skip: $t is installed — drop from cc-score.local"
+    if [ -z "$citers" ]; then
+      fail rules "manifest entry no longer mentioned in any rule: $t (drop it here)"
+    else
+      pass rules "tool: $t <- $citers"
+    fi
   fi
 done
 
@@ -55,7 +75,8 @@ sect "== rules: file references resolve"
 while IFS=: read -r src ref; do
   case "$ref" in *://*|*'$'*|*'*'*) continue ;; esac
   base="${ref##*/}"
-  if [ -e "$CLAUDE_DIR/rules/$base" ] || [ -e "$CLAUDE_DIR/$base" ] \
+  if [ -e "$CLAUDE_DIR/$ref" ] \
+     || [ -e "$CLAUDE_DIR/rules/$base" ] || [ -e "$CLAUDE_DIR/$base" ] \
      || [ -e "$CLAUDE_DIR/hooks/$base" ] \
      || [ -e "${ref/#\~/$HOME}" ]; then
     pass rules "$(basename "$src") -> $ref"
@@ -69,18 +90,26 @@ while IFS='|' read -r phrase f1 f2; do
   [ -z "$phrase" ] && continue
   drift=0
   for f in "$f1" "$f2"; do
-    if ! grep -qF "$phrase" "$CLAUDE_DIR/$f"; then
+    if [ ! -f "$CLAUDE_DIR/$f" ]; then
+      fail rules "phrase-table target file missing: $f (update pairs table)"; drift=1
+    elif ! grep -qF "$phrase" "$CLAUDE_DIR/$f"; then
       fail rules "phrase drift: \"$phrase\" missing from $f"; drift=1
     fi
   done
   if [ "$drift" = 0 ]; then pass rules "phrase: \"$phrase\""; fi
 done <<'EOF'
-default to none|rules/comments.md|hooks/comment-gate.sh
-would refactoring the adjacent code force this comment to change|rules/comments.md|hooks/comment-gate.sh
-compress to at most two short lines|rules/comments.md|hooks/comment-gate.sh
-name which of the four homes|CLAUDE.md|skills/rule-audit/SKILL.md
-Stdlib does it|rules/simplicity.md|skills/rule-audit/SKILL.md
+default to none|CLAUDE.md|hooks/comment-gate.sh
+would refactoring the adjacent code force this comment to change|CLAUDE.md|hooks/comment-gate.sh
+compress to at most two short lines|CLAUDE.md|hooks/comment-gate.sh
+Stdlib does it|CLAUDE.md|skills/rule-audit/SKILL.md
 ≥2 variants or any variant carries a|rules/rust.md|skills/rule-audit/SKILL.md
+not a reason to skip a rung|CLAUDE.md|skills/rule-audit/SKILL.md
+if the sentence is still Chinese|CLAUDE.md|skills/rule-audit/SKILL.md
+default to none|CLAUDE.md|skills/rule-audit/SKILL.md
+full construction in a 2nd test file|CLAUDE.md|skills/rule-audit/SKILL.md
+permanently destroy uncommitted working-tree changes|CLAUDE.md|skills/rule-audit/SKILL.md
+never discard directly|CLAUDE.md|hooks/stash-gate.sh
+Write code comments in English|CLAUDE.md|skills/rule-audit/SKILL.md
 EOF
 
 sect "== rules: rule IDs resolve and stay unique"
@@ -89,23 +118,29 @@ mapfile -t ID_FILES < <(find "${ID_SRC[@]}" -name '*.md' | sort)
 # A definition is the ID at the end of a heading, or bold at line start.
 # Anything else on the same line is a reference — extract by position, not per line.
 # The trailing /dev/null keeps grep off stdin when the file list comes back empty.
+# Fenced code blocks may show ID syntax as an example; strip them before
+# scanning for definitions/references so an example doesn't count as real.
+strip_fences() { awk '/^```/{f=!f;next} !f' "$@" /dev/null; }
 id_defs_in() {
-  { grep -hE '^#{1,6} ' "$@" /dev/null | grep -oE '\[[A-Z]+-[0-9]+\]$'
-    grep -hoE '^[[:space:]]*(- )?\*\*\[[A-Z]+-[0-9]+\]' "$@" /dev/null \
-      | grep -oE '\[[A-Z]+-[0-9]+\]'
+  local stripped
+  stripped=$(strip_fences "$@")
+  { grep -E '^#{1,6} ' <<< "$stripped" | grep -oE '\[[a-z][a-z0-9-]*\]$'
+    grep -oE '^[[:space:]]*(- )?\*\*\[[a-z][a-z0-9-]*\]' <<< "$stripped" \
+      | grep -oE '\[[a-z][a-z0-9-]*\]'
   }
 }
 id_defs=$(id_defs_in "${ID_FILES[@]}" | sort)
-# IDs are read line-by-line: `[CQ-1]` unquoted is a bracket glob, and a stray
-# single-char file in $PWD would expand it away.
+# Line-by-line read: an unquoted slug is a bracket glob a stray file could expand.
+# -P lookarounds skip markdown links [text](url) and wiki links [[name]].
 while IFS= read -r id; do
   [ -z "$id" ] && continue
   if grep -qxF "$id" <<< "$id_defs"; then
     pass rules "ID resolves: $id"
   else
-    fail rules "ID referenced but never defined: $id"
+    fail rules "ID referenced but never defined: $id — cited in $(grep -lF "$id" \
+      "${ID_FILES[@]}" | sed "s|^$CLAUDE_DIR/||" | paste -sd' ' - || true)"
   fi
-done < <(grep -hoE '\[[A-Z]+-[0-9]+\]' "${ID_FILES[@]}" /dev/null | sort -u)
+done < <(strip_fences "${ID_FILES[@]}" | grep -oP '(?<!\[)\[[a-z][a-z0-9-]*\](?!\()' | sort -u)
 dupe_ids=$(echo "$id_defs" | uniq -d | tr '\n' ' ')
 if [ -n "$dupe_ids" ]; then
   fail rules "duplicate ID definition: $dupe_ids"
@@ -114,8 +149,8 @@ else
 fi
 # A heading ID must sit last; anywhere else it is dropped with no trace, so flag
 # the position instead of silently under-counting definitions.
-stray_heads=$(grep -nE '^#{1,6} .*\[[A-Z]+-[0-9]+\]' "${ID_FILES[@]}" /dev/null \
-                | grep -vE '\[[A-Z]+-[0-9]+\]$' \
+stray_heads=$(grep -nE '^#{1,6} .*\[[a-z][a-z0-9-]*\]' "${ID_FILES[@]}" /dev/null \
+                | grep -vE '\[[a-z][a-z0-9-]*\]$' \
                 | sed "s|^$CLAUDE_DIR/||" | cut -d: -f1,2 | tr '\n' ' ' || true)
 if [ -n "$stray_heads" ]; then
   fail rules "heading ID must be last on its line: $stray_heads"
@@ -131,15 +166,15 @@ nested_ids=$(awk '
   /^#+[ \t]/ {
     match($0, /^#+/); l = RLENGTH
     while (top > 0 && lvl[top] >= l) top--
-    if (match($0, /\[[A-Z]+-[0-9]+\][ \t]*$/)) {
+    if (match($0, /\[[a-z][a-z0-9-]*\][ \t]*$/)) {
       id = substr($0, RSTART, RLENGTH); sub(/[ \t]+$/, "", id)
       if (top > 0) printf "%s:%d(%s in %s) ", FILENAME, FNR, id, sid[top]
       top++; lvl[top] = l; sid[top] = id
     }
     next
   }
-  /^[ \t]*(- )?\*\*\[[A-Z]+-[0-9]+\]/ {
-    match($0, /\[[A-Z]+-[0-9]+\]/); id = substr($0, RSTART, RLENGTH)
+  /^[ \t]*(- )?\*\*\[[a-z][a-z0-9-]*\]/ {
+    match($0, /\[[a-z][a-z0-9-]*\]/); id = substr($0, RSTART, RLENGTH)
     if (top > 0) printf "%s:%d(%s in %s) ", FILENAME, FNR, id, sid[top]
     else if ($0 ~ /^[ \t]/) printf "%s:%d(%s indented) ", FILENAME, FNR, id
   }
@@ -149,15 +184,16 @@ if [ -n "$nested_ids" ]; then
 else
   pass rules "no nested ID definitions"
 fi
-# `paths:` frontmatter = loads per project; no frontmatter = resident.
+# Resident set = CLAUDE.md alone; rules/ holds only `paths:`-scoped conditionals.
 # A resident cite of a conditional ID resolves on disk but is absent at runtime.
 cond_files=(); res_files=("$CLAUDE_DIR/CLAUDE.md")
 for f in "$CLAUDE_DIR"/rules/*.md; do
   [ -e "$f" ] || continue
   if awk 'NR==1 && $0!="---"{exit} NR>1 && /^---/{exit} NR>1 && /^paths:/{p=1; exit} END{exit !p}' "$f"; then
     cond_files+=("$f")
+    pass rules "conditional (paths-scoped): $(basename "$f")"
   else
-    res_files+=("$f")
+    fail rules "resident content in rules/ (no paths: frontmatter) — belongs in CLAUDE.md: $(basename "$f")"
   fi
 done
 dangling_ids=""
@@ -190,20 +226,25 @@ for f in "$CLAUDE_DIR"/rules/*.md; do
 done
 
 sect "== hooks: commands wired in settings.json exist"
-WIRED_CMDS=$(jq -r '.hooks[][]?.hooks[]?.command // empty' "$CLAUDE_DIR/settings.json" | sort -u)
-while IFS= read -r cmd; do
-  [ -z "$cmd" ] && continue
-  first=${cmd%% *}
-  case "$first" in
-    "~/"*|/*)
-      f="${first/#\~/$HOME}"
-      if [ -x "$f" ]; then pass hooks "wired: $first"; else fail hooks "wired but missing/not executable: $first"; fi
-      ;;
-    *)
-      if command -v "$first" >/dev/null 2>&1; then pass hooks "wired: $first"; else fail hooks "wired but not found: $first"; fi
-      ;;
-  esac
-done <<< "$WIRED_CMDS"
+if [ ! -f "$CLAUDE_DIR/settings.json" ]; then
+  WIRED_CMDS=""
+  fail hooks "settings.json missing — cannot verify wired hooks"
+else
+  WIRED_CMDS=$(jq -r '.hooks[][]?.hooks[]?.command // empty' "$CLAUDE_DIR/settings.json" | sort -u)
+  while IFS= read -r cmd; do
+    [ -z "$cmd" ] && continue
+    first=${cmd%% *}
+    case "$first" in
+      "~/"*|/*)
+        f="${first/#\~/$HOME}"
+        if [ -x "$f" ]; then pass hooks "wired: $first"; else fail hooks "wired but missing/not executable: $first"; fi
+        ;;
+      *)
+        if command -v "$first" >/dev/null 2>&1; then pass hooks "wired: $first"; else fail hooks "wired but not found: $first"; fi
+        ;;
+    esac
+  done <<< "$WIRED_CMDS"
+fi
 
 sect "== hooks: scripts syntax-clean and executable"
 for f in "$CLAUDE_DIR"/hooks/*.sh; do
@@ -215,16 +256,18 @@ done
 sect "== hooks: every hooks/*.sh script is referenced by settings.json"
 # Scoped to *.sh so an unwired script can't hide here (scripts/ retired 2026-08-03).
 # Non-.sh config (e.g. cmd-gate.conf) needs no exemption — never a wired command.
-for f in "$CLAUDE_DIR"/hooks/*.sh; do
-  b=$(basename "$f")
-  # Leading slash anchors to the path component: bare "$b" lets gate.sh match
-  # cmd-gate.sh and pass an orphan off as wired.
-  if grep -qF "/$b" <<< "$WIRED_CMDS"; then
-    pass hooks "registered: $b"
-  else
-    fail hooks "orphaned in hooks/, not referenced in settings.json: $b"
-  fi
-done
+if [ -f "$CLAUDE_DIR/settings.json" ]; then
+  for f in "$CLAUDE_DIR"/hooks/*.sh; do
+    b=$(basename "$f")
+    # Leading slash anchors to the path component: bare "$b" lets gate.sh match
+    # cmd-gate.sh and pass an orphan off as wired.
+    if grep -qF "/$b" <<< "$WIRED_CMDS"; then
+      pass hooks "registered: $b"
+    else
+      fail hooks "orphaned in hooks/, not referenced in settings.json: $b"
+    fi
+  done
+fi
 
 sect "== skills: every directory is a loadable skill"
 for d in "$CLAUDE_DIR"/skills/*/; do
@@ -237,47 +280,55 @@ for d in "$CLAUDE_DIR"/skills/*/; do
 done
 
 sect "== plugins: enabled installed; project installs not orphaned"
-while IFS= read -r p; do
-  if jq -e --arg k "$p" '.plugins[$k]' "$CLAUDE_DIR/plugins/installed_plugins.json" >/dev/null 2>&1; then
-    pass plugins "enabled+installed: $p"
-  else
-    fail plugins "enabled but not installed: $p"
-  fi
-done < <(jq -r '.enabledPlugins | to_entries[] | select(.value==true) | .key' "$CLAUDE_DIR/settings.json")
-while IFS=$'\t' read -r k path; do
-  [ -z "$k" ] && continue
-  if [ -d "$path" ]; then
-    pass plugins "project install alive: $k ($path)"
-  else
-    fail plugins "orphaned project install (project gone): $k ($path)"
-  fi
-done < <(jq -r '.plugins | to_entries[] | .key as $k | .value[] | select(.scope=="project") | "\($k)\t\(.projectPath)"' "$CLAUDE_DIR/plugins/installed_plugins.json")
-dormant=$(jq -r --slurpfile s "$CLAUDE_DIR/settings.json" \
-  '.plugins | to_entries[] | select(any(.value[]; .scope=="user")) | .key | select(($s[0].enabledPlugins[.] // false) | not)' \
-  "$CLAUDE_DIR/plugins/installed_plugins.json" | tr '\n' ' ')
-[ -n "$dormant" ] && info "user-scope installed but disabled (dormant): $dormant"
+if [ ! -f "$CLAUDE_DIR/settings.json" ] || [ ! -f "$CLAUDE_DIR/plugins/installed_plugins.json" ]; then
+  fail plugins "settings.json or installed_plugins.json missing — cannot verify plugins"
+else
+  while IFS= read -r p; do
+    if jq -e --arg k "$p" '.plugins[$k]' "$CLAUDE_DIR/plugins/installed_plugins.json" >/dev/null 2>&1; then
+      pass plugins "enabled+installed: $p"
+    else
+      fail plugins "enabled but not installed: $p"
+    fi
+  done < <(jq -r '.enabledPlugins | to_entries[] | select(.value==true) | .key' "$CLAUDE_DIR/settings.json")
+  while IFS=$'\t' read -r k path; do
+    [ -z "$k" ] && continue
+    if [ -d "$path" ]; then
+      pass plugins "project install alive: $k ($path)"
+    else
+      fail plugins "orphaned project install (project gone): $k ($path)"
+    fi
+  done < <(jq -r '.plugins | to_entries[] | .key as $k | .value[] | select(.scope=="project") | "\($k)\t\(.projectPath)"' "$CLAUDE_DIR/plugins/installed_plugins.json")
+  dormant=$(jq -r --slurpfile s "$CLAUDE_DIR/settings.json" \
+    '.plugins | to_entries[] | select(any(.value[]; .scope=="user")) | .key | select(($s[0].enabledPlugins[.] // false) | not)' \
+    "$CLAUDE_DIR/plugins/installed_plugins.json" | tr '\n' ' ')
+  [ -n "$dormant" ] && info "user-scope installed but disabled (dormant): $dormant"
+fi
 
 sect "== mcp: manual servers minimal and alive"
-n=$(jq -r '.mcpServers // {} | length' "$HOME/.claude.json")
-if [ "$n" = 0 ]; then
-  pass mcp "no manual MCP servers (plugins own capabilities)"
+if [ ! -f "$HOME/.claude.json" ]; then
+  fail mcp "~/.claude.json missing — cannot check MCP servers"
 else
-  while IFS=$'\t' read -r name cmd; do
-    [ -z "$name" ] && continue
-    if command -v "$cmd" >/dev/null 2>&1; then pass mcp "$name (command: $cmd)"; else fail mcp "$name: command not found: $cmd"; fi
-  done < <(jq -r '.mcpServers // {} | to_entries[] | "\(.key)\t\(.value.command)"' "$HOME/.claude.json")
-fi
-while IFS='|' read -r srv plg; do
-  [ -z "$srv" ] && continue
-  if jq -e --arg k "$srv" '.mcpServers[$k]' "$HOME/.claude.json" >/dev/null 2>&1 \
-     && jq -e --arg k "$plg" '.enabledPlugins[$k] == true' "$CLAUDE_DIR/settings.json" >/dev/null 2>&1; then
-    fail mcp "duplicate stack: mcpServers[$srv] duplicates plugin $plg"
+  n=$(jq -r '.mcpServers // {} | length' "$HOME/.claude.json")
+  if [ "$n" = 0 ]; then
+    pass mcp "no manual MCP servers (plugins own capabilities)"
   else
-    pass mcp "no duplicate: $srv vs $plg"
+    while IFS=$'\t' read -r name cmd; do
+      [ -z "$name" ] && continue
+      if command -v "$cmd" >/dev/null 2>&1; then pass mcp "$name (command: $cmd)"; else fail mcp "$name: command not found: $cmd"; fi
+    done < <(jq -r '.mcpServers // {} | to_entries[] | "\(.key)\t\(.value.command)"' "$HOME/.claude.json")
   fi
-done <<'EOF'
+  while IFS='|' read -r srv plg; do
+    [ -z "$srv" ] && continue
+    if jq -e --arg k "$srv" '.mcpServers[$k]' "$HOME/.claude.json" >/dev/null 2>&1 \
+       && jq -e --arg k "$plg" '.enabledPlugins[$k] == true' "$CLAUDE_DIR/settings.json" >/dev/null 2>&1; then
+      fail mcp "duplicate stack: mcpServers[$srv] duplicates plugin $plg"
+    else
+      pass mcp "no duplicate: $srv vs $plg"
+    fi
+  done <<'EOF'
 chrome-devtools-debug|chrome-devtools-mcp@chrome-devtools-plugins
 EOF
+fi
 info "runtime liveness (plugin MCP server died) not checkable offline — use /mcp in a session"
 
 sect "== memory: single location, index complete, bounded size (project: $PROJECT_DIR)"
@@ -310,7 +361,7 @@ if [ "$MEM_OK" = 1 ] && [ -d "$MEM_DIR" ] && [ ! -L "$MEM_DIR" ]; then
     pass memory "MEMORY.md index exists"
     # Both halves of "is it indexed" read the same parsed link targets — a bare
     # substring test would accept prose "(foo.md)" and reject "[t](./foo.md)".
-    index_targets=$(grep -oP '\]\(\K[^)]+' "$MEM_DIR/MEMORY.md" | sed 's|^\./||')
+    index_targets=$(grep -oP '\]\(\K[^)]+' "$MEM_DIR/MEMORY.md" | sed -e 's|^\./||' -e 's/#.*//')
 
     file_count=0
     for f in "$MEM_DIR"/*.md; do
@@ -340,6 +391,19 @@ if [ "$MEM_OK" = 1 ] && [ -d "$MEM_DIR" ] && [ ! -L "$MEM_DIR" ]; then
         fail memory "dead index link: $t"
       fi
     done <<< "$index_targets"
+
+    # Wiki links are memory-to-memory: [[name]] dies silently when its target goes.
+    # Stricter than the harness, which tolerates forward refs; else use plain text.
+    wiki_n=0; wiki_bad=0
+    while IFS= read -r ln; do
+      [ -z "$ln" ] && continue
+      ((wiki_n++)) || true
+      [ -f "$MEM_DIR/${ln#*:}.md" ] && continue
+      fail memory "dangling wiki link in ${ln%%:*}: [[${ln#*:}]]"
+      wiki_bad=1
+    done < <(grep -oHP '\[\[\K[a-z0-9-]+(?=\]\])' "$MEM_DIR"/*.md 2>/dev/null \
+               | sed "s|^$MEM_DIR/||" | sort -u)
+    [ "$wiki_bad" = 0 ] && pass memory "wiki links resolve ($wiki_n checked)"
 
     line_count=$(wc -l < "$MEM_DIR/MEMORY.md")
     if [ "$line_count" -gt 120 ]; then
@@ -371,11 +435,15 @@ if [ "$MEM_OK" = 1 ] && [ -d "$MEM_DIR" ] && [ ! -L "$MEM_DIR" ]; then
     stale=$(cat "$STALE_CACHE" 2>/dev/null || true)
   else
     exec 202>"$STALE_LOCK"
-    if flock -n 202; then
+    flock 202
+    # Re-check after acquiring the lock: a racing process may have just
+    # refreshed the cache while we were waiting, in which case reuse it.
+    cache_age=$(( $(date +%s) - $(stat -c %Y "$STALE_CACHE" 2>/dev/null || echo 0) ))
+    if [ -f "$STALE_CACHE" ] && [ "$cache_age" -lt "$CACHE_TTL" ]; then
+      stale=$(cat "$STALE_CACHE" 2>/dev/null || true)
+    else
       stale=$(find "$MEM_DIR" -type f -name "*.md" ! -name "MEMORY.md" -mtime +180 2>/dev/null || true)
       printf '%s\n' "$stale" > "$STALE_CACHE"
-    elif [ -f "$STALE_CACHE" ]; then
-      stale=$(cat "$STALE_CACHE" 2>/dev/null || true)
     fi
     exec 202>&-
   fi
@@ -402,15 +470,16 @@ elif [ "$MEM_OK" = 1 ]; then
   [ -e "$MEM_DIR" ] && fail memory "memory directory is a symlink, not plain: $MEM_DIR"
 fi
 
-TOTAL_P=0; TOTAL_F=0
-for l in $LAYERS; do TOTAL_P=$((TOTAL_P + ${LP[$l]:-0})); TOTAL_F=$((TOTAL_F + ${LF[$l]:-0})); done
-TOTAL=$((TOTAL_P + TOTAL_F))
-if [ "$TOTAL" -gt 0 ]; then
-  PCT=$(( TOTAL_P * 100 / TOTAL ))
-  printf '%s %d%% %d/%d\n' "$(date +%F)" "$PCT" "$TOTAL_P" "$TOTAL" >> "$SCORE_LOG"
-else
-  PCT=0
-fi
+# Statusline score = layers passed / layers total: a layer passes when none of
+# its assertions failed; a layer with no checks trivially passes.
+TOTAL_F=0; LAYER_P=0; NLAYERS=0
+for l in $LAYERS; do
+  NLAYERS=$((NLAYERS + 1))
+  TOTAL_F=$((TOTAL_F + ${LF[$l]:-0}))
+  [ "${LF[$l]:-0}" = 0 ] && LAYER_P=$((LAYER_P + 1))
+done
+PCT=$(( LAYER_P * 100 / NLAYERS ))
+printf '%s %d%% %d/%d\n' "$(date +%F)" "$PCT" "$LAYER_P" "$NLAYERS" >> "$SCORE_LOG"
 
 [ "$HOOK" = 1 ] && exit 0
 
@@ -422,5 +491,5 @@ done
 if   [ "$PCT" -ge 95 ]; then BAND="healthy"
 elif [ "$PCT" -ge 80 ]; then BAND="needs attention"
 else BAND="rotting"; fi
-printf 'overall  %d/%d (%d%%) — %s\n' "$TOTAL_P" "$TOTAL" "$PCT" "$BAND"
+printf 'overall  %d/%d layers (%d%%) — %s\n' "$LAYER_P" "$NLAYERS" "$PCT" "$BAND"
 [ "$TOTAL_F" = 0 ]

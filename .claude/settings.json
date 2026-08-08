@@ -12,6 +12,7 @@
     ],
     "defaultMode": "bypassPermissions"
   },
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -30,6 +31,10 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/cmd-gate.sh"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/stash-gate.sh"
           },
           {
             "type": "command",

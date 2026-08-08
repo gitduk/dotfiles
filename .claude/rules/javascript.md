@@ -9,8 +9,4 @@ paths:
 
 # JS/TS
 
-## Code navigation [JS-1]
-
-See `code_navigation.md`; LSP server check: `pgrep -f typescript-language-server`.
-
-    if LSP returns few results all in the queried file: likely cold start, not the true answer — tsserver answers from a partially loaded project; wait ~15s and requery before trusting  # JS cold start yields plausible-looking PARTIAL results, unlike rust/python's obvious empty
+- **[tsserver-cold-start]** LSP returns few results, all inside the queried file → suspect cold start before trusting it: tsserver answers from a partially loaded project, and a partial answer looks like a real one (no empty result to tip you off). Check `pgrep -f typescript-language-server`, wait ~15s, requery.

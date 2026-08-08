@@ -460,8 +460,8 @@ section_plugins() {
 _ccscore_maybe_refresh() {
   # Background refresh, fire-and-forget: skip if already running (pidfile).
   # Also skip if refreshed <60s ago — avoids rerunning on every render.
-  local script="$HOME/.claude/hooks/cc-score.sh" log="$HOME/.claude/projects/-${_cc_slug}/cc-score.log"
-  local lock="$HOME/.claude/projects/-${_cc_slug}/cc-score.lock"
+  local script="$HOME/.claude/hooks/cc-score.sh" log="$_quota_cache_dir/cc-score-${_cc_slug}.log"
+  local lock="$_quota_cache_dir/cc-score-${_cc_slug}.lock"
   [ -x "$script" ] || return
   mkdir -p "${lock%/*}" 2>/dev/null
   if [ -f "$lock" ]; then
@@ -480,7 +480,7 @@ section_ccscore() {
   _ccscore_maybe_refresh
   # First render races the background refresh — the log lands only after it
   # finishes, so show a pending marker instead of dropping the section.
-  local log="$HOME/.claude/projects/-${_cc_slug}/cc-score.log"
+  local log="$_quota_cache_dir/cc-score-${_cc_slug}.log"
   [ -f "$log" ] || { _pending "cc"; return; }
   local last; last=$(tail -1 "$log" 2>/dev/null)
   [ -z "$last" ] && return

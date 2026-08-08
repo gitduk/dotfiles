@@ -116,7 +116,7 @@ If unpushed commits exist and belong to same logical change → squash before ne
 - Lock file must be included? (`Cargo.lock`, `package-lock.json`, `uv.lock`)
 - Quality checks required? (auto-detect based on project type)
 
-**Quality checks:** run the per-language QA chain defined in `~/.claude/rules/languages.md` — that file is the canonical definition (always loaded in context); do not restate commands here. At commit time use the applying variants (`cargo fmt`, `uv run ruff format .`), not `--check`. Mixed projects: run chains for all detected languages.
+**Quality checks:** run the per-language QA chain defined in the language rules files (`~/.claude/rules/rust.md`, `~/.claude/rules/python.md` — loaded whenever the project matches their `paths:`); they are the canonical definition, do not restate commands here. At commit time use the applying variants (`cargo fmt`, `uv run ruff format .`), not `--check`. Mixed projects: run chains for all detected languages.
 
 ### 3.5. CLAUDE.md Consistency Check
 
@@ -148,7 +148,7 @@ If unpushed commits exist and belong to same logical change → squash before ne
 
 ### 3.6 Comment Check
 
-**Review comments in and around the diff against the project comment policy (`~/.claude/rules/comments.md`, `~/.claude/rules/user.md`):**
+**Review comments in and around the diff against the project comment policy (the Comments and 吴凯歌 sections of `~/.claude/CLAUDE.md`):**
 
 Read the diff with `git diff --cached -U10` for this step. The default 3 lines of context routinely hides the comment sitting just above a changed function — which is exactly what the Stale rule has to see.
 
@@ -202,10 +202,10 @@ Add body (separated by blank line) when WHY isn't obvious from diff.
 
 ### 6. Execute Commit
 
-**Run the verification QA chain — `cargo clippy` / `cargo test` (commands per `rules/languages.md`) — BEFORE any `git add`. Do NOT run `cargo fmt` / `ruff format` manually: the global git pre-commit hook formats staged files and re-stages them automatically at commit time.**
+**Run the verification QA chain — `cargo clippy` / `cargo test` (commands per `rules/{rust,python}.md`) — BEFORE any `git add`. Do NOT run `cargo fmt` / `ruff format` manually: the global git pre-commit hook formats staged files and re-stages them automatically at commit time.**
 
 ```bash
-# QA commands: see ~/.claude/rules/languages.md (canonical, always in context).
+# QA commands: see ~/.claude/rules/{rust,python}.md (canonical per language).
 # Separate commands are fine — the QA gate accumulates each passing check.
 <per-language QA chain>
 

@@ -6,4 +6,4 @@ paths:
   - "**/*.containerfile"
 ---
 
-- **[CT-1]** Prefer `podman` over `docker` (rootless, no daemon)
+- **[prefer-podman]** Prefer `podman` over `docker` (rootless, no daemon)

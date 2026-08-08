@@ -32,8 +32,11 @@ autoload -Uz add-zsh-hook edit-command-line
 
 # bootstrap
 _rig_zsh=$HOME/.local/share/rig/rig.zsh
-_rig="https://github.com/gitduk/rig/releases/latest/download/rig.zsh"
-[[ -f $_rig_zsh ]] || curl -fsSL -o $_rig_zsh $_rig
+[[ -f $_rig_zsh ]] || {
+  mkdir -p ${_rig_zsh:h}
+  curl -fsSL -o $_rig_zsh \
+    https://github.com/gitduk/rig/releases/latest/download/rig.zsh
+}
 source $_rig_zsh
 
 # completions

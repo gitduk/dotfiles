@@ -5,19 +5,13 @@ paths:
   - "**/Cargo.lock"
 ---
 
-- **[RUST-1]** Errors: libraries use `thiserror` once the type has ≥2 variants or any variant carries a `source` — hand-writing `Display`+`Error`+`source` runs ~40 lines and is easy to get subtly wrong, so this deliberately overrides [SIM-1] rung 4; single-variant wrappers may stay hand-rolled. Never expose `anyhow::Error` in public APIs; binaries use `anyhow::Result` with `.with_context(|| format!("..."))` on every `?`
-- **[RUST-2]** `.unwrap()` — new code: none in production
-- **[RUST-3]** `.unwrap()` — existing code: no refactor mandate for legacy unwraps; fix only if touching that code for other reasons
-- **[RUST-4]** Paths: never `./` relative paths (CWD-dependent)
+- **[thiserror-threshold]** Errors: libraries use `thiserror` once the type has ≥2 variants or any variant carries a `source` — hand-writing `Display`+`Error`+`source` runs ~40 lines and is easy to get subtly wrong, so this deliberately overrides [minimal-ladder] rung 4; single-variant wrappers may stay hand-rolled. Never expose `anyhow::Error` in public APIs; binaries use `anyhow::Result` with `.with_context(|| format!("..."))` on every `?`
+- **[no-new-unwraps]** `.unwrap()` — new code: none in production
+- **[legacy-unwraps-stay]** `.unwrap()` — existing code: no refactor mandate for legacy unwraps; fix only if touching that code for other reasons
+- **[rust-abs-paths]** Paths ([no-cwd-relative-paths]) — the Rust mechanisms:
   - small files: `include_str!("../../file.txt")` embeds at compile time
   - dev/test: `env!("CARGO_MANIFEST_DIR")`
   - production: config file or `current_exe()`
-- **[RUST-5]** Security: never `danger_accept_invalid_certs(true)` (reqwest) — TLS verification stays on
-- **[RUST-6]** Quality: `cargo clippy -- -D warnings`; `cargo test` only when a test suite exists
-  - fmt is owned by the git pre-commit hook — never run it manually
+- **[rust-qa]** Quality: `cargo clippy -- -D warnings`; `cargo test` per [tests-only-when-suite]; fmt per [fmt-owned-by-precommit]
   - no `cargo build` just to type-check (clippy already compiles) — build only when the binary itself is needed
   - never `cargo generate-lockfile` (it is a side effect of clippy/test)
-
-## Code navigation
-
-See `code_navigation.md`; LSP server check: `pgrep -x rust-analyzer`.

@@ -52,7 +52,7 @@ INPUT=$(cat)
 )"
 [ -z "$CWD" ] && CWD="$PWD"
 
-STATE_DIR="$HOME/.claude/session-env/${SESSION_ID}"
+STATE_DIR="$HOME/.cache/claude/${SESSION_ID}"
 mkdir -p "$STATE_DIR"
 STATE_FILE="$STATE_DIR/qa-gate.state"
 

@@ -6,10 +6,10 @@ paths:
 
 # Database & Data Stores
 
-- **[DB-1]** Access: through a repository layer; map errors at the boundary; never log PII
-- **[DB-2]** SQL pools: set `max_connections` / `acquire_timeout`
-- **[DB-3]** SQL schema: index all FKs; `BIGINT` for PKs
-- **[DB-4]** SQL queries: never query in loops (N+1); keep transactions short
-- **[DB-5]** Rust/sqlx: `sqlx::query!` macros for compile-checked queries
-- **[DB-6]** Redis keys: `{entity}:{id}:{field}` naming; always set TTL
-- **[DB-7]** Redis locks: `SET key value NX PX ttl`
+- **[repository-layer]** Access: through a repository layer; map errors at the boundary; never log PII
+- **[pool-limits]** SQL pools: set `max_connections` / `acquire_timeout`
+- **[schema-indexes]** SQL schema: index all FKs; `BIGINT` for PKs
+- **[no-query-loops]** SQL queries: never query in loops (N+1); keep transactions short
+- **[sqlx-macros]** Rust/sqlx: `sqlx::query!` macros for compile-checked queries
+- **[redis-key-naming]** Redis keys: `{entity}:{id}:{field}` naming; always set TTL
+- **[redis-locks]** Redis locks: `SET key value NX PX ttl`
