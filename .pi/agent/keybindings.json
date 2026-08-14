@@ -1,0 +1,9 @@
+{
+  "tui.altScreen.pageUp": ["pageUp", "ctrl+b"],
+  "tui.altScreen.pageDown": ["pageDown", "ctrl+f"],
+  "tui.altScreen.bottom": ["end"],
+  "tui.select.up": ["up", "ctrl+k"],
+  "tui.select.down": ["down", "ctrl+j"],
+  "app.message.copy": "ctrl+shift+y",
+  "tui.editor.deleteCharBackward": ["backspace", "ctrl+h"]
+}

@@ -26,8 +26,8 @@ $jobs\
 $cmd_duration\
 $fill\
 ${custom.direnv}\
-${custom.just}\
 ${custom.ai}\
+${custom.just}\
 ${custom.proxy}\
 $time\
 $line_break\
@@ -58,21 +58,6 @@ style = "bold blue"
 # "Downloads" = " "
 # "Music" = " "
 # "Pictures" = " "
-
-[custom.direnv]
-when = '[ -n "$DIRENV_FILE" ] || [ -f .envrc ] || [ -f .env ]'
-command = '''
-s=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed')
-case "$s" in
-  0) c=32 ;;
-  null) exit 0 ;;
-  *) c=90 ;;
-esac
-printf "\e[${c}m󰡱 \e[0m"
-'''
-shell = ["sh"]
-style = ""
-format = '[$output]($style)'
 
 [git_commit]
 tag_symbol = " tag "
@@ -284,13 +269,28 @@ symbol = "zig "
 
 [custom.just]
 command = """
-printf "\e[1;34m\e[0m"
+printf "\e[1;34m\e[0m"
 """
 when = "test -f .justfile || test -f justfile"
 shell = ["sh"]
 symbol = ""
 style = ""
 format = "[$symbol$output]($style) "
+
+[custom.direnv]
+when = '[ -n "$DIRENV_FILE" ] || [ -f .envrc ] || [ -f .env ]'
+command = '''
+s=$(direnv status --json 2>/dev/null | jq -r '.state.foundRC.allowed')
+case "$s" in
+  0) c=32 ;;
+  null) exit 0 ;;
+  *) c=90 ;;
+esac
+printf "\e[${c}m󰡱 \e[0m"
+'''
+shell = ["sh"]
+style = ""
+format = '[$output]($style)'
 
 [custom.proxy]
 command = ""

@@ -1,7 +1,7 @@
 {
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-6"
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-5"
   },
   "permissions": {
     "allow": [
@@ -12,7 +12,6 @@
     ],
     "defaultMode": "bypassPermissions"
   },
-  "model": "opus",
   "hooks": {
     "SessionStart": [
       {

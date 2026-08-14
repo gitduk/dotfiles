@@ -274,16 +274,6 @@ eval = "zoxide init zsh --cmd j"
 description = "A smarter cd command, inspired by z and autojump"
 
 [[repo]]
-name = "atuinsh/atuin"
-bpick = "atuin-x86_64-unknown-linux-musl.tar.gz"
-bin = "atuin"
-run = "alias asy='atuin sync'"
-env = { ATUIN_TMUX_POPUP = "false" }
-eval = "atuin init zsh"
-completions = { generate = "./atuin gen-completions --shell zsh > _atuin" }
-description = "Magical shell history"
-
-[[repo]]
 name = "denisidoro/navi"
 setup = "mkdir -p ~/.config/navi/cheats; ./navi info config-example > ~/.config/navi/config.yaml"
 env = { NAVI_PATH = "~/.config/navi/cheats", NAVI_CONFIG = "~/.config/navi/config.yaml" }
@@ -309,6 +299,12 @@ bpick = "rig-x86_64-unknown-linux-gnu"
 extract = false
 bin = { "rig*" = "rig" }
 description = "Tool installer + zsh loader"
+
+[[repo]]
+name = "earendil-works/pi"
+bpick = "pi-linux-x64.tar.gz"
+bin = "pi"
+description = "AI agent toolkit: unified LLM API, agent loop, TUI, coding agent CLI"
 
 # ============ [[git]] 源码构建（钩子只构建，rig 来放）============
 
@@ -409,6 +405,7 @@ description = "Shows side-by-side file content for a git diff in an interactive 
 [[curl]]
 name = "rtk"
 url = "https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh"
+setup = "rtk init -g --agent pi"
 description = "Token-optimized CLI proxy for Claude Code"
 
 [[curl]]
@@ -445,7 +442,7 @@ source = "zsh-completions.plugin.zsh"
 [[plugin]]
 name = "zsh-users/zsh-autosuggestions"
 source = "zsh-autosuggestions.zsh"
-atload = '''
+run = '''
 ZSH_AUTOSUGGEST_STRATEGY=(match_prev_cmd history)
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
 bindkey -M viins "^ " autosuggest-execute
@@ -460,7 +457,7 @@ source = "fast-syntax-highlighting.plugin.zsh"
 [[plugin]]
 name = "zsh-users/zsh-history-substring-search"
 source = "zsh-history-substring-search.zsh"
-atload = '''
+run = '''
 export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=""
 bindkey "^k" history-substring-search-up
 bindkey "^j" history-substring-search-down

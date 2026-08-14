@@ -110,6 +110,11 @@ full construction in a 2nd test file|CLAUDE.md|skills/rule-audit/SKILL.md
 permanently destroy uncommitted working-tree changes|CLAUDE.md|skills/rule-audit/SKILL.md
 never discard directly|CLAUDE.md|hooks/stash-gate.sh
 Write code comments in English|CLAUDE.md|skills/rule-audit/SKILL.md
+cargo clippy -- -D warnings|rules/rust.md|hooks/qa-gate.sh
+cargo test|rules/rust.md|hooks/qa-gate.sh
+uv run ruff check|rules/python.md|hooks/qa-gate.sh
+basedpyright|rules/python.md|hooks/qa-gate.sh
+uv run pytest|rules/python.md|hooks/qa-gate.sh
 EOF
 
 sect "== rules: rule IDs resolve and stay unique"
@@ -124,14 +129,14 @@ strip_fences() { awk '/^```/{f=!f;next} !f' "$@" /dev/null; }
 id_defs_in() {
   local stripped
   stripped=$(strip_fences "$@")
-  { grep -E '^#{1,6} ' <<< "$stripped" | grep -oE '\[[a-z][a-z0-9-]*\]$'
-    grep -oE '^[[:space:]]*(- )?\*\*\[[a-z][a-z0-9-]*\]' <<< "$stripped" \
-      | grep -oE '\[[a-z][a-z0-9-]*\]'
+  { grep -E '^#{1,6} ' <<< "$stripped" | grep -oE '\[R[0-9]+ [a-z][a-z0-9-]*\]$'
+    grep -oE '^[[:space:]]*(- )?\*\*\[R[0-9]+ [a-z][a-z0-9-]*\]' <<< "$stripped" \
+      | grep -oE '\[R[0-9]+ [a-z][a-z0-9-]*\]'
   }
 }
 id_defs=$(id_defs_in "${ID_FILES[@]}" | sort)
 # Line-by-line read: an unquoted slug is a bracket glob a stray file could expand.
-# -P lookarounds skip markdown links [text](url) and wiki links [[name]].
+# The R-number prefix disambiguates on its own — no lookarounds needed.
 while IFS= read -r id; do
   [ -z "$id" ] && continue
   if grep -qxF "$id" <<< "$id_defs"; then
@@ -140,17 +145,25 @@ while IFS= read -r id; do
     fail rules "ID referenced but never defined: $id — cited in $(grep -lF "$id" \
       "${ID_FILES[@]}" | sed "s|^$CLAUDE_DIR/||" | paste -sd' ' - || true)"
   fi
-done < <(strip_fences "${ID_FILES[@]}" | grep -oP '(?<!\[)\[[a-z][a-z0-9-]*\](?!\()' | sort -u)
-dupe_ids=$(echo "$id_defs" | uniq -d | tr '\n' ' ')
-if [ -n "$dupe_ids" ]; then
-  fail rules "duplicate ID definition: $dupe_ids"
+done < <(strip_fences "${ID_FILES[@]}" | grep -oE '\[R[0-9]+ [a-z][a-z0-9-]*\]' | sort -u)
+# Number and slug are separate identities — either one colliding breaks grep-by-ID.
+# A whole-string compare catches neither, since the strings differ by construction.
+dupe_msg=""
+for n in $(sed -E 's/^\[(R[0-9]+) .*/\1/' <<< "$id_defs" | sort | uniq -d); do
+  dupe_msg+="number $n reused by $(grep -F "[$n " <<< "$id_defs" | paste -sd' ' -); "
+done
+for s in $(sed -E 's/^\[R[0-9]+ (.*)\]$/\1/' <<< "$id_defs" | sort | uniq -d); do
+  dupe_msg+="slug $s reused by $(grep -E "^\[R[0-9]+ $s\]\$" <<< "$id_defs" | paste -sd' ' -); "
+done
+if [ -n "$dupe_msg" ]; then
+  fail rules "duplicate ID definition: ${dupe_msg%; }"
 else
   pass rules "no duplicate ID definitions"
 fi
 # A heading ID must sit last; anywhere else it is dropped with no trace, so flag
 # the position instead of silently under-counting definitions.
-stray_heads=$(grep -nE '^#{1,6} .*\[[a-z][a-z0-9-]*\]' "${ID_FILES[@]}" /dev/null \
-                | grep -vE '\[[a-z][a-z0-9-]*\]$' \
+stray_heads=$(grep -nE '^#{1,6} .*\[R[0-9]+ [a-z][a-z0-9-]*\]' "${ID_FILES[@]}" /dev/null \
+                | grep -vE '\[R[0-9]+ [a-z][a-z0-9-]*\]$' \
                 | sed "s|^$CLAUDE_DIR/||" | cut -d: -f1,2 | tr '\n' ' ' || true)
 if [ -n "$stray_heads" ]; then
   fail rules "heading ID must be last on its line: $stray_heads"
@@ -166,15 +179,15 @@ nested_ids=$(awk '
   /^#+[ \t]/ {
     match($0, /^#+/); l = RLENGTH
     while (top > 0 && lvl[top] >= l) top--
-    if (match($0, /\[[a-z][a-z0-9-]*\][ \t]*$/)) {
+    if (match($0, /\[R[0-9]+ [a-z][a-z0-9-]*\][ \t]*$/)) {
       id = substr($0, RSTART, RLENGTH); sub(/[ \t]+$/, "", id)
       if (top > 0) printf "%s:%d(%s in %s) ", FILENAME, FNR, id, sid[top]
       top++; lvl[top] = l; sid[top] = id
     }
     next
   }
-  /^[ \t]*(- )?\*\*\[[a-z][a-z0-9-]*\]/ {
-    match($0, /\[[a-z][a-z0-9-]*\]/); id = substr($0, RSTART, RLENGTH)
+  /^[ \t]*(- )?\*\*\[R[0-9]+ [a-z][a-z0-9-]*\]/ {
+    match($0, /\[R[0-9]+ [a-z][a-z0-9-]*\]/); id = substr($0, RSTART, RLENGTH)
     if (top > 0) printf "%s:%d(%s in %s) ", FILENAME, FNR, id, sid[top]
     else if ($0 ~ /^[ \t]/) printf "%s:%d(%s indented) ", FILENAME, FNR, id
   }
