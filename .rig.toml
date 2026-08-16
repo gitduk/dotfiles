@@ -294,16 +294,17 @@ bin = "tmux"
 description = "Prebuilt tmux binaries"
 
 [[repo]]
-name = "gitduk/rig"
-bpick = "rig-x86_64-unknown-linux-gnu"
+name = "gitduk/ccs"
+bpick = "ccs*"
 extract = false
-bin = { "rig*" = "rig" }
-description = "Tool installer + zsh loader"
+bin = { "ccs*" = "ccs" }
+description = "lightweight API proxy for routing Claude Code traffic"
 
 [[repo]]
 name = "earendil-works/pi"
 bpick = "pi-linux-x64.tar.gz"
 bin = "pi"
+run = "alias p='pi'"
 description = "AI agent toolkit: unified LLM API, agent loop, TUI, coding agent CLI"
 
 # ============ [[git]] 源码构建（钩子只构建，rig 来放）============

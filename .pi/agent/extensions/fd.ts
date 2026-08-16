@@ -9,6 +9,8 @@
  */
 
 import { spawn } from "node:child_process";
+import { statSync } from "node:fs";
+import { isAbsolute, resolve } from "node:path";
 import { StringEnum } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
@@ -18,9 +20,9 @@ const MAX_BYTES = 50 * 1024; // keep aligned with built-in tool output budgets
 
 const FdParams = Type.Object({
 	pattern: Type.Optional(
-		Type.String({ description: "Glob pattern, e.g. '*.ts', 'src/**/*.json'. Omit to list all entries" }),
+		Type.String({ description: "Filename glob matched against the basename, e.g. '*.ts'. Do NOT put a directory or absolute path here — use path for that. Omit to match all entries" }),
 	),
-	path: Type.Optional(Type.String({ description: "Directory to search in (default: current directory)" })),
+	path: Type.Optional(Type.String({ description: "Directory to search in, absolute or relative to the working directory (default: current directory). Pass directory paths here, e.g. 'src' or '/home/user/project'" })),
 	limit: Type.Optional(Type.Number({ description: "Maximum number of results (default: 1000)" })),
 	type: Type.Optional(
 		StringEnum(["f", "d", "l"] as const, {
@@ -28,7 +30,7 @@ const FdParams = Type.Object({
 		}),
 	),
 	extension: Type.Optional(Type.String({ description: "Filter by file extension without the dot, e.g. 'ts' (same as -e)" })),
-	hidden: Type.Optional(Type.Boolean({ description: "Include hidden files and directories (default: false)" })),
+	hidden: Type.Optional(Type.Boolean({ description: "Include hidden files and directories (default: false). Set true to search dot-directories or match dotfiles, e.g. '.github'" })),
 });
 
 export default function (pi: ExtensionAPI) {
@@ -36,10 +38,12 @@ export default function (pi: ExtensionAPI) {
 		name: "fd",
 		label: "fd",
 		description:
-			"Find files fast with fd. Accepts glob patterns and respects .gitignore. Returns relative paths, truncated to 1000 results or 50KB.",
-		promptSnippet: "Find files fast with fd (glob patterns, respects .gitignore)",
+			"Find files fast with fd. Search a directory via path; pattern is a filename glob (e.g. '*.ts') matched against the basename — never put directory paths in pattern. Respects .gitignore; set hidden: true to search dotfiles/dot-directories. Output paths mirror the path argument's form (relative or absolute). Truncated to 1000 results or 50KB.",
+		promptSnippet: "Find files by filename glob within a directory (fd; respects .gitignore)",
 		promptGuidelines: [
 			"Use fd when the user asks to find files by name or glob — faster than the built-in find tool.",
+			"Pass the directory to search in via fd's path parameter; pattern is only a filename glob, never a directory or absolute path.",
+			"Set fd's hidden: true when searching dotfiles or dot-directories like .github or .claude.",
 		],
 		parameters: FdParams,
 
@@ -61,6 +65,22 @@ async function runFd(
 	signal: AbortSignal | undefined,
 	ctx: ExtensionContext,
 ): Promise<{ content: Array<{ type: "text"; text: string }>; details?: unknown }> {
+	let { pattern, path } = params;
+	// Models sometimes pass a directory path as pattern. When pattern names an
+	// existing directory and no path was given, redirect it to path so fd searches
+	// inside it (dot-directories included) instead of matching nothing.
+	if (pattern && !path) {
+		try {
+			const candidate = isAbsolute(pattern) ? pattern : resolve(ctx.cwd, pattern);
+			if (statSync(candidate).isDirectory()) {
+				path = pattern;
+				pattern = undefined;
+			}
+		} catch {
+			// Not an existing directory; keep the pattern as-is.
+		}
+	}
+
 	const args: string[] = ["--color=never", "--glob", "--max-results", String(params.limit ?? DEFAULT_LIMIT)];
 	if (params.type) args.push("--type", params.type);
 	if (params.extension) args.push("-e", params.extension);
@@ -70,7 +90,7 @@ async function runFd(
 	// mode it matches against the absolute candidate path, so a path-containing
 	// pattern like 'src/**/*.spec.ts' needs a leading '**/' to match anything.
 	// (Same handling as pi's built-in find tool.)
-	let effectivePattern = params.pattern;
+	let effectivePattern = pattern;
 	if (effectivePattern && effectivePattern.includes("/")) {
 		args.push("--full-path");
 		if (!effectivePattern.startsWith("/") && !effectivePattern.startsWith("**/") && effectivePattern !== "**") {
@@ -84,9 +104,9 @@ async function runFd(
 	// the path(s) instead of the positional parameter.")
 	if (effectivePattern) {
 		args.push("--", effectivePattern);
-		if (params.path) args.push(params.path);
-	} else if (params.path) {
-		args.push("--search-path", params.path);
+		if (path) args.push(path);
+	} else if (path) {
+		args.push("--search-path", path);
 	}
 	// No pattern and no path: fd lists the current directory by default.
 

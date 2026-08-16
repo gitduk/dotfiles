@@ -1,6 +1,6 @@
 ---
+name: simplify
 description: Review the changed code for reuse, simplification, efficiency, and altitude cleanups, then apply the fixes
-argument-hint: "[<target>]"
 ---
 You are improving the quality of the changed code, not hunting for bugs. Review
 it for reuse, simplification, efficiency, and altitude issues, then fix what you

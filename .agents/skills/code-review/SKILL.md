@@ -1,6 +1,6 @@
 ---
+name: code-review
 description: Review the current diff (or a given target) for correctness bugs plus reuse/simplification/efficiency/altitude/convention cleanups
-argument-hint: "[<pr#>|<branch>|<path>]"
 ---
 You are reviewing for **precision**: every finding you surface should be one
 a maintainer would act on. You are not applying fixes — just reporting.
@@ -102,18 +102,20 @@ candidate when you can point at the line that disproves or already guards it.
 
 ## Output
 
-Return findings as a JSON array of at most 8 objects:
+Return findings as a markdown table, at most 8 rows, ranked most-severe first:
 
-```json
-[
-  {
-    "file": "path/to/file.ext",
-    "line": 123,
-    "summary": "one-sentence statement of the bug",
-    "failure_scenario": "concrete inputs/state → wrong output/crash"
-  }
-]
-```
+| # | Severity | File | Line | Summary | Failure scenario |
+|---|----------|------|------|---------|------------------|
+| 1 | blocker | `path/to/file.ext` | 123 | one-sentence statement of the bug | concrete inputs/state → wrong output/crash |
 
-Ranked most-severe first. If more than 8 survive, keep the 8 most severe. If
-nothing survives, return `[]`.
+`Severity` is one of:
+- `blocker` — crashes, data loss, security holes, wrong results on a
+  reachable path; must fix before merge.
+- `major` — realistic-state bugs (races, nil/undefined on rare-but-reachable
+  paths, falsy-zero) that ship broken behavior for some inputs.
+- `minor` — reuse/simplification/efficiency/altitude/conventions cleanup
+  that costs maintenance, not correctness.
+
+Correctness findings outrank cleanup findings of the same severity. If more
+than 8 survive, keep the 8 most severe. If nothing survives, return an empty
+table with just the header row and a one-line note that no findings were kept.

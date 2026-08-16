@@ -22,3 +22,4 @@
 [R22] 剪贴板用 `wl-copy`。
 [R23] JS 包管理器优先 `bun` 而非 `npm`；若项目已有 `package-lock.json` 且无 bun lockfile 则用 `npm`。
 [R24] HTTP 客户端优先 `xh` 而非 `curl`。
+[R25] 代码注释不得超过三行，超长就精简或删掉。
