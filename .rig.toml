@@ -10,13 +10,11 @@
 [[repo]]
 name = "dandavison/delta"
 bpick = "delta-*-x86_64-unknown-linux-gnu.tar.gz"
-bin = "delta"
 description = "A viewer for git and diff output"
 
 [[repo]]
 name = "sharkdp/fd"
 bpick = "fd-v*-x86_64-unknown-linux-gnu.tar.gz"
-bin = "fd"
 description = "A program to find entries in your filesystem"
 
 [[repo]]
@@ -28,7 +26,6 @@ description = "ripgrep recursively searches directories for a regex pattern"
 [[repo]]
 name = "bootandy/dust"
 bpick = "dust-v*-x86_64-unknown-linux-gnu.tar.gz"
-bin = "dust"
 run = "alias du='dust'"
 completions = { generate = "wget -q https://raw.githubusercontent.com/bootandy/dust/refs/heads/master/completions/_dust" }
 description = "Like du but more intuitive"
@@ -36,14 +33,12 @@ description = "Like du but more intuitive"
 [[repo]]
 name = "Canop/dysk"
 bpick = "dysk_*.zip"
-bin = "dysk"
 run = "alias ds='dysk'"
 setup = "mv */completion/_dysk .; mv */x86_64-unknown-linux-musl/dysk .; rm -rf */"
 description = "dysk displays filesystem information in a pretty table"
 
 [[repo]]
 name = "casey/just"
-bin = "just"
 completions = { generate = "./just --completions zsh > _just" }
 description = "Just a command runner"
 
@@ -56,13 +51,11 @@ description = "Hyperextensible Vim-based text editor"
 
 [[repo]]
 name = "tstack/lnav"
-bin = "lnav"
 description = "A log file viewer for the terminal that indexes log messages"
 
 [[repo]]
 name = "karol-broda/snitch"
 bpick = "snitch_*_linux_amd64.tar.gz"
-bin = "snitch"
 run = "alias sn='snitch'"
 completions = { generate = "./snitch completion zsh > _snitch" }
 description = "A tool for inspecting network connections"
@@ -83,7 +76,6 @@ description = "A neofetch-like tool for fetching system information"
 [[repo]]
 name = "astral-sh/uv"
 bpick = "uv-x86_64-unknown-linux-gnu.tar.gz"
-bin = "uv"
 completions = { generate = "./uv generate-shell-completion zsh > _uv" }
 description = "An extremely fast Python package manager"
 
@@ -105,21 +97,18 @@ description = "Explains why a process or port is running by tracing its ancestry
 [[repo]]
 name = "abhimanyu003/sttr"
 bpick = "sttr_Linux_x86_64.tar.gz"
-bin = "sttr"
 run = "alias sr='sttr'"
 completions = { generate = "./sttr completion zsh > _sttr" }
 description = "A command line tool to quickly apply various transformation operations"
 
 [[repo]]
 name = "ducaale/xh"
-bin = "xh"
 run = "alias x='xh'"
 description = "A friendly and fast tool for sending HTTP requests"
 
 [[repo]]
 name = "pamburus/hl"
 bpick = "hl-linux-x86_64-musl.tar.gz"
-bin = "hl"
 description = "JSON and logfmt log converter to human readable representation"
 
 [[repo]]
@@ -154,7 +143,6 @@ description = "A database management tui"
 [[repo]]
 name = "SagerNet/sing-box"
 bpick = "sing-box-*-linux-amd64.tar.gz"
-bin = "sing-box"
 setup = "sudo setcap cap_net_admin=+ep */sing-box"
 description = "The universal proxy platform"
 
@@ -190,7 +178,6 @@ description = "Desktop API client for REST, GraphQL, and gRPC"
 [[repo]]
 name = "oven-sh/bun"
 bpick = "bun-linux-x64.zip"
-bin = "bun"
 run = '''
 alias b="bun"
 alias bx="bun x"
@@ -207,7 +194,6 @@ description = "A fast JavaScript runtime, package manager, bundler, and test run
 [[repo]]
 name = "eza-community/eza"
 bpick = "eza_x86_64-unknown-linux-gnu.tar.gz"
-bin = "eza"
 run = "alias ls='eza'"
 description = "A modern replacement for ls"
 
@@ -221,13 +207,11 @@ description = "A cat clone with syntax highlighting and Git integration"
 [[repo]]
 name = "mozilla/sccache"
 bpick = "sccache-v*-x86_64-unknown-linux-musl.tar.gz"
-bin = "sccache"
 description = "Shared compilation cache for C/C++ and Rust"
 
 [[repo]]
 name = "Schniz/fnm"
 bpick = "fnm-linux.zip"
-bin = "fnm"
 run = "alias f='fnm'"
 eval = "fnm env --use-on-cd --shell zsh"
 description = "A fast and simple Node.js manager"
@@ -235,33 +219,28 @@ description = "A fast and simple Node.js manager"
 [[repo]]
 name = "astral-sh/ruff"
 bpick = "ruff-x86_64-unknown-linux-musl.tar.gz"
-bin = "ruff"
 description = "An extremely fast Python linter and code formatter"
 
 [[repo]]
 name = "ind-igo/cx"
 bpick = "cx-x86_64-unknown-linux-gnu.tar.gz"
-bin = "cx"
 description = "Semantic code navigation for AI agents"
 
 [[repo]]
 name = "stanlyzoolo/keepkit"
 bpick = "keepkit_*_linux_x86_64.tar.gz"
-bin = "keepkit"
 description = "Lightweight TUI for tracking versions of your favorite tools"
 
 # .deb 资产走 §2.5 的 dpkg 流程 —— extract() 通过 `dpkg-deb -x` 解包，不碰系统包数据库
 [[repo]]
 name = "t8y2/dbx"
 bpick = "DBX_*_amd64.deb"
-bin = "dbx"
 description = "lightweight cross-platform database client"
 
 # 从 zinit 迁移过来的剩余「Binary Tools」——原先靠 zinit ice 装
 [[repo]]
 name = "starship/starship"
 bpick = "starship-x86_64-unknown-linux-gnu.tar.gz"
-bin = "starship"
 completions = { generate = "./starship completions zsh > _starship" }
 env = { STARSHIP_CONFIG = "~/.starship.toml" }
 eval = "starship init zsh"
@@ -269,7 +248,6 @@ description = "The minimal, blazing-fast, and infinitely customizable prompt for
 
 [[repo]]
 name = "ajeetdsouza/zoxide"
-bin = "zoxide"
 eval = "zoxide init zsh --cmd j"
 description = "A smarter cd command, inspired by z and autojump"
 
@@ -278,14 +256,14 @@ name = "denisidoro/navi"
 setup = "mkdir -p ~/.config/navi/cheats; ./navi info config-example > ~/.config/navi/config.yaml"
 env = { NAVI_PATH = "~/.config/navi/cheats", NAVI_CONFIG = "~/.config/navi/config.yaml" }
 eval = "navi widget zsh"
-lazy = true
 bind = "^E:_navi_widget"
+lazy = true
 description = "An interactive cheatsheet tool for the command-line"
 
 [[repo]]
 name = "junegunn/fzf"
 bpick = "fzf-*-linux_amd64.tar.gz"
-bin = "fzf"
+eval = "fzf --zsh"
 description = "A command-line fuzzy finder"
 
 [[repo]]
@@ -295,17 +273,36 @@ description = "Prebuilt tmux binaries"
 
 [[repo]]
 name = "gitduk/ccs"
-bpick = "ccs*"
-extract = false
-bin = { "ccs*" = "ccs" }
+bpick = "ccs-x86_64-unknown-linux-gnu.tar.gz"
+bin = { "*/ccs" = "ccs" }
 description = "lightweight API proxy for routing Claude Code traffic"
 
 [[repo]]
-name = "earendil-works/pi"
-bpick = "pi-linux-x64.tar.gz"
-bin = "pi"
+name = "gitduk/zhis"
+bpick = "zhis-x86_64-unknown-linux-gnu.tar.gz"
+bin = { "*/zhis" = "zhis" }
+eval = "zhis init"
+env = { HIST_EXCLUDE="(cd ls clear pwd exit pi)" }
+description = "zsh history store recording directory, exit status, and duration"
+
+[[repo]]
+name = "gitduk/pi-rs"
+bpick = "pi-x86_64-*.tar.gz"
+bin = { "*/pi" = "pi" }
 run = "alias p='pi'"
-description = "AI agent toolkit: unified LLM API, agent loop, TUI, coding agent CLI"
+description = "Pi By Rust"
+
+[[repo]]
+name = "Giammarco-Ferranti/deja"
+bpick = "deja_*_linux_amd64.tar.gz"
+eval = "deja init zsh"
+env = { DEJA_CYCLE_KEY = "", DEJA_FUZZY_SEPARATOR = "  " }
+description = "Predictive inline shell autosuggestions for zsh"
+
+[[repo]]
+name = "webxsid/crona"
+bpick = "crona-bundle-*-linux-amd64.zip"
+description = "Local-first work tracking for people who live in the terminal."
 
 # ============ [[git]] 源码构建（钩子只构建，rig 来放）============
 
@@ -440,16 +437,16 @@ description = "Just a command runner"
 name = "zsh-users/zsh-completions"
 source = "zsh-completions.plugin.zsh"
 
-[[plugin]]
-name = "zsh-users/zsh-autosuggestions"
-source = "zsh-autosuggestions.zsh"
-run = '''
-ZSH_AUTOSUGGEST_STRATEGY=(match_prev_cmd history)
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
-bindkey -M viins "^ " autosuggest-execute
-bindkey -M vicmd "^ " autosuggest-execute
-_zsh_autosuggest_start
-'''
+# [[plugin]]
+# name = "zsh-users/zsh-autosuggestions"
+# source = "zsh-autosuggestions.zsh"
+# run = '''
+# ZSH_AUTOSUGGEST_STRATEGY=(match_prev_cmd history)
+# ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
+# bindkey -M viins "^ " autosuggest-execute
+# bindkey -M vicmd "^ " autosuggest-execute
+# _zsh_autosuggest_start
+# '''
 
 [[plugin]]
 name = "zdharma-continuum/fast-syntax-highlighting"

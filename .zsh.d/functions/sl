@@ -91,7 +91,7 @@ main() {
     if [[ "$arg" =~ ^([0-9]+):([^:,]+):([0-9]+)$ ]]; then
       _sl_add "${match[2]}" "${match[1]}" "${match[3]}"
     elif [[ "$arg" =~ ^([^:,]+):([0-9][0-9,]*)$ ]]; then
-      local host="${match[1]}" port
+      local host="${match[1]}" port=
       for port in ${(s:,:)${match[2]}}; do
         [[ "$port" =~ ^[0-9]+$ ]] || { echo "Error: Invalid port '$port' in '$arg'" >&2; return 1; }
         _sl_add "$host" "$port" "$port"
@@ -155,7 +155,7 @@ main() {
     for h in "${host_order[@]}"; do
       (
         local -a flags=(${(f)host_flags[$h]})
-        ssh -M -S "$tmp_dir/$h.ctl" -f -N -o ExitOnForwardFailure=yes "${flags[@]}" "$h" 2> "$tmp_dir/$h.err"
+        ssh -M -S "$tmp_dir/$h.ctl" -f -N -o ExitOnForwardFailure=yes -o WarnWeakCrypto=no "${flags[@]}" "$h" 2> "$tmp_dir/$h.err"
         print -r -- "$?" > "$tmp_dir/$h.status"
       ) &
       launch_pids+=($!)
@@ -191,7 +191,7 @@ main() {
       for h in "${successful_hosts[@]}"; do
         if ! ssh -S "$tmp_dir/$h.ctl" -O check "$h" >/dev/null 2>&1; then
           local -a flags=(${(f)host_flags[$h]})
-          ssh -M -S "$tmp_dir/$h.ctl" -f -N -o ExitOnForwardFailure=yes "${flags[@]}" "$h" 2>/dev/null
+          ssh -M -S "$tmp_dir/$h.ctl" -f -N -o ExitOnForwardFailure=yes -o WarnWeakCrypto=no "${flags[@]}" "$h" 2>/dev/null
         fi
       done
       sleep 5

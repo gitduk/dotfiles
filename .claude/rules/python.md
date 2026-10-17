@@ -13,4 +13,4 @@ paths:
 - **[R72 async-libs-only]** Async: async libs only (`httpx`, `aiosqlite`, `asyncpg`); `asyncio.to_thread` to escape a sync call; `asyncio.gather` for concurrent
 - **[R73 fastapi-annotated]** FastAPI: `Annotated` for deps/validation, Pydantic v2 for models
 - **[R74 fastapi-lifespan]** FastAPI lifecycle: `lifespan` for startup/shutdown; responses typed, never raw ORM objects
-- **[R75 py-qa]** Quality: `uv run ruff check . && uv run basedpyright .`; `uv run pytest` per [R42 tests-only-when-suite]; formatting per [R41 fmt-owned-by-precommit]
+- **[R75 py-qa]** Quality: `uv run ruff check . && uv run basedpyright .`; `uv run pytest` per [R42 tests-only-when-suite]; `uv run ruff format .` per [R82 fmt-before-staging]

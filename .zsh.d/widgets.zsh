@@ -53,7 +53,6 @@ zbindkey -M viins '^W' backward-delete-widget
 function space-widget() {
   zle _expand_alias
   zle self-insert
-  zle autosuggest-fetch
 }
 zbindkey ' ' space-widget
 

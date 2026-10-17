@@ -15,6 +15,13 @@
     "dock": "left",
   },
   "agent_servers": {
+    "pi-acp": {
+      "default_config_options": {
+        "thought_level": "medium",
+        "model": "ccs/deepseek-v4-pro"
+      },
+      "type": "registry"
+    },
     "gemini": {
       "type": "registry",
     },
@@ -51,7 +58,7 @@
     "copilot": {
       "enable_next_edit_suggestions": true,
     },
-    "provider": "zed",
+    "provider": "ollama",
   },
   "languages": {
     "Python": {
@@ -139,10 +146,9 @@
       },
     },
     "default_model": {
-      "effort": "max",
-      "provider": "opencode",
-      "model": "go/deepseek-v4-flash",
-      "enable_thinking": true,
+      "provider": "ollama",
+      "model": "bge-m3:latest",
+      "enable_thinking": false,
     },
     "commit_message_model": {
       "provider": "opencode",

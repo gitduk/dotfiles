@@ -1,24 +1,34 @@
 ---
 name: code-review
 description: Review the current diff (or a given target) for correctness bugs plus reuse/simplification/efficiency/altitude/convention cleanups
+argument-hint: "[PR-URL | branch | path]"
 ---
 You are reviewing for **precision**: every finding you surface should be one
 a maintainer would act on. You are not applying fixes — just reporting.
 
 ## Phase 0 — Gather the diff
 
-Run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` / `git diff HEAD~1`
-if there's no upstream) to get the unified diff under review. If there are
-uncommitted changes, or the range diff is empty, also run `git diff HEAD` and
-include the working-tree changes in scope — the review often runs before the
-commit. If a PR number, branch name, or file path was passed as an argument
-(`${1:-}`), review that target instead. Treat this diff as the review scope.
+Review target: ${@:-(none given)}
 
-## Phase 1 — Find candidates (8 angles, single pass)
+If a target is named above (a PR number, branch name, or file path), review that
+target and treat it as the review scope.
 
-Work through **8 angles** yourself, in sequence, in this same context. Each
-surfaces candidate findings with `file`, `line`, a one-line `summary`, and a
-concrete `failure_scenario`.
+Otherwise run `git diff @{upstream}...HEAD` (or `git diff main...HEAD` /
+`git diff HEAD~1` if there's no upstream) to get the unified diff under review.
+If there are uncommitted changes, or the range diff is empty, also run
+`git diff HEAD` and include the working-tree changes in scope — the review often
+runs before the commit. Treat that diff as the review scope.
+
+## Phase 1 — Find candidates (8 angles)
+
+Run the review by diff size:
+
+- **Small diff (≤ ~300 changed lines)**: work through the 8 angles below
+  yourself, in sequence, in this same context. Each surfaces candidate findings
+  with `file`, `line`, a one-line `summary`, and a concrete `failure_scenario`.
+- **Large diff (> ~300 changed lines or > ~15 files)**: shard and parallelize
+  with `task` (see "Large-diff sharding" at the end of this phase), then merge
+  the shard pools into one for Phase 2.
 
 ### Angle A — line-by-line diff scan
 
@@ -91,6 +101,23 @@ duplicated, wasted, harder to maintain, or which rule is broken) instead of a
 crash. Correctness bugs always outrank cleanup, altitude, and conventions
 findings when the output cap forces a cut.
 
+### Large-diff sharding (task)
+
+1. Split the diff into chunks by file group — never inside a hunk or function —
+   keeping line counts roughly balanced; whole files per chunk when the diff is
+   file-dominant. A chunk is the scope one subagent fully reviews.
+2. Launch one `task` per chunk in a single message so they run in parallel.
+   Each prompt must be self-contained — the subagent cannot reach you — so
+   state exactly: the paths/lines it owns, to run `git diff <range>` scoped to
+   them, a condensed 8-angle checklist (name + what each hunts), and the
+   finding shape (`file`, `line`, `summary`, `failure_scenario`) to return.
+3. After all return, merge the pools into one and run Phase 2 on the combined
+   set; the 8-finding output cap applies to the merged pool, not per shard. A
+   subagent sees only its own chunk, so the gaps between chunks are yours to
+   close in this context: callers/callees crossing a chunk boundary (Angle C)
+   and invariants deleted in one chunk that must be re-established in another
+   (Angle B). Conventions is a cheap ancestor-search, so run it centrally on
+   the full changed-file set rather than per shard.
 ## Phase 2 — Dedup and self-check
 
 Dedup near-duplicates (same defect, same location, same reason → keep one).
@@ -102,11 +129,15 @@ candidate when you can point at the line that disproves or already guards it.
 
 ## Output
 
-Return findings as a markdown table, at most 8 rows, ranked most-severe first:
+Return at most 8 findings, ranked most-severe first, as a numbered list. One
+finding per item, in this shape:
 
-| # | Severity | File | Line | Summary | Failure scenario |
-|---|----------|------|------|---------|------------------|
-| 1 | blocker | `path/to/file.ext` | 123 | one-sentence statement of the bug | concrete inputs/state → wrong output/crash |
+1. **blocker** — `path/to/file.ext:123` — one-sentence statement of the bug.
+   Failure: concrete inputs/state → wrong output/crash.
+
+For cleanup, altitude, and conventions findings, the `Failure` line states the
+concrete cost (what is duplicated, wasted, harder to maintain, or which rule is
+broken) instead of a crash.
 
 `Severity` is one of:
 - `blocker` — crashes, data loss, security holes, wrong results on a
@@ -117,5 +148,5 @@ Return findings as a markdown table, at most 8 rows, ranked most-severe first:
   that costs maintenance, not correctness.
 
 Correctness findings outrank cleanup findings of the same severity. If more
-than 8 survive, keep the 8 most severe. If nothing survives, return an empty
-table with just the header row and a one-line note that no findings were kept.
+than 8 survive, keep the 8 most severe. If nothing survives, state that no
+findings were kept.

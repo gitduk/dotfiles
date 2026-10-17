@@ -1,31 +1,29 @@
 ---
 name: commit
 description: Use when ready to commit changes to git repository
-model: sonnet
 ---
 
 # Commit
 
 ## Overview
 
-Structured git commit workflow that enforces project-specific requirements (version bumps, quality checks) and prevents common mistakes (missing files, wrong scope, duplicate commits).
+Structured git commit workflow that enforces project-specific requirements (version bumps) and prevents common mistakes (missing files, wrong scope, duplicate commits).
 
 ## When to Use
 
 - User says "commit", "提交", or equivalent
 - After completing a logical unit of work
 - Before switching branches or creating PR
+- Invoked as the `/commit` slash command in pi
 
 **When NOT to use:**
 - Mid-implementation (incomplete feature)
-- Tests failing
-- Quality checks not passing
 
 ## Commit Granularity
 
 - One logical change per commit; all tests passing at each commit
 - Batch all edits for a single feature/fix into one commit — never commit after each individual file edit
-- Rust: `cargo clippy` cycles within a single logical change are **preparation steps**, not separate commits (formatting is handled automatically by the git pre-commit hook). Commit only after the full logical change is complete and verified.
+- Rust: `cargo clippy` cycles within a single logical change are **preparation steps**, not separate commits (formatting runs once, right before staging — see step 6). Commit only after the full logical change is complete and verified.
 
 ## Workflow
 
@@ -39,12 +37,12 @@ digraph commit_flow {
     "Check project requirements" [shape=box];
     "Missing version bump?" [shape=diamond];
     "Bump version + update lock" [shape=box];
-    "Has CLAUDE.md?" [shape=diamond];
-    "Check CLAUDE.md consistency" [shape=box];
+    "Has instruction file?" [shape=diamond];
+    "Check instruction file consistency" [shape=box];
     "Inconsistent?" [shape=diamond];
-    "Draft CLAUDE.md updates" [shape=box];
+    "Draft instruction-file updates" [shape=box];
     "User confirms update?" [shape=diamond];
-    "Update CLAUDE.md + stage" [shape=box];
+    "Update instruction file + stage" [shape=box];
     "Check comment compliance" [shape=box];
     "Comment violations found?" [shape=diamond];
     "Draft comment fixes" [shape=box];
@@ -52,7 +50,6 @@ digraph commit_flow {
     "Apply comment fixes + restage" [shape=box];
     "Analyze change type" [shape=box];
     "Draft commit message" [shape=box];
-    "Run quality checks" [shape=box];
     "Stage files + commit" [shape=box];
     "Show commit report" [shape=box];
     "Done" [shape=doublecircle];
@@ -65,17 +62,17 @@ digraph commit_flow {
     "Squash first" -> "Check project requirements";
     "Check project requirements" -> "Missing version bump?";
     "Missing version bump?" -> "Bump version + update lock" [label="yes"];
-    "Missing version bump?" -> "Has CLAUDE.md?" [label="no"];
-    "Bump version + update lock" -> "Has CLAUDE.md?";
-    "Has CLAUDE.md?" -> "Check CLAUDE.md consistency" [label="yes"];
-    "Has CLAUDE.md?" -> "Check comment compliance" [label="no"];
-    "Check CLAUDE.md consistency" -> "Inconsistent?";
-    "Inconsistent?" -> "Draft CLAUDE.md updates" [label="yes"];
+    "Missing version bump?" -> "Has instruction file?" [label="no"];
+    "Bump version + update lock" -> "Has instruction file?";
+    "Has instruction file?" -> "Check instruction file consistency" [label="yes"];
+    "Has instruction file?" -> "Check comment compliance" [label="no"];
+    "Check instruction file consistency" -> "Inconsistent?";
+    "Inconsistent?" -> "Draft instruction-file updates" [label="yes"];
     "Inconsistent?" -> "Check comment compliance" [label="no"];
-    "Draft CLAUDE.md updates" -> "User confirms update?";
-    "User confirms update?" -> "Update CLAUDE.md + stage" [label="yes"];
+    "Draft instruction-file updates" -> "User confirms update?";
+    "User confirms update?" -> "Update instruction file + stage" [label="yes"];
     "User confirms update?" -> "Check comment compliance" [label="no, manual"];
-    "Update CLAUDE.md + stage" -> "Check comment compliance";
+    "Update instruction file + stage" -> "Check comment compliance";
     "Check comment compliance" -> "Comment violations found?";
     "Comment violations found?" -> "Draft comment fixes" [label="yes"];
     "Comment violations found?" -> "Analyze change type" [label="no"];
@@ -84,8 +81,7 @@ digraph commit_flow {
     "User confirms comment fix?" -> "Analyze change type" [label="no, manual"];
     "Apply comment fixes + restage" -> "Analyze change type";
     "Analyze change type" -> "Draft commit message";
-    "Draft commit message" -> "Run quality checks";
-    "Run quality checks" -> "Stage files + commit";
+    "Draft commit message" -> "Stage files + commit";
     "Stage files + commit" -> "Show commit report";
     "Show commit report" -> "Done";
 }
@@ -112,50 +108,47 @@ If unpushed commits exist and belong to same logical change → squash before ne
 ### 3. Check Project Requirements
 
 **Common patterns:**
-- Version bump required? (check `CLAUDE.md`, `Cargo.toml`, `package.json`, `pyproject.toml`)
+- Version bump required? (check the project's instruction file `AGENTS.md`, plus `Cargo.toml`, `package.json`, `pyproject.toml`)
 - Lock file must be included? (`Cargo.lock`, `package-lock.json`, `uv.lock`)
-- Quality checks required? (auto-detect based on project type)
 
-**Quality checks:** run the per-language QA chain defined in the language rules files (`~/.claude/rules/rust.md`, `~/.claude/rules/python.md` — loaded whenever the project matches their `paths:`); they are the canonical definition, do not restate commands here. At commit time use the applying variants (`cargo fmt`, `uv run ruff format .`), not `--check`. Mixed projects: run chains for all detected languages.
+### 3.5. Project Instruction File Consistency Check
 
-### 3.5. CLAUDE.md Consistency Check
+**If the project has an instruction file (`AGENTS.md`) at repo root:**
 
-**If project has CLAUDE.md at repo root:**
-
-1. Read current CLAUDE.md content
+1. Read current instruction file content
 2. Analyze staged changes (from `git diff --cached`):
    - Look for public interface changes: new/removed/modified functions, classes, types, exports
    - Look for behavior changes: new features, removed features, changed logic
    - Look for architecture changes: new dependencies, service integrations, data flow changes
-3. Compare CLAUDE.md description against staged changes:
-   - Does CLAUDE.md describe the interfaces/features being added/removed?
-   - Does CLAUDE.md reflect the current architecture after these changes?
-   - Are there new public APIs that CLAUDE.md doesn't mention?
-   - Are there removed features that CLAUDE.md still describes?
+3. Compare instruction file description against staged changes:
+   - Does it describe the interfaces/features being added/removed?
+   - Does it reflect the current architecture after these changes?
+   - Are there new public APIs that it doesn't mention?
+   - Are there removed features that it still describes?
 
 **If inconsistency detected:**
-- Show specific examples of what's inconsistent (e.g., "CLAUDE.md says vector model loads locally, but code now calls external service")
-- Draft suggested CLAUDE.md updates to match the code changes
-- Ask user: "CLAUDE.md 需要更新。我已经起草了建议的修改，要我直接更新吗？"
-- If user confirms: update CLAUDE.md, stage it, continue commit
-- If user declines: explain they should update CLAUDE.md manually before committing
+- Show specific examples of what's inconsistent (e.g., "instruction file says vector model loads locally, but code now calls external service")
+- Draft suggested instruction-file updates to match the code changes
+- Ask user: "项目指令文件需要更新。我已经起草了建议的修改，要我直接更新吗？"
+- If user confirms: update the instruction file, stage it, continue commit
+- If user declines: explain they should update the instruction file manually before committing
 
-**If consistent or no CLAUDE.md exists:**
+**If consistent or no instruction file exists:**
 - Continue to next step silently
 
 **Bypass:**
-- If commit message contains `[skip-claudemd]` tag, skip this check entirely
+- If commit message contains `[skip-instruction-file]` tag, skip this check entirely
 
 ### 3.6 Comment Check
 
-**Review comments in and around the diff against the project comment policy (the Comments and 吴凯歌 sections of `~/.claude/CLAUDE.md`):**
+**Review comments in and around the diff against the project comment policy (the Comments and 吴凯歌 sections of `~/.pi/AGENTS.md`):**
 
 Read the diff with `git diff --cached -U10` for this step. The default 3 lines of context routinely hides the comment sitting just above a changed function — which is exactly what the Stale rule has to see.
 
 - Restates implementation: would refactoring the adjacent code force this comment to change? Yes → it describes the implementation, not a constraint outside it → flag, suggest removal
 - Too long: WHY comment exceeds ~80 chars or is a compound sentence rather than one short clause → flag, suggest tightening
 - Stale: code changed in this diff but an adjacent unchanged comment still describes the old behavior → flag, suggest fixing or deleting
-- Wrong language: code comment not in English, unless the project `CLAUDE.md` requires Chinese → flag, suggest translation
+- Wrong language: code comment not in English, unless the project instruction file requires Chinese → flag, suggest translation
 
 Doc comments (`///`, `//!`, `/** */`, docstrings) on public API are interface contract, not commentary — out of scope for this check. A rustdoc with `# Examples` and a doctest is legitimately long; do not flag it for length.
 
@@ -202,15 +195,11 @@ Add body (separated by blank line) when WHY isn't obvious from diff.
 
 ### 6. Execute Commit
 
-**Run the verification QA chain — `cargo clippy` / `cargo test` (commands per `rules/{rust,python}.md`) — BEFORE any `git add`. Do NOT run `cargo fmt` / `ruff format` manually: the global git pre-commit hook formats staged files and re-stages them automatically at commit time.**
+Format first, then stage the specific files and commit. No hook formats anything, so run the project's formatter yourself (Rust: `cargo fmt`; otherwise the one the instruction file or project config names) before `git add` — staging after formatting is what keeps the committed content and the working tree identical.
 
 ```bash
-# QA commands: see ~/.claude/rules/{rust,python}.md (canonical per language).
-# Separate commands are fine — the QA gate accumulates each passing check.
-<per-language QA chain>
-
-# ONLY after all checks pass, stage and commit
-git add <specific files>
+cargo fmt   # or the project's formatter
+git add <specific files> [<lock files changed by the version bump>]
 git commit -m "$(cat <<'EOF'
 <commit message>
 
@@ -219,13 +208,7 @@ EOF
 )"
 ```
 
-**Critical ordering rule**: run verification (`cargo clippy`, plus `cargo test` when a suite exists — the qa-gate requires these, no longer fmt) BEFORE `git add`. These compile and rewrite `Cargo.lock`, so staging before they finish desyncs the index. **After QA passes**, run `git diff --name-only` to check which lock files changed (`Cargo.lock`, `uv.lock`, etc.) and include every changed lock file in `git add` — failing to do so leaves a dirty working tree after commit. **Formatting is not your job at commit time**: the global git pre-commit hook (`~/.config/git/hooks/pre-commit`) runs `cargo fmt` / `ruff format` on the staged files and re-stages them during `git commit`. So the flow is: clippy/test → check for changed lock files → `git add <files + lock files>` → `git commit` (hook formats). Never run `cargo fmt` before `git add` — that reintroduces the exact desync this hook exists to remove.
-
-**Detection logic:**
-- Check for `Cargo.toml` → Rust
-- Check for `pyproject.toml` → Python
-- Check for `package.json` → JS/TS
-- Multiple files present → run all applicable checks
+A version bump rewrites lock files (`Cargo.lock`, `uv.lock`, ...); after `git add`, run `git diff --name-only` and include every changed lock file — failing to do so leaves a dirty working tree after commit. Never run the formatter after `git add`: it rewrites the working tree but not the index, so the commit holds the unformatted version and the formatting is left behind as a dirty diff.
 
 ### 7. Show Commit Report
 
@@ -243,17 +226,12 @@ After successful commit, display a structured report:
   - Cargo.toml (v0.1.5 → v0.1.6)
   - Cargo.lock
 
-质量检查：
-  ✓ cargo fmt passed
-  ✓ cargo clippy passed
-
 提交哈希：<short-hash>
 ```
 
 **Report must include:**
 - Commit message (full, including body if present)
 - List of committed files with any special notes (version bumps, lock files)
-- Quality check results
 - Commit hash for reference
 
 ## Branches
@@ -267,14 +245,12 @@ After successful commit, display a structured report:
 | Mistake | Fix |
 |---------|-----|
 | Commit without checking unpushed commits | Always check `git log @{u}..HEAD` first |
-| Forget version bump | Check project `CLAUDE.md` for requirements |
+| Forget version bump | Check project instruction file `AGENTS.md` for requirements |
 | Commit unrelated changes | Explicitly list files to stage, not `git add .` |
-| QA updated lock file but wasn't staged | After clippy/test, run `git diff --name-only` and include any changed lock files in `git add` |
-| Skip quality checks | Run project-specific checks before commit |
+| Version bump updated lock file but wasn't staged | After bumping, run `git diff --name-only` and include any changed lock files in `git add` |
 | Vague commit message | Use conventional commits format with clear summary |
-| Commit with failing tests | Verify tests pass before committing |
 | Missing commit report | Always show structured report after commit |
-| CLAUDE.md out of sync with code | Check CLAUDE.md consistency before commit, update if needed |
+| Instruction file out of sync with code | Check its consistency before commit (Step 3.5), update if needed |
 | Comments restate implementation, run long, went stale, or wrong language | Run Comment Check (Step 3.6) before drafting commit message |
 
 ## Red Flags
@@ -282,6 +258,6 @@ After successful commit, display a structured report:
 - "I'll commit everything in working tree" → Check if all changes belong together
 - "Skip version bump this time" → Project requirements are not optional
 - "Commit message: WIP" → Not a logical unit, don't commit yet
-- "I'll run tests after committing" → Tests must pass before commit
+- "I'll run tests after committing" → Commit skill runs only on completed work; tests must pass first
 - "Let me ask user to confirm first" → Commit skill executes directly, no confirmation needed
-- "I'll run quality checks now" (after version bump check) → CLAUDE.md consistency check (Step 3.5) comes BEFORE quality checks; do not skip it when CLAUDE.md exists
+- "I'll run checks now" (after version bump check) → instruction file consistency check (Step 3.5) comes BEFORE committing; do not skip it when the file exists

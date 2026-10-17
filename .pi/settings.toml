@@ -1,0 +1,37 @@
+# ~/.pi.toml — one endpoint, and the models it serves.
+
+# The gateway translating for DeepSeek. It terminates `response.completed`
+# without the `output` the Responses spec requires, so pi rebuilds each turn
+# from the deltas and says so once per session.
+base_url = "http://127.0.0.1:7896"
+format   = "anthropic"
+
+# What a bare `pi` runs when no session resumes one, as the endpoint names it.
+model = "deepseek-v4.1-flash"
+
+# allow path
+write_roots = ["/tmp"]
+
+loop_max_rounds = 100
+
+status = ["elapsed", "in_out", "speed", "cache", "ctx", "queued", "compacted", "cost"]
+
+[models."deepseek-v4.1-flash"]
+context_window    = 1_000_000
+max_output_tokens = 131_072
+pricing = { cache_read_per_mtok = 0.006, input_per_mtok = 0.3, output_per_mtok = 1.2 }
+
+[models.deepseek-v4-pro]
+context_window    = 1_000_000
+max_output_tokens = 131_072
+pricing = { cache_read_per_mtok = 0.044, input_per_mtok = 1.32, output_per_mtok = 3.96 }
+
+[keys]
+"menu.accept"   = ["tab"]
+"menu.next"     = ["down", "ctrl+n", "ctrl+j"]
+"menu.previous" = ["up", "ctrl+p", "ctrl+k"]
+
+# Library docs on demand: resolve a library, then query its current docs.
+[mcp.context7]
+url = "https://mcp.context7.com/mcp"
+

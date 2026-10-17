@@ -2,22 +2,11 @@
 ### fzf ###
 ###########
 
-# fzf shell integration (key bindings + path completion via ** trigger)
-eval "$(fzf --zsh)"
-# fzf --zsh overwrites ^R; zhs.zsh (loaded after this) rebinds it.
-
 # fzf default command
-export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow \
-  --exclude .git \
-  --exclude .venv \
-  --exclude venv \
-  --exclude node_modules \
-  2>/dev/null || find . -type f"
+export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git --exclude .venv --exclude venv --exclude node_modules 2>/dev/null || find . -type f"
 
 # fzf default opts
-export FZF_DEFAULT_OPTS="
-  --preview 'bat --color=always --style=numbers --line-range=:500 {}'
-  --preview-window=right:50%:wrap
+export FZF_DEFAULT_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {}' --preview-window=right:50%:wrap
   --height 100%
   --bind 'ctrl-k:up'
   --bind 'ctrl-j:down'

@@ -36,6 +36,7 @@ alias wic="which"
 alias wch="watch -c -n 1"
 alias li="sudo lsof -i:"
 alias mt="sudo mount /dev/sd"
+alias pc="pi --continue"
 
 # dotfiles
 alias cs="c status"
@@ -75,6 +76,8 @@ alias cas="cargo sync"
 alias cau="cargo update"
 alias cais="cargo install"
 alias caui="cargo uninstall"
+alias carl="cargo release"
+alias care="cargo release --execute --no-confirm"
 
 # docker
 alias dcv="docker volume"

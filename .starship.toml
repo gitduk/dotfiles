@@ -16,6 +16,7 @@ $git_commit\
 $git_state\
 $git_metrics\
 $git_status\
+$package\
 $python\
 $rust\
 $golang\
@@ -208,6 +209,7 @@ symbol = "ml "
 symbol = "opa "
 
 [package]
+format = "[$symbol$version](bold red) "
 symbol = "pkg "
 
 [perl]

@@ -1,12 +1,14 @@
 # Kill mode
 if [[ "$1" == "-k" || "$1" == "--kill" ]]; then
   shift
+
   if [ -z "$*" ]; then
     sessions="$(tmux ls -F '#{session_name}#{?session_attached,: attached,}' 2>/dev/null | fzf --preview '')"
   else
     sessions="$(echo "$*" | tr ' ' '\n')"
   fi
-  [[ -n "$sessions" ]] && xargs -I _ tmux kill-session -t _ <<<${sessions//: attached/}
+
+  [[ -n "$sessions" ]] && xargs -I _ tmux kill-session -t _ <<<"${sessions//: attached/}"
   return
 fi
 
@@ -14,12 +16,21 @@ fi
 [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
 
 if [[ $# -eq 1 ]]; then
-  tmux $change -t "$1" &>/dev/null || (tmux new-session -d -s "$1" && tmux $change -t "$1")
+  tmux $change -t "$1" &>/dev/null || (
+    tmux new-session -d -s "$1" &&
+    tmux $change -t "$1"
+  )
 else
   if tmux has-session &>/dev/null; then
-    session_name="$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --preview '' --exit-0 --select-1)"
+    # Prefer exact $USER session, otherwise use the first session
+    if tmux list-sessions -F "#{session_name}" 2>/dev/null | grep -Fxq "$USER"; then
+      session_name="$USER"
+    else
+      session_name="$(tmux list-sessions -F "#{session_name}" 2>/dev/null | head -n 1)"
+    fi
     [[ -n "$session_name" ]] && tmux $change -t "$session_name"
   else
-    tmux new-session -d -s "$USER" && tmux attach-session -t "$USER"
+    # No existing session: create and attach/switch to $USER
+    tmux new-session -d -s "$USER" && tmux $change -t "$USER"
   fi
 fi

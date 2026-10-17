@@ -264,8 +264,9 @@ they reference the ID and add only the language-specific mechanism or API name.
 
 - **[R39 no-cwd-relative-paths]** Never `./` CWD-relative paths in project code — they break the moment the process starts from a different directory. Each language file names its absolute-path mechanism. Shell commands inherit CWD as hidden state and break the same way, but silently: git resolves pathspecs against CWD even under `--work-tree`, so a stale CWD turns `status -- <path>` into empty output and `ls-files` into "did you forget to 'git add'" — both read as answers rather than as misses. Pin the base explicitly (`git -C <dir>`); never trust where the shell happens to have landed.
 - **[R40 tls-verify-stays-on]** TLS certificate verification stays on — never `danger_accept_invalid_certs(true)` (reqwest), `verify=False` (requests / httpx), or any language's equivalent.
-- **[R41 fmt-owned-by-precommit]** Formatting is owned by the git pre-commit hook — never run formatters manually.
+- **[R82 fmt-before-staging]** Run the language's formatter before `git add`, never after — formatting after staging rewrites the working tree but not the index, so the commit ships unformatted code. No hook formats; if one is ever added back, retire this rule.
 - **[R42 tests-only-when-suite]** Run the language's test command only when a test suite exists.
+- **[R83 name-only-what-you-depend-on]** Never encode knowledge of code this module does not depend on — keys, panes, command names, another module's types, constants or behavior — in code, comments, error text or tool descriptions alike. Before naming something defined elsewhere, check this module's manifest/imports for its definer: absent means hidden coupling — when the definer changes, this text or logic goes silently wrong and no compiler sees it. Fix by saying it in this layer's own terms ("stop the run", not "press esc"), or by moving the knowledge to the layer that owns it and injecting it (parameter, trait, callback); a value two modules share comes from one definition, never two copies.
 
 # Chinese Typography (punctuation width)
 

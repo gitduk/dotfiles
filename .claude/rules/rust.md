@@ -12,6 +12,6 @@ paths:
   - small files: `include_str!("../../file.txt")` embeds at compile time
   - dev/test: `env!("CARGO_MANIFEST_DIR")`
   - production: config file or `current_exe()`
-- **[R80 rust-qa]** Quality: `cargo clippy -- -D warnings`; `cargo test` per [R42 tests-only-when-suite]; fmt per [R41 fmt-owned-by-precommit]
+- **[R80 rust-qa]** Quality: `cargo clippy -- -D warnings`; `cargo test` per [R42 tests-only-when-suite]; `cargo fmt` per [R82 fmt-before-staging]
   - no `cargo build` just to type-check (clippy already compiles) — build only when the binary itself is needed
   - never `cargo generate-lockfile` (it is a side effect of clippy/test)

@@ -1,0 +1,208 @@
+
+##############
+### config ###
+##############
+
+declare -A COLOR=(
+  [reset]=""
+  [green]=""
+  [yellow]=""
+  [red]=""
+  [blue]=""
+)
+
+if [[ -t 1 && -z "$NO_COLOR" ]]; then
+  COLOR[reset]=$'\e[0m'
+  COLOR[green]=$'\e[32m'
+  COLOR[yellow]=$'\e[33m'
+  COLOR[red]=$'\e[31m'
+  COLOR[blue]=$'\e[34m'
+fi
+
+usage() {
+  local name="${0##*/}"
+  cat << EOF
+Usage: $name [OPTIONS] [NAME]
+
+Set or manage tmux pane names:
+  $name "my-name"        Set current pane name
+  $name PANE_ID NAME     Set specific pane name by index
+  $name -d [PANE_ID]     Delete pane name (current or specified)
+  $name -D               Delete all pane names
+  $name -l               List all panes with names
+  $name -h|--help        Show this help
+
+Examples:
+  $name "web-server"
+  $name 1 "database"
+  $name -d
+  $name -d 1
+EOF
+}
+
+logger() {
+  local level="$1"
+  shift
+
+  local color_reset="${COLOR[reset]}"
+  local color_level=""
+  local fd=1
+
+  case "$level" in
+  INFO)  color_level="${COLOR[blue]}"   ;;
+  OK)    color_level="${COLOR[green]}"  ;;
+  WARN)  color_level="${COLOR[yellow]}"; fd=2 ;;
+  ERROR) color_level="${COLOR[red]}";   fd=2 ;;
+  *)     color_level="" ;;
+  esac
+
+  printf '[%s%s%s] %s\n' "$color_level" "$level" "$color_reset" "$*" >&$fd
+}
+
+############
+### main ###
+############
+
+check_tmux() {
+  if [[ -z "$TMUX" ]]; then
+    logger ERROR "Not in a tmux session"
+    return 1
+  fi
+}
+
+# List all panes in the current window with their names
+list_panes() {
+  printf "Panes in current window:\n"
+  tmux list-panes -F "#{pane_index}: #{pane_current_command} #{?@pane_name,(#{@pane_name}),}"
+}
+
+# Validate that the given pane index exists in the current tmux window
+validate_pane() {
+  local pane_id="$1"
+
+  if [[ ! "$pane_id" =~ ^[0-9]+$ ]]; then
+    logger ERROR "Invalid pane ID: '$pane_id' (must be a number)"
+    return 1
+  fi
+
+  if ! tmux list-panes -F "#{pane_index}" | grep -q "^${pane_id}$"; then
+    logger ERROR "Pane $pane_id does not exist"
+    return 1
+  fi
+}
+
+# Get the @pane_name value for a pane; empty string if unset
+get_pane_name() {
+  local target_flags=("${@}")
+  tmux show -pv "${target_flags[@]}" @pane_name 2>/dev/null
+}
+
+main() {
+  check_tmux || return 1
+
+  if [[ $# -eq 0 ]]; then
+    logger ERROR "Name is required"
+    usage
+    return 1
+  fi
+
+  case "$1" in
+  -h|--help)
+    usage
+    ;;
+
+  -d)
+    if [[ -n "$2" ]]; then
+      # Delete the name of a specific pane by index
+      local pane_id="$2"
+      validate_pane "$pane_id" || return 1
+      local pane_name
+      pane_name=$(get_pane_name -t "$pane_id")
+      if [[ -n "$pane_name" ]]; then
+        if tmux set -u -p -t "$pane_id" @pane_name; then
+          logger OK "Unset pane $pane_id \"$pane_name\""
+        else
+          logger ERROR "Failed to unset pane $pane_id"
+          return 1
+        fi
+      else
+        logger WARN "Pane $pane_id has no name set"
+      fi
+    else
+      # Delete the name of the current pane
+      local current_name
+      current_name=$(get_pane_name)
+      if [[ -n "$current_name" ]]; then
+        if tmux set -u -p @pane_name; then
+          logger OK "Unset current pane \"$current_name\""
+        else
+          logger ERROR "Failed to unset current pane name"
+          return 1
+        fi
+      else
+        logger WARN "Current pane has no name set"
+      fi
+    fi
+    ;;
+
+  -D)
+    local count=0
+    local unset_names=()
+    for pane_id in $(tmux list-panes -F "#{pane_index}"); do
+      local pane_name
+      pane_name=$(get_pane_name -t "$pane_id")
+      if [[ -n "$pane_name" ]]; then
+        if tmux set -u -p -t "$pane_id" @pane_name; then
+          unset_names+=("pane $pane_id: $pane_name")
+          (( count += 1 ))
+        fi
+      fi
+    done
+    if [[ $count -gt 0 ]]; then
+      logger OK "Unset $count pane(s):"
+      printf "  %s\n" "${unset_names[@]}"
+    else
+      logger INFO "No pane names to unset"
+    fi
+    ;;
+
+  -l|--list)
+    list_panes
+    ;;
+
+  -*)
+    logger ERROR "Unknown option '$1'"
+    usage
+    return 1
+    ;;
+
+  *)
+    if [[ "$1" =~ ^[0-9]+$ ]]; then
+      # First arg is a number — treat as PANE_ID NAME
+      if [[ $# -lt 2 ]]; then
+        logger ERROR "NAME is required when PANE_ID is specified"
+        usage
+        return 1
+      fi
+      local pane_id="$1" name="$2"
+      validate_pane "$pane_id" || return 1
+      if tmux set -p -t "$pane_id" @pane_name "$name"; then
+        logger OK "Set pane $pane_id to \"$name\""
+      else
+        logger ERROR "Failed to set pane $pane_id name"
+        return 1
+      fi
+    else
+      # Set name for current pane
+      if tmux set -p @pane_name "$1"; then
+        logger OK "Set current pane to \"$1\""
+      else
+        logger ERROR "Failed to set current pane name"
+        return 1
+      fi
+    fi
+    ;;
+  esac
+}
+
+main "$@"

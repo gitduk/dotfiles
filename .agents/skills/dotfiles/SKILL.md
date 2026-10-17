@@ -1,123 +1,75 @@
 ---
-name: dotfiles
-description: Sync config files to the bare dotfiles repo (~/.dotfiles.git, worktree $HOME). Use when the user runs /dotfiles, asks to commit/push dotfiles, 固化配置, or sync ~/.claude changes into version control. Stages tracked modifications and untracked claude config files (rules/hooks/skills), blocks secrets, then commits and pushes.
-user-invocable: true
+description: Sync $HOME config to the bare dotfiles repo via the `c` command — stage, scan for secrets (name + content), draft message, confirm, commit & push
+argument-hint: "[push]"
 ---
-
 # Dotfiles Repo
 
-Managed as a **bare git repo**: `~/.dotfiles.git`, worktree `$HOME`.
+Bare repo `~/.dotfiles.git`, worktree `$HOME`. All git ops go through `c` (`~/.local/bin/c`, bash-compatible):
+- `c add` — stage all changes incl. untracked pi config
+- `c status` — show state
+- `c commit`/`c push` — pass-through
+- `c restore` — unstages; if unstaged edits exist it restores them from the worktree (discards them)
 
-Always use the full form (the `c` alias is zsh-only, not available in Bash tool):
-
-```bash
-git --work-tree=$HOME --git-dir=$HOME/.dotfiles.git <git-args>
-```
+Mode: **${1:-ask}**
 
 ---
 
-## Step 1 — Detect & stage (single bash call)
+## Step 1 — Inspect, then stage precisely
 
-Run this compound script **in one Bash tool call**:
+Never run bare `c add` — it stages the whole `$HOME` worktree (1.6M untracked files: caches, containers, project dirs, credentials). Inspect first, then stage only the real dotfile paths:
 
 ```bash
-export GIT_DIR="$HOME/.dotfiles.git"
-export GIT_WORK_TREE="$HOME"
-
-is_blocked() { case "\$1" in
-  # secrets / credentials — never commit these
-  *token*|*secret*|*password*|*credential*|*.pem|*.key|*.p12|*.env|.env*)
-    return 0 ;;
-  # auto-generated memory / project-local state
-  .claude/projects/*)
-    return 0 ;;
-  *) return 1 ;;
-esac; }
-
-echo "=== Unpushed commits ==="
-git log @{u}..HEAD --oneline 2>/dev/null \
-  || git log origin/master..HEAD --oneline 2>/dev/null \
-  || echo "(no upstream)"
-
-echo ""
-echo "=== Pre-staged cleanup (unstage blocked files) ==="
-git diff --cached --name-only | while IFS= read -r rel; do
-  if is_blocked "$rel"; then
-    git restore --staged -- "$rel" && echo "  unstaged(blocked): $rel"
-  fi
-done
-
-echo ""
-echo "=== Modified/deleted tracked files → staging ==="
-git status --porcelain | while IFS= read -r line; do
-  xy="${line:0:2}"
-  rel="${line:3}"
-  [[ "$xy" == "??" ]] && continue
-  [[ "$rel" == *" -> "* ]] && rel="${rel##* -> }"
-  if is_blocked "$rel"; then
-    echo "  blocked:  $rel"
-  elif [[ -e "$HOME/$rel" ]]; then
-    git add "$HOME/$rel" && echo "  staged:   $rel"
-  else
-    git rm --cached -- "$rel" 2>/dev/null && echo "  staged(rm): $rel" \
-      || echo "  skip(already-rm): $rel"
-  fi
-done
-
-echo ""
-echo "=== Untracked claude files → staging ==="
-{ find ~/.claude/rules ~/.claude/hooks ~/.claude/commands -type f -print0 2>/dev/null
-  find ~/.claude/skills -type f \( -name "SKILL.md" -o -path "*/scripts/*" \) -print0 2>/dev/null
-} |
-while IFS= read -r -d '' f; do
-  rel="${f#$HOME/}"
-  git ls-files --error-unmatch "$f" >/dev/null 2>&1 && continue
-  if is_blocked "$rel"; then
-    echo "  blocked:  $rel"
-  else
-    git add "$f" && echo "  added:    $rel"
-  fi
-done
-
-echo ""
-echo "=== Staged diff ==="
-git diff --cached --name-only
+cd "$HOME" && c status --porcelain -uall
 ```
 
-After the staged diff, verify no blocked file appears in the output.
-If any blocked file is still staged, **STOP and report. Do NOT proceed.**
+From the porcelain output, identify the genuine dotfile changes (`.pi/agent/...`, `.zsh.d/...`, `.tmux.conf`, configs you manage) and stage only those paths explicitly — never the whole tree:
+
+```bash
+c add -A -- .pi/agent/... .zsh.d/...
+```
+
+Then run the mandatory secret gate — **on any match, STOP and report. Do NOT commit.**
+
+Filename sweep (credential-shaped paths):
+```bash
+c diff --cached --name-only | grep -iE 'token|secret|password|credential|\.env|\.pem|\.key|\.p12|\.p8'
+```
+
+Content sweep (real secret shapes inside the staged diff — catches tokens hidden in ordinary filenames):
+```bash
+c diff --cached | grep -aiE 'BEGIN [A-Z ]*PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[0-9A-Za-z-]{10,}'
+```
+
+Flag new modules — if any untracked extension or prompt is being added, call it out explicitly so the user knows it's in this commit. `--porcelain -uall` avoids ANSI color and untracked-directory collapsing (both of which hid files before):
+```bash
+c status --porcelain -uall | grep -E '^\?\? .pi/agent/(extensions|prompts)/'
+```
+After `c add`, if the porcelain above still lists `??` entries (a file `c add` missed), `git add` them explicitly before continuing:
+```bash
+git --git-dir="$HOME/.dotfiles.git" --work-tree="$HOME" add <missed-path>
+```
 
 ---
 
 ## Step 2 — Propose commit
 
-Draft commit message from the staged files in the output above:
-`<type>[scope]: <imperative summary>` (max 72 chars)
-
-**Mode check:**
-- `/dotfiles` (no args): show staged diff + message, ask user to confirm before Step 3
-- `/dotfiles push`: skip confirmation, go directly to Step 3
+Message: `<type>[scope]: <imperative summary>` (≤72 chars)
+- `ask` / no argument: show staged list + proposed message, wait for confirmation
+- `push`: skip confirmation, go to Step 3
 
 ---
 
-## Step 3 — Commit & push (single bash call)
+## Step 3 — Commit & push
 
 ```bash
-export GIT_DIR="$HOME/.dotfiles.git" GIT_WORK_TREE="$HOME"
-git commit -m "<message>" && git push && git status --short
+cd "$HOME" && c commit -m "<message>" && c push
 ```
 
-Only report success if `status --short` output is empty.
-If any paths remain, report them explicitly — do **not** claim the update is complete.
+Only report success if `c status --short` prints nothing; otherwise list the remaining paths explicitly — do not claim completion.
 
 ---
 
 ## Constraints
+- The Step 1 gate is mandatory — never commit tokens/credentials
+- If the change set includes `.pi/agent/prompts/dotfiles.md` itself, don't treat this run as authoritative; rerun in a fresh session
 
-- Never commit tokens or credentials
-- When creating/modifying files under `~/.claude/rules/` or `~/.claude/hooks/`,
-  track them immediately with `git ... add $HOME/<path>`
-- If the current change set includes `~/.claude/skills/dotfiles/SKILL.md` itself,
-  do not treat the current `/dotfiles` run as authoritative. Rerun in a fresh
-  session after the file is saved.
-- Functions live in `~/.zsh.d/functions/` and are autoloaded by zsh
