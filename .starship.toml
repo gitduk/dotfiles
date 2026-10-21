@@ -4,6 +4,10 @@
 # Inserts a blank line between shell prompts
 add_newline = false
 
+# Milliseconds starship may spend scanning the current directory for project
+# files. Default 30 is below what a cold scan of a large tree needs.
+scan_timeout = 30
+
 # Use custom format
 format = """
 $hostname\

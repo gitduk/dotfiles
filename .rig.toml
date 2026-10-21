@@ -34,12 +34,13 @@ description = "Like du but more intuitive"
 name = "Canop/dysk"
 bpick = "dysk_*.zip"
 run = "alias ds='dysk'"
-setup = "mv */completion/_dysk .; mv */x86_64-unknown-linux-musl/dysk .; rm -rf */"
+setup = "mv completion/_dysk .; mv x86_64-unknown-linux-musl/dysk .; rm -rf */"
 description = "dysk displays filesystem information in a pretty table"
 
 [[repo]]
 name = "casey/just"
 completions = { generate = "./just --completions zsh > _just" }
+run = "alias js='just'"
 description = "Just a command runner"
 
 [[repo]]
@@ -69,7 +70,7 @@ description = "A rich git commit graph in your terminal"
 [[repo]]
 name = "fastfetch-cli/fastfetch"
 bpick = "fastfetch-linux-amd64.tar.gz"
-bin = { "fastfetch-*/usr/bin/fastfetch" = "fastfetch" }
+bin = { "usr/bin/fastfetch" = "fastfetch" }
 run = "alias ff='fastfetch'"
 description = "A neofetch-like tool for fetching system information"
 
@@ -143,13 +144,13 @@ description = "A database management tui"
 [[repo]]
 name = "SagerNet/sing-box"
 bpick = "sing-box-*-linux-amd64.tar.gz"
-setup = "sudo setcap cap_net_admin=+ep */sing-box"
+setup = "sudo setcap cap_net_admin=+ep sing-box"
 description = "The universal proxy platform"
 
 [[repo]]
 name = "cli/cli"
 bpick = "gh_*_linux_amd64.tar.gz"
-bin = { "gh_*/bin/gh" = "gh" }
+bin = "gh"
 completions = { generate = "./gh completion -s zsh > _gh" }
 description = "Work seamlessly with GitHub from the command line"
 
@@ -200,7 +201,6 @@ description = "A modern replacement for ls"
 [[repo]]
 name = "sharkdp/bat"
 bpick = "bat-v*-x86_64-unknown-linux-gnu.tar.gz"
-bin = { "bat-*/bat" = "bat" }
 completions = { generate = "./bat --completion zsh > _bat" }
 description = "A cat clone with syntax highlighting and Git integration"
 
@@ -242,7 +242,7 @@ description = "lightweight cross-platform database client"
 name = "starship/starship"
 bpick = "starship-x86_64-unknown-linux-gnu.tar.gz"
 completions = { generate = "./starship completions zsh > _starship" }
-env = { STARSHIP_CONFIG = "~/.starship.toml" }
+env = { STARSHIP_CONFIG = "~/.starship.toml", STARSHIP_LOG="error"}
 eval = "starship init zsh"
 description = "The minimal, blazing-fast, and infinitely customizable prompt for any shell"
 
@@ -272,15 +272,18 @@ bin = "tmux"
 description = "Prebuilt tmux binaries"
 
 [[repo]]
+name = "ivaaaan/smug"
+bpick = "smug_*_Linux_x86_64.tar.gz"
+description = "Session manager and task runner for tmux"
+
+[[repo]]
 name = "gitduk/ccs"
 bpick = "ccs-x86_64-unknown-linux-gnu.tar.gz"
-bin = { "*/ccs" = "ccs" }
 description = "lightweight API proxy for routing Claude Code traffic"
 
 [[repo]]
 name = "gitduk/zhis"
 bpick = "zhis-x86_64-unknown-linux-gnu.tar.gz"
-bin = { "*/zhis" = "zhis" }
 eval = "zhis init"
 env = { HIST_EXCLUDE="(cd ls clear pwd exit pi)" }
 description = "zsh history store recording directory, exit status, and duration"
@@ -288,9 +291,15 @@ description = "zsh history store recording directory, exit status, and duration"
 [[repo]]
 name = "gitduk/pi-rs"
 bpick = "pi-x86_64-*.tar.gz"
-bin = { "*/pi" = "pi" }
+bin = "pi"
 run = "alias p='pi'"
 description = "Pi By Rust"
+
+[[repo]]
+name = "gitduk/ms"
+bpick = "ms-x86_64-unknown-linux-gnu.tar.gz"
+eval = "ms init zsh"
+description = "Save and restore tmux sessions"
 
 [[repo]]
 name = "Giammarco-Ferranti/deja"
@@ -303,6 +312,14 @@ description = "Predictive inline shell autosuggestions for zsh"
 name = "webxsid/crona"
 bpick = "crona-bundle-*-linux-amd64.zip"
 description = "Local-first work tracking for people who live in the terminal."
+
+[[repo]]
+name = "EasyTier/EasyTier"
+bin = ["easytier-core", "easytier-cli"]
+bpick = "easytier-linux-x86_64-v*.zip"
+setup = "sudo setcap cap_net_admin=+ep easytier-core"
+run = "alias epr='easytier-cli peer'"
+description = "A simple, decentralized mesh VPN with WireGuard support."
 
 # ============ [[git]] 源码构建（钩子只构建，rig 来放）============
 
@@ -347,10 +364,6 @@ description = "OpenAI Codex command-line interface"
 # ============ [[apt]] 系统包 ============
 
 [[apt]]
-name = "git"
-description = "fast, scalable, distributed revision control system"
-
-[[apt]]
 name = "nala"
 run = '''
 alias nai="sudo nala install -y"
@@ -374,6 +387,10 @@ description = "A fast, lightweight and minimalistic Wayland terminal emulator"
 [[apt]]
 name = "kitty"
 description = "A cross-platform, GPU-accelerated terminal emulator"
+
+[[apt]]
+name = "google-chrome-stable"
+description = "The web browser from Google"
 
 # ============ [[curl]] 安装脚本 ============
 
@@ -407,12 +424,6 @@ setup = "rtk init -g --agent pi"
 description = "Token-optimized CLI proxy for Claude Code"
 
 [[curl]]
-name = "easytier"
-url = "https://github.com/EasyTier/EasyTier/blob/main/script/install.sh?raw=true"
-run = "alias epr='easytier-cli peer'"
-description = "A simple, decentralized mesh VPN with WireGuard support."
-
-[[curl]]
 name = "direnv/direnv"
 url = "https://direnv.net/install.sh"
 env = { bin_path = "~/.local/bin" }
@@ -424,12 +435,6 @@ alias did="direnv disallow"
 alias eenv="v .env"
 '''
 description = "unclutter your .profile"
-
-[[curl]]
-name = "casey/just"
-url = "https://just.systems/install.sh"
-run = "alias js='just'"
-description = "Just a command runner"
 
 # ============ [[plugin]] Job B —— 纯 clone/source，不构建 ============
 

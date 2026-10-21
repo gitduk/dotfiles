@@ -1,0 +1,12 @@
+[Unit]
+Description=EasyTier decentralized mesh VPN node
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/easytier-core -c %h/.config/easytier/config.toml
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

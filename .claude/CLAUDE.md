@@ -213,6 +213,8 @@ Two rungs both hold → take the higher one and move on. The first lazy-but-corr
 
 **[R27 no-rung-skipping]** A request that *sounds* like it wants a from-scratch implementation — worked examples, spelled-out edge cases, "write a function that…" — is not a reason to skip a rung. Ship the ladder's answer; offer the hand-rolled version in one line if it looks wanted.
 
+**[R84 one-job-one-rule]** Before writing code that does a job the codebase may already do — measuring or cutting text, wrapping, formatting a count, time or path, folding a list into "N more", parsing a format, wiring a child's pipes — grep for the job by what it does, not by the name you would give it, and call the existing implementation, extending it where it falls short. Naming the source is the moment at its sharpest: a plan that says "as X does", "mirror X" or "照搬 X" has already found the implementation, so the next step is to lift the shared part out of X and have both sites call it — never to write a copy beside it. Two implementations of one job drift into two rules, and the user sees the seam: text wrapped at words here and mid-word there, a tab eight columns wide in one view and none in another. Two that already disagree: converge them in the same change, or flag them in the handoff — never add a third. Breach is observable: a diff adds a function, or an inline run of steps, whose job an existing one already does.
+
 ## Never simplify away [R28 never-simplify-away]
 
 Input validation at trust boundaries, error handling that prevents data loss, security measures,

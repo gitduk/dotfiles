@@ -78,6 +78,9 @@ alias cais="cargo install"
 alias caui="cargo uninstall"
 alias carl="cargo release"
 alias care="cargo release --execute --no-confirm"
+alias carp="cargo release --execute --no-confirm patch"
+alias carmi="cargo release --execute --no-confirm minor"
+alias carma="cargo release --execute --no-confirm major"
 
 # docker
 alias dcv="docker volume"

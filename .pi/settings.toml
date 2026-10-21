@@ -35,3 +35,8 @@ pricing = { cache_read_per_mtok = 0.044, input_per_mtok = 1.32, output_per_mtok 
 [mcp.context7]
 url = "https://mcp.context7.com/mcp"
 
+
+# Banner when a run finishes and this terminal is not the focused window.
+[[hooks]]
+on      = ["run.done"]
+command = "~/.pi/hooks/notify-unfocused.sh 5 'pi: Done'"

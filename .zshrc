@@ -35,7 +35,7 @@ _rig_zsh=$HOME/.local/share/rig/rig.zsh
 [[ -f $_rig_zsh ]] || {
   mkdir -p ${_rig_zsh:h}
   curl -fsSL -o $_rig_zsh \
-    https://github.com/gitduk/rig/releases/latest/download/rig.zsh
+    https://raw.githubusercontent.com/gitduk/rig/master/rig.zsh
 }
 source $_rig_zsh
 
