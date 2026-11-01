@@ -70,7 +70,7 @@ The user may at any point say **"安全区?"** (or equivalent short challenge). 
 
 This is external calibration. I cannot always see my own 退缩 in real time. The user can. This mechanism is load-bearing.
 
-> **PART II · Operating rules** — Test: **is it changing behavior**. Countable and repealable; enforced by `cc-score.sh` and the hook gates.
+> **PART II · Operating rules** — Test: **is it changing behavior**. Countable and repealable; enforced by the hook gates.
 
 # Precedence [R11 precedence]
 
@@ -93,19 +93,19 @@ Fires when writing or editing rule text — this file, `rules/`, and any prose a
 
 ## Anchors
 
-Stable named anchors for cross-references and for the handoff report ([R21 review-workflow] step 5). Form is `[Rnn slug]` — a zero-padded number carrying the identity, plus a kebab-case slug naming the rule's core commitment, taken from the rule's own key phrase. The number is what makes the anchor greppable: `\[R21` matches every reference and nothing else, where a bare slug collides with markdown links, wiki links, and ordinary brackets. A new ID takes the current maximum plus one, never a gap left by a retired one, and never a position-derived number — renumbering to match document order would break every existing reference. Prefer a verb-shaped slug over a topic word — at a reference site the ID travels without its body, so `[R31 look-then-leap]` survives that compression while `[R11 precedence]` merely names the subject and has to be looked up. A topic-shaped ID that reads as self-sufficient is precisely the one that gets acted on without the lookup. **Never reuse a retired number or slug for new content** — old references in transcripts and memory must keep pointing at what they meant. Renaming a slug means grepping every reference and updating all of them in the same change; `cc-score.sh` catches config-side leftovers after the fact.
+Stable named anchors for cross-references and for the handoff report ([R21 review-workflow] step 5). Form is `[Rnn slug]` — a zero-padded number carrying the identity, plus a kebab-case slug naming the rule's core commitment, taken from the rule's own key phrase. The number is what makes the anchor greppable: `\[R21` matches every reference and nothing else, where a bare slug collides with markdown links, wiki links, and ordinary brackets. A new ID takes the current maximum plus one, never a gap left by a retired one, and never a position-derived number — renumbering to match document order would break every existing reference. Prefer a verb-shaped slug over a topic word — at a reference site the ID travels without its body, so `[R31 look-then-leap]` survives that compression while `[R11 precedence]` merely names the subject and has to be looked up. A topic-shaped ID that reads as self-sufficient is precisely the one that gets acted on without the lookup. **Never reuse a retired number or slug for new content** — old references in transcripts and memory must keep pointing at what they meant. Renaming a slug means grepping every reference and updating all of them in the same change.
 
 Two definition forms; the choice is not stylistic, it names what can be violated:
 - `## Heading [Rnn slug]` — the section is one indivisible obligation, run whole or not at all ([R21 review-workflow], [R07 retreat-patterns]). Cite a part as `[R07 retreat-patterns] #2`.
 - `**[Rnn slug]**` at line start, bullet or paragraph — one clause, violable on its own ([R36 doc-comments], [R43 punct-context-test]).
 
-Test: if "violated [X]" needs a sub-reference to mean anything, it is a section ID; otherwise a clause ID. `cc-score.sh` recognizes only these two positions — an ID anywhere else reads as a reference and fails the resolve check.
+Test: if "violated [X]" needs a sub-reference to mean anything, it is a section ID; otherwise a clause ID. Only these two positions define an ID — one anywhere else reads as a reference.
 
 **No nesting** — an ID definition never sits inside another ID's scope (a section's scope runs to the next heading at its level or above; a clause's, to its indented subtree). Nesting asserts a containment the IDs deny: an indivisible section cannot hold a separately-violable clause, and an indented clause reads as its parent's detail while its own ID says otherwise. Unnumbered sub-items are fine (`[R07 retreat-patterns]`'s seven symptom→break pairs carry no IDs of their own); one that earns an ID gets promoted to sibling level instead. Clause IDs therefore start at column 0.
 
 **Reference by ID, not position** — dependencies between rules are wanted ([R13 propose-first] pairing with [R01 sovereignty], [R53 punct-width] deferring to [R43 punct-context-test] instead of restating it); they just have to be traceable. "the workflow below" / "any pattern above" reaching across an ID boundary is a dependency no tool can see: it fails silently when the target moves or gets renamed, and it leaves the range ambiguous when several IDs sit "above". Positional wording stays legal where it crosses no ID boundary: inside one ID's own scope, or as a lead-in to the list sitting directly under it ([R19 rule-quality]'s "A good rule:" introducing its numbered items). No hook enforces this — "above" is indistinguishable from ordinary prose, so it rides on review attention.
 
-**[R14 redeemable-dependencies] Dependencies must be redeemable** — a reference is worth only as much as the target's presence when the reference is read, and rule content does not all load together: this file is the resident set, while everything under `rules/` is conditional (`paths:`-scoped, loads per matching project). This file therefore must not reference an ID defined under `rules/` — the symbol still resolves on disk, yet the content is absent at runtime, which is the one failure reading alone cannot see. `cc-score.sh` enforces the split structurally: no resident→conditional ID citations, and no `rules/` file without `paths:` frontmatter (resident content belongs in this file). Same-file and conditional→resident references stay safe and wanted (a language file overriding [R26 minimal-ladder] rung 4). The judgement is never "fewer dependencies" — an explicit reference freezes a conflict ruling once, where dropping it forces the ruling to be re-derived, differently, on every run.
+**[R14 redeemable-dependencies] Dependencies must be redeemable** — a reference is worth only as much as the target's presence when the reference is read, and rule content does not all load together: this file is the resident set, while everything under `rules/` is conditional (`paths:`-scoped, loads per matching project). This file therefore must not reference an ID defined under `rules/` — the symbol still resolves on disk, yet the content is absent at runtime, which is the one failure reading alone cannot see. No tool enforces the split, so it rides on drafting: no resident→conditional ID citations, and no `rules/` file without `paths:` frontmatter (resident content belongs in this file). Same-file and conditional→resident references stay safe and wanted (a language file overriding [R26 minimal-ladder] rung 4). The judgement is never "fewer dependencies" — an explicit reference freezes a conflict ruling once, where dropping it forces the ruling to be re-derived, differently, on every run.
 
 ## Sentence discipline
 
@@ -211,6 +211,8 @@ Reflex *before* writing code — the minimal-solution ladder.
 
 Two rungs both hold → take the higher one and move on. The first lazy-but-correct solution is the right one.
 
+The ladder runs per expression, not only per feature. Arithmetic, index math or string surgery that restates an operation a dependency already in use names — `a.y - h` beside ratatui's `Layout`/`union`, a path glued with `/` beside `Path::join`, a date offset by hand beside chrono — is rung 4 skipped. Before writing such an expression, look up the type's API for the operation by name (`union`, `intersection`, `join`, `checked_add`, …). Why: the library's version holds the edge cases and the relation in one place; a hand copy holds neither, and goes silently wrong when the relation changes — a menu moved to cover the jobs list, while a hand-counted "rows the menu covers" kept counting the old stacking. Breach is observable: a diff adds such an expression where the type in hand offers the operation.
+
 **[R27 no-rung-skipping]** A request that *sounds* like it wants a from-scratch implementation — worked examples, spelled-out edge cases, "write a function that…" — is not a reason to skip a rung. Ship the ladder's answer; offer the hand-rolled version in one line if it looks wanted.
 
 **[R84 one-job-one-rule]** Before writing code that does a job the codebase may already do — measuring or cutting text, wrapping, formatting a count, time or path, folding a list into "N more", parsing a format, wiring a child's pipes — grep for the job by what it does, not by the name you would give it, and call the existing implementation, extending it where it falls short. Naming the source is the moment at its sharpest: a plan that says "as X does", "mirror X" or "照搬 X" has already found the implementation, so the next step is to lift the shared part out of X and have both sites call it — never to write a copy beside it. Two implementations of one job drift into two rules, and the user sees the seam: text wrapped at words here and mid-word there, a tab eight columns wide in one view and none in another. Two that already disagree: converge them in the same change, or flag them in the handoff — never add a third. Breach is observable: a diff adds a function, or an inline run of steps, whose job an existing one already does.
@@ -249,7 +251,7 @@ Writing-time discipline for code comments — fires when writing code, not when 
 
 # Testing
 
-Writing-time discipline for test fixtures — fires when writing a test, not when reviewing it.
+Writing-time discipline for tests — fires when writing a test, not when reviewing it.
 (The review-side counterpart is the Simplicity/duplication dimension of [R22 review-dimensions].)
 
 - **[R38 shared-fixtures]** The moment the same object needs full construction in a 2nd test file, extract a
@@ -258,17 +260,31 @@ Writing-time discipline for test fixtures — fires when writing a test, not whe
   dict/dataclass literals, TS object literals all rot the same way — duplicated construction
   drifts silently out of sync when the underlying shape changes, and nothing catches it until
   every copy is found by hand.
+- **[R86 tests-guard-invisible-drift]** Before writing a test or an assertion, ask whether a
+  regression there would be noticed just by using the program; if yes, write none. Tests
+  exist for drift nobody sees: state and fold logic, index and height accounting, walk
+  order, persistence, data safety, concurrency, parsing, and text only the model reads
+  (prompts, tool output, error codes). Never pin what shows at once — a glyph, wording,
+  indentation, layout, a tuning constant's value: assert the relation instead (a count, an
+  order, which item a line maps to, "stopped below the cap") or name the constant. When an
+  intended visible change breaks such an assertion, drop or loosen it and keep the logic it
+  carried — never paste the new output into the expected value. Exempt: a test the user
+  asks for. Why: a pin on visible output repeats what the eye checks for free, breaks on
+  every intended tweak, and gets "fixed" by copying the new output, so it costs upkeep and
+  never catches a bug. Breach is observable: a diff adds or rewrites an expected literal of
+  rendered text or of a tuning value.
 
 # Cross-Language Invariants
 
 Writing-time constants that hold in every language. Language rules files do not restate them —
 they reference the ID and add only the language-specific mechanism or API name.
 
-- **[R39 no-cwd-relative-paths]** Never `./` CWD-relative paths in project code — they break the moment the process starts from a different directory. Each language file names its absolute-path mechanism. Shell commands inherit CWD as hidden state and break the same way, but silently: git resolves pathspecs against CWD even under `--work-tree`, so a stale CWD turns `status -- <path>` into empty output and `ls-files` into "did you forget to 'git add'" — both read as answers rather than as misses. Pin the base explicitly (`git -C <dir>`); never trust where the shell happens to have landed.
+- **[R39 no-cwd-relative-paths]** Never `./` CWD-relative paths in project code — they break the moment the process starts from a different directory. Each language file names its absolute-path mechanism. For shell commands, the tool's guaranteed workspace directory or explicit working-directory parameter pins the base: do not prefix commands with `cd` to that same directory, and select other directories through the parameter when available; when neither guarantee nor parameter exists, pin the base explicitly (for example, `git -C <dir>`).
 - **[R40 tls-verify-stays-on]** TLS certificate verification stays on — never `danger_accept_invalid_certs(true)` (reqwest), `verify=False` (requests / httpx), or any language's equivalent.
 - **[R82 fmt-before-staging]** Run the language's formatter before `git add`, never after — formatting after staging rewrites the working tree but not the index, so the commit ships unformatted code. No hook formats; if one is ever added back, retire this rule.
 - **[R42 tests-only-when-suite]** Run the language's test command only when a test suite exists.
 - **[R83 name-only-what-you-depend-on]** Never encode knowledge of code this module does not depend on — keys, panes, command names, another module's types, constants or behavior — in code, comments, error text or tool descriptions alike. Before naming something defined elsewhere, check this module's manifest/imports for its definer: absent means hidden coupling — when the definer changes, this text or logic goes silently wrong and no compiler sees it. Fix by saying it in this layer's own terms ("stop the run", not "press esc"), or by moving the knowledge to the layer that owns it and injecting it (parameter, trait, callback); a value two modules share comes from one definition, never two copies.
+- **[R85 name-the-effect]** When naming a function, type, field or variant, name what the caller gets — where the data goes, who sees it — never the mechanism it calls (`say_note`, not `file_note` or `push_note_and_draw`). Siblings share one shape and differ only on the axis that truly differs: `say` / `say_kept` / `say_note` reads as one ladder, while `say` / `say_kept` / `tell_model` swaps verb and axis at once, so each name must be decoded by hand. Take the term the codebase already uses before coining one ([R16 one-term-one-meaning]): a new word asserts a new concept. Breach is observable: sibling names that do not read as one pattern, or a new word for an existing concept.
 
 # Chinese Typography (punctuation width)
 

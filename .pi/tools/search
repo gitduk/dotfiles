@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+# ---
+# description = "Search the web.\nReturn numbered results with a title, URL, and snippet without markup.\nUse this tool to find a page that answers your question.\nUse `fetch` to read that page.\nA snippet only helps locate a source.\nThe tool tries DuckDuckGo first, then Bing if DuckDuckGo fails.\n\nEngines may refuse automated requests or return unrelated results.\nThe tool reports either case as a failure, not as an empty result."
+# [required]
+# query = "Specify the search query."
+# [optional]
+# engine = "Use duckduckgo or bing to query only that engine."
+# limit = "Set the result limit. The default is 8. The maximum is 20."
+# ---
+# An example: no key needed, curl does the fetching, a failure exits non-zero
+# with the reason on stderr. It reads result pages, so a layout change on an
+# engine's side can break it; copy it to ~/.pi/tools/ and fix it there.
+import base64
+import os
+import subprocess
+import sys
+import urllib.parse
+from html.parser import HTMLParser
+
+BROWSER = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+)
+TIMEOUT = 20
+VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
+
+
+def fail(message):
+    print(message, file=sys.stderr)
+    sys.exit(1)
+
+
+class Node:
+    def __init__(self, tag, attrs, parent):
+        self.tag, self.attrs, self.parent = tag, dict(attrs), parent
+        self.children = []
+
+    def classes(self):
+        return (self.attrs.get("class") or "").split()
+
+    def walk(self):
+        for child in self.children:
+            if isinstance(child, Node):
+                yield child
+                yield from child.walk()
+
+    def find(self, test):
+        return next((n for n in self.walk() if test(n)), None)
+
+    def text(self):
+        parts = []
+        for child in self.children:
+            parts.append(child.text() if isinstance(child, Node) else child)
+        # Inline markup splits words (`<b>ser</b>ializing`): joined bare.
+        return " ".join("".join(parts).split())
+
+
+class Tree(HTMLParser):
+    """Just enough of a DOM: elements, their attributes, their text."""
+
+    def __init__(self, html):
+        super().__init__(convert_charrefs=True)
+        self.root = self.at = Node("#root", [], None)
+        self.feed(html)
+
+    def handle_starttag(self, tag, attrs):
+        node = Node(tag, attrs, self.at)
+        self.at.children.append(node)
+        if tag not in VOID:
+            self.at = node
+
+    def handle_endtag(self, tag):
+        # Close up to the matching open element; a stray end tag changes nothing.
+        node = self.at
+        while node is not None and node.tag != tag:
+            node = node.parent
+        if node is not None and node.parent is not None:
+            self.at = node.parent
+
+    def handle_data(self, data):
+        if self.at.tag not in ("script", "style"):
+            self.at.children.append(data)
+
+
+def has_class(name):
+    return lambda n: name in n.classes()
+
+
+# --- Where each engine keeps what is read, and how its links resolve.
+
+def duckduckgo_url(href):
+    if href.startswith("//"):
+        href = "https:" + href
+    u = urllib.parse.urlsplit(href)
+    if u.hostname == "duckduckgo.com" and u.path == "/l/":
+        target = urllib.parse.parse_qs(u.query).get("uddg")
+        if target:
+            return target[0]
+    return href
+
+
+def bing_url(href):
+    # Bing links through /ck/a, the target base64url-encoded in `u` behind `a1`.
+    u = urllib.parse.urlsplit(href)
+    if u.path == "/ck/a":
+        target = urllib.parse.parse_qs(u.query).get("u", [""])[0]
+        if target.startswith("a1"):
+            encoded = target[2:]
+            try:
+                return base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)).decode()
+            except ValueError:
+                pass
+    return href
+
+
+def duckduckgo_hits(root):
+    for r in root.walk():
+        cls = r.classes()
+        if r.tag != "div" or "result" not in cls or "result--ad" in cls:
+            continue
+        a = r.find(lambda n: n.tag == "a" and "result__a" in n.classes())
+        if a is None or "href" not in a.attrs:
+            continue
+        snippet = r.find(has_class("result__snippet"))
+        yield a.text(), duckduckgo_url(a.attrs["href"]), snippet.text() if snippet else ""
+
+
+def bing_hits(root):
+    for r in root.walk():
+        if r.tag != "li" or "b_algo" not in r.classes():
+            continue
+        h2 = r.find(lambda n: n.tag == "h2")
+        a = h2 and h2.find(lambda n: n.tag == "a")
+        if a is None or "href" not in a.attrs:
+            continue
+        caption = r.find(has_class("b_caption")) or r
+        p = caption.find(lambda n: n.tag == "p")
+        yield a.text(), bing_url(a.attrs["href"]), p.text() if p else ""
+
+
+ENGINES = {
+    "duckduckgo": {
+        # The form's own POST: a GET of the same page draws a bot check.
+        "curl": ["--data-urlencode", "{q}", "https://html.duckduckgo.com/html/"],
+        "hits": duckduckgo_hits,
+        "none": has_class("no-results"),
+        "blocked": lambda n: any(c.startswith("anomaly-modal") for c in n.classes()),
+    },
+    "bing": {
+        "curl": ["--get", "--data-urlencode", "{q}", "--data-urlencode", "setlang=en",
+                 "https://www.bing.com/search"],
+        "hits": bing_hits,
+        "none": has_class("b_no"),
+        "blocked": None,
+    },
+}
+
+
+def page(engine, query):
+    """The engine's results page, or the reason there is none."""
+    # Fixed https addresses, no redirects, nothing decompressed past the cap.
+    args = ["curl", "--silent", "--show-error", "--proto", "=https",
+            "--max-time", str(TIMEOUT), "--max-filesize", "2M",
+            "--user-agent", BROWSER,
+            "--header", "Accept: text/html,application/xhtml+xml",
+            "--header", "Accept-Language: en-US,en;q=0.9",
+            "--write-out", "\n%{http_code}"]
+    # `q=` before the query keeps a leading `@` from naming a file.
+    args += [a.replace("{q}", "q=" + query) for a in ENGINES[engine]["curl"]]
+    try:
+        out = subprocess.run(args, capture_output=True, timeout=TIMEOUT + 5)
+    except FileNotFoundError:
+        raise RuntimeError("search needs `curl` on PATH")
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"no answer in {TIMEOUT}s")
+    if out.returncode != 0:
+        raise RuntimeError(out.stderr.decode(errors="replace").strip())
+    body, _, status = out.stdout.decode(errors="replace").rpartition("\n")
+    if status.strip() != "200":
+        raise RuntimeError(f"answered {status.strip()}")
+    return body
+
+
+def on_topic(query, hits):
+    # `serde_json` is answered by pages about serde: compounds count by part.
+    words = [w for w in "".join(c if c.isalnum() else " " for c in query.lower()).split()
+             if len(w) >= 2]
+    if not hits or not words:
+        return True
+    return any(any(w in f"{t} {u} {s}".lower() for w in words) for t, u, s in hits)
+
+
+def ask(engine, query):
+    layout = ENGINES[engine]
+    root = Tree(page(engine, query)).root
+    hits = list(layout["hits"](root))
+    if not hits and root.find(layout["none"]) is None:
+        if layout["blocked"] and root.find(layout["blocked"]):
+            raise RuntimeError("it answered with a bot check instead of results")
+        raise RuntimeError("its page held no results this tool can read — a bot check, or a changed layout")
+    if not on_topic(query, hits):
+        raise RuntimeError("its results have nothing to do with the query — likely served to a suspected bot")
+    return hits
+
+
+def main():
+    query = (os.environ.get("query") or "").strip()
+    if not query:
+        fail("an empty query searches for nothing")
+    engine = (os.environ.get("engine") or "").strip().lower()
+    if engine and engine not in ENGINES:
+        fail(f"engine is duckduckgo or bing, not `{engine}`")
+    try:
+        limit = min(max(int(os.environ.get("limit") or 8), 1), 20)
+    except ValueError:
+        fail("limit is a number")
+
+    failed = []
+    for name in [engine] if engine else list(ENGINES):
+        try:
+            hits = ask(name, query)[:limit]
+        except RuntimeError as why:
+            failed.append(f"{name}: {why}")
+            continue
+        if not hits:
+            print(f"{name} found nothing for “{query}”.")
+        else:
+            print(f"{name} results for “{query}”:")
+            for i, (title, url, snippet) in enumerate(hits, 1):
+                print(f"\n{i}. {title}\n   {url}")
+                if snippet:
+                    print(f"   {snippet}")
+        for note in failed:
+            print(f"\nnote: {note.split(':')[0]} failed first:{note.split(':', 1)[1]}")
+        return
+    fail("no engine answered — " + "; ".join(failed))
+
+
+main()

@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+# ---
+# description = "Read a YouTube video's own words: fetch its captions — uploaded first, auto-generated as a fallback — with `yt-dlp` run through `uvx`, so nothing is installed permanently, and print the title, channel, duration, upload date and the transcript with the caption machinery stripped. Takes a watch URL, a youtu.be link, a `/shorts` link or a bare 11-character id, and an optional language. The video's own publication is quoted, never summarised. When `file` is given the whole transcript goes there and only a preview is printed; without it a long transcript is cut at 20k characters with the path to re-run it. Fails with the reason when the video is private or age-gated, when it carries no captions in any language, or when `uvx` cannot fetch yt-dlp."
+# [required]
+# url = "the video: a watch URL, a youtu.be link, a `/shorts` link or the bare 11-character id"
+# [optional]
+# lang = "caption language code, default `en`; `en.*` matches regional variants, and any language is taken when the requested one is absent"
+# file = "write the cleaned transcript to this path as text"
+# ---
+"""A YouTube video's transcript, from yt-dlp's captions, as plain text."""
+
+import html
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import urllib.parse
+
+TIMEOUT = 300
+# A long stream's transcript runs to a megabyte; printing that into a
+# conversation costs more than it is worth, so it is cut and the rest is
+# left where the caller can point `file` at it.
+PREVIEW = 20000
+STAMP = re.compile(r"^\d{2}:\d{2}:\d{2}\.\d{3} --> ")
+TAGS = re.compile(r"<[^>]+>")
+
+
+def fail(message):
+    print(message, file=sys.stderr)
+    sys.exit(1)
+
+
+def parse_args():
+    """Every declared argument arrives as an environment variable of its
+    own name AND as part of the whole call in JSON on stdin; the env var
+    wins, and the JSON covers a name the environment already owns."""
+    import json
+    try:
+        sent = json.load(sys.stdin)
+    except (json.JSONDecodeError, ValueError, OSError):
+        sent = {}
+    if not isinstance(sent, dict):
+        sent = {}
+
+    def arg(name):
+        return str(os.environ.get(name) or sent.get(name) or "").strip()
+
+    return arg
+
+
+def video_url(raw):
+    """A bare id is the only form yt-dlp cannot take as given — it would
+    read it as a file name — so it is wrapped in a watch URL."""
+    if re.fullmatch(r"[A-Za-z0-9_-]{11}", raw):
+        return f"https://www.youtube.com/watch?v={raw}"
+    if "://" in raw:
+        return raw
+    fail(f"{raw!r} is neither a URL nor an 11-character video id")
+
+
+def ytdlp(args):
+    if not shutil.which("uvx"):
+        fail("uvx is not installed — yt-dlp is run through it, and there is "
+             "no other caption route on this machine")
+    done = subprocess.run(["uvx", "--quiet", "yt-dlp", "--no-warnings", *args],
+                          capture_output=True, text=True, timeout=TIMEOUT)
+    return done
+
+
+def meta(args_line):
+    fields = (args_line.split("\t") + ["-"] * 4)[:4]
+    title, channel, duration, uploaded = fields
+    try:
+        minutes = int(float(duration)) // 60
+        length = f"{minutes}m{int(float(duration)) % 60:02d}s"
+    except ValueError:
+        length = duration
+    return f"# {title} — {channel} — {length} — uploaded {uploaded}"
+
+
+def clean_vtt(text):
+    """Cruft out of YouTube's VTT. Each cue repeats the accumulated caption
+    and then shows one more word, so keeping each cue's last line and
+    dropping a line that repeats the one before it leaves the words in
+    order without stuttering."""
+    lines = []
+    for block in text.split("\n\n"):
+        body = [line for line in block.splitlines()
+                if line.strip() and not STAMP.match(line.strip())
+                and line.strip() != "WEBVTT" and not line.startswith(("Kind:",
+                                                                     "Language:"))]
+        if not body:
+            continue
+        last = html.unescape(TAGS.sub("", body[-1])).strip()
+        if last and (not lines or lines[-1] != last):
+            lines.append(last)
+    return " ".join(lines)
+
+
+def fetch(url, lang, workdir):
+    """Uploaded captions first, then auto-generated, then any language: the
+    order a person would want them, since auto-captions mangle jargon."""
+    for langs in (f"{lang}.*,{lang}", "all"):
+        done = ytdlp(["--skip-download", "--write-subs", "--write-auto-subs",
+                      "--sub-langs", langs, "--sub-format", "vtt",
+                      "-o", os.path.join(workdir, "%(id)s"), url])
+        files = sorted(f for f in os.listdir(workdir) if f.endswith(".vtt"))
+        if files:
+            manual = [f for f in files if ".auto." not in f and "-orig." not in f]
+            chosen = sorted(manual or files)[0]
+            with open(os.path.join(workdir, chosen), encoding="utf-8",
+                      errors="replace") as handle:
+                return chosen, clean_vtt(handle.read())
+    return None, done.stderr.strip()[-600:]
+
+
+def main():
+    arg = parse_args()
+    raw = arg("url")
+    if not raw:
+        fail("url is empty — pass a YouTube link or an 11-character video id")
+    url = video_url(raw)
+    lang = arg("lang") or "en"
+    out = arg("file")
+    if not os.environ.get("PATH") or shutil.which("uvx") is None:
+        fail("uvx is not on PATH — yt-dlp is run through it")
+
+    named = ytdlp(["--skip-download", "--print",
+                   "%(title)s\t%(channel)s\t%(duration)s\t%(upload_date)s",
+                   url])
+    if named.returncode != 0 and "Unsupported URL" in named.stderr:
+        fail(f"yt-dlp cannot read {url}: {named.stderr.strip()[-300:]}")
+    header = meta(named.stdout.strip().splitlines()[0]) if named.stdout.strip() \
+        else "# (no metadata)"
+
+    with tempfile.TemporaryDirectory(prefix="yt-transcript-") as workdir:
+        track, transcript = fetch(url, lang, workdir)
+    if not track:
+        fail(f"no captions could be fetched for {url}"
+             + (f": {transcript}" if transcript else ""))
+
+    if out:
+        path = os.path.expanduser(out)
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(f"{header}\n\n{transcript}\n")
+        print(header)
+        print(f"# caption track {track}, {len(transcript)} characters"
+              f" -> {path}")
+        print(f"# first {PREVIEW} characters follow")
+        print(transcript[:PREVIEW])
+        return
+    print(header)
+    print(f"# caption track {track}, {len(transcript)} characters")
+    if len(transcript) > PREVIEW:
+        print(transcript[:PREVIEW])
+        print(f"\n# cut here: {len(transcript)} characters in total — pass "
+              f"`file` to keep the whole transcript")
+        return
+    print(transcript)
+
+
+main()

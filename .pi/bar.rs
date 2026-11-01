@@ -87,6 +87,7 @@ fn main() {
         project(&facts.root),
         json!({ "part": "model", "style": "muted" }),
         json!({ "part": "effort", "style": "muted" }),
+        json!({ "part": "spent", "style": "muted" }),
     ];
     if facts.running {
         left.push(text("working", json!("emphasis")));

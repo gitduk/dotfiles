@@ -9,9 +9,6 @@ format   = "anthropic"
 # What a bare `pi` runs when no session resumes one, as the endpoint names it.
 model = "deepseek-v4.1-flash"
 
-# allow path
-write_roots = ["/tmp"]
-
 loop_max_rounds = 100
 
 status = ["elapsed", "in_out", "speed", "cache", "ctx", "queued", "compacted", "cost"]
@@ -35,6 +32,10 @@ pricing = { cache_read_per_mtok = 0.044, input_per_mtok = 1.32, output_per_mtok 
 [mcp.context7]
 url = "https://mcp.context7.com/mcp"
 
+# Real Chrome under DevTools control: traces, network, console, screenshots.
+[mcp.chrome-devtools]
+command = "bun"
+args    = ["x", "chrome-devtools-mcp@latest"]
 
 # Banner when a run finishes and this terminal is not the focused window.
 [[hooks]]

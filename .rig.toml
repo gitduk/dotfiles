@@ -210,13 +210,6 @@ bpick = "sccache-v*-x86_64-unknown-linux-musl.tar.gz"
 description = "Shared compilation cache for C/C++ and Rust"
 
 [[repo]]
-name = "Schniz/fnm"
-bpick = "fnm-linux.zip"
-run = "alias f='fnm'"
-eval = "fnm env --use-on-cd --shell zsh"
-description = "A fast and simple Node.js manager"
-
-[[repo]]
 name = "astral-sh/ruff"
 bpick = "ruff-x86_64-unknown-linux-musl.tar.gz"
 description = "An extremely fast Python linter and code formatter"

@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+# ---
+# description = "Read the text out of an image — a screenshot, a photo of a page, a diagram's labels — and answer with that text, lines in their original order. Not OCR-only: a vision model reads it, so layout, tables and CJK come through. Fails with the reason when the file is missing, the type is not an image, or the model is unreachable."
+# [required]
+# image = "path of the image to read, absolute or relative to the workspace (e.g. /home/wukaige/.pi/images/1791431570406.png)"
+# ---
+"""Transcribe an image through the vision model on pi's own gateway.
+
+The model is claude-haiku-5-5 (2026-10-27): the previous
+`deepseek-v4-flash-vision-exp` was retired and answers 410 ModelDeprecated. Of the
+gateway's models that accept image input, this one transcribes Chinese screenshots
+accurately and returns an empty thinking block, so its whole output budget goes to
+the transcription. `kimi-k3` also reads images but spends the budget on thinking --
+with a plain `max_tokens` it stops at `max_tokens` with no text at all.
+"""
+
+import base64
+import json
+import os
+import sys
+import tomllib
+import urllib.error
+import urllib.request
+
+MODEL = "claude-haiku-5-5"
+DEFAULT_BASE_URL = "http://127.0.0.1:7896"
+SETTINGS = os.path.expanduser("~/.pi/settings.toml")
+TIMEOUT = 240
+MEDIA_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+}
+PROMPT = (
+    "Transcribe every character of text in this image exactly as it appears, in the "
+    "order it reads. Keep the wording, digits and punctuation as they are, do not "
+    "translate, and add no commentary of your own. "
+    "Do not open with a sentence about what you are doing, do not say the text would be "
+    "long or that you are summarising, and do not summarise: the transcription alone, "
+    "starting at the image's first line of text."
+)
+
+
+def fail(message):
+    print(message, file=sys.stderr)
+    sys.exit(1)
+
+
+def gateway():
+    """The base_url pi runs on; the vision model is served there too."""
+    try:
+        with open(SETTINGS, "rb") as settings:
+            return tomllib.load(settings).get("base_url", DEFAULT_BASE_URL)
+    except (OSError, tomllib.TOMLDecodeError):
+        return DEFAULT_BASE_URL
+
+
+def media_type(path):
+    extension = os.path.splitext(path)[1].lower()
+    if extension not in MEDIA_TYPES:
+        fail(
+            f"{path}: {extension or 'no extension'} is not a supported image type; "
+            f"convert it to one of {', '.join(sorted(MEDIA_TYPES))}"
+        )
+    return MEDIA_TYPES[extension]
+
+
+def transcribe(path):
+    try:
+        with open(path, "rb") as image:
+            encoded = base64.b64encode(image.read()).decode()
+    except OSError as error:
+        fail(f"cannot read {path}: {error.strerror or error}")
+
+    payload = {
+        "model": MODEL,
+        "max_tokens": 16384,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type(path),
+                            "data": encoded,
+                        },
+                    },
+                    {"type": "text", "text": PROMPT},
+                ],
+            }
+        ],
+    }
+    url = gateway().rstrip("/") + "/v1/messages"
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode(),
+        headers={
+            "content-type": "application/json",
+            "anthropic-version": "2023-06-01",
+            # the gateway answers 403 to urllib's default User-Agent
+            "user-agent": "image-to-text/1.0",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            answer = json.load(response)
+    except urllib.error.HTTPError as error:
+        fail(f"{url} answered {error.code}: {error.read().decode(errors='replace')[:500]}")
+    except (urllib.error.URLError, OSError, ValueError) as error:
+        fail(f"cannot reach the model at {url}: {error}")
+
+    blocks = answer.get("content", [])
+    text = "\n".join(b.get("text", "") for b in blocks if b.get("type") == "text").strip()
+    if not text:
+        # A model that thinks before answering spends the budget on the thinking block:
+        # the answer comes back empty and `stop_reason` is max_tokens, not a missing image.
+        if answer.get("stop_reason") == "max_tokens" and any(b.get("type") == "thinking" for b in blocks):
+            fail(
+                "the model spent its whole output budget thinking and returned no transcription; "
+                f"raise max_tokens or drop the thinking block ({MODEL})"
+            )
+        fail(
+            f"the model answered no text (stop_reason={answer.get('stop_reason')}, "
+            f"blocks={[b.get('type') for b in blocks]})"
+        )
+    print(text)
+    if answer.get("stop_reason") == "max_tokens":
+        print("[truncated: the model hit its output limit, the end of the text is missing]")
+
+
+if __name__ == "__main__":
+    argument = os.environ.get("image") or json.load(sys.stdin).get("image")
+    if not argument:
+        fail("no image argument was given")
+    transcribe(argument)

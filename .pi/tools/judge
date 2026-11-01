@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+# ---
+# description = "Ask a judgment model questions about one shared state.\nThe tool returns structured answers.\nUse it to classify output, rank options, or check a condition.\nIt supports choices among options, scores across defined levels, and probabilities that statements are true.\nCombine questions about the same state in one call.\n\nThe questions run in parallel.\nAdding questions has little effect on response time.\nEach question must ask one thing that a knowledgeable person could answer in seconds.\nSplit larger judgments into separate questions.\nCombine their answers in your own logic.\n\nAnswers contain only the supplied options or score levels, or a probability.\nThey contain no generated prose.\nUse them directly for branching, sorting, and thresholds.\nDo not use this model for writing, rewriting, or open-ended reasoning."
+# [required]
+# state = "Supply the state to judge as a string or JSON object. Instructions can reference object fields by dot path, such as `output.block_2`."
+# questions = "Supply a JSON object that maps each question ID to a question.\nEach answer uses the same ID.\nWrite the complete question in its `instructions`.\nEach question contains `type`, `instructions`, and `criteria` where required.\n\n- Use `type: \"choice\"` to select one option.\n  Set `criteria` to an object mapping options to descriptions.\n- Use `type: \"score\"` for a position among ordered levels.\n  Set `criteria` to an ordered array of levels.\n- Use `type: \"noul\"` for the probability that a statement is true.\n  Its optional `criteria` can contain `yes` and `no` clarifications.\n\nYou may include questions that apply only to some inputs.\nThese questions add little cost."
+# [optional]
+# model = "Specify a model name the endpoint accepts. The default is the configured model. That model is jev-latest unless overridden."
+# ---
+# An example of a keyed service: the key comes from ~/.pi/tools/.env
+# (TYPESAFE_API_KEY; JUDGE_BASE_URL and JUDGE_MODEL override the defaults),
+# and the structured arguments are read from the call's JSON on stdin.
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+
+BASE_URL = os.environ.get("JUDGE_BASE_URL") or "https://api.typesafe.ai/v1"
+MODEL = os.environ.get("JUDGE_MODEL") or "jev-latest"
+TIMEOUT = 30
+MAX_BYTES = 4 << 20
+MAX_ERROR_BODY = 2000
+
+
+def fail(message):
+    print(message, file=sys.stderr)
+    sys.exit(1)
+
+
+def structured(value, name):
+    # The schema says string; a model may still send the object itself.
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except ValueError:
+            if name == "state":
+                return value
+            fail(f"`{name}` is not JSON: {value[:200]}")
+    return value
+
+
+def check(questions):
+    # Refused here, where the model can fix it in place, not as the endpoint's 422.
+    if not isinstance(questions, dict) or not questions:
+        fail("`questions` is an object of question id → question")
+    wants = {"choice": (dict, "a map of {option: description}"),
+             "score": (list, "an ordered array of levels, scored by position")}
+    for qid, q in questions.items():
+        if not isinstance(q, dict) or not isinstance(q.get("instructions"), str):
+            fail(f"questions.{qid}: needs `type` and `instructions`")
+        kind = q.get("type")
+        if kind not in ("choice", "score", "noul"):
+            fail(f"questions.{qid}: `type` is choice, score or noul, not {kind!r}")
+        if kind in wants and not isinstance(q.get("criteria"), wants[kind][0]):
+            fail(f"questions.{qid}: a {kind} question takes `criteria` as {wants[kind][1]}")
+
+
+def digest(answers):
+    # phase=done  readiness=1.25  urgent=0.95: one value per answer, at a glance.
+    parts = []
+    for qid, a in (answers or {}).items():
+        kind = a.get("type") if isinstance(a, dict) else None
+        value = a.get(kind) if kind in ("choice", "score", "noul") else None
+        parts.append(qid if value is None else f"{qid}={value}")
+    return "  ".join(parts)
+
+
+def main():
+    try:
+        call = json.load(sys.stdin)
+    except ValueError:
+        fail("no call on stdin")
+    if "state" not in call or "questions" not in call:
+        fail("`state` and `questions` are both required")
+    questions = structured(call["questions"], "questions")
+    check(questions)
+    body = {
+        "state": structured(call["state"], "state"),
+        "questions": questions,
+        "model": call.get("model") or MODEL,
+    }
+
+    request = urllib.request.Request(
+        BASE_URL.rstrip("/") + "/systemone",
+        data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json", "User-Agent": "pi-judge"},
+    )
+    key = os.environ.get("TYPESAFE_API_KEY")
+    if key:
+        request.add_header("Authorization", f"Bearer {key}")
+    try:
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            raw = response.read(MAX_BYTES + 1)
+    except urllib.error.HTTPError as e:
+        detail = e.read(MAX_ERROR_BODY).decode(errors="replace")
+        fail(f"judgment endpoint returned {e.code}: {detail}")
+    except (urllib.error.URLError, TimeoutError) as e:
+        fail(f"judgment endpoint unreachable: {getattr(e, 'reason', e)}")
+    if len(raw) > MAX_BYTES:
+        fail("judgment endpoint answered with over 4 MiB — not a judgment response; check JUDGE_BASE_URL")
+
+    text = raw.decode(errors="replace")
+    try:
+        shaped = json.loads(text)
+    except ValueError:
+        print(text)
+        return
+    line = digest(shaped.get("answers")) if isinstance(shaped, dict) else ""
+    if line:
+        print(line)
+    print(json.dumps(shaped, indent=2, ensure_ascii=False))
+
+
+main()
