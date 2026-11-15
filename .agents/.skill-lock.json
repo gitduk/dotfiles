@@ -1,0 +1,180 @@
+{
+  "version": 3,
+  "skills": {
+    "youtube-clipper": {
+      "source": "op7418/Youtube-clipper-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/op7418/Youtube-clipper-skill.git",
+      "skillPath": "SKILL.md",
+      "skillFolderHash": "f31f077ee0905c95a510a6f34bbd0c3c85b15129",
+      "installedAt": "2026-02-03T08:31:16.420Z",
+      "updatedAt": "2026-02-03T08:31:16.420Z"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
+      "installedAt": "2026-02-03T08:31:28.580Z",
+      "updatedAt": "2026-11-05T08:43:54.981Z"
+    },
+    "skill-from-masters": {
+      "source": "GBSOSS/skill-from-masters",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/GBSOSS/skill-from-masters.git",
+      "skillPath": "skill-from-masters/SKILL.md",
+      "skillFolderHash": "17df0b62aea7e59858d20808f103c4171577fdcd",
+      "installedAt": "2026-02-03T08:40:56.683Z",
+      "updatedAt": "2026-04-15T10:33:47.762Z"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills.git",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "skillFolderHash": "3116f3e62dbd02b44a598b1aa690d2a8938e8f89",
+      "installedAt": "2026-02-03T09:22:21.702Z",
+      "updatedAt": "2026-02-03T09:22:21.702Z"
+    },
+    "implement-design": {
+      "source": "figma/mcp-server-guide",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/figma/mcp-server-guide.git",
+      "skillPath": "skills/implement-design/SKILL.md",
+      "skillFolderHash": "d067a8156ba4f4a28f6fc44904c2adebc2bb5920",
+      "installedAt": "2026-02-03T09:22:33.248Z",
+      "updatedAt": "2026-02-03T09:22:33.248Z"
+    },
+    "ui-design-system": {
+      "source": "davila7/claude-code-templates",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/davila7/claude-code-templates.git",
+      "skillPath": "cli-tool/components/skills/creative-design/ui-design-system/SKILL.md",
+      "skillFolderHash": "ebd92dd5eb700408b0039aa097d6fae214da634c",
+      "installedAt": "2026-02-03T09:23:06.138Z",
+      "updatedAt": "2026-02-03T09:23:06.138Z"
+    },
+    "wechat-article-formatter": {
+      "source": "solar-luna/fully-automatic-article-generation-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/solar-luna/fully-automatic-article-generation-skill.git",
+      "skillPath": "skills/wechat-article-formatter/SKILL.md",
+      "skillFolderHash": "890f4d9450acde97e87af2eeb7a5d1988c7e90c7",
+      "installedAt": "2026-04-03T19:15:45.168Z",
+      "updatedAt": "2026-04-03T19:15:45.168Z"
+    },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/microsoft/playwright-cli.git",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "skillFolderHash": "b901dcc64256dbb1b32744975a0bafaeb4478da5",
+      "installedAt": "2026-04-16T09:05:36.751Z",
+      "updatedAt": "2026-04-16T09:05:36.751Z"
+    },
+    "archify": {
+      "source": "tt-a1i/archify",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/tt-a1i/archify.git",
+      "skillPath": "archify/SKILL.md",
+      "skillFolderHash": "1e6718c4590db8ad1272b4b2a1734cd7110da810",
+      "installedAt": "2026-07-28T01:28:51.401Z",
+      "updatedAt": "2026-07-28T01:28:51.401Z"
+    },
+    "binance-agentic-wallet": {
+      "source": "binance/binance-skills-hub",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/binance/binance-skills-hub.git",
+      "skillPath": "skills/binance-web3/binance-agentic-wallet/SKILL.md",
+      "skillFolderHash": "8ebd31584e50440959c074baf2eff0d9d15b0522",
+      "installedAt": "2026-10-23T13:17:05.815Z",
+      "updatedAt": "2026-10-23T13:17:05.815Z"
+    },
+    "rust-best-practices": {
+      "source": "morganlinton/BeautifulRust",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/morganlinton/BeautifulRust.git",
+      "skillPath": "skills/rust-best-practices/SKILL.md",
+      "skillFolderHash": "8fdf58bea17c7c569b5650b185469836dbc84692",
+      "installedAt": "2026-11-03T02:35:31.711Z",
+      "updatedAt": "2026-11-03T02:35:31.711Z"
+    },
+    "rust-port": {
+      "source": "morganlinton/BeautifulRust",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/morganlinton/BeautifulRust.git",
+      "skillPath": "skills/rust-port/SKILL.md",
+      "skillFolderHash": "abe13f039a9ab3aa38e8d2b53e5fb84059176d87",
+      "installedAt": "2026-11-03T02:35:31.717Z",
+      "updatedAt": "2026-11-03T02:35:31.717Z"
+    },
+    "rust-review": {
+      "source": "morganlinton/BeautifulRust",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/morganlinton/BeautifulRust.git",
+      "skillPath": "skills/rust-review/SKILL.md",
+      "skillFolderHash": "d2ed162f0a140a08be32fb667222d8de5a4554ac",
+      "installedAt": "2026-11-03T02:35:31.718Z",
+      "updatedAt": "2026-11-03T02:35:31.718Z"
+    },
+    "code-review": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/anthropics/knowledge-work-plugins.git",
+      "skillPath": "engineering/skills/code-review/SKILL.md",
+      "skillFolderHash": "434f3ffc700ca7a6fe937bc72d11ddc180fc81c0",
+      "installedAt": "2026-11-05T08:48:47.210Z",
+      "updatedAt": "2026-11-05T08:48:47.210Z"
+    },
+    "code-polish": {
+      "source": "paulrberg/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/paulrberg/agent-skills.git",
+      "skillPath": "skills/code-polish/SKILL.md",
+      "skillFolderHash": "5fbf00b02b38bae1ae5973688b6ea7ea445ebe3e",
+      "installedAt": "2026-11-05T08:51:19.532Z",
+      "updatedAt": "2026-11-05T08:51:49.779Z"
+    },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/anthropics/skills.git",
+      "skillPath": "skills/skill-creator/SKILL.md",
+      "skillFolderHash": "3cf9a8db32597ba3e24b584a3d696f4e11c7d7b6",
+      "pluginName": "example-skills",
+      "installedAt": "2026-11-05T09:08:34.900Z",
+      "updatedAt": "2026-11-05T09:08:34.900Z"
+    },
+    "mcp-builder": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/anthropics/skills.git",
+      "ref": "main",
+      "skillPath": "skills/mcp-builder/SKILL.md",
+      "skillFolderHash": "ea6e4d7bc108b44b3009129688049e23d801f0f3",
+      "installedAt": "2026-11-09T02:42:45.019Z",
+      "updatedAt": "2026-11-09T02:42:45.019Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "cline",
+    "codex",
+    "cursor",
+    "droid",
+    "fx",
+    "gemini-cli",
+    "github-copilot",
+    "kilo",
+    "kimi-code-cli",
+    "opencode",
+    "pi",
+    "warp",
+    "zed",
+    "claude-code"
+  ]
+}

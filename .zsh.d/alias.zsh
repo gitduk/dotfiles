@@ -151,6 +151,7 @@ alias pddf="podman diff"
 alias pdis="podman inspect"
 alias pdv="podman volume"
 alias pdn="podman network"
+alias pdcps="podman compose"
 
 # systemctl
 alias scs="sudo systemctl status"

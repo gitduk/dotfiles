@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 # ---
-# description = "Search the web.\nReturn numbered results with a title, URL, and snippet without markup.\nUse this tool to find a page that answers your question.\nUse `fetch` to read that page.\nA snippet only helps locate a source.\nThe tool tries DuckDuckGo first, then Bing if DuckDuckGo fails.\n\nEngines may refuse automated requests or return unrelated results.\nThe tool reports either case as a failure, not as an empty result."
+# description = "Search the web.\nReturn numbered results with a title, URL, and snippet without markup.\nUse this tool to find a page that answers your question.\nUse `fetch` to read that page.\nA snippet only helps locate a source.\nThe tool tries DuckDuckGo, then Bing, then the AnySearch JSON API.\nPass engine=all to run all of them at once and compare their own results.\n\nEngines may refuse automated requests or return unrelated results.\nThe tool reports either case as a failure, not as an empty result."
 # [required]
 # query = "Specify the search query."
 # [optional]
-# engine = "Use duckduckgo or bing to query only that engine."
+# engine = "Use duckduckgo, bing or anysearch to query only that engine, or all to run every engine at once and see each one's own results."
 # limit = "Set the result limit. The default is 8. The maximum is 20."
 # ---
-# An example: no key needed, curl does the fetching, a failure exits non-zero
-# with the reason on stderr. It reads result pages, so a layout change on an
-# engine's side can break it; copy it to ~/.pi/tools/ and fix it there.
+# An example: no key needed, a failure exits non-zero with the reason on
+# stderr. DuckDuckGo and Bing are read as pages, so a layout change on their
+# side can break them; AnySearch answers JSON and works anonymously.
 import base64
+import json
 import os
 import subprocess
 import sys
+import urllib.error
 import urllib.parse
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from html.parser import HTMLParser
 
 BROWSER = (
@@ -86,7 +90,7 @@ def has_class(name):
     return lambda n: name in n.classes()
 
 
-# --- Where each engine keeps what is read, and how its links resolve.
+# --- Where each scraped engine keeps what is read, and how its links resolve.
 
 def duckduckgo_url(href):
     if href.startswith("//"):
@@ -138,6 +142,7 @@ def bing_hits(root):
         yield a.text(), bing_url(a.attrs["href"]), p.text() if p else ""
 
 
+# AnySearch is absent on purpose: it answers JSON, so it has no layout to read.
 ENGINES = {
     "duckduckgo": {
         # The form's own POST: a GET of the same page draws a bot check.
@@ -203,33 +208,99 @@ def ask(engine, query):
     return hits
 
 
+def anysearch_hits(query, limit):
+    body = json.dumps({"query": query, "max_results": min(limit, 10)}).encode()
+    request = urllib.request.Request(
+        "https://api.anysearch.com/v1/search", data=body,
+        headers={"Content-Type": "application/json", "User-Agent": BROWSER})
+    try:
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as answer:
+            payload = json.load(answer)
+    except urllib.error.HTTPError as err:
+        detail = err.read().decode(errors="replace")
+        try:
+            detail = json.loads(detail)["message"]
+        except (ValueError, KeyError, TypeError):
+            pass
+        raise RuntimeError(f"answered {err.code}: {detail}")
+    except urllib.error.URLError as why:
+        raise RuntimeError(str(why.reason))
+    except TimeoutError:
+        raise RuntimeError(f"no answer in {TIMEOUT}s")
+    except ValueError:
+        raise RuntimeError("answered with something other than JSON")
+    if payload.get("code") != 0:
+        raise RuntimeError(payload.get("message") or "refused the query")
+    results = (payload.get("data") or {}).get("results") or []
+    hits = [(r.get("title") or "", r.get("url") or "", r.get("snippet") or "")
+            for r in results]
+    if not on_topic(query, hits):
+        raise RuntimeError("its results have nothing to do with the query")
+    return hits
+
+
+# Page readers first; the API is the fallback that survives their bot checks.
+SOURCES = list(ENGINES) + ["anysearch"]
+
+
+def search(source, query, limit):
+    hits = anysearch_hits(query, limit) if source == "anysearch" else ask(source, query)
+    return hits[:limit]
+
+
+def format_hits(source, query, hits):
+    if not hits:
+        return f"{source} found nothing for “{query}”."
+    lines = [f"{source} results for “{query}”:"]
+    for i, (title, url, snippet) in enumerate(hits, 1):
+        lines += ["", f"{i}. {title}", f"   {url}"]
+        if snippet:
+            lines.append(f"   {snippet}")
+    return "\n".join(lines)
+
+
+def run_all(query, limit):
+    """Every engine at once: each gets its own section, so the reader judges quality."""
+    with ThreadPoolExecutor(max_workers=len(SOURCES)) as pool:
+        pending = [(name, pool.submit(search, name, query, limit)) for name in SOURCES]
+        outcomes = []
+        for name, future in pending:
+            try:
+                outcomes.append((name, future.result(), None))
+            except RuntimeError as why:
+                outcomes.append((name, None, str(why)))
+    if all(hits is None for _, hits, _ in outcomes):
+        fail("no engine answered — " + "; ".join(
+            f"{name}: {why}" for name, _, why in outcomes))
+    print("\n\n".join(
+        format_hits(name, query, hits) if why is None else f"{name}: {why}"
+        for name, hits, why in outcomes))
+
+
 def main():
     query = (os.environ.get("query") or "").strip()
     if not query:
         fail("an empty query searches for nothing")
     engine = (os.environ.get("engine") or "").strip().lower()
-    if engine and engine not in ENGINES:
-        fail(f"engine is duckduckgo or bing, not `{engine}`")
+    choices = SOURCES + ["all"]
+    if engine and engine not in choices:
+        fail(f"engine is {', '.join(choices)}, not `{engine}`")
     try:
         limit = min(max(int(os.environ.get("limit") or 8), 1), 20)
     except ValueError:
         fail("limit is a number")
 
+    if engine == "all":
+        return run_all(query, limit)
+
     failed = []
-    for name in [engine] if engine else list(ENGINES):
+    for name in [engine] if engine else SOURCES:
         try:
-            hits = ask(name, query)[:limit]
+            hits = search(name, query, limit)
         except RuntimeError as why:
             failed.append(f"{name}: {why}")
             continue
-        if not hits:
-            print(f"{name} found nothing for “{query}”.")
-        else:
-            print(f"{name} results for “{query}”:")
-            for i, (title, url, snippet) in enumerate(hits, 1):
-                print(f"\n{i}. {title}\n   {url}")
-                if snippet:
-                    print(f"   {snippet}")
+        print(format_hits(name, query, hits))
         for note in failed:
             print(f"\nnote: {note.split(':')[0]} failed first:{note.split(':', 1)[1]}")
         return

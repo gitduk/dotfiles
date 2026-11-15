@@ -314,6 +314,15 @@ setup = "sudo setcap cap_net_admin=+ep easytier-core"
 run = "alias epr='easytier-cli peer'"
 description = "A simple, decentralized mesh VPN with WireGuard support."
 
+# GUI build: needs GTK 3 + WebKitGTK 4.1 (magpie-cli-linux-amd64 is terminal)
+# magpie self-updates into ~/.local/bin; `magpie update auto off` leaves it to rig
+[[repo]]
+name = "yetone/magpie"
+bpick = "magpie-linux-amd64"
+extract = false
+bin = { "magpie-linux-amd64" = "magpie" }
+description = "One place to pick every agent's model, through a local gateway"
+
 # ============ [[git]] 源码构建（钩子只构建，rig 来放）============
 
 [[git]]
@@ -413,7 +422,6 @@ description = "Shows side-by-side file content for a git diff in an interactive 
 [[curl]]
 name = "rtk"
 url = "https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh"
-setup = "rtk init -g --agent pi"
 description = "Token-optimized CLI proxy for Claude Code"
 
 [[curl]]

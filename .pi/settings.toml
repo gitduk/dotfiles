@@ -1,27 +1,26 @@
-# ~/.pi.toml — one endpoint, and the models it serves.
+# ~/.pi/settings.toml — the connections pi talks to, and the models they serve.
 
-# The gateway translating for DeepSeek. It terminates `response.completed`
-# without the `output` the Responses spec requires, so pi rebuilds each turn
-# from the deltas and says so once per session.
-base_url = "http://127.0.0.1:7896"
-format   = "anthropic"
-
-# What a bare `pi` runs when no session resumes one, as the endpoint names it.
-model = "deepseek-v4.1-flash"
-
-loop_max_rounds = 100
+# What a bare `pi` runs when no session resumes one.
+model = "ccs/deepseek-v4.1-flash"
 
 status = ["elapsed", "in_out", "speed", "cache", "ctx", "queued", "compacted", "cost"]
 
-[models."deepseek-v4.1-flash"]
-context_window    = 1_000_000
-max_output_tokens = 131_072
-pricing = { cache_read_per_mtok = 0.006, input_per_mtok = 0.3, output_per_mtok = 1.2 }
+# Local gateway on 127.0.0.1:7896. Its catalog names a per-model API shape, but
+# every model also answers Chat Completions, so one `chat` connection serves all.
+[provider.ccs]
+base_url            = "http://127.0.0.1:7896/v1"
+format              = "chat"
+api_key             = "x"
+context_window      = "limit.context"
+max_output_tokens   = "limit.output"
+vision              = "modalities.input"
+accepts_temperature = "capabilities.temperature"
+reasoning           = "capabilities.reasoning.supported"
 
-[models.deepseek-v4-pro]
-context_window    = 1_000_000
-max_output_tokens = 131_072
-pricing = { cache_read_per_mtok = 0.044, input_per_mtok = 1.32, output_per_mtok = 3.96 }
+[provider.ccs.pricing]
+input_per_mtok      = "cost.text.input.price"
+output_per_mtok     = "cost.text.output.price"
+cache_read_per_mtok = "cost.text.input.cache.read"
 
 [keys]
 "menu.accept"   = ["tab"]

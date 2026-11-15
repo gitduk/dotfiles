@@ -1,9 +1,9 @@
 ---
 [package]
 # Bump this script's version whenever it changes.
-version = "0.1.8"
+version = "0.1.11"
 edition = "2024"
-description = "Connect this session to Telegram when the user requests it.\nThe tool submits messages from the user's bot to this session, including commands.\nEach answer returns to the chat.\nSet TELEGRAM_BOT_TOKEN in the tool directory's .env file to a bot token from @BotFather.\n\nThe tool runs in the background until you stop its background command.\nOn first use, the background command provides a link and QR code for account pairing.\nThe pairing persists for later use."
+description = "Connect this session to Telegram when the user requests it.\nThe tool submits messages from the user's bot to this session, as model input. Use /stop to stop the current run.\nEach answer returns to the chat.\nSet TELEGRAM_BOT_TOKEN in the tool directory's .env file to a bot token from @BotFather.\n\nThe tool runs in the background until you stop its background command.\nOn first use, the background command provides a link and QR code for account pairing.\nThe pairing persists for later use."
 
 [package.metadata.pi]
 background = true
@@ -15,6 +15,7 @@ rand = "0.8"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sha2 = "0.10"
 thiserror = "2"
 tokio = { version = "1", features = ["macros", "time", "sync", "net", "io-util", "io-std", "rt"] }
 
@@ -45,10 +46,9 @@ async fn main() -> ExitCode {
 
 mod bridge {
     //! telegram as a pi background command: what the paired account sends goes up fd 3 as
-    //! `input` (or `interrupt` for `/stop`). It follows, so every turn on the
-    //! checkout comes back as `started`, progress, then `reply`, sent to the chat;
-    //! each question put there comes too, its options as buttons: a press
-    //! answers with that one, a reply of numbers only with several.
+    //! semantic messages (or runtime interrupt for `/stop`). Observation sends
+    //! complete model responses to the chat. Model input requests appear with
+    //! buttons and accept either option text or a free text response.
     //!
     //! Anyone can message a bot, and a turn here can run commands, so only
     //! the account that sent the pairing code shown in the background command is heard.
@@ -59,6 +59,7 @@ mod bridge {
     use std::sync::{Mutex, MutexGuard, PoisonError};
     use std::time::Duration;
 
+    use crate::protocol;
     use serde_json::{Value, json};
     use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
     use tokio::net::unix::OwnedReadHalf;
@@ -145,8 +146,9 @@ mod bridge {
 
     #[derive(Debug, Clone, PartialEq)]
     struct Up {
-        id: u64,
+        id: String,
         text: String,
+        back: bool,
         options: Vec<String>,
         stage: Stage,
         // The message showing it, once sent.
@@ -161,8 +163,9 @@ mod bridge {
                 .map(|o| o.as_str().map(str::to_string))
                 .collect::<Option<_>>()?;
             Some(Self {
-                id: q.get("id")?.as_u64()?,
+                id: protocol::key(q.get("id")?)?,
                 text: q.get("text")?.as_str()?.to_string(),
+                back: q.get("back").and_then(Value::as_bool).unwrap_or(false),
                 options,
                 stage: Stage::Held,
                 message: None,
@@ -197,8 +200,8 @@ mod bridge {
     // A press goes up as the answer: its option, or none to close it. One on
     // what is no longer up, or already answered, says why not.
     fn pressed(asking: &Asking, pi: &Pi, data: &str) -> Result<(), &'static str> {
-        let (id, what) = data.split_once(':').ok_or(CLOSED)?;
-        let id: u64 = id.parse().map_err(|_| CLOSED)?;
+        let (id, what) = data.rsplit_once(':').ok_or(CLOSED)?;
+        let id: String = id.parse().map_err(|_| CLOSED)?;
         let mut up = asking.lock();
         let q = up.iter_mut().find(|q| q.id == id).ok_or(CLOSED)?;
         if q.stage == Stage::Answered {
@@ -214,18 +217,19 @@ mod bridge {
             }
         };
         q.stage = Stage::Answered;
-        pi.say(json!({ "answer": id, "picks": picks }));
+        pi.answer(q, &picks);
         Ok(())
     }
 
     async fn press(client: &Client, asking: &Asking, pi: &Pi, click: Click) {
-        let said = pressed(asking, pi, click.data.as_deref().unwrap_or_default());
+        let pi = pi.for_source(&format!("telegram-click:{}", click.id), 0);
+        let said = pressed(asking, &pi, click.data.as_deref().unwrap_or_default());
         let _ = client.settle(&click.id, said.err()).await;
     }
 
     // A line of option numbers only answers the latest question shown and not
     // yet answered, by place; anything else is the person's own words.
-    fn picks_of(asking: &Asking, line: &str) -> Option<(u64, Vec<usize>)> {
+    fn picks_of(asking: &Asking, line: &str) -> Option<(String, Vec<usize>)> {
         let mut up = asking.lock();
         let q = up.iter_mut().rev().find(|q| q.stage == Stage::Shown)?;
         let picks = (line.split(|c: char| c.is_whitespace() || ",，、".contains(c)))
@@ -240,15 +244,15 @@ mod bridge {
             return None;
         }
         q.stage = Stage::Answered;
-        Some((q.id, picks.into_iter().collect()))
+        Some((q.id.clone(), picks.into_iter().collect()))
     }
 
     // Questions not yet shown go out, marked first so the other task does
     // not send them too; one closed while it went has its buttons taken
     // away again.
-    async fn show_held(client: &Client, chat: i64, asking: &Asking, pi: &Pi) {
+    async fn show_held(client: &Client, chat: i64, asking: &Asking, pi: &Pi, idle: bool) {
         let held: Vec<Up> = (asking.lock().iter_mut())
-            .filter(|q| q.stage == Stage::Held)
+            .filter(|q| q.stage == Stage::Held && (idle || q.back))
             .map(|q| {
                 q.stage = Stage::Shown;
                 q.clone()
@@ -280,26 +284,168 @@ mod bridge {
 
     // pi's end of fd 3, written by one task so a plain callback can say things.
     #[derive(Clone)]
-    struct Pi(mpsc::UnboundedSender<Value>);
+    struct Pi(
+        mpsc::Sender<Value>,
+        String,
+        tokio::sync::watch::Sender<Option<String>>,
+        Option<std::sync::Arc<crate::pending::Pending>>,
+        Option<(String, u64)>,
+    );
 
     impl Pi {
-        fn say(&self, line: Value) {
-            let _ = self.0.send(line);
+        fn new(
+            to: mpsc::Sender<Value>,
+            session: String,
+            failed: tokio::sync::watch::Sender<Option<String>>,
+        ) -> Self {
+            Self(to, session, failed, None, None)
+        }
+        fn for_source(&self, source: &str, at: u64) -> Self {
+            let mut pi = self.clone();
+            pi.4 = Some((
+                format!(
+                    "channel-{}",
+                    protocol::hash(&format!("{}:{source}", self.1))
+                ),
+                at,
+            ));
+            pi
+        }
+        fn already_retained(&self) -> bool {
+            self.3
+                .as_ref()
+                .zip(self.4.as_ref())
+                .is_some_and(|(pending, (id, _))| pending.remembers(id))
+        }
+        fn acknowledge(&self, frame: &Value) -> Option<Value> {
+            let pending = self.3.as_ref()?;
+            match pending.acknowledge(frame) {
+                Ok(Some(original))
+                    if original["message"]["kind"]["value"]["direction"] == "to_model"
+                        && frame["response"].is_object() =>
+                {
+                    Some(json!({"type":"message", "message":frame["response"], "replayed":true}))
+                }
+                Ok(_) => None,
+                Err(error) => {
+                    self.2.send_replace(Some(error));
+                    None
+                }
+            }
         }
 
+        fn say(&self, mut frame: Value) {
+            if frame["type"] == "message" {
+                if let Some((id, at)) = &self.4 {
+                    frame["message"]["id"] = json!(id);
+                    // Preserve transport time on retry; zero means it supplied no timestamp.
+                    frame["message"]["at"] = json!(at);
+                }
+                if let Some(pending) = &self.3 {
+                    if let Err(error) = pending.push(frame) {
+                        self.2.send_replace(Some(error));
+                    }
+                    return;
+                }
+            }
+            if let Err(error) = self.0.try_send(frame) {
+                let reason = match error {
+                    mpsc::error::TrySendError::Full(_) => "host frame queue is full",
+                    mpsc::error::TrySendError::Closed(_) => "host frame connection is closed",
+                };
+                self.2.send_replace(Some(reason.into()));
+            }
+        }
         fn status(&self, text: &str) {
-            self.say(json!({ "status": text }));
+            self.say(protocol::runtime(json!({"type":"status","text":text})));
+        }
+        fn input(&self, text: &str) {
+            self.say(protocol::message(
+                &self.1,
+                json!({"type":"request","value":{"direction":"to_model","request":"user"}}),
+                vec![json!({"type":"text","value":text})],
+            ));
+        }
+        fn answer(&self, q: &Up, picks: &[usize]) {
+            if let Some(request) = q.id.strip_prefix("m:") {
+                let body = if picks.is_empty() {
+                    vec![]
+                } else {
+                    vec![
+                        json!({"type":"text","value":picks.iter().filter_map(|&i|q.options.get(i)).cloned().collect::<Vec<_>>().join("\n")}),
+                    ]
+                };
+                self.say(protocol::message(&self.1,json!({"type":"response","value":{"request":request,"status":{"type":if picks.is_empty(){"stopped"}else{"done"}}}}),body));
+            } else if let Ok(question) = q.id.parse::<u64>() {
+                self.say(protocol::runtime(
+                    json!({"type":"answer","question":question,"picks":picks}),
+                ));
+            }
+        }
+        fn answer_text(&self, asking: &Asking, text: &str) -> bool {
+            let mut questions = asking.lock();
+            let Some(q) = questions
+                .iter_mut()
+                .rev()
+                .find(|q| q.back && q.stage == Stage::Shown)
+            else {
+                return false;
+            };
+            q.stage = Stage::Answered;
+            if let Some(request) = q.id.strip_prefix("m:") {
+                self.say(protocol::message(
+                    &self.1,
+                    json!({"type":"response","value":{"request":request,"status":{"type":"done"}}}),
+                    vec![json!({"type":"text","value":text})],
+                ));
+            } else if let Ok(question) = q.id.parse::<u64>() {
+                self.say(protocol::runtime(
+                    json!({"type":"answer_text","question":question,"text":text}),
+                ));
+            }
+            true
+        }
+        fn picked(&self, asking: &Asking, id: &str, picks: &[usize]) {
+            if let Some(q) = asking.lock().iter().find(|q| q.id == id) {
+                self.answer(q, picks);
+            }
         }
     }
 
     /// Run as pi's background command until the token is refused, another client takes the
-    /// updates, or pi goes. The error is what pi reports back to the model.
+    /// updates, or pi goes. Errors remain in the background command's status.
     pub async fn run() -> Result<(), String> {
         if std::env::var("PI_EVENTS_FD").as_deref() != Ok("3") {
             return Err("telegram runs as a pi tool: there is no fd 3 here".into());
         }
         let mut args = String::new();
         let _ = tokio::io::stdin().read_to_string(&mut args).await;
+        let session =
+            std::env::var("PI_SESSION_ID").map_err(|_| "the host did not bind a conversation")?;
+        // SAFETY: PI_EVENTS_FD says pi opened fd 3 for this process, and
+        // nothing else here takes it.
+        let fd3 = unsafe { std::os::unix::net::UnixStream::from_raw_fd(3) };
+        fd3.set_nonblocking(true).map_err(|e| e.to_string())?;
+        let (read, mut write) = tokio::net::UnixStream::from_std(fd3)
+            .map_err(|e| e.to_string())?
+            .into_split();
+        let (tx, mut rx) = mpsc::channel::<Value>(64);
+        let (failure, mut failed) = tokio::sync::watch::channel(None);
+        let writer_failure = failure.clone();
+        tokio::spawn(async move {
+            while let Some(line) = rx.recv().await {
+                if write
+                    .write_all(format!("{line}\n").as_bytes())
+                    .await
+                    .is_err()
+                {
+                    writer_failure.send_replace(Some("host frame connection is closed".into()));
+                    return;
+                }
+            }
+        });
+        let mut pi = Pi::new(tx, session, failure);
+
         let token = std::env::var("TELEGRAM_BOT_TOKEN").unwrap_or_default();
         let token = token.trim();
         if token.is_empty() {
@@ -329,40 +475,22 @@ mod bridge {
             };
         }
 
-        // SAFETY: PI_EVENTS_FD says pi opened fd 3 for this process, and
-        // nothing else here takes it.
-        let fd3 = unsafe { std::os::unix::net::UnixStream::from_raw_fd(3) };
-        fd3.set_nonblocking(true).map_err(|e| e.to_string())?;
-        let (read, mut write) = tokio::net::UnixStream::from_std(fd3)
-            .map_err(|e| e.to_string())?
-            .into_split();
-        let (tx, mut rx) = mpsc::unbounded_channel::<Value>();
-        tokio::spawn(async move {
-            while let Some(line) = rx.recv().await {
-                if write
-                    .write_all(format!("{line}\n").as_bytes())
-                    .await
-                    .is_err()
-                {
-                    return;
-                }
-            }
-        });
-        let pi = Pi(tx);
+        pi.3 = Some(crate::pending::Pending::open(&path, &pi.1)?);
 
         let mut code = None;
         if state.user.is_some() {
             pi.status(&format!("Telegram 已连接到 @{bot}。"));
         } else {
-            pi.say(json!({ "status": format!(
-                "waiting for the user to pair @{bot}: a link and a QR are in this background command; once they open it, messages from their account arrive here as turns"
-            )}));
+            pi.status(&format!(
+                "waiting for the user to pair @{bot}: a link and QR are in this background command"
+            ));
             let fresh = format!("{:08}", rand::random::<u32>() % 100_000_000);
             show_pairing(&pi, &bot, &fresh);
-            pi.say(json!({ "status": "waiting for pairing" }));
+            pi.status("waiting for pairing");
             code = Some(fresh);
         }
-        pi.say(json!({ "follow": true }));
+        pi.say(protocol::runtime(json!({"type":"observe","cursor":null})));
+        pi.say(protocol::runtime(json!({"type":"watch"})));
         let kept = Kept {
             path,
             state: Mutex::new(state),
@@ -370,6 +498,8 @@ mod bridge {
         let asking = Asking::default();
         let retry = Notify::new();
         tokio::select! {
+            result = pi.3.as_ref().expect("bound pending input").pump(&pi.0) => result,
+            _ = failed.changed() => Err(failed.borrow().clone().unwrap_or_else(|| "host frame connection is closed".into())),
             r = poll(&client, &kept, &asking, &pi, code, &retry) => r,
             () = answer(&client, &kept, &asking, &pi, read, &retry) => Ok(()),
         }
@@ -429,7 +559,7 @@ mod bridge {
                     }
                     if let Some(chat) = paired {
                         let _ = client.send_message(chat, CONNECTED_NOTICE, &[]).await;
-                        show_held(client, chat, asking, pi).await;
+                        show_held(client, chat, asking, pi, false).await;
                     }
                     for click in clicks {
                         press(client, asking, pi, click).await;
@@ -473,7 +603,14 @@ mod bridge {
         let mut paired = None;
         let mut clicks = Vec::new();
         for update in updates {
+            let pi = pi.for_source(
+                &format!("telegram:{:?}:{}", s.bot, update.update_id),
+                update.message.as_ref().map_or(0, |msg| msg.date),
+            );
             s.offset = s.offset.max(update.update_id + 1);
+            if pi.already_retained() {
+                continue;
+            }
             if let Some(click) = update.callback_query {
                 let chat = click.message.as_ref().map(|m| m.chat.id);
                 if s.user == Some(click.from.id) && chat.is_some() && chat == s.chat {
@@ -511,16 +648,26 @@ mod bridge {
                         continue;
                     }
                     match command(&text) {
-                        Some("stop" | "esc") => pi.say(json!({ "interrupt": true })),
+                        Some("stop" | "esc") => {
+                            pi.say(protocol::runtime(json!({"type":"interrupt"})))
+                        }
                         Some("start") => {}
                         _ => match picks_of(asking, line) {
-                            Some((id, picks)) => pi.say(json!({ "answer": id, "picks": picks })),
-                            None => pi.say(json!({ "input": submitted(&text) })),
+                            Some((id, picks)) => pi.picked(asking, &id, &picks),
+                            None => {
+                                let text = submitted(&text);
+                                if !pi.answer_text(asking, &text) {
+                                    pi.input(&text)
+                                }
+                            }
                         },
                     }
                 }
                 Some(_) => {}
             }
+        }
+        if pi.2.borrow().is_some() {
+            s.offset = before.offset;
         }
         if *s != before {
             kept.save(&s);
@@ -548,12 +695,11 @@ mod bridge {
     }
 
     #[derive(Default)]
-    struct Activity(BTreeSet<Option<u64>>);
+    struct Activity(BTreeSet<Option<String>>);
 
     impl Activity {
         fn hear(&mut self, told: &Value) {
-            // Older hosts have one unnumbered run.
-            let id = told.get("request").and_then(Value::as_u64);
+            let id = told.get("request").and_then(protocol::key);
             if told.get("started").and_then(Value::as_bool) == Some(true) {
                 self.0.insert(id);
             } else if told.get("reply").and_then(Value::as_str).is_some() {
@@ -630,6 +776,7 @@ mod bridge {
             outbox.flush(client, pi).await;
         }
         let mut activity = Activity::default();
+        let mut completed = VecDeque::<String>::new();
         let mut tick = tokio::time::interval(TYPING_EVERY);
         tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
         loop {
@@ -638,22 +785,30 @@ mod bridge {
                     let Ok(Some(line)) = line else {
                         return;
                     };
-                    let Ok(told) = serde_json::from_str::<Value>(&line) else {
-                        continue;
-                    };
+                    let Ok(frame) = serde_json::from_str::<Value>(&line) else { continue; };
+                    let replayed = pi.acknowledge(&frame);
+                    let frame = replayed.as_ref().unwrap_or(&frame);
+                    if frame["type"] == "message" && frame["message"]["kind"]["type"] == "response"
+                        && let Some(id) = frame["message"]["id"].as_str() {
+                        if completed.iter().any(|seen| seen == id) { continue; }
+                        completed.push_back(id.to_owned());
+                        if completed.len() > 4096 { completed.pop_front(); }
+                    }
+                    let Some(told) = protocol::project(frame) else { continue; };
+                    if let Some(id)=told.get("linked").and_then(protocol::key){activity.0.remove(&Some(id));}
                     // Kept even before pairing: what is up then shows once paired.
                     let mut shows = false;
                     let mut gone = None;
                     if let Some(up) = Up::of(&told) {
                         asking.lock().push(up);
-                        shows = activity.idle();
-                    } else if let Some(id) = told.get("closed").and_then(Value::as_u64) {
+                        shows = true;
+                    } else if let Some(id) = told.get("closed").and_then(protocol::key) {
                         let mut up = asking.lock();
                         let at = up.iter().position(|q| q.id == id);
                         gone = at.and_then(|at| up.remove(at).message);
                     }
                     // Not taken: it may be answered again, and the person hears why.
-                    let refused = told.get("refused").and_then(Value::as_u64).map(|id| {
+                    let refused = told.get("refused").and_then(protocol::key).map(|id| {
                         if let Some(q) = asking.lock().iter_mut().find(|q| q.id == id)
                             && q.stage == Stage::Answered
                         {
@@ -661,6 +816,8 @@ mod bridge {
                         }
                         told.get("why").and_then(Value::as_str).unwrap_or_default().to_string()
                     });
+                    let known=told["replayed"] == true || told.get("semantic").and_then(Value::as_bool)!=Some(true) || activity.0.contains(&told.get("request").and_then(protocol::key));
+                    activity.hear(&told);
                     let Some(chat) = kept.chat() else {
                         continue;
                     };
@@ -670,12 +827,10 @@ mod bridge {
                     if told.get("queued").and_then(Value::as_bool) == Some(true) {
                         outbox.push(chat, QUEUED_NOTICE);
                     } else if told.get("started").and_then(Value::as_bool) == Some(true) {
-                        activity.hear(&told);
                         tick.reset_immediately();
                     } else if let Some(reply) = told.get("reply").and_then(Value::as_str) {
-                        activity.hear(&told);
-                        outbox.push(chat, &reply_text(reply, &told));
-                        shows = activity.idle();
+                        if known {outbox.push(chat, &reply_text(reply, &told));}
+                        shows = true;
                     } else if let Some(progress) = told.get("progress").and_then(Value::as_str) {
                         outbox.push(chat, progress);
                     }
@@ -684,7 +839,7 @@ mod bridge {
                         let _ = client.set_buttons(chat, message, &[]).await;
                     }
                     if shows && outbox.pending.is_empty() {
-                        show_held(client, chat, asking, pi).await;
+                        show_held(client, chat, asking, pi, activity.idle()).await;
                     }
                 }
                 _ = tick.tick(), if !activity.idle() => {
@@ -694,9 +849,9 @@ mod bridge {
                 }
                 _ = retry.notified() => {
                     outbox.flush(client, pi).await;
-                    if activity.idle() && outbox.pending.is_empty()
+                    if outbox.pending.is_empty()
                         && let Some(chat) = kept.chat() {
-                        show_held(client, chat, asking, pi).await;
+                        show_held(client, chat, asking, pi, activity.idle()).await;
                     }
                 }
             }
@@ -776,6 +931,94 @@ mod bridge {
     #[cfg(test)]
     mod tests {
         use super::*;
+        #[test]
+        fn model_answers_keep_the_original_request_and_selected_text() {
+            let (tx, mut rx) = mpsc::channel(8);
+            let pi = Pi::new(
+                tx,
+                "fixture-session".into(),
+                tokio::sync::watch::channel(None).0,
+            );
+            let question = json!({"type":"message","message":{
+                "id":"ask-id", "kind":{"type":"request","value":{"direction":"from_model","request":{"type":"ask","options":["Allow once","Deny"]}}},
+                "body":[{"type":"text","value":"Proceed?"}]
+            }});
+            let view = protocol::project(&question).unwrap();
+            let mut q = Up::of(&view).unwrap();
+            assert!(
+                q.back,
+                "model input must be answerable during the active run"
+            );
+            q.stage = Stage::Shown;
+            pi.answer(&q, &[0]);
+            let choice = rx.try_recv().unwrap();
+            assert_eq!(choice["message"]["kind"]["value"]["request"], "ask-id");
+            assert_eq!(choice["message"]["body"][0]["value"], "Allow once");
+            let asking = Asking::default();
+            asking.lock().push(q);
+            assert!(pi.answer_text(&asking, "Use another directory"));
+            let answer = rx.try_recv().unwrap();
+            assert_eq!(answer["message"]["session"], "fixture-session");
+            assert_eq!(answer["message"]["kind"]["type"], "response");
+            assert_eq!(answer["message"]["kind"]["value"]["request"], "ask-id");
+            assert_eq!(
+                answer["message"]["body"][0]["value"],
+                "Use another directory"
+            );
+            assert_ne!(answer["message"]["id"], choice["message"]["id"]);
+            assert!(!pi.answer_text(&asking, "duplicate"));
+        }
+
+        #[test]
+        fn legacy_wire_is_not_a_presentation_fallback() {
+            for frame in [
+                json!({"reply":"old reply"}),
+                json!({"question":{"id":1,"text":"old"}}),
+                json!({"started":true}),
+            ] {
+                assert!(protocol::project(&frame).is_none());
+            }
+            let frame = json!({"type":"message","message":{
+                "id":"response", "kind":{"type":"response","value":{"request":"original","status":{"type":"done"}}},
+                "body":[{"type":"text","value":"before tool"},{"type":"text","value":"after tool"},{"type":"reasoning","value":"private"}]
+            }});
+            let view = protocol::project(&frame).unwrap();
+            assert_eq!(view["request"], "m:original");
+            assert_eq!(view["reply"], "before tool\nafter tool");
+            assert!(protocol::project(&json!({"type":"runtime","event":{"type":"operation","operation":1,"model":true,"phase":{"type":"finished","text":"duplicate"}}})).is_none());
+        }
+
+        #[test]
+        fn a_full_host_queue_reports_failure_instead_of_silently_losing_input() {
+            let (tx, _rx) = mpsc::channel(1);
+            let (failed, reason) = tokio::sync::watch::channel(None);
+            let pi = Pi::new(tx, "fixture-session".into(), failed);
+            pi.input("first");
+            pi.input("second");
+            assert_eq!(reason.borrow().as_deref(), Some("host frame queue is full"));
+        }
+
+        fn runtime_fixture(view: &Value) -> Value {
+            let event = if let Some(q) = view.get("question") {
+                json!({"type":"prompt","question":q["id"],"text":q["text"],"options":q["options"],"back":q["back"]})
+            } else if let Some(q) = view.get("closed") {
+                json!({"type":"closed","question":q})
+            } else if let Some(q) = view.get("refused") {
+                json!({"type":"refused","question":q,"message":view["why"]})
+            } else {
+                let phase = if view["queued"] == true {
+                    json!({"type":"queued"})
+                } else if view["started"] == true {
+                    json!({"type":"started"})
+                } else if let Some(text) = view.get("progress") {
+                    json!({"type":"progress","text":text})
+                } else {
+                    json!({"type":"finished","text":view["reply"],"status":{"type":view["status"],"reason":view["reason"],"failure":{"message":view["error"]}},"exit_code":view["exit_code"]})
+                };
+                json!({"type":"operation","operation":view["request"],"phase":phase})
+            };
+            json!({"type":"runtime","event":event})
+        }
 
         #[test]
         fn an_immediate_command_does_not_finish_another_requests_typing() {
@@ -854,11 +1097,15 @@ mod bridge {
                 state.user = Some(7);
                 state.chat = Some(7);
             }
-            let (tx, mut rx) = mpsc::unbounded_channel();
+            let (tx, mut rx) = mpsc::channel(64);
             heard(
                 &kept,
                 &Asking::default(),
-                &Pi(tx),
+                &Pi::new(
+                    tx,
+                    "fixture-session".into(),
+                    tokio::sync::watch::channel(None).0,
+                ),
                 &mut None,
                 vec![
                     update(1, 7, 7, "private", "/compact@pi_bot keep failures"),
@@ -867,11 +1114,17 @@ mod bridge {
                 ],
             );
             assert_eq!(
-                rx.try_recv().unwrap(),
-                json!({"input": "/compact keep failures"})
+                rx.try_recv().unwrap()["message"]["body"][0]["value"],
+                "/compact keep failures"
             );
-            assert_eq!(rx.try_recv().unwrap(), json!({"input": " /stop"}));
-            assert_eq!(rx.try_recv().unwrap(), json!({"interrupt": true}));
+            assert_eq!(
+                rx.try_recv().unwrap()["message"]["body"][0]["value"],
+                " /stop"
+            );
+            assert_eq!(
+                rx.try_recv().unwrap(),
+                protocol::runtime(json!({"type":"interrupt"}))
+            );
             assert!(rx.try_recv().is_err());
         }
 
@@ -881,13 +1134,13 @@ mod bridge {
             kept.lock().chat = Some(7);
             let (base, requests) = server(vec![(200, json!({"ok": true, "result": {}})); 3]).await;
             let client = Client::at(base);
-            let (tx, _rx) = mpsc::unbounded_channel();
+            let (tx, _rx) = mpsc::channel(64);
             let (mut host, script) = tokio::net::UnixStream::pair().unwrap();
             for told in [
                 json!({"request": 17, "queued": true}),
                 json!({"request": 17, "reply": "queued", "status": "done"}),
             ] {
-                host.write_all(format!("{told}\n").as_bytes())
+                host.write_all(format!("{}\n", runtime_fixture(&told)).as_bytes())
                     .await
                     .unwrap();
             }
@@ -899,7 +1152,11 @@ mod bridge {
                     &client,
                     &kept,
                     &Asking::default(),
-                    &Pi(tx),
+                    &Pi::new(
+                        tx,
+                        "fixture-session".into(),
+                        tokio::sync::watch::channel(None).0,
+                    ),
                     read,
                     &Notify::new(),
                 ),
@@ -917,7 +1174,7 @@ mod bridge {
             kept.lock().chat = Some(7);
             let (base, requests) = server(vec![(200, json!({"ok": true, "result": {}})); 3]).await;
             let client = Client::at(base);
-            let (tx, _rx) = mpsc::unbounded_channel();
+            let (tx, _rx) = mpsc::channel(64);
             let (mut host, script) = tokio::net::UnixStream::pair().unwrap();
             for told in [
                 json!({"request": 1, "reply": "stopped", "status": "done"}),
@@ -927,7 +1184,7 @@ mod bridge {
                     "status": "stopped",
                 }),
             ] {
-                host.write_all(format!("{told}\n").as_bytes())
+                host.write_all(format!("{}\n", runtime_fixture(&told)).as_bytes())
                     .await
                     .unwrap();
             }
@@ -939,7 +1196,11 @@ mod bridge {
                     &client,
                     &kept,
                     &Asking::default(),
-                    &Pi(tx),
+                    &Pi::new(
+                        tx,
+                        "fixture-session".into(),
+                        tokio::sync::watch::channel(None).0,
+                    ),
                     read,
                     &Notify::new(),
                 ),
@@ -965,7 +1226,7 @@ mod bridge {
                     .collect();
                 let (base, requests) = server(replies).await;
                 let client = Client::at(base);
-                let (tx, _rx) = mpsc::unbounded_channel();
+                let (tx, _rx) = mpsc::channel(64);
                 let (host, script) = tokio::net::UnixStream::pair().unwrap();
                 let (read, _write) = script.into_split();
                 drop(host);
@@ -975,7 +1236,11 @@ mod bridge {
                         &client,
                         &kept,
                         &Asking::default(),
-                        &Pi(tx),
+                        &Pi::new(
+                            tx,
+                            "fixture-session".into(),
+                            tokio::sync::watch::channel(None).0,
+                        ),
                         read,
                         &Notify::new(),
                     ),
@@ -999,8 +1264,12 @@ mod bridge {
             );
             let (base, requests) = server(vec![ok.clone(), failed, ok.clone(), ok]).await;
             let client = Client::at(base);
-            let (tx, mut status) = mpsc::unbounded_channel();
-            let pi = Pi(tx);
+            let (tx, mut status) = mpsc::channel(64);
+            let pi = Pi::new(
+                tx,
+                "fixture-session".into(),
+                tokio::sync::watch::channel(None).0,
+            );
             let mut outbox = Outbox::default();
             outbox.push(
                 7,
@@ -1010,7 +1279,7 @@ mod bridge {
             assert!(outbox.blocked);
             assert_eq!(outbox.pending.front().unwrap().pieces.len(), 1);
             assert!(
-                status.try_recv().unwrap()["status"]
+                status.try_recv().unwrap()["command"]["text"]
                     .as_str()
                     .unwrap()
                     .contains("kept")
@@ -1103,6 +1372,65 @@ mod bridge {
             (base, task)
         }
 
+        #[test]
+        fn a_full_durable_queue_does_not_advance_the_transport_offset() {
+            let (_dir, kept) = kept();
+            {
+                let mut state = kept.lock();
+                state.user = Some(7);
+                state.chat = Some(7);
+            }
+            let (tx, _rx) = mpsc::channel(1);
+            let mut pi = Pi::new(tx, "s".into(), tokio::sync::watch::channel(None).0);
+            pi.3 = Some(crate::pending::Pending::open(&kept.path, "s").unwrap());
+            let batch = || {
+                (0..300)
+                    .map(|id| update(id, 7, 7, "private", "input"))
+                    .collect()
+            };
+            heard(&kept, &Asking::default(), &pi, &mut None, batch());
+            assert_eq!(kept.lock().offset, 0);
+            assert!(pi.2.borrow().is_some());
+            let path = kept
+                .path
+                .with_extension(format!("pending-{}.json", protocol::hash("s")));
+            let saved: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
+            assert_eq!(saved["waiting"].as_array().unwrap().len(), 256);
+            for frame in saved["waiting"].as_array().unwrap() {
+                pi.acknowledge(&json!({"type":"accepted","id":frame["message"]["id"]}));
+            }
+            pi.2.send_replace(None);
+            heard(&kept, &Asking::default(), &pi, &mut None, batch());
+            assert_eq!(kept.lock().offset, 300);
+            assert!(pi.2.borrow().is_none());
+        }
+
+        #[test]
+        fn a_failed_pending_save_keeps_the_transport_update_available() {
+            let (_dir, kept) = kept();
+            {
+                let mut state = kept.lock();
+                state.user = Some(7);
+                state.chat = Some(7);
+            }
+            let (tx, _rx) = mpsc::channel(1);
+            let mut pi = Pi::new(tx, "s".into(), tokio::sync::watch::channel(None).0);
+            pi.3 = Some(crate::pending::Pending::open(&kept.path, "s").unwrap());
+            let path = kept
+                .path
+                .with_extension(format!("pending-{}.json", protocol::hash("s")));
+            std::fs::create_dir(path).unwrap();
+            heard(
+                &kept,
+                &Asking::default(),
+                &pi,
+                &mut None,
+                vec![update(17, 7, 7, "private", "keep me")],
+            );
+            assert_eq!(kept.lock().offset, 0);
+            assert!(pi.2.borrow().is_some());
+        }
+
         fn kept() -> (tempfile::TempDir, Kept) {
             let dir = tempfile::tempdir().unwrap();
             let path = dir.path().join("telegram.json");
@@ -1132,8 +1460,12 @@ mod bridge {
         #[test]
         fn only_the_account_that_paired_is_heard() {
             let (_dir, kept) = kept();
-            let (tx, mut rx) = mpsc::unbounded_channel();
-            let pi = Pi(tx);
+            let (tx, mut rx) = mpsc::channel(64);
+            let pi = Pi::new(
+                tx,
+                "fixture-session".into(),
+                tokio::sync::watch::channel(None).0,
+            );
             let mut code = Some("12345678".to_string());
             let asking = Asking::default();
             let (paired, _) = heard(
@@ -1149,7 +1481,7 @@ mod bridge {
             );
             assert_eq!(paired, Some(7));
             assert_eq!(code, None);
-            assert!(rx.try_recv().unwrap().get("status").is_some());
+            assert!(rx.try_recv().unwrap()["command"]["type"] == "status");
             assert!(rx.try_recv().is_err());
 
             heard(
@@ -1164,10 +1496,13 @@ mod bridge {
                 ],
             );
             assert_eq!(
-                rx.try_recv().unwrap(),
-                json!({ "input": "why did it fail" })
+                rx.try_recv().unwrap()["message"]["body"][0]["value"],
+                "why did it fail"
             );
-            assert_eq!(rx.try_recv().unwrap(), json!({ "interrupt": true }));
+            assert_eq!(
+                rx.try_recv().unwrap(),
+                protocol::runtime(json!({"type":"interrupt"}))
+            );
             assert!(rx.try_recv().is_err());
             let saved: State = serde_json::from_slice(&std::fs::read(&kept.path).unwrap()).unwrap();
             assert_eq!(
@@ -1187,8 +1522,12 @@ mod bridge {
                 chat: Some(7),
                 ..State::default()
             };
-            let (tx, mut rx) = mpsc::unbounded_channel();
-            let pi = Pi(tx);
+            let (tx, mut rx) = mpsc::channel(64);
+            let pi = Pi::new(
+                tx,
+                "fixture-session".into(),
+                tokio::sync::watch::channel(None).0,
+            );
             let asking = Asking::default();
             let click = |id: i64, from: i64, chat: i64, data: &str| -> Update {
                 serde_json::from_value(json!({
@@ -1224,11 +1563,17 @@ mod bridge {
             asking.lock().push(Up::of(&told(3)).unwrap());
             assert_eq!(pressed(&asking, &pi, "3:3"), Err(CLOSED));
             assert_eq!(pressed(&asking, &pi, "3:1"), Ok(()));
-            assert_eq!(rx.try_recv().unwrap(), json!({ "answer": 3, "picks": [1] }));
+            assert_eq!(
+                rx.try_recv().unwrap(),
+                protocol::runtime(json!({"type":"answer","question":3,"picks":[1]}))
+            );
             assert!(pressed(&asking, &pi, "3:close").is_err(), "answered once");
             asking.lock().push(Up::of(&told(5)).unwrap());
             assert_eq!(pressed(&asking, &pi, "5:close"), Ok(()));
-            assert_eq!(rx.try_recv().unwrap(), json!({ "answer": 5, "picks": [] }));
+            assert_eq!(
+                rx.try_recv().unwrap(),
+                protocol::runtime(json!({"type":"answer","question":5,"picks":[]}))
+            );
             assert_eq!(pressed(&asking, &pi, "9:0"), Err(CLOSED));
 
             let mut shown = Up::of(&told(6)).unwrap();
@@ -1246,10 +1591,13 @@ mod bridge {
             says("3，1 3");
             assert_eq!(
                 rx.try_recv().unwrap(),
-                json!({ "answer": 6, "picks": [0, 2] })
+                protocol::runtime(json!({"type":"answer","question":6,"picks":[0, 2]}))
             );
             says("1 more");
-            assert_eq!(rx.try_recv().unwrap(), json!({ "input": "1 more" }));
+            assert_eq!(
+                rx.try_recv().unwrap()["message"]["body"][0]["value"],
+                "1 more"
+            );
         }
 
         #[test]
@@ -1355,6 +1703,8 @@ mod api {
 
     #[derive(Debug, Deserialize)]
     pub struct Message {
+        #[serde(default)]
+        pub date: u64,
         #[serde(default)]
         pub message_id: i64,
         #[serde(default)]
@@ -1993,6 +2343,356 @@ mod split {
             assert!(pieces.len() > 1);
             let rejoined: String = pieces.into_iter().map(|r| &text[r]).collect();
             assert_eq!(rejoined, text);
+        }
+    }
+}
+
+// Transport frames project into chat presentation state; semantic messages stay unchanged.
+mod protocol {
+    use serde_json::{Value, json};
+    use std::sync::atomic::{AtomicU64, Ordering};
+    pub fn hash(value: &str) -> String {
+        use sha2::{Digest, Sha256};
+        format!("{:x}", Sha256::digest(value.as_bytes()))
+    }
+    pub fn fresh() -> String {
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos();
+        format!("channel-{now}-{}", NEXT.fetch_add(1, Ordering::Relaxed))
+    }
+    pub fn key(value: &Value) -> Option<String> {
+        value
+            .as_str()
+            .map(str::to_owned)
+            .or_else(|| value.as_u64().map(|id| id.to_string()))
+    }
+    // Old command shapes, translated: status and stop are notices, the rest
+    // are requests whose ids this script mints itself.
+    pub fn runtime(command: Value) -> Value {
+        let kind = command["type"].as_str().unwrap_or_default();
+        match kind {
+            "status" => json!({"op":"status","text":command["text"]}),
+            "interrupt" | "stop" => json!({"op":"stop"}),
+            "watch" => json!({"id":"listen-questions","op":"listen","to":"questions"}),
+            "observe" => json!({"id":"listen-session","op":"listen","to":"session","cursor":command["cursor"]}),
+            "answer" => json!({"id":command["question"],"result":{"picks":command["picks"]}}),
+            "answer_text" => json!({"id":command["question"],"result":{"text":command["text"]}}),
+            _ => json!({"op":kind}),
+        }
+    }
+    pub fn message(_session: &str, kind: Value, body: Vec<Value>) -> Value {
+        let text = body
+            .first()
+            .and_then(|block| block["value"].as_str())
+            .unwrap_or_default();
+        match kind["type"].as_str() {
+            Some("response") => json!({
+                "op":"say",
+                "re":kind["value"]["request"],
+                "text":text,
+                "stop":kind["value"]["status"]["type"] != "done",
+            }),
+            _ => json!({"op":"say","text":text}),
+        }
+    }
+    fn text(body: &Value) -> String {
+        use std::borrow::Cow;
+        let mut text = String::new();
+        let mut separator = "";
+        for block in body.as_array().into_iter().flatten() {
+            let part = match block["type"].as_str() {
+                Some("text") => block["value"].as_str().map(Cow::Borrowed),
+                Some("image") => Some(Cow::Borrowed("[image]")),
+                Some("data") => Some(Cow::Owned(block["value"].to_string())),
+                _ => None,
+            };
+            if let Some(part) = part {
+                text.push_str(separator);
+                text.push_str(&part);
+                separator = "\n";
+            }
+        }
+        text
+    }
+    fn result(mut view: Value, status: &Value) -> Value {
+        view["status"] = status["type"].clone();
+        view["reason"] = status["reason"].clone();
+        view["error"] = status["failure"]["message"].clone();
+        view
+    }
+    pub fn project(frame: &Value) -> Option<Value> {
+        if let Some(op) = frame["op"].as_str() {
+            return match op {
+                "message" => {
+                    let m = &frame["message"];
+                    let kind = &m["kind"];
+                    let value = &kind["value"];
+                    match kind["type"].as_str()? {
+                        "request" => match value["direction"].as_str()? {
+                            "to_model" => Some(
+                                json!({"request":format!("m:{}",m["id"].as_str()?),"started":true}),
+                            ),
+                            "from_model" if value["request"]["type"] == "ask" => Some(
+                                json!({"question":{"id":format!("m:{}",m["id"].as_str()?),"text":text(&m["body"]),"options":value["request"]["options"],"back":true}}),
+                            ),
+                            _ => None,
+                        },
+                        "response" => {
+                            let id = format!("m:{}", value["request"].as_str()?);
+                            Some(result(
+                                json!({"request":id,"closed":id,"reply":text(&m["body"]),"semantic":true,"replayed":frame["replayed"]}),
+                                &value["status"],
+                            ))
+                        }
+                        _ => None,
+                    }
+                }
+                "ask" => Some(
+                    json!({"question":{"id":frame["id"],"text":frame["text"],"options":frame["options"],"back":false}}),
+                ),
+                "refused" => Some(json!({"refused":frame["question"],"why":frame["message"]})),
+                _ => None,
+            };
+        }
+        if frame["error"].is_object() {
+            return Some(json!({"progress":frame["error"]["message"]}));
+        }
+        None
+    }
+}
+
+// Retain original semantic frames until the host acknowledges their message IDs.
+
+mod pending {
+    use serde::{Deserialize, Serialize};
+    use serde_json::Value;
+    use std::{
+        collections::VecDeque,
+        path::{Path, PathBuf},
+        sync::{Arc, Mutex},
+    };
+    use tokio::sync::{Notify, mpsc};
+
+    #[derive(Default, Clone, Serialize, Deserialize)]
+    struct Stored {
+        waiting: VecDeque<Value>,
+        completed: VecDeque<String>,
+    }
+    pub struct Pending {
+        path: PathBuf,
+        stored: Mutex<Stored>,
+        changed: Notify,
+    }
+    impl Pending {
+        pub fn open(state: &Path, session: &str) -> Result<Arc<Self>, String> {
+            let path =
+                state.with_extension(format!("pending-{}.json", crate::protocol::hash(session)));
+            let stored = match std::fs::read(&path) {
+                Ok(bytes) => serde_json::from_slice(&bytes)
+                    .map_err(|e| format!("invalid pending input: {e}"))?,
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => Stored::default(),
+                Err(e) => return Err(format!("cannot read pending input: {e}")),
+            };
+            Ok(Arc::new(Self {
+                path,
+                stored: Mutex::new(stored),
+                changed: Notify::new(),
+            }))
+        }
+        fn save(&self, stored: &Stored) -> Result<(), String> {
+            use std::io::Write;
+            use std::os::unix::fs::OpenOptionsExt;
+            let result = (|| -> std::io::Result<()> {
+                let temp = self.path.with_extension("json.pi-tmp");
+                let mut file = std::fs::OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .mode(0o600)
+                    .open(&temp)?;
+                file.write_all(&serde_json::to_vec(stored)?)?;
+                file.sync_all()?;
+                std::fs::rename(temp, &self.path)?;
+                if let Some(parent) = self.path.parent() {
+                    std::fs::File::open(parent)?.sync_all()?;
+                }
+                Ok(())
+            })();
+            result.map_err(|e| format!("cannot save pending input: {e}"))
+        }
+        pub fn remembers(&self, id: &str) -> bool {
+            let stored = self
+                .stored
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            stored.completed.iter().any(|seen| seen == id)
+                || stored.waiting.iter().any(|old| old["id"] == id)
+        }
+        pub fn push(&self, frame: Value) -> Result<(), String> {
+            let id = frame["message"]["id"]
+                .as_str()
+                .ok_or("input has no message ID")?;
+            let mut stored = self
+                .stored
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            if stored.completed.iter().any(|seen| seen == id)
+                || stored.waiting.iter().any(|old| old["id"] == id)
+            {
+                return Ok(());
+            }
+            if stored.waiting.len() >= 256 {
+                return Err("pending input queue is full".into());
+            }
+            let mut next = stored.clone();
+            next.waiting.push_back(frame);
+            if serde_json::to_vec(&next).map_err(|e| e.to_string())?.len() > 64 * 1024 * 1024 {
+                return Err("pending input byte budget is full".into());
+            }
+            self.save(&next)?;
+            *stored = next;
+            drop(stored);
+            self.changed.notify_waiters();
+            Ok(())
+        }
+        pub fn acknowledge(&self, frame: &Value) -> Result<Option<Value>, String> {
+            let Some(id) = frame["id"].as_str() else {
+                return Ok(None);
+            };
+            let mut stored = self
+                .stored
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+            let Some(at) = stored.waiting.iter().position(|p| p["message"]["id"] == id) else {
+                return Ok(None);
+            };
+            match frame["type"].as_str() {
+                Some("accepted") => {}
+                Some("error") => {
+                    return Err(format!(
+                        "host refused pending input: {}",
+                        frame["message"].as_str().unwrap_or("unknown error")
+                    ));
+                }
+                _ => return Ok(None),
+            }
+            let mut next = stored.clone();
+            let original = next.waiting.remove(at).expect("located pending input");
+            next.completed.push_back(id.to_string());
+            while next.completed.len() > 4096 {
+                next.completed.pop_front();
+            }
+            self.save(&next)?;
+            *stored = next;
+            drop(stored);
+            self.changed.notify_waiters();
+            Ok(Some(original))
+        }
+        pub async fn pump(&self, to: &mpsc::Sender<Value>) -> Result<(), String> {
+            loop {
+                let changed = self.changed.notified();
+                tokio::pin!(changed);
+                changed.as_mut().enable();
+                let frame = self
+                    .stored
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .waiting
+                    .front()
+                    .cloned();
+                if let Some(frame) = frame {
+                    let id = frame["message"]["id"].clone();
+                    to.send(frame)
+                        .await
+                        .map_err(|_| "host frame connection is closed")?;
+                    loop {
+                        let changed = self.changed.notified();
+                        tokio::pin!(changed);
+                        changed.as_mut().enable();
+                        if !self
+                            .stored
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner)
+                            .waiting
+                            .iter()
+                            .any(|p| p["message"]["id"] == id)
+                        {
+                            break;
+                        }
+                        changed.await;
+                    }
+                } else {
+                    changed.await;
+                }
+            }
+        }
+    }
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use serde_json::json;
+        fn frame(id: &str, response: bool) -> Value {
+            json!({"type":"message", "message":{"id":id,"session":"s","by":null,"at":7,
+                "kind":if response {json!({"type":"response","value":{"request":"ask","status":{"type":"done"}}})} else {json!({"type":"request","value":{"direction":"to_model","request":"user"}})},
+                "body":[{"type":"text","value":"original"}]}})
+        }
+        #[tokio::test]
+        async fn persisted_requests_and_answers_retry_unchanged_under_backpressure() {
+            let dir = tempfile::tempdir().unwrap();
+            let state = dir.path().join("state.json");
+            let pending = Pending::open(&state, "s").unwrap();
+            let expected: Vec<_> = (0..70)
+                .map(|i| frame(&format!("event-{i}"), i % 2 != 0))
+                .collect();
+            for frame in &expected {
+                pending.push(frame.clone()).unwrap();
+            }
+            drop(pending);
+            let pending = Pending::open(&state, "s").unwrap();
+            let (tx, mut rx) = mpsc::channel(1);
+            let task = tokio::spawn({
+                let pending = pending.clone();
+                async move { pending.pump(&tx).await }
+            });
+            for frame in expected {
+                let received = tokio::time::timeout(std::time::Duration::from_secs(2), rx.recv())
+                    .await
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(received, frame);
+                pending
+                    .acknowledge(&json!({"type":"accepted","id":frame["message"]["id"]}))
+                    .unwrap();
+                pending.push(frame).unwrap();
+            }
+            assert!(pending.stored.lock().unwrap().waiting.is_empty());
+            task.abort();
+            let restored = Pending::open(&state, "s").unwrap();
+            assert!(restored.stored.lock().unwrap().waiting.is_empty());
+            assert_eq!(restored.stored.lock().unwrap().completed.len(), 70);
+        }
+        #[test]
+        fn failed_saves_and_host_rejections_retain_the_original_input() {
+            let dir = tempfile::tempdir().unwrap();
+            let pending = Pending::open(&dir.path().join("state.json"), "s").unwrap();
+            let original = frame("input", false);
+            pending.push(original.clone()).unwrap();
+            assert!(
+                pending
+                    .acknowledge(&json!({"type":"error","id":"input","message":"full"}))
+                    .is_err()
+            );
+            assert_eq!(
+                pending.stored.lock().unwrap().waiting.front(),
+                Some(&original)
+            );
+            std::fs::remove_file(&pending.path).unwrap();
+            std::fs::create_dir(&pending.path).unwrap();
+            assert!(pending.push(frame("next", false)).is_err());
+            assert_eq!(pending.stored.lock().unwrap().waiting.len(), 1);
         }
     }
 }

@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+# ---
+# description = "Repeat a line until a round changes no file.\nSubmit the same line round after round; each round carries a note saying which one it is.\nStop when a round changes nothing, when the tree returns to an earlier state, when rounds only nibble, or at max_rounds.\nThe tree is read from git where there is one, and from the filesystem otherwise."
+# background = true
+# [required]
+# goal = "Specify the line to submit each round. It may be a skill such as /simplify."
+# [optional]
+# max_rounds = "Set the ceiling on rounds. The default is 10."
+# ---
+# Driven from fd 3: a `say` carrying an id is answered when that turn ends, and
+# `more` keeps the checkout open between rounds.
+import hashlib
+import json
+import os
+import select
+import subprocess
+import sys
+import time
+
+FD = 3
+# A round that moves fewer lines than this is below the noise floor.
+THIN_CHANGES = 5
+# Consecutive thin rounds that end the loop.
+THIN_ROUNDS = 2
+# How long one round may run before the loop gives up on it.
+ROUND_LIMIT = 1800
+SKIP = {".git", "target", "node_modules", ".pi", "__pycache__", ".venv"}
+
+buf = b""
+
+
+def send(msg):
+    os.write(FD, (json.dumps(msg) + "\n").encode())
+
+
+def read_line(timeout):
+    global buf
+    end = time.monotonic() + timeout
+    while b"\n" not in buf:
+        left = end - time.monotonic()
+        if left <= 0:
+            return None
+        ready, _, _ = select.select([FD], [], [], left)
+        if not ready:
+            return None
+        chunk = os.read(FD, 65536)
+        if not chunk:
+            return None
+        buf += chunk
+    line, buf = buf.split(b"\n", 1)
+    return line.decode()
+
+
+def ask(frame, wanted, limit=ROUND_LIMIT):
+    """Send one request and wait for the reply that carries its id."""
+    send(frame)
+    end = time.monotonic() + limit
+    while True:
+        left = end - time.monotonic()
+        if left <= 0:
+            return None
+        line = read_line(left)
+        if line is None:
+            return None
+        try:
+            msg = json.loads(line)
+        except ValueError:
+            continue
+        if "error" in msg and "id" not in msg:
+            return msg
+        if msg.get("id") != wanted:
+            continue
+        return msg
+
+
+def ended_as(reply):
+    if "error" in reply:
+        return "error: " + ((reply["error"] or {}).get("message") or "no reason given")
+    result = reply.get("result") or {}
+    state = result.get("state") or "unknown"
+    return f"{state}: {result.get('text') or 'no answer'}" if state == "failed" else state
+
+
+def git(*args):
+    try:
+        out = subprocess.run(
+            ["git", *args], capture_output=True, text=True, timeout=30
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if out.returncode != 0:
+        return None
+    return out.stdout
+
+
+def in_git():
+    return git("rev-parse", "--is-inside-work-tree") == "true\n"
+
+
+def scan(root):
+    entries = []
+    for base, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in SKIP]
+        for name in files:
+            path = os.path.join(base, name)
+            try:
+                st = os.stat(path)
+            except OSError:
+                continue
+            entries.append((os.path.relpath(path, root), st.st_size, st.st_mtime_ns))
+    entries.sort()
+    return entries
+
+
+def mark(root):
+    if in_git():
+        parts = [git("status", "--porcelain", "-uno") or ""]
+        for rel in (git("diff", "--name-only") or "").splitlines():
+            try:
+                st = os.stat(os.path.join(root, rel))
+            except OSError:
+                parts.append(f"{rel} gone")
+                continue
+            parts.append(f"{rel} {st.st_size} {st.st_mtime_ns}")
+        return hashlib.sha256("\n".join(parts).encode()).hexdigest()
+    return hashlib.sha256(repr(scan(root)).encode()).hexdigest()
+
+
+def changed_lines(root):
+    if in_git():
+        total = 0
+        for line in (git("diff", "--numstat") or "").splitlines():
+            fields = line.split("\t")
+            for n in fields[:2]:
+                if n.isdigit():
+                    total += int(n)
+        for rel in (git("ls-files", "--others", "--exclude-standard") or "").splitlines():
+            total += count_lines(os.path.join(root, rel))
+        return total
+    return sum(count_lines(os.path.join(root, rel)) for rel, _, _ in scan(root))
+
+
+def count_lines(path):
+    try:
+        with open(path, "rb") as f:
+            return sum(1 for _ in f)
+    except OSError:
+        return 0
+
+
+def main():
+    try:
+        args = json.load(sys.stdin)
+    except ValueError:
+        args = {}
+    goal = (args.get("goal") or "").strip()
+    if not goal:
+        print("a loop needs a goal", file=sys.stderr)
+        return 2
+    try:
+        cap = int(args.get("max_rounds") or 10)
+    except ValueError:
+        print("max_rounds must be a number", file=sys.stderr)
+        return 2
+    root = os.getcwd()
+    hello = ask({"id": "hello", "op": "initialize", "protocol": 4}, "hello")
+    if hello is None or "error" in hello:
+        print("this pi speaks another protocol", file=sys.stderr)
+        return 2
+    seen = [mark(root)]
+    thin = 0
+    ended = f"loop stopped at max_rounds ({cap}) — rounds were still changing files"
+    for n in range(1, cap + 1):
+        note = (
+            f"This is loop round {n}. If nothing is left worth changing, "
+            "change nothing — an unchanged round is the signal to stop."
+        )
+        wanted = f"round-{n}"
+        reply = ask({"id": wanted, "op": "say", "text": goal, "note": note, "more": True}, wanted)
+        if reply is None:
+            ended = "loop stopped — the round never answered"
+            break
+        status = ended_as(reply)
+        if status != "done":
+            ended = f"loop stopped — the round ended {status or 'unknown'}"
+            break
+        now = mark(root)
+        if now == seen[-1]:
+            ended = "loop done — that round changed nothing"
+            break
+        if now in seen:
+            ended = "loop stopped — a round undid the work before it"
+            break
+        thin = thin + 1 if changed_lines(root) < THIN_CHANGES else 0
+        if thin >= THIN_ROUNDS:
+            ended = "loop stopped — rounds are only nibbling now"
+            break
+        seen.append(now)
+    # It has spoken, so its exit carries no words: the verdict is said here.
+    send({"op": "say", "text": ended, "as": "task", "source": "loop", "reason": "the loop ended"})
+    print(ended)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

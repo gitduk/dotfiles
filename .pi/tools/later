@@ -8,12 +8,12 @@
 # after = "a delay, 30s / 10m / 2h / 1d"
 # every = "a period, at least 1m"
 # ---
-# An example of a tool that outlives its call: it detaches over fd 3 and
-# reports each time the prompt comes due, as `{"result": ...}`.
+# A timer service submits each occurrence as a canonical automatic input.
 import json
 import os
 import sys
 import time
+import uuid
 
 UNITS = {"s": 1, "m": 60, "h": 3600, "d": 86400}
 
@@ -33,14 +33,54 @@ def span(spec):
     return seconds
 
 
-def say(fd3, **message):
-    fd3.write(json.dumps(message) + "\n")
+def say(fd3, frame):
+    fd3.write(json.dumps(frame) + "\n")
     fd3.flush()
+
+
+def status(fd3, text):
+    say(fd3, {"op": "status", "text": text})
+
+
+def initialize(fd3, replies):
+    say(fd3, {"id": "hello", "op": "initialize", "protocol": 4})
+    answer(fd3, replies, "hello")
+
+
+def answer(fd3, replies, wanted):
+    while True:
+        line = replies.readline()
+        if not line:
+            fail("host frame connection closed")
+        reply = json.loads(line)
+        if "error" in reply and "id" not in reply:
+            fail(reply["error"].get("message") or "the host refused a frame")
+        if reply.get("id") != wanted:
+            continue
+        if "error" in reply:
+            fail(reply["error"].get("message") or "the host refused the frame")
+        return reply.get("result") or {}
+
+
+def trigger(fd3, replies, prompt, source):
+    message_id = uuid.uuid4().hex
+    say(fd3, {
+        "id": message_id,
+        "op": "say",
+        "text": prompt,
+        "as": "task",
+        "source": source,
+        "reason": "timer elapsed",
+    })
+    answer(fd3, replies, message_id)
 
 
 def main():
     if os.environ.get("PI_EVENTS_FD") != "3":
         fail("later needs pi to keep it running: no fd 3 here")
+    fd3 = os.fdopen(os.dup(3), "w")
+    replies = os.fdopen(os.dup(3), "r")
+    initialize(fd3, replies)
     args = json.load(sys.stdin)
     prompt = (args.get("prompt") or "").strip()
     after = (args.get("after") or "").strip()
@@ -50,21 +90,21 @@ def main():
     if bool(after) == bool(every):
         fail("give exactly one of `after` or `every`")
 
-    fd3 = os.fdopen(3, "w")
+    source = "timer:" + uuid.uuid4().hex
     if after:
         seconds = span(after)
-        say(fd3, status=f"set: back in {after}, so this turn can end")
+        status(fd3, f"set: back in {after}, so this turn can end")
         time.sleep(seconds)
-        say(fd3, result=prompt)
+        trigger(fd3, replies, prompt, source)
         return
     seconds = span(every)
     if seconds < 60:
         fail("`every` is at least 1m")
-    say(fd3, status=f"set: back every {every} until stopped, so this turn can end")
+    status(fd3, f"set: back every {every} until stopped, so this turn can end")
     while True:
-        say(fd3, status=f"next in {every}")
+        status(fd3, f"next in {every}")
         time.sleep(seconds)
-        say(fd3, result=prompt)
+        trigger(fd3, replies, prompt, source)
 
 
 main()

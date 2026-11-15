@@ -19,7 +19,7 @@ Mode: **${1:-ask}**
 Never run bare `c add` — it stages the whole `$HOME` worktree (1.6M untracked files: caches, containers, project dirs, credentials). Inspect first, then stage only the real dotfile paths:
 
 ```bash
-cd "$HOME" && c status --porcelain -uall
+c status --porcelain -uall
 ```
 
 From the porcelain output, identify the genuine dotfile changes (`.pi/agent/...`, `.zsh.d/...`, `.tmux.conf`, configs you manage) and stage only those paths explicitly — never the whole tree:
@@ -62,7 +62,7 @@ Message: `<type>[scope]: <imperative summary>` (≤72 chars)
 ## Step 3 — Commit & push
 
 ```bash
-cd "$HOME" && c commit -m "<message>" && c push
+c commit -m "<message>" && c push
 ```
 
 Only report success if `c status --short` prints nothing; otherwise list the remaining paths explicitly — do not claim completion.
