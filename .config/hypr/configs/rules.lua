@@ -8,7 +8,7 @@
 hl.window_rule({ match = { fullscreen = true }, opacity = "1.0" })
 
 -- WeChat
-hl.window_rule({ match = { title = "(?i)(weixin)" }, workspace = "9" })
+hl.window_rule({ match = { title = "(?i)(weixin)" }, workspace = "special" })
 hl.window_rule({ match = { title = "(?i)(weixin)" }, center = true })
 
 -- Code editors (tag then assign workspace)
@@ -23,24 +23,24 @@ hl.window_rule({ match = { initial_title = "^$" }, float = true })
 
 -- Ignore maximize requests from all apps. You'll probably like this.
 hl.window_rule({
-	name = "suppress-maximize-events",
-	match = { class = ".*" },
-	suppress_event = "maximize",
+  name = "suppress-maximize-events",
+  match = { class = ".*" },
+  suppress_event = "maximize",
 })
 
 -- Fix some dragging issues with XWayland
 hl.window_rule({
-	name = "fix-xwayland-drags",
-	match = {
-		class = "^$",
-		title = "^$",
-		xwayland = true,
-		float = true,
-		fullscreen = false,
-		pin = false,
-	},
+  name = "fix-xwayland-drags",
+  match = {
+    class = "^$",
+    title = "^$",
+    xwayland = true,
+    float = true,
+    fullscreen = false,
+    pin = false,
+  },
 
-	no_focus = true,
+  no_focus = true,
 })
 
 -----------------------------
@@ -63,7 +63,7 @@ hl.layer_rule({ match = { namespace = "launcher" }, blur = true })
 hl.layer_rule({ match = { namespace = "overview" }, blur = true })
 
 hl.layer_rule({
-	name = "no-anim-for-selection",
-	match = { namespace = "selection" },
-	no_anim = true,
+  name = "no-anim-for-selection",
+  match = { namespace = "selection" },
+  no_anim = true,
 })

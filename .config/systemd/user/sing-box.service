@@ -5,6 +5,7 @@ After=network.target nss-lookup.target network-online.target
 [Service]
 Type=simple
 LimitNOFILE=1000000
+ExecSearchPath=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=sing-box run -c %h/.config/sing-box/config.json -D %h/.config/sing-box/
 
 [Install]

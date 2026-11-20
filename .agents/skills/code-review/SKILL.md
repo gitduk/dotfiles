@@ -67,7 +67,8 @@ the template for that lens from `references/lenses.md` with:
 
 Require the evidence field to start with `unverified` when the reviewer could not confirm
 the claim from the diff or the code it read. Reviewers sometimes add a header or a closing
-line; keep only lines with five `|`-separated fields.
+line; keep only lines with five `|`-separated fields. A reviewer's fix field is always a
+proposal: no state marker, since only the merge knows what got applied.
 
 ## 3 Verify and merge
 
@@ -78,6 +79,8 @@ line; keep only lines with five `|`-separated fields.
 3. Downgrade a finding the diff, a nearby comment, or a deliberate caller already
    justifies, and give the reason in one line.
 4. Rank by severity, then by blast radius: a reachable path before an unreachable one.
+5. Carry out a fix when the user asked for it or it is trivially safe; mark it `applied`
+   only once the check that covers it passes. Everything else stays `open`.
 
 Reviewers invent plausible problems, so a finding you did not open is a finding you cannot
 report. Two lenses hitting one line is normal, and reviewers disagree on severity: re-grade
@@ -110,8 +113,13 @@ every survivor against the definitions below.
 - <two to four specific things the change does well>
 
 ### Verdict
-**Request changes** — <one line why>
+**Request changes** — <one line why>. `<n>` applied and uncommitted in this tree, `<n>` left `open`.
 ~~~
+
+Every **Fix** cell opens with its state: `applied` — changed in this tree and the check that
+covers it passed; `open` — a proposal the author carries out (`` `open` — check the length
+before the slice ``). An applied fix nobody committed is still `applied`, with the uncommitted
+work named in the Verdict so the tree's state shows.
 
 Severity, and the verdict it drives:
 
@@ -122,7 +130,9 @@ Severity, and the verdict it drives:
 - **Minor** — naming, structure, duplication, polish. Minor alone means *Approve*.
 
 Leave out a section with no findings, and leave out "Dropped or downgraded" when every
-finding survived. "What looks good" stays: it is what the author is told to keep.
+finding survived. "What looks good" stays: it is what the author is told to keep. The Fix
+column and the Verdict must agree: a table of `open` rows beside a Verdict claiming the work
+is done is the one contradiction this report cannot have.
 
 ## Tips
 

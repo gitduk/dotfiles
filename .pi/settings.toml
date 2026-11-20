@@ -31,12 +31,13 @@ cache_read_per_mtok = "cost.text.input.cache.read"
 [mcp.context7]
 url = "https://mcp.context7.com/mcp"
 
-# Real Chrome under DevTools control: traces, network, console, screenshots.
-[mcp.chrome-devtools]
-command = "bun"
-args    = ["x", "chrome-devtools-mcp@latest"]
-
 # Banner when a run finishes and this terminal is not the focused window.
 [[hooks]]
 on      = ["run.done"]
 command = "~/.pi/hooks/notify-unfocused.sh 5 'pi: Done'"
+
+# An ssh command from `bash` waits for a yes on the input line.
+[[hooks]]
+on      = ["tool.before"]
+tools   = ["bash"]
+command = "~/.pi/hooks/ssh-gate"

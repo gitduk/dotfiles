@@ -79,19 +79,12 @@ set_wallpaper() {
   local focused
   focused=$(get_focused_monitor)
 
-  local -a monitors
-  if [[ -n $focused ]]; then
-    monitors=("$focused")
-  else
-    mapfile -t monitors < <(hyprctl -j monitors 2>/dev/null | jq -r '.[].name' 2>/dev/null)
-    [[ ${#monitors[@]} -gt 0 ]] || error "No monitors found"
-  fi
-
   info "Setting wallpaper: ${wallpaper##*/}"
-  local preload_out; preload_out=$(hyprctl hyprpaper preload "$wallpaper" 2>&1)
-  for monitor in "${monitors[@]}"; do
-    local wp_out; wp_out=$(hyprctl hyprpaper wallpaper "$monitor,$wallpaper" 2>&1)
-  done
+  if [[ -n $focused ]]; then
+    hyprctl hyprpaper wallpaper "$focused,$wallpaper" >/dev/null || error "hyprctl hyprpaper wallpaper failed"
+  else
+    hyprctl hyprpaper wallpaper ",$wallpaper" >/dev/null || error "hyprctl hyprpaper wallpaper failed"
+  fi
   echo "$wallpaper" > "$HOME/.cache/waybar/current_wallpaper"
 
   if ! command -v wallust >/dev/null; then

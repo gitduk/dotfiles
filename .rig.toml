@@ -207,6 +207,7 @@ description = "A cat clone with syntax highlighting and Git integration"
 [[repo]]
 name = "mozilla/sccache"
 bpick = "sccache-v*-x86_64-unknown-linux-musl.tar.gz"
+run = 'export RUSTC_WRAPPER=$(command -v sccache)'
 description = "Shared compilation cache for C/C++ and Rust"
 
 [[repo]]
@@ -323,6 +324,15 @@ extract = false
 bin = { "magpie-linux-amd64" = "magpie" }
 description = "One place to pick every agent's model, through a local gateway"
 
+[[repo]]
+# tags are per-build (<ver>-<runid>) and rig compares them as strings, so a
+# patch release on an older minor can be the "latest" and downgrade go.
+name = "actions/go-versions"
+bpick = "go-*-linux-x64.tar.gz"
+bin = { "bin/go" = "go", "bin/gofmt" = "gofmt" }
+env = { GOPROXY = "https://goproxy.cn,https://mirrors.aliyun.com/goproxy,https://goproxy.io,direct", GOPRIVATE = "*.corp.example.com,rsc.io/private", GOSUMDB = "sum.golang.org", GO111MODULE = "on" }
+description = "The Go programming language"
+
 # ============ [[git]] 源码构建（钩子只构建，rig 来放）============
 
 [[git]]
@@ -394,6 +404,20 @@ description = "A cross-platform, GPU-accelerated terminal emulator"
 name = "google-chrome-stable"
 description = "The web browser from Google"
 
+[[apt]]
+name = "podman"
+description = "A tool for managing OCI containers and pods"
+
+[[apt]]
+name = "docker.io"
+bin = "docker"
+description = "Docker container runtime (dockerd) and CLI"
+
+[[apt]]
+name = "docker-compose-v2"
+bin = "/usr/libexec/docker/cli-plugins/docker-compose"
+description = "Docker Compose v2 plugin for the docker CLI"
+
 # ============ [[curl]] 安装脚本 ============
 
 [[curl]]
@@ -436,6 +460,17 @@ alias did="direnv disallow"
 alias eenv="v .env"
 '''
 description = "unclutter your .profile"
+
+# The installer runs without -y, so it waits for a confirmation: run
+# `rig i rustup` on its own, a parallel batch cannot answer it.
+[[curl]]
+name = "rustup"
+url = "https://sh.rustup.rs"
+bin = "rustup"
+env = { CARGO_INSTALL_ROOT = "~/.local", CARGO_INCREMENTAL = "0" }
+run = 'export PATH="$HOME/.cargo/bin:$PATH"'
+completions = { generate = "rustup completions zsh > _rustup && rustup completions zsh cargo > _cargo" }
+description = "The Rust toolchain installer"
 
 # ============ [[plugin]] Job B —— 纯 clone/source，不构建 ============
 

@@ -74,7 +74,7 @@ alias cacl="cargo clean"
 alias cack="cargo check"
 alias cas="cargo sync"
 alias cau="cargo update"
-alias cais="cargo install"
+alias cais="cargo install --path"
 alias caui="cargo uninstall"
 alias carl="cargo release"
 alias care="cargo release --execute --no-confirm"
@@ -126,6 +126,9 @@ alias ejs="v .justfile"
 alias gomi="go mod init"
 alias gomt="go mod tidy"
 alias gor="go run ."
+
+# git
+alias g="git"
 
 # open
 alias o="open"
