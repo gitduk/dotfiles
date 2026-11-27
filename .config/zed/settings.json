@@ -1,4 +1,7 @@
 {
+  "search": {
+    "button": false
+  },
   "cli_default_open_behavior": "existing_window",
   "diff_view_style": "unified",
   "proxy": "",
@@ -15,13 +18,6 @@
     "dock": "left",
   },
   "agent_servers": {
-    "pi-acp": {
-      "default_config_options": {
-        "thought_level": "medium",
-        "model": "ccs/deepseek-v4-pro"
-      },
-      "type": "registry"
-    },
     "gemini": {
       "type": "registry",
     },
@@ -58,7 +54,7 @@
     "copilot": {
       "enable_next_edit_suggestions": true,
     },
-    "provider": "ollama",
+    "provider": "copilot",
   },
   "languages": {
     "Python": {
@@ -92,6 +88,17 @@
     },
   },
   "agent": {
+    "threads_sidebar": {
+      "position": "right"
+    },
+    "sandbox_permissions": {
+      "allow_unsandboxed": true,
+      "network_hosts": [
+        "pypi.org",
+        "files.pythonhosted.org",
+        "mirrors.tuna.tsinghua.edu.cn"
+      ]
+    },
     "favorite_models": [
       {
         "provider": "openrouter",
@@ -117,7 +124,6 @@
       },
     ],
     "flexible": false,
-    "sidebar_side": "right",
     "max_content_width": 1000.0,
     "button": true,
     "single_file_review": false,
@@ -146,9 +152,10 @@
       },
     },
     "default_model": {
-      "provider": "ollama",
-      "model": "bge-m3:latest",
-      "enable_thinking": false,
+      "effort": "high",
+      "provider": "opencode",
+      "model": "go/deepseek-v4.1-flash",
+      "enable_thinking": true,
     },
     "commit_message_model": {
       "provider": "opencode",

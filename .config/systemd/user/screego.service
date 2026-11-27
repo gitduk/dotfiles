@@ -1,0 +1,12 @@
+[Unit]
+Description=Screego screen sharing (LAN)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/wukaige/.local/bin
+ExecStart=/home/wukaige/.local/bin/screego serve
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

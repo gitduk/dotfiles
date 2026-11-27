@@ -7,13 +7,19 @@
 -- opacity
 hl.window_rule({ match = { fullscreen = true }, opacity = "1.0" })
 
--- WeChat
-hl.window_rule({ match = { title = "(?i)(weixin)" }, workspace = "special" })
-hl.window_rule({ match = { title = "(?i)(weixin)" }, center = true })
+-- Chrome
+hl.window_rule({ match = { class = "(?i).*chrome.*" }, workspace = "special" })
 
--- Code editors (tag then assign workspace)
-hl.window_rule({ match = { class = "(?i)(zed|dev.zed.Zed|dev.zed.Zed-Preview|Code)" }, tag = "code" })
-hl.window_rule({ match = { tag = "code" }, workspace = "2" })
+-- Hyprland matches RE2 FullMatch: patterns must cover the whole title/class
+-- WeChat
+hl.window_rule({ match = { title = "(?i).*weixin.*" }, workspace = "special" })
+hl.window_rule({ match = { title = "(?i).*weixin.*" }, center = true })
+
+-- Obsidian
+hl.window_rule({ match = { class = "(?i).*obsidian.*" }, workspace = "special" })
+
+-- Code editors
+hl.window_rule({ match = { class = "(?i)(.*zed.*|code)" }, workspace = "2" })
 
 -- Float anonymous / empty-class windows (Chrome notifications, etc.)
 hl.window_rule({ match = { class = "^$" }, float = true })

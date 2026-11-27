@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Obsidian
+Comment=Markdown-based knowledge base on top of local files
+Exec=obsidian %U
+Icon=obsidian
+Terminal=false
+Type=Application
+Categories=Office;
+StartupWMClass=md.obsidian.Obsidian
+MimeType=application/pdf;text/markdown;application/x-obsidian-canvas;application/x-obsidian-base;x-scheme-handler/obsidian;

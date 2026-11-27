@@ -1,0 +1,20 @@
+[Unit]
+Description=Acquire complete NONCE problems before waking the assistant
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=/home/wukaige/nonce
+EnvironmentFile=/home/wukaige/nonce/.pi/nonce-watch.env
+ExecStart=/usr/bin/python3 -u /home/wukaige/nonce/nonce_acquire.py
+Restart=on-failure
+RestartSec=10
+RestartPreventExitStatus=3
+TimeoutStopSec=15
+StandardOutput=append:/home/wukaige/nonce/nonce-watch.log
+StandardError=append:/home/wukaige/nonce/nonce-watch.log
+UMask=0077
+
+[Install]
+WantedBy=default.target

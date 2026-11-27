@@ -26,6 +26,10 @@ hl.on("hyprland.start", function()
 end)
 
 -- All settings
+local function with_alpha(color, alpha)
+	return (color:gsub("^rgb%(", "rgba("):gsub("%)$", alpha .. ")"))
+end
+
 hl.config({
 	general = {
 		border_size = 0,
@@ -97,8 +101,8 @@ hl.config({
 		groupbar = {
 			enabled = true,
 			render_titles = false,
-			text_color = foreground,
-			col = { active = color7, inactive = color0 },
+			indicator_height = 4,
+			col = { active = with_alpha(cursor, "B3"), inactive = "rgba(00000000)" },
 			middle_click_close = true,
 			scrolling = true,
 		},

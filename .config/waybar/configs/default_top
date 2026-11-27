@@ -35,6 +35,7 @@
   ],
 
   "modules-right": [
+    "custom/coin",
     "hyprland/submap",
     "network#speed",
     "custom/easytier",

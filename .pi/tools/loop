@@ -163,7 +163,7 @@ def main():
         print("max_rounds must be a number", file=sys.stderr)
         return 2
     root = os.getcwd()
-    hello = ask({"id": "hello", "op": "initialize", "protocol": 4}, "hello")
+    hello = ask({"id": "hello", "op": "initialize", "protocol": 5, "client": "loop"}, "hello")
     if hello is None or "error" in hello:
         print("this pi speaks another protocol", file=sys.stderr)
         return 2
@@ -176,7 +176,7 @@ def main():
             "change nothing — an unchanged round is the signal to stop."
         )
         wanted = f"round-{n}"
-        reply = ask({"id": wanted, "op": "say", "text": goal, "note": note, "more": True}, wanted)
+        reply = ask({"id": wanted, "op": "send", "text": goal, "note": note, "more": True}, wanted)
         if reply is None:
             ended = "loop stopped — the round never answered"
             break
@@ -197,7 +197,7 @@ def main():
             break
         seen.append(now)
     # It has spoken, so its exit carries no words: the verdict is said here.
-    send({"op": "say", "text": ended, "as": "task", "source": "loop", "reason": "the loop ended"})
+    send({"op": "event", "text": ended, "source": "loop", "reason": "the loop ended"})
     print(ended)
     return 0
 

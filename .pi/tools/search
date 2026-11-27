@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 # ---
-# description = "Search the web.\nReturn numbered results with a title, URL, and snippet without markup.\nUse this tool to find a page that answers your question.\nUse `fetch` to read that page.\nA snippet only helps locate a source.\nThe tool tries DuckDuckGo, then Bing, then the AnySearch JSON API.\nPass engine=all to run all of them at once and compare their own results.\n\nEngines may refuse automated requests or return unrelated results.\nThe tool reports either case as a failure, not as an empty result."
+# description = "Search the web.\nReturn numbered results with a title, URL, and snippet without markup.\nUse this tool to find a page that answers your question.\nUse `fetch` to read that page.\nA snippet only helps locate a source.\nThe tool tries DuckDuckGo, then Bing, then the AnySearch and Firecrawl JSON APIs.\nPass engine=all to run all of them at once and compare their own results.\n\nEngines may refuse automated requests or return unrelated results.\nThe tool reports either case as a failure, not as an empty result."
 # [required]
 # query = "Specify the search query."
 # [optional]
-# engine = "Use duckduckgo, bing or anysearch to query only that engine, or all to run every engine at once and see each one's own results."
+# engine = "Use duckduckgo, bing, anysearch or firecrawl to query only that engine, or all to run every engine at once and see each one's own results."
 # limit = "Set the result limit. The default is 8. The maximum is 20."
 # ---
 # An example: no key needed, a failure exits non-zero with the reason on
 # stderr. DuckDuckGo and Bing are read as pages, so a layout change on their
-# side can break them; AnySearch answers JSON and works anonymously.
+# side can break them; AnySearch and Firecrawl answer JSON and work anonymously.
 import base64
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -186,10 +187,22 @@ def page(engine, query):
     return body
 
 
+def unspaced(c):
+    """Scripts written without word separators, where a run is not a word."""
+    code = ord(c)
+    return (0x3040 <= code <= 0x30FF        # kana
+            or 0x3400 <= code <= 0x4DBF     # CJK extension A
+            or 0x4E00 <= code <= 0x9FFF     # CJK unified
+            or 0xF900 <= code <= 0xFAFF)    # CJK compatibility
+
+
 def on_topic(query, hits):
     # `serde_json` is answered by pages about serde: compounds count by part.
-    words = [w for w in "".join(c if c.isalnum() else " " for c in query.lower()).split()
-             if len(w) >= 2]
+    # Unspaced scripts have no word to count, so only spaced words are checked;
+    # a query made of nothing else passes, since a false pass is cheaper.
+    words = [w for w in "".join(
+        c if c.isalnum() and not unspaced(c) else " " for c in query.lower()).split()
+        if len(w) >= 2]
     if not hits or not words:
         return True
     return any(any(w in f"{t} {u} {s}".lower() for w in words) for t, u, s in hits)
@@ -208,14 +221,14 @@ def ask(engine, query):
     return hits
 
 
-def anysearch_hits(query, limit):
-    body = json.dumps({"query": query, "max_results": min(limit, 10)}).encode()
+def post_json(url, body, headers=None):
+    """The JSON answer to a POST, or the reason there is none."""
     request = urllib.request.Request(
-        "https://api.anysearch.com/v1/search", data=body,
-        headers={"Content-Type": "application/json", "User-Agent": BROWSER})
+        url, data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json", "User-Agent": BROWSER, **(headers or {})})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as answer:
-            payload = json.load(answer)
+            return json.load(answer)
     except urllib.error.HTTPError as err:
         detail = err.read().decode(errors="replace")
         try:
@@ -229,6 +242,19 @@ def anysearch_hits(query, limit):
         raise RuntimeError(f"no answer in {TIMEOUT}s")
     except ValueError:
         raise RuntimeError("answered with something other than JSON")
+
+
+def one_line(text, width=400):
+    """A page's markdown folded into one snippet: links keep their words."""
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", " ", text or "")
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    text = " ".join(re.sub(r"(?m)^#+\s*", "", text).split())
+    return text if len(text) <= width else text[:width].rstrip() + "…"
+
+
+def anysearch_hits(query, limit):
+    payload = post_json("https://api.anysearch.com/v1/search",
+                        {"query": query, "max_results": min(limit, 10)})
     if payload.get("code") != 0:
         raise RuntimeError(payload.get("message") or "refused the query")
     results = (payload.get("data") or {}).get("results") or []
@@ -239,12 +265,30 @@ def anysearch_hits(query, limit):
     return hits
 
 
-# Page readers first; the API is the fallback that survives their bot checks.
-SOURCES = list(ENGINES) + ["anysearch"]
+def firecrawl_hits(query, limit):
+    """Keyless answers without a key; a key only lifts the monthly cap."""
+    key = os.environ.get("FIRECRAWL_API_KEY")
+    payload = post_json("https://api.firecrawl.dev/v2/search",
+                        {"query": query, "limit": min(limit, 20)},
+                        {"Authorization": "Bearer " + key} if key else None)
+    results = (payload.get("data") or {}).get("web") or []
+    # Its description is the page's own markdown, far longer than a snippet.
+    hits = [(r.get("title") or "", r.get("url") or "", one_line(r.get("description")))
+            for r in results]
+    if not on_topic(query, hits):
+        raise RuntimeError("its results have nothing to do with the query")
+    return hits
+
+
+# Page readers first; the JSON APIs are the fallback that survives their bot checks.
+# Firecrawl last: its keyless cap is per month, AnySearch's per day.
+JSON_SOURCES = {"anysearch": anysearch_hits, "firecrawl": firecrawl_hits}
+SOURCES = list(ENGINES) + list(JSON_SOURCES)
 
 
 def search(source, query, limit):
-    hits = anysearch_hits(query, limit) if source == "anysearch" else ask(source, query)
+    hits = (JSON_SOURCES[source](query, limit) if source in JSON_SOURCES
+            else ask(source, query))
     return hits[:limit]
 
 

@@ -1,26 +1,28 @@
 # ~/.pi/settings.toml — the connections pi talks to, and the models they serve.
 
 # What a bare `pi` runs when no session resumes one.
-model = "ccs/deepseek-v4.1-flash"
+model = "deepseek-v4.1-flash"
 
 status = ["elapsed", "in_out", "speed", "cache", "ctx", "queued", "compacted", "cost"]
 
-# Local gateway on 127.0.0.1:7896. Its catalog names a per-model API shape, but
-# every model also answers Chat Completions, so one `chat` connection serves all.
-[provider.ccs]
-base_url            = "http://127.0.0.1:7896/v1"
+# Local Bifrost gateway in podman (--network=host, :8080, OpenAI-compatible
+# Chat Completions). Its VK allows gemini and vllm, every model; ids carry the
+# upstream prefix, so a selection is bifrost/gemini/gemini-3-flash-preview.
+[provider.bifrost]
+base_url            = "http://localhost:8080/v1"
 format              = "chat"
-api_key             = "x"
-context_window      = "limit.context"
-max_output_tokens   = "limit.output"
-vision              = "modalities.input"
-accepts_temperature = "capabilities.temperature"
-reasoning           = "capabilities.reasoning.supported"
+api_key             = "$BIFROST_API_KEY"
+context_window      = "context_length"
+max_output_tokens   = "max_output_tokens"
+# Bifrost pins an opencode-go request to one upstream by this id; a fresh one
+# per request lands on a different upstream, whose prompt cache is cold.
+session_header      = "x-bf-session-id"
 
-[provider.ccs.pricing]
-input_per_mtok      = "cost.text.input.price"
-output_per_mtok     = "cost.text.output.price"
-cache_read_per_mtok = "cost.text.input.cache.read"
+[provider.bifrost.pricing]
+unit                = "token"
+input_per_mtok      = "pricing.prompt"
+output_per_mtok     = "pricing.completion"
+cache_read_per_mtok = "pricing.input_cache_read"
 
 [keys]
 "menu.accept"   = ["tab"]
@@ -30,6 +32,18 @@ cache_read_per_mtok = "cost.text.input.cache.read"
 # Library docs on demand: resolve a library, then query its current docs.
 [mcp.context7]
 url = "https://mcp.context7.com/mcp"
+
+# Obsidian vault via the Local REST API with MCP plugin. Its CA is in the system
+# trust store; the header value in ~/.pi/.env carries the full "Bearer <key>".
+[mcp.obsidian]
+url     = "https://127.0.0.1:27124/mcp"
+headers = { Authorization = "$OBSIDIAN_AUTHORIZATION" }
+
+# DBX desktop app: connection list, schema inspection and SQL over its local
+# MCP endpoint; the header value in ~/.pi/.env carries the full "Bearer <key>".
+[mcp.dbx]
+url     = "http://127.0.0.1:5225/mcp"
+headers = { Authorization = "$DBX_AUTHORIZATION" }
 
 # Banner when a run finishes and this terminal is not the focused window.
 [[hooks]]

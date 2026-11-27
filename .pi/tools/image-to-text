@@ -4,14 +4,13 @@
 # [required]
 # image = "path of the image to read, absolute or relative to the workspace (e.g. /home/wukaige/.pi/images/1791431570406.png)"
 # ---
-"""Transcribe an image through the vision model on pi's own gateway.
+"""Transcribe an image through pi's own Bifrost gateway.
 
-The model is claude-haiku-5-5 (2026-10-27): the previous
-`deepseek-v4-flash-vision-exp` was retired and answers 410 ModelDeprecated. Of the
-gateway's models that accept image input, this one transcribes Chinese screenshots
-accurately and returns an empty thinking block, so its whole output budget goes to
-the transcription. `kimi-k3` also reads images but spends the budget on thinking --
-with a plain `max_tokens` it stops at `max_tokens` with no text at all.
+The gateway (2026-11-26: :8080, OpenAI-compatible Chat Completions) needs a
+virtual key and upstream-prefixed model ids, so the request format is chat
+completions, not the Anthropic messages API the old :7896 proxy took.
+`opencode-go/claude-haiku-5-5` transcribes Chinese screenshots accurately and
+returns no thinking block, so its whole output budget goes to the text.
 """
 
 import base64
@@ -22,9 +21,10 @@ import tomllib
 import urllib.error
 import urllib.request
 
-MODEL = "claude-haiku-5-5"
-DEFAULT_BASE_URL = "http://127.0.0.1:7896"
+PROVIDER = "bifrost"
+MODEL = "opencode-go/claude-haiku-5-5"
 SETTINGS = os.path.expanduser("~/.pi/settings.toml")
+ENV_FILE = os.path.expanduser("~/.pi/.env")
 TIMEOUT = 240
 MEDIA_TYPES = {
     ".png": "image/png",
@@ -48,13 +48,39 @@ def fail(message):
     sys.exit(1)
 
 
+def env_file():
+    values = {}
+    try:
+        with open(ENV_FILE) as lines:
+            for line in lines:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                name, _, value = line.partition("=")
+                values[name.strip()] = value.strip().strip("\"'")
+    except OSError:
+        pass
+    return values
+
+
+def secret(reference):
+    """`$NAME` reads the process environment first, then ~/.pi/.env, as pi does."""
+    if not reference.startswith("$"):
+        return reference
+    name = reference[1:]
+    return os.environ.get(name) or env_file().get(name) or fail(f"{name} is not set in the environment or {ENV_FILE}")
+
+
 def gateway():
-    """The base_url pi runs on; the vision model is served there too."""
+    """Base URL and virtual key of the `[provider.bifrost]` pi itself talks to."""
     try:
         with open(SETTINGS, "rb") as settings:
-            return tomllib.load(settings).get("base_url", DEFAULT_BASE_URL)
-    except (OSError, tomllib.TOMLDecodeError):
-        return DEFAULT_BASE_URL
+            provider = tomllib.load(settings).get("provider", {}).get(PROVIDER, {})
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        fail(f"cannot read {SETTINGS}: {error}")
+    if not provider.get("base_url"):
+        fail(f"{SETTINGS} has no [provider.{PROVIDER}] base_url")
+    return provider["base_url"].rstrip("/"), secret(provider.get("api_key", ""))
 
 
 def media_type(path):
@@ -74,6 +100,7 @@ def transcribe(path):
     except OSError as error:
         fail(f"cannot read {path}: {error.strerror or error}")
 
+    base_url, key = gateway()
     payload = {
         "model": MODEL,
         "max_tokens": 16384,
@@ -82,28 +109,19 @@ def transcribe(path):
                 "role": "user",
                 "content": [
                     {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": media_type(path),
-                            "data": encoded,
-                        },
+                        "type": "image_url",
+                        "image_url": {"url": f"data:{media_type(path)};base64,{encoded}"},
                     },
                     {"type": "text", "text": PROMPT},
                 ],
             }
         ],
     }
-    url = gateway().rstrip("/") + "/v1/messages"
+    url = base_url + "/chat/completions"
     request = urllib.request.Request(
         url,
         data=json.dumps(payload).encode(),
-        headers={
-            "content-type": "application/json",
-            "anthropic-version": "2023-06-01",
-            # the gateway answers 403 to urllib's default User-Agent
-            "user-agent": "image-to-text/1.0",
-        },
+        headers={"content-type": "application/json", "authorization": f"Bearer {key}"},
     )
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
@@ -113,22 +131,23 @@ def transcribe(path):
     except (urllib.error.URLError, OSError, ValueError) as error:
         fail(f"cannot reach the model at {url}: {error}")
 
-    blocks = answer.get("content", [])
-    text = "\n".join(b.get("text", "") for b in blocks if b.get("type") == "text").strip()
+    choice = (answer.get("choices") or [{}])[0]
+    text = (choice.get("message") or {}).get("content") or ""
+    if isinstance(text, list):
+        text = "\n".join(part.get("text", "") for part in text if isinstance(part, dict))
+    text = text.strip()
     if not text:
         # A model that thinks before answering spends the budget on the thinking block:
-        # the answer comes back empty and `stop_reason` is max_tokens, not a missing image.
-        if answer.get("stop_reason") == "max_tokens" and any(b.get("type") == "thinking" for b in blocks):
+        # the answer comes back empty and finish_reason is length, not a missing image.
+        finish = choice.get("finish_reason")
+        if finish == "length" and (choice.get("message") or {}).get("reasoning_content"):
             fail(
                 "the model spent its whole output budget thinking and returned no transcription; "
                 f"raise max_tokens or drop the thinking block ({MODEL})"
             )
-        fail(
-            f"the model answered no text (stop_reason={answer.get('stop_reason')}, "
-            f"blocks={[b.get('type') for b in blocks]})"
-        )
+        fail(f"the model answered no text (finish_reason={finish}, keys={sorted(choice)})")
     print(text)
-    if answer.get("stop_reason") == "max_tokens":
+    if choice.get("finish_reason") == "length":
         print("[truncated: the model hit its output limit, the end of the text is missing]")
 
 

@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+# ---
+# description = "Sense the machine and tell pi: disk levels and temperatures, one process shared by every session. Emits an event when a filesystem crosses 95% (98% critical), assigns the cleanup to an idle session, and shows disk or temperature on the statusline only while one is over its threshold."
+# service = true
+# ---
+# One process per machine, held by the lock fd pi passes as PI_SERVICE_LOCK_FD.
+# Sessions to speak to are the sockets under PI_SESSIONS_DIR; each gets the same
+# protocol 5 frames pi's own scripts speak on fd 3.
+import glob
+import json
+import os
+import socket
+import sys
+import threading
+import time
+import uuid
+
+POLL = 60            # seconds between samples
+FULL, CRITICAL, RECOVERED = 95, 98, 92
+CPU_HOT, NVME_HOT = 85, 70
+SUSTAIN = 3          # consecutive samples over the line before a temp notifies
+REOFFER = 1800       # seconds before the cleanup task is offered again
+GRACE = 30           # seconds with no session before the service exits
+AGAIN = 6 * 3600     # seconds before the same level notifies again
+FSTYPES = {"ext2", "ext3", "ext4", "xfs", "btrfs", "f2fs", "zfs", "vfat", "exfat"}
+MIN_DISK = 1 << 30   # a filesystem smaller than 1 GiB is never a problem
+
+
+def send(conn, frame):
+    try:
+        conn.sock.sendall((json.dumps(frame) + "\n").encode())
+    except OSError:
+        conn.alive = False
+
+
+class Conn:
+    def __init__(self, path):
+        self.path = path
+        self.sock = socket.socket(socket.AF_UNIX)
+        self.sock.settimeout(2)
+        self.sock.connect(path)
+        self.sock.settimeout(None)
+        self.alive = True
+        self.session = None
+        self.workspace = None
+        self._lock = threading.Lock()
+        self._pending = {}
+        threading.Thread(target=self.drain, daemon=True).start()
+        hello = self.request({"op": "initialize", "protocol": 5, "client": "sensor"})
+        if hello is None:
+            self.alive = False
+            try:
+                self.sock.close()
+            except OSError:
+                pass
+            return
+        self.session = hello.get("session")
+        self.workspace = hello.get("workspace")
+
+    def drain(self):
+        buf = b""
+        try:
+            while True:
+                chunk = self.sock.recv(4096)
+                if not chunk:
+                    break
+                buf += chunk
+                while b"\n" in buf:
+                    line, buf = buf.split(b"\n", 1)
+                    if not line:
+                        continue
+                    try:
+                        frame = json.loads(line)
+                    except ValueError:
+                        continue
+                    req_id = frame.get("id")
+                    if req_id is None:
+                        continue
+                    with self._lock:
+                        waiter = self._pending.pop(req_id, None)
+                    if waiter is not None:
+                        waiter[1] = frame
+                        waiter[0].set()
+        except OSError:
+            pass
+        self.alive = False
+        with self._lock:
+            for waiter in self._pending.values():
+                waiter[0].set()
+            self._pending.clear()
+
+    def request(self, frame, timeout=2.0):
+        req_id = uuid.uuid4().hex
+        frame = dict(frame, id=req_id)
+        waiter = [threading.Event(), None]
+        with self._lock:
+            if not self.alive:
+                return None
+            self._pending[req_id] = waiter
+        send(self, frame)
+        waiter[0].wait(timeout)
+        with self._lock:
+            self._pending.pop(req_id, None)
+        reply = waiter[1]
+        if not reply or "error" in reply:
+            return None
+        return reply.get("result")
+
+    def info(self):
+        return self.request({"op": "info"})
+
+    def status(self, text):
+        send(self, {"op": "status", "text": text})
+
+    def notify(self, text, reason):
+        send(self, {"op": "event", "text": text, "source": "sensor", "reason": reason})
+
+
+def disks():
+    seen, found = set(), []
+    with open("/proc/self/mounts") as mounts:
+        for line in mounts:
+            device, mount, fstype = line.split()[:3]
+            if fstype not in FSTYPES or device in seen:
+                continue
+            mount = mount.encode().decode("unicode_escape")
+            try:
+                st = os.statvfs(mount)
+            except OSError:
+                continue
+            total = st.f_blocks * st.f_frsize
+            if total < MIN_DISK:
+                continue
+            seen.add(device)
+            used = (st.f_blocks - st.f_bfree) * st.f_frsize
+            found.append((mount, round(used * 100 / total)))
+    return sorted(found, key=lambda each: -each[1])
+
+
+def temps():
+    found = {}
+    for hwmon in glob.glob("/sys/class/hwmon/hwmon*"):
+        try:
+            name = open(f"{hwmon}/name").read().strip()
+        except OSError:
+            continue
+        wanted = {"coretemp": "Package id 0", "nvme": "Composite"}.get(name)
+        if not wanted:
+            continue
+        for path in glob.glob(f"{hwmon}/temp*_input"):
+            try:
+                label = open(path.replace("_input", "_label")).read().strip()
+                value = int(open(path).read()) // 1000
+            except (OSError, ValueError):
+                continue
+            if label == wanted:
+                found[name] = value
+    return found
+
+
+class Sensor:
+    def __init__(self):
+        self.conns = {}
+        self.level = {}
+        self.notified = {}
+        self.temp = {}
+        self.assigned = None
+        self.offered = 0
+        self.line = ""
+        self.since = time.monotonic()
+
+    def run(self):
+        while True:
+            self.reconnect()
+            if not self.conns:
+                if time.monotonic() - self.since > GRACE:
+                    return
+            else:
+                self.since = time.monotonic()
+            self.sense()
+            time.sleep(POLL)
+
+    def reconnect(self):
+        live = {}
+        for path in sorted(glob.glob(os.environ.get("PI_SESSIONS_DIR", "") + "/*.sock")):
+            if self.conns.get(path) and self.conns[path].alive:
+                live[path] = self.conns[path]
+                continue
+            try:
+                conn = Conn(path)
+                if conn.alive:
+                    live[path] = conn
+            except OSError:
+                continue
+        self.conns = live
+
+    def sense(self):
+        mounts, hot = disks(), temps()
+        for mount, pct in mounts:
+            level = "critical" if pct >= CRITICAL else "full" if pct >= FULL else "ok"
+            was = self.level.get(mount, "ok")
+            if level != was:
+                self.crossed(mount, pct, was, level)
+            self.level[mount] = level
+            self.renotify(mount, pct, level)
+        for mount in list(self.level):
+            if mount not in [each[0] for each in mounts]:
+                del self.level[mount]
+        for name, value in hot.items():
+            limit = CPU_HOT if name == "coretemp" else NVME_HOT
+            if value >= limit:
+                self.temp[name] = self.temp.get(name, 0) + 1
+            else:
+                self.temp[name] = 0
+            if self.temp[name] == SUSTAIN:
+                self.broadcast(f"{name} {value}°C 持续超标", f"{name} {value}C")
+        self.offer(mounts)
+        self.status(mounts, hot)
+
+    def crossed(self, mount, pct, was, level):
+        if level == "ok":
+            if was != "ok":
+                self.broadcast(f"{mount} 已回落到 {pct}%", f"disk {mount} {pct}%")
+            return
+        self.notified.pop((mount, was), None)
+        line = f"{mount} 已用 {pct}%"
+        why = f"disk {mount} {pct}%"
+        self.broadcast(f"{line}：磁盘快满，注意大文件写入。", why)
+        self.notified[(mount, level)] = time.monotonic()
+        self.assigned = None
+        self.offered = time.monotonic()
+
+    def renotify(self, mount, pct, level):
+        if level == "ok":
+            return
+        now = time.monotonic()
+        if now - self.notified.get((mount, level), 0) < AGAIN:
+            return
+        self.notified[(mount, level)] = now
+        self.broadcast(f"{mount} 仍在 {pct}%", f"disk {mount} {pct}%")
+
+    def pick_target(self, mount):
+        candidates = []
+        for path, conn in self.conns.items():
+            if not conn.alive:
+                continue
+            snapshot = conn.info()
+            if snapshot is None:
+                continue
+            busy = bool(snapshot.get("busy"))
+            ws = snapshot.get("workspace") or conn.workspace or ""
+            on_mount = ws == mount or ws.startswith(mount.rstrip("/") + "/")
+            candidates.append((busy, not on_mount, path))
+        if candidates:
+            candidates.sort()
+            return candidates[0][2]
+        paths = [path for path, conn in self.conns.items() if conn.alive]
+        return paths[0] if paths else None
+
+    def offer(self, mounts):
+        full = [(mount, pct) for mount, pct in mounts if self.level.get(mount) != "ok"]
+        if not full:
+            return
+        if self.assigned and self.conns.get(self.assigned) and self.conns[self.assigned].alive:
+            if time.monotonic() - self.offered < REOFFER:
+                return
+        mount, pct = full[0]
+        target = self.pick_target(mount)
+        if not target:
+            return
+        self.assigned = target
+        self.offered = time.monotonic()
+        text = (f"磁盘 {mount} 已用 {pct}%，由本会话负责：先 df -h 确认仍快满，"
+                "再列出可清理项（docker、包缓存、日志等）给我确认后处理。")
+        send(self.conns[self.assigned], {
+            "op": "event",
+            "text": text,
+            "source": "sensor",
+            "reason": f"assign disk {mount} {pct}%",
+        })
+
+    def broadcast(self, text, why):
+        for conn in self.conns.values():
+            if conn.alive:
+                conn.notify(f"sensor：{text}", why)
+
+    def status(self, mounts, hot):
+        parts = [f"{mount} {pct}%" for mount, pct in mounts[:1] if pct >= FULL]
+        if hot.get("coretemp", 0) >= CPU_HOT:
+            parts.append(f"cpu {hot['coretemp']}°")
+        if hot.get("nvme", 0) >= NVME_HOT:
+            parts.append(f"nvme {hot['nvme']}°")
+        line = ("sensor: " + " · ".join(parts)) if parts else ""
+        if line != self.line:
+            self.line = line
+            for conn in self.conns.values():
+                if conn.alive:
+                    conn.status(line)
+
+
+if __name__ == "__main__":
+    if not os.environ.get("PI_SESSIONS_DIR"):
+        sys.exit("sensor is a service: pi runs it, pointing PI_SESSIONS_DIR at its sockets")
+    if not os.environ.get("PI_SERVICE_LOCK_FD"):
+        sys.exit("sensor is a service: pi runs it, holding its lock in PI_SERVICE_LOCK_FD")
+    Sensor().run()

@@ -177,6 +177,29 @@ bin = { "yaak*" = "yaak" }
 description = "Desktop API client for REST, GraphQL, and gRPC"
 
 [[repo]]
+name = "noodle-rest/noodle"
+bpick = "noodle-linux-x86_64"
+extract = false
+bin = { "noodle-*" = "noodle" }
+description = "A REST Client where the Repository is the Workspace"
+
+[[repo]]
+name = "s1dashu/quiet-md"
+bpick = "quiet-md-*-x86_64.AppImage"
+extract = false
+bin = { "quiet-md*" = "quiet-md" }
+description = "Blazing-fast native notes app and rich-text editor"
+
+# GUI: the release names both architectures after one pattern, so the list
+# must exclude the arm64 build; the AppImage needs no setuid fix-up.
+[[repo]]
+name = "obsidianmd/obsidian-releases"
+bpick = ["Obsidian-*.AppImage", "!*arm64*"]
+extract = false
+bin = { "Obsidian-*" = "obsidian" }
+description = "Markdown-based knowledge base on top of local files"
+
+[[repo]]
 name = "oven-sh/bun"
 bpick = "bun-linux-x64.zip"
 run = '''
@@ -220,6 +243,18 @@ name = "ind-igo/cx"
 bpick = "cx-x86_64-unknown-linux-gnu.tar.gz"
 description = "Semantic code navigation for AI agents"
 
+# 取 -stealth 变体（渲染 + 反检测），scrape 要在真实站点上跑
+[[repo]]
+name = "h4ckf0r0day/obscura"
+bpick = "obscura-x86_64-linux-stealth.tar.gz"
+bin = ["obscura", "obscura-worker"]
+description = "The headless browser for AI agents and web scraping"
+
+[[repo]]
+name = "lexmount/moli"
+bpick = "moli-x86_64-unknown-linux-gnu.tar.gz"
+description = "Best headless browser for AI agents. Lite, Fast, High-Compatibility"
+
 [[repo]]
 name = "stanlyzoolo/keepkit"
 bpick = "keepkit_*_linux_x86_64.tar.gz"
@@ -228,7 +263,7 @@ description = "Lightweight TUI for tracking versions of your favorite tools"
 # .deb 资产走 §2.5 的 dpkg 流程 —— extract() 通过 `dpkg-deb -x` 解包，不碰系统包数据库
 [[repo]]
 name = "t8y2/dbx"
-bpick = "DBX_*_amd64.deb"
+bpick = ["DBX_*_amd64.deb", "!*beta*"]
 description = "lightweight cross-platform database client"
 
 # 从 zinit 迁移过来的剩余「Binary Tools」——原先靠 zinit ice 装
@@ -347,6 +382,11 @@ name = "alacritty/alacritty"
 setup = '''export PATH="$HOME/.cargo/bin:$PATH"; cargo build --release --no-default-features --features=wayland; sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg; sudo desktop-file-install extra/linux/Alacritty.desktop; sudo update-desktop-database'''
 bin = { "target/release/alacritty" = "alacritty" }
 description = "A fast, cross-platform, OpenGL terminal emulator"
+
+[[repo]]
+name = "osenvosem/tickview"
+bpick = "tickview-*-linux-amd64.tar.gz"
+description = "TickView: An open-source charting terminal written from scratch in pure Rust."
 
 # ============ [[cargo]] cargo install ============
 

@@ -425,6 +425,7 @@ mod bridge {
             login(&mut client, &kept, &pi).await?;
         }
         pi.status("connected");
+        pi.say(json!({"id":"hello","op":"initialize","protocol":5,"client":"wechat"}));
         pi.say(protocol::runtime(json!({"type":"observe","cursor":null})));
         pi.say(protocol::runtime(json!({"type":"watch"})));
         let asking = Asking::default();
@@ -2516,18 +2517,9 @@ mod types {
 // Transport frames project into chat presentation state; semantic messages stay unchanged.
 mod protocol {
     use serde_json::{Value, json};
-    use std::sync::atomic::{AtomicU64, Ordering};
     pub fn hash(value: &str) -> String {
         use sha2::{Digest, Sha256};
         format!("{:x}", Sha256::digest(value.as_bytes()))
-    }
-    pub fn fresh() -> String {
-        static NEXT: AtomicU64 = AtomicU64::new(0);
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_nanos();
-        format!("channel-{now}-{}", NEXT.fetch_add(1, Ordering::Relaxed))
     }
     pub fn key(value: &Value) -> Option<String> {
         value
@@ -2556,12 +2548,12 @@ mod protocol {
             .unwrap_or_default();
         match kind["type"].as_str() {
             Some("response") => json!({
-                "op":"say",
-                "re":kind["value"]["request"],
+                "op":"reply",
+                "to":kind["value"]["request"],
                 "text":text,
-                "stop":kind["value"]["status"]["type"] != "done",
+                "cancel":kind["value"]["status"]["type"] != "done",
             }),
-            _ => json!({"op":"say","text":text}),
+            _ => json!({"op":"send","text":text}),
         }
     }
     fn text(body: &Value) -> String {

@@ -1,4 +1,5 @@
 ---
+name: dotfiles
 description: Sync $HOME config to the bare dotfiles repo via the `c` command — stage, scan for secrets (name + content), draft message, confirm, commit & push
 argument-hint: "[push]"
 ---

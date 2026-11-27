@@ -33,17 +33,17 @@ def span(spec):
     return seconds
 
 
-def say(fd3, frame):
+def send(fd3, frame):
     fd3.write(json.dumps(frame) + "\n")
     fd3.flush()
 
 
 def status(fd3, text):
-    say(fd3, {"op": "status", "text": text})
+    send(fd3, {"op": "status", "text": text})
 
 
 def initialize(fd3, replies):
-    say(fd3, {"id": "hello", "op": "initialize", "protocol": 4})
+    send(fd3, {"id": "hello", "op": "initialize", "protocol": 5, "client": "later"})
     answer(fd3, replies, "hello")
 
 
@@ -64,13 +64,13 @@ def answer(fd3, replies, wanted):
 
 def trigger(fd3, replies, prompt, source):
     message_id = uuid.uuid4().hex
-    say(fd3, {
+    send(fd3, {
         "id": message_id,
-        "op": "say",
+        "op": "event",
         "text": prompt,
-        "as": "task",
         "source": source,
         "reason": "timer elapsed",
+        "key": message_id,
     })
     answer(fd3, replies, message_id)
 

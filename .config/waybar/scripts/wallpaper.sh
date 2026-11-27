@@ -103,6 +103,9 @@ set_wallpaper() {
   [[ $percent -gt 42 ]] && toggle_foreground "${css}.tmp"
   mv -f "${css}.tmp" "$css"
 
+  hyprctl reload >/dev/null 2>&1
+  pkill -USR2 -x waybar >/dev/null 2>&1
+
   if command -v makoctl >/dev/null; then
     makoctl reload &>/dev/null
     makoctl dismiss -a

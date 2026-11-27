@@ -38,7 +38,7 @@ DUP = re.compile(r"\d*[<>]&\d+")
 
 # The judgment tool, and where its key waits when the environment lacks one.
 JUDGE = os.path.expanduser("~/.pi/tools/judge")
-SECRETS = os.path.expanduser("~/.pi/tools/.env")
+SECRETS = os.path.expanduser("~/.pi/.env")
 
 RISKY, SAFE, UNSURE = "risky", "safe", "unsure"
 

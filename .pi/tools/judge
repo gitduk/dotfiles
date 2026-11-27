@@ -7,7 +7,7 @@
 # [optional]
 # model = "Specify a model name the endpoint accepts. The default is the configured model. That model is jev-latest unless overridden."
 # ---
-# An example of a keyed service: the key comes from ~/.pi/tools/.env
+# An example of a keyed service: the key comes from ~/.pi/.env
 # (TYPESAFE_API_KEY; JUDGE_BASE_URL and JUDGE_MODEL override the defaults),
 # and the structured arguments are read from the call's JSON on stdin.
 import json

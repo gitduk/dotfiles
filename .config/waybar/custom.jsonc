@@ -168,6 +168,12 @@
     "on-click": "~/.config/waybar/scripts/sites.sh",
     "tooltip": true
   },
+  "custom/coin": {
+    "exec": "~/.config/waybar/scripts/coin.py",
+    "return-type": "json",
+    "format": " {} ",
+    "tooltip": true
+  },
   "custom/easytier": {
     "exec": "~/.config/waybar/scripts/easytier.sh",
     "return-type": "json",
